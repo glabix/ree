@@ -1,0 +1,38 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "build_connection",
+  "path": "packages/ree_dao/package/ree_dao/functions/build_connection.rb",
+  "mount_as": "fn",
+  "class": "ReeDao::BuildConnection",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "conn_opts",
+          "type": "Hash"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:timeout? => Integer, :convert_two_digit_years? => Bool, :single_threaded? => Bool, :extensions? => ArrayOf[Symbol], :datetime_class? => Or[Time, DateTime], :after_connect? => Proc, :database_timezone? => Or[utc, local], :application_timezone? => Or[utc, local], :typecast_timezone? => Or[utc, local], :connection_validation_timeout? => Integer, :logger? => Logger, :sql_log_level? => [fatal, error, warn, info, debug]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "connections",
+      "package_name": "ree_dao",
+      "as": "connections",
+      "imports": [
+
+      ]
+    }
+  ]
+}

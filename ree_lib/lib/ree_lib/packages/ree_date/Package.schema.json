@@ -1,0 +1,229 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_date",
+  "entry_path": "packages/ree_date/package/ree_date.rb",
+  "tags": [
+    "ree_date"
+  ],
+  "depends_on": [
+
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "advance",
+      "schema": "packages/ree_date/schemas/ree_date/functions/advance.schema.json"
+    },
+    {
+      "name": "all_month",
+      "schema": "packages/ree_date/schemas/ree_date/functions/all_month.schema.json"
+    },
+    {
+      "name": "all_quarter",
+      "schema": "packages/ree_date/schemas/ree_date/functions/all_quarter.schema.json"
+    },
+    {
+      "name": "all_week",
+      "schema": "packages/ree_date/schemas/ree_date/functions/all_week.schema.json"
+    },
+    {
+      "name": "all_year",
+      "schema": "packages/ree_date/schemas/ree_date/functions/all_year.schema.json"
+    },
+    {
+      "name": "beginning_of_month",
+      "schema": "packages/ree_date/schemas/ree_date/functions/beginning_of_month.schema.json"
+    },
+    {
+      "name": "beginning_of_quarter",
+      "schema": "packages/ree_date/schemas/ree_date/functions/beginning_of_quarter.schema.json"
+    },
+    {
+      "name": "beginning_of_week",
+      "schema": "packages/ree_date/schemas/ree_date/functions/beginning_of_week.schema.json"
+    },
+    {
+      "name": "beginning_of_year",
+      "schema": "packages/ree_date/schemas/ree_date/functions/beginning_of_year.schema.json"
+    },
+    {
+      "name": "change",
+      "schema": "packages/ree_date/schemas/ree_date/functions/change.schema.json"
+    },
+    {
+      "name": "days_ago",
+      "schema": "packages/ree_date/schemas/ree_date/functions/days_ago.schema.json"
+    },
+    {
+      "name": "days_in_month",
+      "schema": "packages/ree_date/schemas/ree_date/functions/days_in_month.schema.json"
+    },
+    {
+      "name": "days_since",
+      "schema": "packages/ree_date/schemas/ree_date/functions/days_since.schema.json"
+    },
+    {
+      "name": "days_to_week_start",
+      "schema": "packages/ree_date/schemas/ree_date/functions/days_to_week_start.schema.json"
+    },
+    {
+      "name": "end_of_month",
+      "schema": "packages/ree_date/schemas/ree_date/functions/end_of_month.schema.json"
+    },
+    {
+      "name": "end_of_quarter",
+      "schema": "packages/ree_date/schemas/ree_date/functions/end_of_quarter.schema.json"
+    },
+    {
+      "name": "end_of_week",
+      "schema": "packages/ree_date/schemas/ree_date/functions/end_of_week.schema.json"
+    },
+    {
+      "name": "end_of_year",
+      "schema": "packages/ree_date/schemas/ree_date/functions/end_of_year.schema.json"
+    },
+    {
+      "name": "friday",
+      "schema": "packages/ree_date/schemas/ree_date/functions/friday.schema.json"
+    },
+    {
+      "name": "is_after",
+      "schema": "packages/ree_date/schemas/ree_date/functions/is_after.schema.json"
+    },
+    {
+      "name": "is_before",
+      "schema": "packages/ree_date/schemas/ree_date/functions/is_before.schema.json"
+    },
+    {
+      "name": "is_week_day",
+      "schema": "packages/ree_date/schemas/ree_date/functions/is_week_day.schema.json"
+    },
+    {
+      "name": "is_weekend",
+      "schema": "packages/ree_date/schemas/ree_date/functions/is_weekend.schema.json"
+    },
+    {
+      "name": "monday",
+      "schema": "packages/ree_date/schemas/ree_date/functions/monday.schema.json"
+    },
+    {
+      "name": "months_ago",
+      "schema": "packages/ree_date/schemas/ree_date/functions/months_ago.schema.json"
+    },
+    {
+      "name": "months_since",
+      "schema": "packages/ree_date/schemas/ree_date/functions/months_since.schema.json"
+    },
+    {
+      "name": "next_day",
+      "schema": "packages/ree_date/schemas/ree_date/functions/next_day.schema.json"
+    },
+    {
+      "name": "next_month",
+      "schema": "packages/ree_date/schemas/ree_date/functions/next_month.schema.json"
+    },
+    {
+      "name": "next_occurring",
+      "schema": "packages/ree_date/schemas/ree_date/functions/next_occurring.schema.json"
+    },
+    {
+      "name": "next_quarter",
+      "schema": "packages/ree_date/schemas/ree_date/functions/next_quarter.schema.json"
+    },
+    {
+      "name": "next_week",
+      "schema": "packages/ree_date/schemas/ree_date/functions/next_week.schema.json"
+    },
+    {
+      "name": "next_year",
+      "schema": "packages/ree_date/schemas/ree_date/functions/next_year.schema.json"
+    },
+    {
+      "name": "parse",
+      "schema": "packages/ree_date/schemas/ree_date/functions/parse.schema.json"
+    },
+    {
+      "name": "prev_day",
+      "schema": "packages/ree_date/schemas/ree_date/functions/prev_day.schema.json"
+    },
+    {
+      "name": "prev_month",
+      "schema": "packages/ree_date/schemas/ree_date/functions/prev_month.schema.json"
+    },
+    {
+      "name": "prev_occurring",
+      "schema": "packages/ree_date/schemas/ree_date/functions/prev_occurring.schema.json"
+    },
+    {
+      "name": "prev_quarter",
+      "schema": "packages/ree_date/schemas/ree_date/functions/prev_quarter.schema.json"
+    },
+    {
+      "name": "prev_week",
+      "schema": "packages/ree_date/schemas/ree_date/functions/prev_week.schema.json"
+    },
+    {
+      "name": "prev_year",
+      "schema": "packages/ree_date/schemas/ree_date/functions/prev_year.schema.json"
+    },
+    {
+      "name": "quarters_ago",
+      "schema": "packages/ree_date/schemas/ree_date/functions/quarters_ago.schema.json"
+    },
+    {
+      "name": "quarters_since",
+      "schema": "packages/ree_date/schemas/ree_date/functions/quarters_since.schema.json"
+    },
+    {
+      "name": "saturday",
+      "schema": "packages/ree_date/schemas/ree_date/functions/saturday.schema.json"
+    },
+    {
+      "name": "sunday",
+      "schema": "packages/ree_date/schemas/ree_date/functions/sunday.schema.json"
+    },
+    {
+      "name": "thursday",
+      "schema": "packages/ree_date/schemas/ree_date/functions/thursday.schema.json"
+    },
+    {
+      "name": "today",
+      "schema": "packages/ree_date/schemas/ree_date/functions/today.schema.json"
+    },
+    {
+      "name": "tomorrow",
+      "schema": "packages/ree_date/schemas/ree_date/functions/tomorrow.schema.json"
+    },
+    {
+      "name": "tuesday",
+      "schema": "packages/ree_date/schemas/ree_date/functions/tuesday.schema.json"
+    },
+    {
+      "name": "wednesday",
+      "schema": "packages/ree_date/schemas/ree_date/functions/wednesday.schema.json"
+    },
+    {
+      "name": "weeks_ago",
+      "schema": "packages/ree_date/schemas/ree_date/functions/weeks_ago.schema.json"
+    },
+    {
+      "name": "weeks_since",
+      "schema": "packages/ree_date/schemas/ree_date/functions/weeks_since.schema.json"
+    },
+    {
+      "name": "years_ago",
+      "schema": "packages/ree_date/schemas/ree_date/functions/years_ago.schema.json"
+    },
+    {
+      "name": "years_since",
+      "schema": "packages/ree_date/schemas/ree_date/functions/years_since.schema.json"
+    },
+    {
+      "name": "yesterday",
+      "schema": "packages/ree_date/schemas/ree_date/functions/yesterday.schema.json"
+    }
+  ]
+}

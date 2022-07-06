@@ -1,0 +1,39 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "merge",
+  "path": "packages/ree_hash/package/ree_hash/functions/merge.rb",
+  "mount_as": "fn",
+  "class": "ReeHash::Merge",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new hash with +first_hash+ and +other_hash+ merged recursively.\n\n  h1 = { a: true, b: { c: [1, 2, 3] } }\n  h2 = { a: false, b: { x: [3, 4, 5] } }\n\n  merge(h1, h2, deep: true) # => { a: false, b: { c: [1, 2, 3], x: [3, 4, 5] } }\n  merge(h1, h2, deep: false) # => { a: false, b: { x: [3, 4, 5] } }\n\nLike with Hash#merge in the standard library, a block can be provided\nto merge values:\n\n  h1 = { a: 100, b: 200, c: { c1: 100 } }\n  h2 = { b: 250, c: { c1: 200 } }\n\n  merge(h1, h2) { |key, this_val, other_val| this_val + other_val }\n    => { a: 100, b: 450, c: { c1: 300 } }",
+      "throws": [
+
+      ],
+      "return": "Hash",
+      "args": [
+        {
+          "arg": "first_hash",
+          "type": "Hash"
+        },
+        {
+          "arg": "other_hash",
+          "type": "Hash"
+        },
+        {
+          "arg": "deep",
+          "type": "Bool"
+        },
+        {
+          "arg": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

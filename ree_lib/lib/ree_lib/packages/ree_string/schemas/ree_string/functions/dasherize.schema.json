@@ -1,0 +1,27 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "dasherize",
+  "path": "packages/ree_string/package/ree_string/functions/dasherize.rb",
+  "mount_as": "fn",
+  "class": "ReeString::Dasherize",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Replaces underscores with dashes in the string.\n\n  dasherize('puni_puni') # => \"puni-puni\"",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "underscored_word",
+          "type": "String"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

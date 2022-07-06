@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "from_json",
+  "path": "packages/ree_json/package/ree_json/functions/from_json.rb",
+  "mount_as": "fn",
+  "class": "ReeJson::FromJson",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+        "ArgumentError"
+      ],
+      "return": "Hash",
+      "args": [
+        {
+          "arg": "object",
+          "type": "Any"
+        },
+        {
+          "arg": "mode",
+          "type": "Or[strict, null, compat, json, rails, object, custom, wab]"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:symbol_keys? => Bool, \"RestKeys\" => Any]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

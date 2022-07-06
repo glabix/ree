@@ -1,0 +1,27 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "set_default_locale",
+  "path": "packages/ree_i18n/package/ree_i18n/functions/set_default_locale.rb",
+  "mount_as": "fn",
+  "class": "ReeI18n::SetDefaultLocale",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+        "I18n::InvalidLocale"
+      ],
+      "return": "Symbol",
+      "args": [
+        {
+          "arg": "locale",
+          "type": "Symbol"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

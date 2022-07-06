@@ -1,0 +1,51 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_validator",
+  "entry_path": "packages/ree_validator/package/ree_validator.rb",
+  "tags": [
+    "ree_validator"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_i18n"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "validate_email",
+      "schema": "packages/ree_validator/schemas/ree_validator/functions/validate_email.schema.json"
+    },
+    {
+      "name": "validate_exclusion",
+      "schema": "packages/ree_validator/schemas/ree_validator/functions/validate_exclusion.schema.json"
+    },
+    {
+      "name": "validate_inclusion",
+      "schema": "packages/ree_validator/schemas/ree_validator/functions/validate_inclusion.schema.json"
+    },
+    {
+      "name": "validate_length",
+      "schema": "packages/ree_validator/schemas/ree_validator/functions/validate_length.schema.json"
+    },
+    {
+      "name": "validate_paging",
+      "schema": "packages/ree_validator/schemas/ree_validator/functions/validate_paging.schema.json"
+    },
+    {
+      "name": "validate_presence",
+      "schema": "packages/ree_validator/schemas/ree_validator/functions/validate_presence.schema.json"
+    },
+    {
+      "name": "validate_regexp",
+      "schema": "packages/ree_validator/schemas/ree_validator/functions/validate_regexp.schema.json"
+    },
+    {
+      "name": "validate_url",
+      "schema": "packages/ree_validator/schemas/ree_validator/functions/validate_url.schema.json"
+    }
+  ]
+}

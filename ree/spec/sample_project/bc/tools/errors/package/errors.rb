@@ -1,0 +1,3 @@
+module Errors
+  package
+end

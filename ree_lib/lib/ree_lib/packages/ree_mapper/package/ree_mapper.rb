@@ -1,0 +1,120 @@
+# frozen_string_literal: true
+
+module ReeMapper
+  package do
+    depends_on :ree_string
+    depends_on :ree_datetime
+  end
+
+  package_require('ree_string/functions/underscore')
+  package_require('ree_datetime/functions/in_default_time_zone')
+  
+  require_relative 'ree_mapper/types/abstract_type'
+  require_relative 'ree_mapper/errors/error'
+  require_relative 'ree_mapper/errors/coercion_error'
+  require_relative 'ree_mapper/errors/type_error'
+  require_relative 'ree_mapper/errors/unsupported_type_error'
+
+  require_relative 'ree_mapper/field'
+
+  require_relative 'ree_mapper/types/bool'
+  require_relative 'ree_mapper/types/date_time'
+  require_relative 'ree_mapper/types/time'
+  require_relative 'ree_mapper/types/date'
+  require_relative 'ree_mapper/types/float'
+  require_relative 'ree_mapper/types/integer'
+  require_relative 'ree_mapper/types/string'
+  require_relative 'ree_mapper/types/array'
+
+  require_relative 'ree_mapper/strategy_outputs/strategy_output'
+  require_relative 'ree_mapper/strategy_outputs/object_output'
+  require_relative 'ree_mapper/strategy_outputs/string_key_hash_output'
+  require_relative 'ree_mapper/strategy_outputs/symbol_key_hash_output'
+
+  require_relative 'ree_mapper/mapper_strategy'
+  require_relative 'ree_mapper/mapper'
+  require_relative 'ree_mapper/mapper_factory_proxy'
+  require_relative 'ree_mapper/mapper_factory'
+
+  require_relative 'ree_mapper/default_factory'
+  require_relative 'ree_mapper/dsl'
+end
+
+=begin
+
+Example of mapper declaration:
+
+  class Products::UserCaster
+    include Mapper::DSL
+
+    mapper :user_caster
+
+    build_mapper(register_as: :user).use(:cast) do
+      integer :id
+      string  :name
+    end
+  end
+
+  class Products::ProductCaster
+    include Mapper::DSL
+
+    mapper :product_caster do
+      link :user_caster
+    end
+
+    build_mapper.use(:cast) do
+      integer :id
+      string  :title
+      user    :creator
+    end
+  end
+
+
+Example of mapper usage:
+
+  class Products::ProductQuery
+    include Ree::BeanDSL
+    
+    bean :product_query do
+      link :product_caster
+    end
+
+    def call
+      product_caster.cast({
+        id: 1,
+        title: 'Product',
+        creator: { id: 1, name: 'John' }
+      })
+    end
+  end
+
+
+If you need to register other packages mappers define your custom mapper factory.
+Create `mapper_factory.rb` file to declare `MapperFactory` class.
+
+  class Products::MapperFactory
+    include Ree::BeanDSL
+
+    bean :mapper_factory do
+      link :build_mapper_factory
+      link :build_mapper_strategy
+      link :user_caster, from: :cart
+
+      factory :build
+    end
+
+    def build
+      mapper_factory = build_mapper_factory(strategies: [
+        build_mapper_strategy(method: :cast,      output: :symbol_key_hash),
+        build_mapper_strategy(method: :serialize, output: :symbol_key_hash),
+        build_mapper_strategy(method: :db_dump,   output: :string_key_hash),
+        build_mapper_strategy(method: :db_load,   output: :object)
+      ])
+
+      mapper_factory.register(:cart_user, user_caster)
+
+      mapper_factory
+    end
+  end
+
+=end

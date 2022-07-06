@@ -1,0 +1,12 @@
+en:
+  gender:
+    male: Male
+    female: Female
+    other: Other
+  count:
+    zero: 'zero'
+    one: 'one'
+    other: 'other'
+  welcome:
+    title: "Welcome!"
+    content: "Welcome to the %{app_name}"

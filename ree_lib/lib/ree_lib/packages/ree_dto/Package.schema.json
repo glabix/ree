@@ -1,0 +1,18 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_dto",
+  "entry_path": "packages/ree_dto/package/ree_dto.rb",
+  "tags": [
+    "ree_dto"
+  ],
+  "depends_on": [
+
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+
+  ]
+}

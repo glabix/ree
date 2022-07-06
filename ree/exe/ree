@@ -1,0 +1,261 @@
+#!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
+require 'rubygems'
+require 'bundler/setup'
+require 'commander'
+require 'ree'
+
+class ReeCliRunner
+  TEST_FRAMEWORKS = %w[minitest rspec]
+  include Commander::Methods
+
+  def run
+    program :name, 'Ree'
+    program :version, Ree::VERSION
+    program :description, 'An enterprise ruby framework'
+    program :help, 'Author', 'Ruslan Gatiyatov'
+
+    command :"init" do |c|
+      c.syntax      = 'ree init'
+      c.description = 'generates project scaffold in a passed directory'
+      c.summary     = '> ' + c.description
+      c.example     'generate scaffold with minitest', 'ree init --test=minitest'
+      c.example     'generate scaffold with rspec',    'ree init --test=rspec'
+      c.example     'generate scaffold with irb',      'ree init --console=irb'
+      c.example     'generate scaffold with pry',      'ree init --console=pry'
+      c.option      '--test FRAMEWORK', TEST_FRAMEWORKS, "select test framework: #{TEST_FRAMEWORKS.join(", ")}"
+      c.option      '--project_path [PROJECT_ROOT_DIR]', String, 'Path for the root project dir'
+      c.action do |args, options|
+        defaults = {
+          test: "rspec",
+          console: "irb",
+          project_path: File.expand_path(Dir.pwd)
+        }
+
+        options_hash = options.__hash__
+        options_hash.delete(:trace)
+
+        if options_hash[:project_path]
+          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
+        end
+
+        options_with_defaults = defaults.merge!(options_hash)
+        Ree::CLI::Init.run(**options_with_defaults)
+        Ree::CLI::GeneratePackagesSchema.run(options_with_defaults[:project_path])
+      end
+    end
+
+    command :"gen.package" do |c|
+      c.syntax      = 'ree gen.package PACKAGE_NAME [options]'
+      c.description = 'generates a package scaffold in a specified folder'
+      c.summary     = '> ' + c.description
+      c.example     "generate 'accounts' package",
+                    'ree gen.package accounts --path bc/accounts'
+      c.example     'generate events package within /some/other/path folder',
+                    'ree gen.package events --path core/domain/events --project_path /data/my_project'
+      c.example     'generate auth package without tests', 'ree gen.package auth --path subsystems/auth'
+      c.option      '--path [RELATIVE_PACKAGE_PATH]', String, 'Relative package path'
+      c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
+
+      c.action do |args, options|
+        package_name = args.first.to_s.strip
+
+        if package_name.empty?
+          raise Ree::Error.new("Package name should be provided")
+        end
+
+        defaults = {
+          project_path: File.expand_path(Dir.pwd),
+          package_name: package_name,
+        }
+
+        options_hash = options.__hash__
+
+        if options_hash[:project_path]
+          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
+        end
+
+        if options_hash[:path].nil?
+          raise Ree::Error.new("Path name should be provided")
+        end
+
+        options_hash.delete(:trace)
+
+        options_with_defaults = defaults.merge!(options_hash)
+
+        Ree::CLI::GeneratePackage.run(**options_with_defaults)
+        Ree::CLI::GeneratePackagesSchema.run(options_with_defaults[:project_path])
+
+        Ree::CLI::GeneratePackageSchema.run(
+          package_name: options_with_defaults[:package_name],
+          project_path: options_with_defaults[:project_path],
+          include_objects: false
+        )
+      end
+    end
+
+    command :"gen.packages_json" do |c|
+      c.syntax      = 'ree gen.packages_json'
+      c.description = 'generates Packages.schema.json'
+      c.summary     = '> ' + c.description
+      c.example     'ree gen.packages_json', ''
+      c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
+      c.action do |_, options|
+        options_hash = options.__hash__
+
+        if options_hash[:project_path]
+          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
+        end
+
+        project_path = options_hash[:project_path] || Dir.pwd
+        Ree::CLI::GeneratePackagesSchema.run(project_path)
+      end
+    end
+
+    command :"gen.package_json" do |c|
+      c.syntax      = 'ree gen.package_json PACKAGE_NAME'
+      c.description = 'generates Package.schema.json for specific package'
+      c.summary     = '> ' + c.description
+      c.example     'ree gen.packages_json PACKAGE_NAME', ''
+      c.option      '--skip_objects', String, 'Skip generation of object schemas'
+      c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
+      c.action do |args, options|
+        package_name = args.first || ""
+        options_hash = options.__hash__
+
+        if options_hash[:project_path]
+          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
+        end
+
+        default_options = {
+          package_name: package_name,
+          project_path: options_hash[:project_path] || File.expand_path(Dir.pwd),
+          include_objects: !options_hash.has_key?(:skip_objects)
+        }
+
+        Ree::CLI::GeneratePackageSchema.run(**default_options)
+      end
+    end
+
+    command :"gen.template" do |c|
+      c.syntax      = "ree gen.template TEMPLATE_NAME [options]"
+      c.description = "generates template from ROOT/.ree/templates folder with specified variables"
+      c.summary     = '> ' + c.description
+      c.example     'creating new repository_template, mapper and dao files',
+                    'ree gen.template repository_template --path infrastructure/storage'
+      c.option      '--path [RELATIVE_PATH]', String, 'Location of generated folders'
+      c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
+      c.option      '--OPTION_NAME [OPTION_VALUE]', String, 'Local variables for template handler'
+      c.action do |args, options|
+        template_name = args.first || ""
+        options_hash = options.__hash__
+        options_hash.delete(:trace)
+
+        defaults = {
+          project_path: File.expand_path(Dir.pwd),
+          template_name: template_name
+        }
+
+        if options_hash[:path].nil? || options_hash[:path].empty?
+          raise Ree::Error.new('Relative path for template should be provided')
+        end
+
+        if options_hash[:project_path]
+          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
+        end
+
+        options_with_defaults = defaults.merge!(options_hash)
+
+        Ree::CLI::GenerateTemplate.run(
+          template_name: options_with_defaults[:template_name],
+          project_path: options_with_defaults[:project_path],
+          local_path: options_with_defaults[:path],
+          locals: options_with_defaults
+        )
+      end
+    end
+
+    command :"exec" do |c|
+      c.syntax      = 'ree exec PACKAGE_NAME PATH_TO_EXEC [options]'
+      c.description = 'change directory to package folder and run executable bash file'
+      c.summary     = '> ' + c.description
+      c.example     "run executable file 'bin/run' for 'accounts' package",
+                    'ree exec accounts bin/run'
+      c.option      '-x', TrueClass, "run 'chmod +X' before the command"
+
+      c.action do |args, options|
+        package_name    = args[0]&.to_sym || (raise Ree::Error.new("package name should be provided"))
+        executable_path = args[1]         || (raise Ree::Error.new("executable path should be provided"))
+        run_chmod_x     = options.x
+
+        puts("Executing #{executable_path} for :#{package_name} package")
+
+        Ree.init(Dir.pwd)
+
+        package          = Ree.container.packages_facade.get_loaded_package(package_name)
+        package_abs_path = Ree::PathHelper.abs_package_dir(package)
+        exec_abs_path    = Pathname.new(package_abs_path).join(Pathname.new(executable_path)).to_s
+
+        raise Ree::Error.new("File #{exec_abs_path} not found") unless File.exists?(exec_abs_path)
+
+        system("chmod +x #{exec_abs_path}") if run_chmod_x
+        system(exec_abs_path)
+      end
+    end
+
+    command :"spec" do |c|
+      c.syntax  = "ree spec PACKAGE_NAME SPEC_MATCHER [options]"
+      c.description = "run tests for specified package"
+      c.example 'ree spec accounts', "Run specs for 'accounts' package"
+      c.example 'ree spec -p accounts -p roles', 'Run specs for several packages'
+      c.example 'ree spec accounts welcome_email:42', 'Run specific spec from specified package using spec matcher'
+      c.example 'ree spec --tag wip', 'Run specs for packages which have "wip" tag'
+      c.option '--project_path [ROOT_DIR]', String, 'Root project dir path'
+      c.option '--tag TAG_NAME', String, 'Run specs for packages with specified tag'
+      c.option '--with_children', TrueClass, 'Run specs for all children dependent packages'
+      c.option '--with_ancestors', TrueClass, 'Run specs for all ancestors dependent packages'
+      c.option '-p PACKAGE_NAME', '--package PACKAGE_NAME', String, 'Package names' do |o|
+        @package_names ||= []
+        @package_names << o.to_sym
+      end
+      
+      c.action do |args, options|
+        @package_names ||= []
+
+        package_name = args[0]&.to_sym
+        spec_matcher = args[1]
+
+        options_hash = options.__hash__
+        options_hash.delete(:trace)
+
+        if options_hash[:project_path]
+          options_hash[:project_path] = File.expand_path(options_hash[:project_path]) 
+        end
+
+        if package_name
+          @package_names ||= []
+          @package_names << package_name
+        end
+
+        if package_name.nil? && options_hash.keys.empty? && \
+           spec_matcher.nil? && @package_names.empty?
+          @run_all = true
+        end
+
+        Ree::CLI::SpecRunner.run(
+          package_names: @package_names,
+          spec_matcher: spec_matcher,
+          tag_name: options_hash[:tag],
+          with_children: options_hash[:with_children],
+          with_ancestors: options_hash[:with_ancestors],
+          run_all: @run_all,
+          path: options_hash[:project_path] || File.expand_path(Dir.pwd)
+        )
+      end
+    end
+
+    run!
+  end
+end
+
+ReeCliRunner.new.run

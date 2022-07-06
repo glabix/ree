@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "yesterday",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/yesterday.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::Yesterday",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date/time representing yesterday.",
+      "throws": [
+
+      ],
+      "return": "DateTime",
+      "args": [
+        {
+          "arg": "date_time",
+          "type": "Nilor[DateTime]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "advance",
+      "package_name": "ree_datetime",
+      "as": "advance",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "now",
+      "package_name": "ree_datetime",
+      "as": "now",
+      "imports": [
+
+      ]
+    }
+  ]
+}

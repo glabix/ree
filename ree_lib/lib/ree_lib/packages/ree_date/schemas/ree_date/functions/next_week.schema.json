@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "next_week",
+  "path": "packages/ree_date/package/ree_date/functions/next_week.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::NextWeek",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Short-hand for <tt>weeks_since(1)</tt>.",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "advance",
+      "package_name": "ree_date",
+      "as": "advance",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

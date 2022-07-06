@@ -1,0 +1,99 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "register_account_cmd",
+  "path": "bc/accounts/package/accounts/commands/register_account_cmd.rb",
+  "mount_as": "fn",
+  "class": "Accounts::RegisterAccountCmd",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Register user and send welcome email",
+      "throws": [
+        "Accounts::RegisterAccountCmd::ValidationErr"
+      ],
+      "return": "Accounts::User",
+      "args": [
+        {
+          "arg": "name",
+          "type": "String"
+        },
+        {
+          "arg": "email",
+          "type": "String"
+        },
+        {
+          "arg": "args",
+          "type": "SplatOf[Any]"
+        },
+        {
+          "arg": "int",
+          "type": "Integer"
+        },
+        {
+          "arg": "test",
+          "type": "String"
+        },
+        {
+          "arg": "kwargs",
+          "type": "Ksplat[:string? => String]"
+        },
+        {
+          "arg": "proc",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "build_user",
+      "package_name": "accounts",
+      "as": "build_user",
+      "imports": [
+        "User",
+        "UserStates"
+      ]
+    },
+    {
+      "target": "except",
+      "package_name": "hash_utils",
+      "as": "except",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "factory_users_repo",
+      "package_name": "accounts",
+      "as": "factory_users_repo",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "transaction",
+      "package_name": "accounts",
+      "as": "transaction",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "users_repo",
+      "package_name": "accounts",
+      "as": "users_repo",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "welcome_email",
+      "package_name": "accounts",
+      "as": "welcome_email",
+      "imports": [
+
+      ]
+    }
+  ]
+}

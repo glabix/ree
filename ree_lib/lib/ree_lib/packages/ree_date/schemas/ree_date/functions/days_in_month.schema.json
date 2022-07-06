@@ -1,0 +1,38 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "days_in_month",
+  "path": "packages/ree_date/package/ree_date/functions/days_in_month.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::DaysInMonth",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns the number of days in the given month.\nIf no year is specified, it will use the current year.",
+      "throws": [
+
+      ],
+      "return": "Integer",
+      "args": [
+        {
+          "arg": "month",
+          "type": "Integer"
+        },
+        {
+          "arg": "year",
+          "type": "Nilor[Integer]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

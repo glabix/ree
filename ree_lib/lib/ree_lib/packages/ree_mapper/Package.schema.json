@@ -1,0 +1,34 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_mapper",
+  "entry_path": "packages/ree_mapper/package/ree_mapper.rb",
+  "tags": [
+    "ree_mapper"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_datetime"
+    },
+    {
+      "name": "ree_string"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "build_mapper_factory",
+      "schema": "packages/ree_mapper/schemas/ree_mapper/functions/build_mapper_factory.schema.json"
+    },
+    {
+      "name": "build_mapper_strategy",
+      "schema": "packages/ree_mapper/schemas/ree_mapper/functions/build_mapper_strategy.schema.json"
+    },
+    {
+      "name": "default_factory",
+      "schema": "packages/ree_mapper/schemas/ree_mapper/default_factory.schema.json"
+    }
+  ]
+}

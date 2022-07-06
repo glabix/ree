@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "sanitize_html",
+  "path": "packages/ree_text/package/ree_text/functions/sanitize_html.rb",
+  "mount_as": "fn",
+  "class": "ReeText::SanitizeHtml",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Sanitizes both html and css via the safe lists found here:\nhttps://github.com/flavorjones/loofah/blob/master/lib/loofah/html5/safelist.rb\n\nTags and attributes can also be passed to +sanitize+.\nPassed options take precedence over the class level options.",
+      "throws": [
+        "ArgumentError"
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "html",
+          "type": "String"
+        },
+        {
+          "arg": "prune",
+          "type": "Bool"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:tags? => ArrayOf[String], :attributes? => ArrayOf[String]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

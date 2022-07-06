@@ -1,0 +1,50 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "end_of_year",
+  "path": "packages/ree_date/package/ree_date/functions/end_of_year.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::EndOfYear",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date representing the end of the year.",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "change",
+      "package_name": "ree_date",
+      "as": "change",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "end_of_month",
+      "package_name": "ree_date",
+      "as": "end_of_month",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

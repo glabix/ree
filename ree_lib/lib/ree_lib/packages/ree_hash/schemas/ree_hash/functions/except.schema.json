@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "except",
+  "path": "packages/ree_hash/package/ree_hash/functions/except.rb",
+  "mount_as": "fn",
+  "class": "ReeHash::Except",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a hash that includes everything except given keys.\n  hash = { a: true, b: false, c: nil }\n  except(hash, :c)     # => { a: true, b: false }\n  except(hash, :a, :b) # => { c: nil }",
+      "throws": [
+
+      ],
+      "return": "Hash",
+      "args": [
+        {
+          "arg": "hash",
+          "type": "Hash"
+        },
+        {
+          "arg": "keys",
+          "type": "SplatOf[Symbol]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

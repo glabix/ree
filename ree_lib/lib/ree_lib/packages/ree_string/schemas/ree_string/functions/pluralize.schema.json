@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "pluralize",
+  "path": "packages/ree_string/package/ree_string/functions/pluralize.rb",
+  "mount_as": "fn",
+  "class": "ReeString::Pluralize",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "count",
+          "type": "Integer"
+        },
+        {
+          "arg": "single",
+          "type": "String"
+        },
+        {
+          "arg": "plural",
+          "type": "String"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

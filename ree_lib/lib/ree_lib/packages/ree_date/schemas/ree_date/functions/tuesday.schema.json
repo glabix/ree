@@ -1,0 +1,50 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "tuesday",
+  "path": "packages/ree_date/package/ree_date/functions/tuesday.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::Tuesday",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns Tuesday of this week assuming that week starts on Monday.",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "days_since",
+      "package_name": "ree_date",
+      "as": "days_since",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "monday",
+      "package_name": "ree_date",
+      "as": "monday",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

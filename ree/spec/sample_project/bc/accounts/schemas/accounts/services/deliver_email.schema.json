@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "deliver_email",
+  "path": "bc/accounts/package/accounts/services/deliver_email.rb",
+  "mount_as": "fn",
+  "class": "Accounts::DeliverEmail",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "to",
+          "type": "Any"
+        },
+        {
+          "arg": "body",
+          "type": "Any"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

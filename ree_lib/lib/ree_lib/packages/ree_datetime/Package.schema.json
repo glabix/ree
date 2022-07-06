@@ -1,0 +1,384 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_datetime",
+  "entry_path": "packages/ree_datetime/package/ree_datetime.rb",
+  "tags": [
+    "ree_datetime"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_date"
+    },
+    {
+      "name": "ree_hash"
+    },
+    {
+      "name": "ree_i18n"
+    },
+    {
+      "name": "ree_number"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "advance",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/advance.schema.json"
+    },
+    {
+      "name": "all_day",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/all_day.schema.json"
+    },
+    {
+      "name": "all_hour",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/all_hour.schema.json"
+    },
+    {
+      "name": "all_minute",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/all_minute.schema.json"
+    },
+    {
+      "name": "all_month",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/all_month.schema.json"
+    },
+    {
+      "name": "all_quarter",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/all_quarter.schema.json"
+    },
+    {
+      "name": "all_week",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/all_week.schema.json"
+    },
+    {
+      "name": "all_year",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/all_year.schema.json"
+    },
+    {
+      "name": "beginning_of_day",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/beginning_of_day.schema.json"
+    },
+    {
+      "name": "beginning_of_hour",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/beginning_of_hour.schema.json"
+    },
+    {
+      "name": "beginning_of_minute",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/beginning_of_minute.schema.json"
+    },
+    {
+      "name": "beginning_of_month",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/beginning_of_month.schema.json"
+    },
+    {
+      "name": "beginning_of_quarter",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/beginning_of_quarter.schema.json"
+    },
+    {
+      "name": "beginning_of_week",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/beginning_of_week.schema.json"
+    },
+    {
+      "name": "beginning_of_year",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/beginning_of_year.schema.json"
+    },
+    {
+      "name": "change",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/change.schema.json"
+    },
+    {
+      "name": "days_ago",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/days_ago.schema.json"
+    },
+    {
+      "name": "days_diff",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/days_diff.schema.json"
+    },
+    {
+      "name": "days_since",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/days_since.schema.json"
+    },
+    {
+      "name": "distance_of_time_in_words",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/distance_of_time_in_words.schema.json"
+    },
+    {
+      "name": "end_of_day",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/end_of_day.schema.json"
+    },
+    {
+      "name": "end_of_hour",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/end_of_hour.schema.json"
+    },
+    {
+      "name": "end_of_minute",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/end_of_minute.schema.json"
+    },
+    {
+      "name": "end_of_month",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/end_of_month.schema.json"
+    },
+    {
+      "name": "end_of_quarter",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/end_of_quarter.schema.json"
+    },
+    {
+      "name": "end_of_week",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/end_of_week.schema.json"
+    },
+    {
+      "name": "end_of_year",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/end_of_year.schema.json"
+    },
+    {
+      "name": "find_human_time_zones_by_offset",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/find_human_time_zones_by_offset.schema.json"
+    },
+    {
+      "name": "find_time_zones_by_offset",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/find_time_zones_by_offset.schema.json"
+    },
+    {
+      "name": "find_tzinfo",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/find_tzinfo.schema.json"
+    },
+    {
+      "name": "friday",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/friday.schema.json"
+    },
+    {
+      "name": "general_diff",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/general_diff.schema.json"
+    },
+    {
+      "name": "get_default_time_zone",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/get_default_time_zone.schema.json"
+    },
+    {
+      "name": "get_default_tz_info",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/get_default_tz_info.schema.json"
+    },
+    {
+      "name": "hours_ago",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/hours_ago.schema.json"
+    },
+    {
+      "name": "hours_diff",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/hours_diff.schema.json"
+    },
+    {
+      "name": "hours_since",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/hours_since.schema.json"
+    },
+    {
+      "name": "human_zone_offset",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/human_zone_offset.schema.json"
+    },
+    {
+      "name": "in_default_time_zone",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/in_default_time_zone.schema.json"
+    },
+    {
+      "name": "in_time_zone",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/in_time_zone.schema.json"
+    },
+    {
+      "name": "is_after",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/is_after.schema.json"
+    },
+    {
+      "name": "is_before",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/is_before.schema.json"
+    },
+    {
+      "name": "is_week_day",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/is_week_day.schema.json"
+    },
+    {
+      "name": "is_weekend",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/is_weekend.schema.json"
+    },
+    {
+      "name": "minutes_ago",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/minutes_ago.schema.json"
+    },
+    {
+      "name": "minutes_diff",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/minutes_diff.schema.json"
+    },
+    {
+      "name": "minutes_since",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/minutes_since.schema.json"
+    },
+    {
+      "name": "monday",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/monday.schema.json"
+    },
+    {
+      "name": "months_ago",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/months_ago.schema.json"
+    },
+    {
+      "name": "months_diff",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/months_diff.schema.json"
+    },
+    {
+      "name": "months_since",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/months_since.schema.json"
+    },
+    {
+      "name": "next_day",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/next_day.schema.json"
+    },
+    {
+      "name": "next_hour",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/next_hour.schema.json"
+    },
+    {
+      "name": "next_month",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/next_month.schema.json"
+    },
+    {
+      "name": "next_occurring",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/next_occurring.schema.json"
+    },
+    {
+      "name": "next_quarter",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/next_quarter.schema.json"
+    },
+    {
+      "name": "next_week",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/next_week.schema.json"
+    },
+    {
+      "name": "next_year",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/next_year.schema.json"
+    },
+    {
+      "name": "now",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/now.schema.json"
+    },
+    {
+      "name": "offset_to_string",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/offset_to_string.schema.json"
+    },
+    {
+      "name": "parse",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/parse.schema.json"
+    },
+    {
+      "name": "prev_day",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/prev_day.schema.json"
+    },
+    {
+      "name": "prev_hour",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/prev_hour.schema.json"
+    },
+    {
+      "name": "prev_month",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/prev_month.schema.json"
+    },
+    {
+      "name": "prev_occurring",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/prev_occurring.schema.json"
+    },
+    {
+      "name": "prev_quarter",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/prev_quarter.schema.json"
+    },
+    {
+      "name": "prev_week",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/prev_week.schema.json"
+    },
+    {
+      "name": "prev_year",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/prev_year.schema.json"
+    },
+    {
+      "name": "quarters_ago",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/quarters_ago.schema.json"
+    },
+    {
+      "name": "quarters_since",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/quarters_since.schema.json"
+    },
+    {
+      "name": "saturday",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/saturday.schema.json"
+    },
+    {
+      "name": "seconds_ago",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/seconds_ago.schema.json"
+    },
+    {
+      "name": "seconds_diff",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/seconds_diff.schema.json"
+    },
+    {
+      "name": "seconds_since",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/seconds_since.schema.json"
+    },
+    {
+      "name": "set_default_time_zone",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/set_default_time_zone.schema.json"
+    },
+    {
+      "name": "sunday",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/sunday.schema.json"
+    },
+    {
+      "name": "thursday",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/thursday.schema.json"
+    },
+    {
+      "name": "time_ago_in_words",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/time_ago_in_words.schema.json"
+    },
+    {
+      "name": "tomorrow",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/tomorrow.schema.json"
+    },
+    {
+      "name": "tuesday",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/tuesday.schema.json"
+    },
+    {
+      "name": "wednesday",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/wednesday.schema.json"
+    },
+    {
+      "name": "weeks_ago",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/weeks_ago.schema.json"
+    },
+    {
+      "name": "weeks_diff",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/weeks_diff.schema.json"
+    },
+    {
+      "name": "weeks_since",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/weeks_since.schema.json"
+    },
+    {
+      "name": "years_ago",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/years_ago.schema.json"
+    },
+    {
+      "name": "years_diff",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/years_diff.schema.json"
+    },
+    {
+      "name": "years_since",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/years_since.schema.json"
+    },
+    {
+      "name": "yesterday",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/yesterday.schema.json"
+    },
+    {
+      "name": "zone_offset",
+      "schema": "packages/ree_datetime/schemas/ree_datetime/functions/zone_offset.schema.json"
+    }
+  ]
+}

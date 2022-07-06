@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "number_to_phone",
+  "path": "packages/ree_number/package/ree_number/functions/number_to_phone.rb",
+  "mount_as": "fn",
+  "class": "ReeNumber::NumberToPhone",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Converts Integer to a formatted string (phone number format).\nCountry_code, delimiter, area_code, extension are optional.\n\nnumber_to_phone(5551234)                                     # => \"555-1234\"\nnumber_to_phone(8005551212)                                  # => \"800-555-1212\"\nnumber_to_phone(8005551212, area_code: true)                 # => \"(800) 555-1212\"\nnumber_to_phone(8005551212, delimiter: \" \")                  # => \"800 555 1212\"\nnumber_to_phone(8005551212, country_code: 7)                 # => \"+7-800-555-1212\"\nnumber_to_phone(8005551212, country_code: 7, extension: 123) # => \"+7-800-555-1212 x 123\"",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "number",
+          "type": "Integer"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:country_code? => Integer, :delimiter? => String, :area_code? => Bool, :pattern? => Regexp, :extension? => Integer]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

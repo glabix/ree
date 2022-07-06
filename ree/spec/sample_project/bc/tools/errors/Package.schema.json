@@ -1,0 +1,21 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "errors",
+  "entry_path": "bc/tools/errors/package/errors.rb",
+  "tags": [
+    "errors"
+  ],
+  "depends_on": [
+
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "raise_error",
+      "schema": "bc/tools/errors/schemas/errors/raise_error.schema.json"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema_type": "package",
+  "ree_version": "1.2.3",
+  "name": "accounts",
+  "entry_path": "package/accounts.rb",
+  "tags": [],
+  "depends_on": [],
+  "env_vars": [],
+  "objects": [
+    {
+      "name": null,
+      "schema": "schemas/accounts/accounts_cfg.schema.json"
+    },
+    {
+      "name": "transaction",
+      "schema": "schemas/accounts/transaction.schema.json"
+    }
+  ]
+}

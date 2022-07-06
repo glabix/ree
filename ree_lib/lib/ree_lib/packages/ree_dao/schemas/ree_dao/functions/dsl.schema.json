@@ -1,0 +1,24 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "dsl",
+  "path": "packages/ree_dao/package/ree_dao/functions/dsl.rb",
+  "mount_as": "fn",
+  "class": "ReeDao::Dsl",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

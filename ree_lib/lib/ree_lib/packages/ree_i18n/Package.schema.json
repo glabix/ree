@@ -1,0 +1,47 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_i18n",
+  "entry_path": "packages/ree_i18n/package/ree_i18n.rb",
+  "tags": [
+    "ree_i18n"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_array"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "add_load_path",
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/add_load_path.schema.json"
+    },
+    {
+      "name": "get_default_locale",
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/get_default_locale.schema.json"
+    },
+    {
+      "name": "get_locale",
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/get_locale.schema.json"
+    },
+    {
+      "name": "set_default_locale",
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/set_default_locale.schema.json"
+    },
+    {
+      "name": "set_locale",
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/set_locale.schema.json"
+    },
+    {
+      "name": "t",
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/t.schema.json"
+    },
+    {
+      "name": "with_locale",
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/with_locale.schema.json"
+    }
+  ]
+}

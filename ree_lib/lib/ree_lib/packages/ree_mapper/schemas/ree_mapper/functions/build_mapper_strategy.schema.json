@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "build_mapper_strategy",
+  "path": "packages/ree_mapper/package/ree_mapper/functions/build_mapper_strategy.rb",
+  "mount_as": "fn",
+  "class": "ReeMapper::BuildMapperStrategy",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+        "ArgumentError"
+      ],
+      "return": "ReeMapper::MapperStrategy",
+      "args": [
+        {
+          "arg": "method",
+          "type": "Symbol"
+        },
+        {
+          "arg": "output",
+          "type": "Symbol"
+        },
+        {
+          "arg": "always_optional",
+          "type": "Bool"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

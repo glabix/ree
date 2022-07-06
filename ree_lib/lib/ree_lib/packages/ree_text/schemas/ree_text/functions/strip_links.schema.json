@@ -1,0 +1,27 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "strip_links",
+  "path": "packages/ree_text/package/ree_text/functions/strip_links.rb",
+  "mount_as": "fn",
+  "class": "ReeText::StripLinks",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Removes +a+ tags and +href+ attributes leaving only the link text.\nstrip_links('<a href=\"example.com\">Only the link text will be kept.</a>')\n#\n#  => 'Only the link text will be kept.'",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "html",
+          "type": "String"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

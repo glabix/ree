@@ -1,0 +1,20 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "roles",
+  "entry_path": "bc/roles/package/roles.rb",
+  "tags": [
+    "roles"
+  ],
+  "depends_on": [
+    {
+      "name": "accounts"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+
+  ]
+}

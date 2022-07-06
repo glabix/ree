@@ -1,0 +1,38 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "round_helper",
+  "path": "packages/ree_number/package/ree_number/functions/round_helper.rb",
+  "mount_as": "fn",
+  "class": "ReeNumber::RoundHelper",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Or[Integer, BigDecimal]",
+      "args": [
+        {
+          "arg": "number",
+          "type": "Or[Integer, Float, Rational, String]"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:precision? => Integer, :significant? => Bool, :round_mode? => Or[up, down, truncate, half_up, default, half_down, half_even, banker, ceiling, floor]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "digit_count",
+      "package_name": "ree_number",
+      "as": "digit_count",
+      "imports": [
+
+      ]
+    }
+  ]
+}

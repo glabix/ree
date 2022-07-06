@@ -1,0 +1,63 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "build_user",
+  "path": "bc/accounts/package/accounts/services/build_user.rb",
+  "mount_as": "fn",
+  "class": "Accounts::BuildUser",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+        "Accounts::BuildUser::InvalidDomainErr",
+        "Accounts::BuildUser::EmailTakenErr"
+      ],
+      "return": "Accounts::User",
+      "args": [
+        {
+          "arg": "name",
+          "type": "String"
+        },
+        {
+          "arg": "email",
+          "type": "String"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "raise_error",
+      "package_name": "errors",
+      "as": "raise_error",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "time",
+      "package_name": "clock",
+      "as": "time",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "user_states",
+      "package_name": "accounts",
+      "as": "user_states",
+      "imports": [
+        "UserStates"
+      ]
+    },
+    {
+      "target": "users_repo",
+      "package_name": "accounts",
+      "as": "users_repo",
+      "imports": [
+
+      ]
+    }
+  ]
+}

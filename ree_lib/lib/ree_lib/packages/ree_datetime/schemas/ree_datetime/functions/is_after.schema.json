@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "is_after",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/is_after.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::IsAfter",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns true if the date_time_end falls after <tt>date_time_start</tt>.",
+      "throws": [
+
+      ],
+      "return": "Bool",
+      "args": [
+        {
+          "arg": "date_time_start",
+          "type": "DateTime"
+        },
+        {
+          "arg": "date_time_end",
+          "type": "DateTime"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

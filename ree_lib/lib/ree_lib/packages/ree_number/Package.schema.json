@@ -1,0 +1,62 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_number",
+  "entry_path": "packages/ree_number/package/ree_number.rb",
+  "tags": [
+    "ree_number"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_hash"
+    },
+    {
+      "name": "ree_i18n"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "digit_count",
+      "schema": "packages/ree_number/schemas/ree_number/functions/digit_count.schema.json"
+    },
+    {
+      "name": "number_to_currency",
+      "schema": "packages/ree_number/schemas/ree_number/functions/number_to_currency.schema.json"
+    },
+    {
+      "name": "number_to_delimited",
+      "schema": "packages/ree_number/schemas/ree_number/functions/number_to_delimited.schema.json"
+    },
+    {
+      "name": "number_to_human",
+      "schema": "packages/ree_number/schemas/ree_number/functions/number_to_human.schema.json"
+    },
+    {
+      "name": "number_to_human_size",
+      "schema": "packages/ree_number/schemas/ree_number/functions/number_to_human_size.schema.json"
+    },
+    {
+      "name": "number_to_ordinalized",
+      "schema": "packages/ree_number/schemas/ree_number/functions/number_to_ordinalized.schema.json"
+    },
+    {
+      "name": "number_to_percentage",
+      "schema": "packages/ree_number/schemas/ree_number/functions/number_to_percentage.schema.json"
+    },
+    {
+      "name": "number_to_phone",
+      "schema": "packages/ree_number/schemas/ree_number/functions/number_to_phone.schema.json"
+    },
+    {
+      "name": "number_to_rounded",
+      "schema": "packages/ree_number/schemas/ree_number/functions/number_to_rounded.schema.json"
+    },
+    {
+      "name": "round_helper",
+      "schema": "packages/ree_number/schemas/ree_number/functions/round_helper.schema.json"
+    }
+  ]
+}

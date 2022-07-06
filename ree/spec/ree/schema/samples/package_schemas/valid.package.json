@@ -1,0 +1,35 @@
+{
+  "schema_type": "package",
+  "ree_version": "1.2.3",
+  "name": "accounts",
+  "entry_path": "package/accounts.rb",
+  "tags": [],
+  "depends_on": [
+    {
+      "name": "clock"
+    },
+    {
+      "name": "test_utils"
+    }
+  ],
+  "env_vars": [
+    {
+      "name": "accounts.string_var",
+      "doc": null
+    },
+    {
+      "name": "accounts.integer_var",
+      "doc": "integer value"
+    }
+  ],
+  "objects": [
+    {
+      "name": "accounts_cfg",
+      "schema": "schemas/accounts/accounts_cfg.schema.json"
+    },
+    {
+      "name": "transaction",
+      "schema": "schemas/accounts/transaction.schema.json"
+    }
+  ]
+}

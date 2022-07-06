@@ -1,0 +1,18 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_enum",
+  "entry_path": "packages/ree_enum/package/ree_enum.rb",
+  "tags": [
+    "ree_enum"
+  ],
+  "depends_on": [
+
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+
+  ]
+}

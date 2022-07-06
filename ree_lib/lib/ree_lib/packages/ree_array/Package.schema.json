@@ -1,0 +1,33 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_array",
+  "entry_path": "packages/ree_array/package/ree_array.rb",
+  "tags": [
+    "ree_array"
+  ],
+  "depends_on": [
+
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "in_groups",
+      "schema": "packages/ree_array/schemas/ree_array/functions/in_groups.schema.json"
+    },
+    {
+      "name": "in_groups_of",
+      "schema": "packages/ree_array/schemas/ree_array/functions/in_groups_of.schema.json"
+    },
+    {
+      "name": "split_by",
+      "schema": "packages/ree_array/schemas/ree_array/functions/split_by.schema.json"
+    },
+    {
+      "name": "wrap",
+      "schema": "packages/ree_array/schemas/ree_array/functions/wrap.schema.json"
+    }
+  ]
+}

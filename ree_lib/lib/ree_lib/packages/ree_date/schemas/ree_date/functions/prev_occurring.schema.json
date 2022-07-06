@@ -1,0 +1,62 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "prev_occurring",
+  "path": "packages/ree_date/package/ree_date/functions/prev_occurring.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::PrevOccurring",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date representing the previous occurrence of the specified day of week.\n\n  today                            # => Tue, 24 May 2022\n  date (optional)                  # => Wed, 6  Apr 2022\n  prev_occurring(date, :monday)    # => Mon, 28 Mar 2022\n  prev_occurring(date, :thursday)  # => Thu, 31 Mar 2022\n  prev_occurring(:thursday)        # => Thu, 19 May 2022",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        },
+        {
+          "arg": "week_day",
+          "type": "Or[monday, tuesday, wednesday, thursday, friday, saturday, sunday]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "advance",
+      "package_name": "ree_date",
+      "as": "advance",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "days_since",
+      "package_name": "ree_date",
+      "as": "days_since",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "monday",
+      "package_name": "ree_date",
+      "as": "monday",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

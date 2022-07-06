@@ -1,0 +1,54 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "all_week",
+  "path": "packages/ree_date/package/ree_date/functions/all_week.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::AllWeek",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a Range representing the whole week of the current date.\nWeek starts on start_day (sunday or monday).",
+      "throws": [
+
+      ],
+      "return": "RangeOf[Date]",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        },
+        {
+          "arg": "start_day",
+          "type": "Or[sunday, monday]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "beginning_of_week",
+      "package_name": "ree_date",
+      "as": "beginning_of_week",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "end_of_week",
+      "package_name": "ree_date",
+      "as": "end_of_week",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

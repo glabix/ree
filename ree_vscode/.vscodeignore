@@ -1,0 +1,15 @@
+client/**
+!client/out/extension.js
+server/**
+!server/out/index.js
+!server/out/*.wasm
+
+*.vsix
+.eslintignore
+shared.webpack.config.js
+**/tsconfig.json
+**/.eslintrc.json
+**/*.ts
+**/*.map
+.gitignore
+.yarnrc

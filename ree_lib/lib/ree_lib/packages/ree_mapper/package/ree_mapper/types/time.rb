@@ -1,0 +1,41 @@
+# frozen_string_literal: true
+
+require 'time'
+
+class ReeMapper::Time < ReeMapper::AbstractType
+  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::TypeError)
+  def serialize(value, role: nil)
+    if value.class == Time
+      value
+    else
+      raise ReeMapper::TypeError, "should be a time"
+    end
+  end
+
+  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::CoercionError, ReeMapper::TypeError)
+  def cast(value, role: nil)
+    if value.class == Time
+      value
+    elsif value.class == DateTime
+      value.to_time
+    elsif value.is_a?(String)
+      begin
+        Time.parse(value)
+      rescue ArgumentError
+        raise ReeMapper::CoercionError, "is invalid time"
+      end
+    else
+      raise ReeMapper::TypeError, "should be a time"
+    end
+  end
+
+  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::TypeError)
+  def db_dump(value, role: nil)
+    serialize(value, role: role)
+  end
+
+  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::CoercionError, ReeMapper::TypeError)
+  def db_load(value, role: nil)
+    cast(value, role: role)
+  end
+end

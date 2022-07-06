@@ -1,0 +1,31 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "clock",
+  "entry_path": "bc/tools/clock/package/clock.rb",
+  "tags": [
+    "clock",
+    "wip"
+  ],
+  "depends_on": [
+    {
+      "name": "test_utils"
+    }
+  ],
+  "env_vars": [
+    {
+      "name": "clock.int_var",
+      "doc": null
+    },
+    {
+      "name": "clock.string_var",
+      "doc": null
+    }
+  ],
+  "objects": [
+    {
+      "name": "time",
+      "schema": "bc/tools/clock/schemas/clock/time.schema.json"
+    }
+  ]
+}

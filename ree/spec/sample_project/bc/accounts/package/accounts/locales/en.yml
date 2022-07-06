@@ -1,0 +1,4 @@
+accounts:
+  errors:
+    email_taken: email taken
+    

@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "perform_async",
+  "path": "bc/accounts/package/accounts/services/perform_async.rb",
+  "mount_as": "fn",
+  "class": "Accounts::PerformAsync",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "bean",
+          "type": "Any"
+        },
+        {
+          "arg": "args",
+          "type": "Any"
+        },
+        {
+          "arg": "kwargs",
+          "type": "Any"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

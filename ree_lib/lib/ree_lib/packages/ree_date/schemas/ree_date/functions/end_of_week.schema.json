@@ -1,0 +1,54 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "end_of_week",
+  "path": "packages/ree_date/package/ree_date/functions/end_of_week.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::EndOfWeek",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date at the end of the week.\nIf no date passed returns date at the end of the current week.\n\n  date(optional) => Wed, 25 May 2022\n  end_of_week(date, :monday) # => Sun, 29 May 2022\n  end_of_week(date, :sunday) # => Sat, 28 May 2022\nWeek is assumed to end on +week_start+ (monday or sunday).",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        },
+        {
+          "arg": "week_start",
+          "type": "Or[sunday, monday]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "days_since",
+      "package_name": "ree_date",
+      "as": "days_since",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "days_to_week_start",
+      "package_name": "ree_date",
+      "as": "days_to_week_start",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

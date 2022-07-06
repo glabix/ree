@@ -1,0 +1,38 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "build_sqlite_connection",
+  "path": "packages/ree_dao/package/ree_dao/functions/build_sqlite_connection.rb",
+  "mount_as": "fn",
+  "class": "ReeDao::BuildSqliteConnection",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Sequel::SQLite::Database",
+      "args": [
+        {
+          "arg": "conn_opts",
+          "type": "{:database => String, :readonly? => Bool, :timeout? => Integer}"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[\"RestKeys\" => Any]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "build_connection",
+      "package_name": "ree_dao",
+      "as": "build_connection",
+      "imports": [
+
+      ]
+    }
+  ]
+}

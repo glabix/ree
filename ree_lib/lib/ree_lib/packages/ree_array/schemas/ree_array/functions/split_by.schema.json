@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "split_by",
+  "path": "packages/ree_array/package/ree_array/functions/split_by.rb",
+  "mount_as": "fn",
+  "class": "ReeArray::SplitBy",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Divides the array into one or more subarrays based on a delimiting +value+\nor the result of an optional block.\n\nsplit([1, 2, 3, 4, 5], 3)              # => [[1, 2], [4, 5]]\nsplit((1..10).to_a) { |i| i % 3 == 0 } # => [[1, 2], [4, 5], [7, 8], [10]]",
+      "throws": [
+
+      ],
+      "return": "ArrayOf[Any]",
+      "args": [
+        {
+          "arg": "array",
+          "type": "ArrayOf[Any]"
+        },
+        {
+          "arg": "value",
+          "type": "Any"
+        },
+        {
+          "arg": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

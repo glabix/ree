@@ -1,0 +1,39 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "build_dao",
+  "path": "packages/ree_dao/package/ree_dao/functions/build_dao.rb",
+  "mount_as": "fn",
+  "class": "ReeDao::BuildDao",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "connection",
+          "type": "Any"
+        },
+        {
+          "arg": "table_name",
+          "type": "Symbol"
+        },
+        {
+          "arg": "mapper",
+          "type": "Proc#call"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:primary_key? => Nilor[Or[Symbol, ArrayOf[Symbol]]], :default_select_columns? => Nilor[ArrayOf[Symbol]]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

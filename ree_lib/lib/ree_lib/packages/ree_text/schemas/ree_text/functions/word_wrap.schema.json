@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "word_wrap",
+  "path": "packages/ree_text/package/ree_text/functions/word_wrap.rb",
+  "mount_as": "fn",
+  "class": "ReeText::WordWrap",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Wraps the +text+ into lines no longer than +line_width+ width. This method\nbreaks on the first whitespace character that does not exceed +line_width+\n(which is 80 by default).\n\n  word_wrap('Once upon a time')\n  # => Once upon a time\n\n  word_wrap('Once upon a time, in a kingdom called Far Far Away, a king fell ill, and finding a successor to the throne turned out to be more trouble than anyone could have imagined...')\n  # => Once upon a time, in a kingdom called Far Far Away, a king fell ill, and finding\na successor to the throne turned out to be more trouble than anyone could have\nimagined...\n\n  word_wrap('Once upon a time', line_width: 8)\n  # => Once\nupon a\ntime\n\n  word_wrap('Once upon a time', line_width: 1)\n  # => Once\nupon\na\ntime\n\n  You can also specify a custom +break_sequence+ (\"\n\" by default)\n\n  word_wrap('Once upon a time', line_width: 1, break_sequence: \"\r\n\")\n  # => Once\r\nupon\r\na\r\ntime",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "text",
+          "type": "String"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:line_width? => Integer, :break_sequence? => String]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

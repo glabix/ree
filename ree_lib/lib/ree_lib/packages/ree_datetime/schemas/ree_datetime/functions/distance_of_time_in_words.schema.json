@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "distance_of_time_in_words",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/distance_of_time_in_words.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::DistanceOfTimeInWords",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Reports the approximate distance in time between two Time, Date, or DateTime objects or integers as seconds.\nPass <tt>include_seconds: true</tt> if you want more detailed approximations when distance < 1 min, 29 secs.\nDistances are reported based on the following table:\n\n  0 <-> 29 secs                                                             # => less than a minute\n  30 secs <-> 1 min, 29 secs                                                # => 1 minute\n  1 min, 30 secs <-> 44 mins, 29 secs                                       # => [2..44] minutes\n  44 mins, 30 secs <-> 89 mins, 29 secs                                     # => about 1 hour\n  89 mins, 30 secs <-> 23 hrs, 59 mins, 29 secs                             # => about [2..24] hours\n  23 hrs, 59 mins, 30 secs <-> 41 hrs, 59 mins, 29 secs                     # => 1 day\n  41 hrs, 59 mins, 30 secs  <-> 29 days, 23 hrs, 59 mins, 29 secs           # => [2..29] days\n  29 days, 23 hrs, 59 mins, 30 secs <-> 44 days, 23 hrs, 59 mins, 29 secs   # => about 1 month\n  44 days, 23 hrs, 59 mins, 30 secs <-> 59 days, 23 hrs, 59 mins, 29 secs   # => about 2 months\n  59 days, 23 hrs, 59 mins, 30 secs <-> 1 yr minus 1 sec                    # => [2..12] months\n  1 yr <-> 1 yr, 3 months                                                   # => about 1 year\n  1 yr, 3 months <-> 1 yr, 9 months                                         # => over 1 year\n  1 yr, 9 months <-> 2 yr minus 1 sec                                       # => almost 2 years\n  2 yrs <-> max time or date                                                # => (same rules as 1 yr)\n\nWith <tt>include_seconds: true</tt> and the difference < 1 minute 29 seconds:\n  0-4   secs      # => less than 5 seconds\n  5-9   secs      # => less than 10 seconds\n  10-19 secs      # => less than 20 seconds\n  20-39 secs      # => half a minute\n  40-59 secs      # => less than a minute\n  60-89 secs      # => 1 minute\n\n  YEAR = 365 * 24 * 60 * 20\n  MONTH = 30 * 24 * 60 * 20\n  DAY = 24 * 60 * 20\n  HOUR = 60 * 60\n  MINUTE = 60\n\n  from_time = Time.now\n  distance_of_time_in_words(from_time, from_time + 50*MINUTE)                                # => about 1 hour\n  distance_of_time_in_words(from_time, from_time + 15)                                # => less than a minute\n  distance_of_time_in_words(from_time, from_time + 15, include_seconds: true)         # => less than 20 seconds\n  distance_of_time_in_words(from_time, from_time + 60 * HOUR)                                  # => 3 days\n  distance_of_time_in_words(from_time, from_time + 45, include_seconds: true)         # => less than a minute\n  distance_of_time_in_words(from_time, from_time 76)                                   # => 1 minute\n  distance_of_time_in_words(from_time, from_time + 1*YEAR + 3 * DAY)                           # => about 1 year\n  distance_of_time_in_words(from_time, from_time + 3 * YEAR + 6 * MONTH)                        # => over 3 years\n  distance_of_time_in_words(from_time, from_time + 4 * YEAR + 9 * DAY + 30 * MINUTE + 5) # => about 4 years\n\n  to_time = Time.now + 6 * YEAR + 19 * DAY\n  distance_of_time_in_words(from_time, to_time, include_seconds: true)                        # => about 6 years\n  distance_of_time_in_words(to_time, from_time, include_seconds: true)                        # => about 6 years\n  distance_of_time_in_words(Time.now, Time.now)                                               # => less than a minute\n\nWith the <tt>scope</tt> option, you can define a custom scope for Rails\nto look up the translation.\n\nFor example you can define the following in your locale (e.g. en.yml).\n\n  datetime:\n    human:\n      distance_in_words:\n        short:\n          about_x_hours:\n            one: \"an hour\"\n            other: \"%{count} hours\"\n\nSee https://github.com/svenfuchs/rails-i18n/blob/master/rails/locale/en.yml\nfor more examples.\n\nWhich will then result in the following:\n\n  from_time = Time.now\n  distance_of_time_in_words(from_time, from_time + 50*60)  => \"an hour\"\n  distance_of_time_in_words(from_time, from_time + 3 * 60 * 60)    => \"3 hours\"')",
+      "throws": [
+        "ArgumentError"
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "start_time",
+          "type": "Or[Time, DateTime, Date]"
+        },
+        {
+          "arg": "end_time",
+          "type": "Or[Time, DateTime, Date]"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:include_seconds? => Bool, :locale? => Symbol]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "t",
+      "package_name": "ree_i18n",
+      "as": "t",
+      "imports": [
+
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "months_ago",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/months_ago.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::MonthsAgo",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date_time/time the specified number of months ago.",
+      "throws": [
+
+      ],
+      "return": "DateTime",
+      "args": [
+        {
+          "arg": "date_time",
+          "type": "Nilor[DateTime]"
+        },
+        {
+          "arg": "month_count",
+          "type": "Integer"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "advance",
+      "package_name": "ree_datetime",
+      "as": "advance",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "now",
+      "package_name": "ree_datetime",
+      "as": "now",
+      "imports": [
+
+      ]
+    }
+  ]
+}

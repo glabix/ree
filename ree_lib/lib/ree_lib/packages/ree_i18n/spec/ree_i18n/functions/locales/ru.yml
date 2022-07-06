@@ -1,0 +1,11 @@
+ru:
+  gender:
+    male: Мужской
+    female: Женский
+  count:
+    zero: 'ноль'
+    one: 'один'
+  welcome:
+    title: "Добро пожаловать!"
+    content: "Добро пожаловать в %{app_name}"
+  

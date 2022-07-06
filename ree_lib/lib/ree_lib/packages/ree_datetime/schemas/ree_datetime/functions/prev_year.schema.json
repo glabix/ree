@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "prev_year",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/prev_year.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::PrevYear",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Short-hand for <tt>years_ago(1)</tt>.",
+      "throws": [
+
+      ],
+      "return": "DateTime",
+      "args": [
+        {
+          "arg": "date_time",
+          "type": "Nilor[DateTime]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "advance",
+      "package_name": "ree_datetime",
+      "as": "advance",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "now",
+      "package_name": "ree_datetime",
+      "as": "now",
+      "imports": [
+
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "change",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/change.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::Change",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date/time where one or more of the elements have been changed\naccording to the +opts+ parameter.",
+      "throws": [
+        "ArgumentError"
+      ],
+      "return": "DateTime",
+      "args": [
+        {
+          "arg": "date_time",
+          "type": "DateTime"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:year? => Integer, :month? => Integer, :day? => Integer, :hour? => Integer, :min? => Integer, :sec? => Integer, :nsec? => Integer, :usec? => Integer, :offset? => Rational]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

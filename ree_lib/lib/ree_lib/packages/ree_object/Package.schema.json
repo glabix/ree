@@ -1,0 +1,52 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_object",
+  "entry_path": "packages/ree_object/package/ree_object.rb",
+  "tags": [
+    "ree_object"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_date"
+    },
+    {
+      "name": "ree_datetime"
+    },
+    {
+      "name": "ree_hash"
+    },
+    {
+      "name": "ree_number"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "deep_dup",
+      "schema": "packages/ree_object/schemas/ree_object/functions/deep_dup.schema.json"
+    },
+    {
+      "name": "deep_freeze",
+      "schema": "packages/ree_object/schemas/ree_object/functions/deep_freeze.schema.json"
+    },
+    {
+      "name": "is_blank",
+      "schema": "packages/ree_object/schemas/ree_object/functions/is_blank.schema.json"
+    },
+    {
+      "name": "not_blank",
+      "schema": "packages/ree_object/schemas/ree_object/functions/not_blank.schema.json"
+    },
+    {
+      "name": "to_hash",
+      "schema": "packages/ree_object/schemas/ree_object/functions/to_hash.schema.json"
+    },
+    {
+      "name": "to_obj",
+      "schema": "packages/ree_object/schemas/ree_object/functions/to_obj.schema.json"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "parse",
+  "path": "packages/ree_date/package/ree_date/functions/parse.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::Parse",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Converts a string to a date",
+      "throws": [
+        "ArgumentError"
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "string",
+          "type": "String"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "is_before",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/is_before.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::IsBefore",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns true if the date_time_start falls before <tt>date_time_end</tt>.",
+      "throws": [
+
+      ],
+      "return": "Bool",
+      "args": [
+        {
+          "arg": "date_time_start",
+          "type": "DateTime"
+        },
+        {
+          "arg": "date_time_end",
+          "type": "DateTime"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

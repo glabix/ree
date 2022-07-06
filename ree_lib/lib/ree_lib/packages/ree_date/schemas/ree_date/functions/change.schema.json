@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "change",
+  "path": "packages/ree_date/package/ree_date/functions/change.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::Change",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date where one or more of the elements have been changed\naccording to the +opts+ parameter.",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Date"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:year? => Integer, :month? => Integer, :day? => Integer]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

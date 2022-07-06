@@ -1,0 +1,50 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "all_quarter",
+  "path": "packages/ree_date/package/ree_date/functions/all_quarter.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::AllQuarter",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a Range representing the whole quarter of the current date.",
+      "throws": [
+
+      ],
+      "return": "RangeOf[Date]",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "beginning_of_quarter",
+      "package_name": "ree_date",
+      "as": "beginning_of_quarter",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "end_of_quarter",
+      "package_name": "ree_date",
+      "as": "end_of_quarter",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

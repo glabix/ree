@@ -1,0 +1,27 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "raise_error",
+  "path": "bc/tools/errors/package/errors/raise_error.rb",
+  "mount_as": "fn",
+  "class": "Errors::RaiseError",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "err",
+          "type": "SubclassOf[Ree::DomainError]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

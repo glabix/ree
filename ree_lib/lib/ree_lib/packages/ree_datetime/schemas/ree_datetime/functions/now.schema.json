@@ -1,0 +1,39 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "now",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/now.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::Now",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date/time representing now.",
+      "throws": [
+
+      ],
+      "return": "Exactly[DateTime]",
+      "args": [
+
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "get_default_tz_info",
+      "package_name": "ree_datetime",
+      "as": "get_default_tz_info",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "offset_to_string",
+      "package_name": "ree_datetime",
+      "as": "offset_to_string",
+      "imports": [
+
+      ]
+    }
+  ]
+}

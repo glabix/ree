@@ -1,0 +1,38 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "safe_join",
+  "path": "packages/ree_text/package/ree_text/functions/safe_join.rb",
+  "mount_as": "fn",
+  "class": "ReeText::SafeJoin",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "This method returns an string similar to what <tt>Array#join</tt>\nwould return. The array is flattened, and all items, including\nthe supplied separator, are HTML escaped.\n\n  safe_join([\"<p>foo</p>\", \"<p>bar</p>\"], sep: \"<br />\")\n  # => \"&lt;p&gt;foo&lt;/p&gt;&lt;br /&gt;&lt;p&gt;bar&lt;/p&gt;\"",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "array",
+          "type": "Array"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:sep? => String]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "escape_html",
+      "package_name": "ree_text",
+      "as": "escape_html",
+      "imports": [
+
+      ]
+    }
+  ]
+}

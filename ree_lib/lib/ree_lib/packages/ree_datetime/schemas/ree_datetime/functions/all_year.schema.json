@@ -1,0 +1,50 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "all_year",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/all_year.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::AllYear",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a Range representing the whole year of the current date/time.\nIf no date_time passed returns the whole current year.",
+      "throws": [
+
+      ],
+      "return": "RangeOf[DateTime]",
+      "args": [
+        {
+          "arg": "date_time",
+          "type": "Nilor[DateTime]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "beginning_of_year",
+      "package_name": "ree_datetime",
+      "as": "beginning_of_year",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "end_of_year",
+      "package_name": "ree_datetime",
+      "as": "end_of_year",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "now",
+      "package_name": "ree_datetime",
+      "as": "now",
+      "imports": [
+
+      ]
+    }
+  ]
+}

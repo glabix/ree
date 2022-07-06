@@ -1,0 +1,50 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "months_diff",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/months_diff.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::MonthsDiff",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns time difference in month (30 days range)",
+      "throws": [
+        "ArgumentError"
+      ],
+      "return": "Integer",
+      "args": [
+        {
+          "arg": "start_time",
+          "type": "Or[Date, DateTime, Time]"
+        },
+        {
+          "arg": "end_time",
+          "type": "Or[Date, DateTime, Time]"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:round_mode? => Or[up, down, truncate, half_up, default, half_down, half_even, banker, ceiling, floor]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "round_helper",
+      "package_name": "ree_number",
+      "as": "round_helper",
+      "imports": [
+        "ROUND_MODES"
+      ]
+    },
+    {
+      "target": "slice",
+      "package_name": "ree_hash",
+      "as": "slice",
+      "imports": [
+
+      ]
+    }
+  ]
+}

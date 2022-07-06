@@ -1,0 +1,3 @@
+module ReeDto
+  package
+end

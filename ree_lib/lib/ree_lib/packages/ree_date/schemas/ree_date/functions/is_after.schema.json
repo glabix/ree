@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "is_after",
+  "path": "packages/ree_date/package/ree_date/functions/is_after.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::IsAfter",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns true if the <tt>date_end</tt> falls after <tt>date_start</tt>.",
+      "throws": [
+
+      ],
+      "return": "Bool",
+      "args": [
+        {
+          "arg": "date_start",
+          "type": "Date"
+        },
+        {
+          "arg": "date_end",
+          "type": "Date"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

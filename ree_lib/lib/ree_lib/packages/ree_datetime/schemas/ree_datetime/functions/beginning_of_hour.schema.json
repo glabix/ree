@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "beginning_of_hour",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/beginning_of_hour.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::BeginningOfHour",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new DateTime representing the start of the hour (ex. 13:00:00).",
+      "throws": [
+
+      ],
+      "return": "DateTime",
+      "args": [
+        {
+          "arg": "date_time",
+          "type": "Nilor[DateTime]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "change",
+      "package_name": "ree_datetime",
+      "as": "change",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "now",
+      "package_name": "ree_datetime",
+      "as": "now",
+      "imports": [
+
+      ]
+    }
+  ]
+}

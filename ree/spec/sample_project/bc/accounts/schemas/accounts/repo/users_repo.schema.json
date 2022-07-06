@@ -1,0 +1,15 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "users_repo",
+  "path": "bc/accounts/package/accounts/repo/users_repo.rb",
+  "mount_as": "object",
+  "class": "Accounts::UsersRepo",
+  "factory": null,
+  "methods": [
+
+  ],
+  "links": [
+
+  ]
+}

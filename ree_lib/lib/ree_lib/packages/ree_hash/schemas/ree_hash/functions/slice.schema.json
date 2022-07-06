@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "slice",
+  "path": "packages/ree_hash/package/ree_hash/functions/slice.rb",
+  "mount_as": "fn",
+  "class": "ReeHash::Slice",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Replaces the hash with only the given keys.\nReturns a hash containing the removed key/value pairs.\n\n  hash = { a: 1, b: 2, c: 3, d: 4 }\n  slice(hash, :a, :b)  # => {:c=>3, :d=>4}",
+      "throws": [
+        "ReeHash::Slice::MissingKeyErr"
+      ],
+      "return": "Hash",
+      "args": [
+        {
+          "arg": "hash",
+          "type": "Hash"
+        },
+        {
+          "arg": "keys",
+          "type": "SplatOf[Symbol]"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:raise? => Bool]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "default_factory",
+  "path": "packages/ree_mapper/package/ree_mapper/default_factory.rb",
+  "mount_as": "object",
+  "class": "ReeMapper::DefaultFactory",
+  "factory": "build",
+  "methods": [
+
+  ],
+  "links": [
+    {
+      "target": "build_mapper_factory",
+      "package_name": "ree_mapper",
+      "as": "build_mapper_factory",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "build_mapper_strategy",
+      "package_name": "ree_mapper",
+      "as": "build_mapper_strategy",
+      "imports": [
+
+      ]
+    }
+  ]
+}

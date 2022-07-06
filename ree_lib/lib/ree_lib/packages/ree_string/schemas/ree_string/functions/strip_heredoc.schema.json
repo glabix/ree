@@ -1,0 +1,27 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "strip_heredoc",
+  "path": "packages/ree_string/package/ree_string/functions/strip_heredoc.rb",
+  "mount_as": "fn",
+  "class": "ReeString::StripHeredoc",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Strips indentation in heredocs.\n\nFor example:\n\n  puts strip_heredoc(<<-USAGE)\n    This command does such and such.\n\n    Supported options are:\n      -h         This message\n      ...\n  USAGE\n\nthe user would see the usage message aligned against the left margin.\n\nTechnically, it looks for the least indented non-empty line\nin the whole string, and removes that amount of leading whitespace.",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "string",
+          "type": "String"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

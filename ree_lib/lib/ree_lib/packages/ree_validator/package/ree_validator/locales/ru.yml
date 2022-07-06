@@ -1,0 +1,27 @@
+ru:
+  validator:
+    paging:
+      min_page: номер страницы должен быть не меньше 1
+      min_per_page: количество элементов на странице должно быть >= %{min_per_page}
+      max_per_page: количество элементов на странице должно быть <= %{max_per_page}
+      max_result_window: окно запроса не должно превышать <= %{max_result_window} элементов
+    email:
+      invalid_email: неправильный email
+    length:
+      can_not_be_less_than: минимальная длина должна быть больше %{length}
+      can_not_be_more_than: максимальная длина должна быть меньше %{length}
+      should_be_equal_to: длина должна быть равна %{length}
+      should_not_be_equal_to: длина не должна быть равна %{length}
+    presence:
+      can_not_be_blank: не может быть пустым
+    url:
+      invalid_url: неправильная ссылка
+      invalid_scheme: протокол должен быть одним из %{schemes}
+      invalid_port: порт должен быть одним из %{ports}
+      invalid_domain: домен должен быть одним из %{domains}
+    inclusion:
+      error: значение должно быть одним из %{list}
+    exclusion:
+      error: значение не должно быть одним из %{list}
+    regexp:
+      error: значение не соответствует регулярному выражению %{regexp}

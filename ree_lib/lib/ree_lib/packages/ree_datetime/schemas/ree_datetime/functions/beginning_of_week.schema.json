@@ -1,0 +1,62 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "beginning_of_week",
+  "path": "packages/ree_datetime/package/ree_datetime/functions/beginning_of_week.rb",
+  "mount_as": "fn",
+  "class": "ReeDatetime::BeginningOfWeek",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date/time at the start of the week.\nIf no date_time passed returns date/time at the start of the current week.\n\n  date_time(optional) => Wed, 25 May 2022 13:00:00\n  beginning_of_week(date_time, :monday) # => Mon, 23 May 2022 00:00:00\n  beginning_of_week(date_time, :sunday) # => Sun, 22 May 2022 00:00:00\nWeek is assumed to start on +week_start+ (monday or sunday).",
+      "throws": [
+
+      ],
+      "return": "DateTime",
+      "args": [
+        {
+          "arg": "date_time",
+          "type": "Nilor[DateTime]"
+        },
+        {
+          "arg": "week_start",
+          "type": "Or[sunday, monday]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "beginning_of_day",
+      "package_name": "ree_datetime",
+      "as": "beginning_of_day",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "beginning_of_week",
+      "package_name": "ree_date",
+      "as": "beginning_of_week",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "change",
+      "package_name": "ree_datetime",
+      "as": "change",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "now",
+      "package_name": "ree_datetime",
+      "as": "now",
+      "imports": [
+
+      ]
+    }
+  ]
+}

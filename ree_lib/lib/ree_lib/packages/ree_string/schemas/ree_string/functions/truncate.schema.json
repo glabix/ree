@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "truncate",
+  "path": "packages/ree_string/package/ree_string/functions/truncate.rb",
+  "mount_as": "fn",
+  "class": "ReeString::Truncate",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Truncates a given +text+ after a given <tt>length</tt> if +text+ is longer than <tt>length</tt>:\n\n  truncate('Once upon a time in a world far far away', 27)\n  => \"Once upon a time in a wo...\"\n\nPass a string or regexp <tt>:separator</tt> to truncate +text+ at a natural break:\n\n  truncate('Once upon a time in a world far far away', 27, separator: ' ')\n  => \"Once upon a time in a...\"\n\n  truncate('Once upon a time in a world far far away', 27, separator: / /)\n  => \"Once upon a time in a...\"\n\nThe last characters will be replaced with the <tt>:omission</tt> string (defaults to \"...\")\nfor a total length not exceeding <tt>length</tt>:\n\n  truncate('And they found that many people were sleeping better.', 25, omission: '... (continued)')\n  => \"And they f... (continued)\"",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "str",
+          "type": "String"
+        },
+        {
+          "arg": "truncate_at",
+          "type": "Integer"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:omission? => String, :separator? => Or[String, Regexp]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

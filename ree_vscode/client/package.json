@@ -1,0 +1,15 @@
+{
+	"name": "ree-vscode-extension",
+	"description": "VSCode Ree Language Client and Extenstion",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.66.0"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^8.0.1"
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.63.0",
+		"@vscode/test-electron": "^2.1.2"
+	}
+}

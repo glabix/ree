@@ -1,0 +1,14 @@
+{
+  "schema_type": "packages",
+  "ree_version": "1.2.3",
+  "packages": [
+    {
+      "name": "accounts",
+      "schema": "bc/accounts/Package.schema.json"
+    },
+    {
+      "name": "tests",
+      "schema": "bc/tests/Package.schema.json"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+en:
+  validator:
+    paging:
+      min_page: page should be more than 1
+      min_per_page: per_page should be >= %{min_per_page}
+      max_per_page: per_page should be <= %{max_per_page}
+      max_result_window: product of page and per_page should be <= %{max_result_window}
+    email:
+      invalid_email: invalid email
+    length:
+      can_not_be_less_than: length can not be less than %{length}
+      can_not_be_more_than: length can not be more than %{length}
+      should_be_equal_to: length should be equal to %{length}
+      should_not_be_equal_to: length should not be equal to %{length}
+    presence:
+      can_not_be_blank: can not be blank
+    url:
+      invalid_url: invalid url
+      invalid_scheme: scheme should be one of %{schemes}
+      invalid_port: port should be one of %{ports}
+      invalid_domain: domain should be one of %{domains}
+    inclusion:
+      error: value should be one of %{list}
+    exclusion:
+      error: value should not be one of %{list}
+    regexp:
+      error: value does not match regexp %{regexp}

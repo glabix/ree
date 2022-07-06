@@ -1,0 +1,50 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "beginning_of_quarter",
+  "path": "packages/ree_date/package/ree_date/functions/beginning_of_quarter.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::BeginningOfQuarter",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date at the start of the quarter.\n\n  today = Date.today # => Fri, 10 Jul 2015\n  today.beginning_of_quarter # => Wed, 01 Jul 2015",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "beginning_of_month",
+      "package_name": "ree_date",
+      "as": "beginning_of_month",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "change",
+      "package_name": "ree_date",
+      "as": "change",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

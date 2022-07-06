@@ -1,0 +1,69 @@
+{
+  "ree_version": "0.1.0",
+  "schema_type": "packages",
+  "packages": [
+    {
+      "name": "ree_array",
+      "schema": "packages/ree_array/Package.schema.json"
+    },
+    {
+      "name": "ree_dao",
+      "schema": "packages/ree_dao/Package.schema.json"
+    },
+    {
+      "name": "ree_date",
+      "schema": "packages/ree_date/Package.schema.json"
+    },
+    {
+      "name": "ree_datetime",
+      "schema": "packages/ree_datetime/Package.schema.json"
+    },
+    {
+      "name": "ree_dto",
+      "schema": "packages/ree_dto/Package.schema.json"
+    },
+    {
+      "name": "ree_enum",
+      "schema": "packages/ree_enum/Package.schema.json"
+    },
+    {
+      "name": "ree_hash",
+      "schema": "packages/ree_hash/Package.schema.json"
+    },
+    {
+      "name": "ree_i18n",
+      "schema": "packages/ree_i18n/Package.schema.json"
+    },
+    {
+      "name": "ree_json",
+      "schema": "packages/ree_json/Package.schema.json"
+    },
+    {
+      "name": "ree_mapper",
+      "schema": "packages/ree_mapper/Package.schema.json"
+    },
+    {
+      "name": "ree_number",
+      "schema": "packages/ree_number/Package.schema.json"
+    },
+    {
+      "name": "ree_object",
+      "schema": "packages/ree_object/Package.schema.json"
+    },
+    {
+      "name": "ree_string",
+      "schema": "packages/ree_string/Package.schema.json"
+    },
+    {
+      "name": "ree_text",
+      "schema": "packages/ree_text/Package.schema.json"
+    },
+    {
+      "name": "ree_validator",
+      "schema": "packages/ree_validator/Package.schema.json"
+    }
+  ],
+  "gem_packages": [
+
+  ]
+}

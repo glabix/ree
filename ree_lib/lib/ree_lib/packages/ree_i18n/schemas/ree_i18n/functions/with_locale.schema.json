@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "with_locale",
+  "path": "packages/ree_i18n/package/ree_i18n/functions/with_locale.rb",
+  "mount_as": "fn",
+  "class": "ReeI18n::WithLocale",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "paths",
+          "type": "Symbol"
+        },
+        {
+          "arg": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

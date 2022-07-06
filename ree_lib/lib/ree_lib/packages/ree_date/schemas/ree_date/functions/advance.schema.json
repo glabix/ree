@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "advance",
+  "path": "packages/ree_date/package/ree_date/functions/advance.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::Advance",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Provides precise Date calculations for years, months, quarters and days. The +options+ parameter takes a hash with\nany of these keys: <tt>:years</tt>, <tt>:months</tt>, <tt>:quarters </tt>, <tt>:weeks</tt>, <tt>:days</tt>.",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Date"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:years? => Integer, :quarters? => Integer, :months? => Integer, :weeks? => Integer, :days? => Integer]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

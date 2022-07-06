@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "validate_inclusion",
+  "path": "packages/ree_validator/package/ree_validator/functions/validate_inclusion.rb",
+  "mount_as": "fn",
+  "class": "ReeValidator::ValidateInclusion",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Bool",
+      "args": [
+        {
+          "arg": "value",
+          "type": "Any"
+        },
+        {
+          "arg": "list_or_set",
+          "type": "Or[ArrayOf[Any], SetOf[Any], RangeOf[Any]]"
+        },
+        {
+          "arg": "error_code",
+          "type": "Symbol"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "t",
+      "package_name": "ree_i18n",
+      "as": "t",
+      "imports": [
+
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+Ree.set_performance_mode

@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "validate_url",
+  "path": "packages/ree_validator/package/ree_validator/functions/validate_url.rb",
+  "mount_as": "fn",
+  "class": "ReeValidator::ValidateUrl",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+        "ReeValidator::ValidateUrl::InvalidUrlErr"
+      ],
+      "return": "Bool",
+      "args": [
+        {
+          "arg": "url",
+          "type": "String"
+        },
+        {
+          "arg": "error_code",
+          "type": "Symbol"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:schemes? => ArrayOf[String], :ports? => ArrayOf[Integer], :domains? => ArrayOf[String]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "t",
+      "package_name": "ree_i18n",
+      "as": "t",
+      "imports": [
+
+      ]
+    }
+  ]
+}

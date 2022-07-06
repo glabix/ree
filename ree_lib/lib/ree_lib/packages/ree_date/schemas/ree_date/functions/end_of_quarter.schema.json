@@ -1,0 +1,50 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "end_of_quarter",
+  "path": "packages/ree_date/package/ree_date/functions/end_of_quarter.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::EndOfQuarter",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date/time at the end of the quarter.\n\n  today = Date.today # => Fri, 10 Jul 2015\n  today.end_of_quarter # => Wed, 30 Sep 2015",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "change",
+      "package_name": "ree_date",
+      "as": "change",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "days_in_month",
+      "package_name": "ree_date",
+      "as": "days_in_month",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "truncate_words",
+  "path": "packages/ree_string/package/ree_string/functions/truncate_words.rb",
+  "mount_as": "fn",
+  "class": "ReeString::TruncateWords",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Truncates a given +text+ after a given number of words (<tt>words_count</tt>):\n\n  truncate_words('Once upon a time in a world far far away', 4)\n  # => \"Once upon a time...\"\n\nPass a string or regexp <tt>:separator</tt> to specify a different separator of words:\n\n  truncate_words('Once<br>upon<br>a<br>time<br>in<br>a<br>world', 5, separator: '<br>')\n  # => \"Once<br>upon<br>a<br>time<br>in...\"\n\nThe last characters will be replaced with the <tt>:omission</tt> string (defaults to \"...\"):\n\n  truncate_words('And they found that many people were sleeping better.', 5, omission: '... (continued)')\n  # => \"And they found that many... (continued)\"",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "str",
+          "type": "String"
+        },
+        {
+          "arg": "words_count",
+          "type": "Integer"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:omission? => String, :separator? => Or[String, Regexp]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

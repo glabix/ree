@@ -1,0 +1,46 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "days_since",
+  "path": "packages/ree_date/package/ree_date/functions/days_since.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::DaysSince",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date the specified number of days in the future.",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        },
+        {
+          "arg": "day_count",
+          "type": "Integer"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "advance",
+      "package_name": "ree_date",
+      "as": "advance",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}

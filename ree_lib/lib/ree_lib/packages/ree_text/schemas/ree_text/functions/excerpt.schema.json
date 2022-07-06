@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "excerpt",
+  "path": "packages/ree_text/package/ree_text/functions/excerpt.rb",
+  "mount_as": "fn",
+  "class": "ReeText::Excerpt",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Extracts an excerpt from +text+ that matches the first instance of +phrase+.\nThe <tt>:radius</tt> option expands the excerpt on each side of the first occurrence of +phrase+ by the number of characters\ndefined in <tt>:radius</tt> (which defaults to 100). If the excerpt radius overflows the beginning or end of the +text+,\nthen the <tt>:omission</tt> option (which defaults to \"...\") will be prepended/appended accordingly. Use the\n<tt>:separator</tt> option to choose the delimitation. The resulting string will be stripped in any case. If the +phrase+\nisn't found, +nil+ is returned.\n\n  excerpt('This is an example', 'an', radius: 5)\n  # => ...s is an exam...\n\n  excerpt('This is an example', 'is', radius: 5)\n  # => This is a...\n\n  excerpt('This is an example', 'is')\n  # => This is an example\n\n  excerpt('This next thing is an example', 'ex', radius: 2)\n  # => ...next...\n\n  excerpt('This is also an example', 'an', radius: 8, omission: '<chop> ')\n  # => <chop> is also an example\n\n  excerpt('This is a very beautiful morning', 'very', separator: ' ', radius: 1)\n  # => ...a very beautiful...",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "text",
+          "type": "String"
+        },
+        {
+          "arg": "phrase",
+          "type": "Or[String, Regexp]"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:radius? => Integer, :omission? => String, :separator? => String]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "is_blank",
+      "package_name": "ree_object",
+      "as": "is_blank",
+      "imports": [
+
+      ]
+    }
+  ]
+}

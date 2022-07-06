@@ -1,0 +1,48 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_dao",
+  "entry_path": "packages/ree_dao/package/ree_dao.rb",
+  "tags": [
+    "ree_dao"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_dto"
+    },
+    {
+      "name": "ree_enum"
+    },
+    {
+      "name": "ree_mapper"
+    },
+    {
+      "name": "ree_string"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "build_connection",
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_connection.schema.json"
+    },
+    {
+      "name": "build_dao",
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_dao.schema.json"
+    },
+    {
+      "name": "build_pg_connection",
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_pg_connection.schema.json"
+    },
+    {
+      "name": "build_sqlite_connection",
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_sqlite_connection.schema.json"
+    },
+    {
+      "name": "connections",
+      "schema": "packages/ree_dao/schemas/ree_dao/beans/connections.schema.json"
+    }
+  ]
+}

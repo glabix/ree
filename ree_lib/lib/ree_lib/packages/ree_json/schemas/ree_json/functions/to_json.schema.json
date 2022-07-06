@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "to_json",
+  "path": "packages/ree_json/package/ree_json/functions/to_json.rb",
+  "mount_as": "fn",
+  "class": "ReeJson::ToJson",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Dumps arbitrary object to json using specific dump mode.\n  to_json({id: 1}) # => \"{\"id\":1}\"\n  to_json({id: 1}, mode: :object) # => \"{\":id\":{\"^o\":\"Object\"}}\"\n\nList of all available Ksplat options could be found here:\nhttps://github.com/ohler55/oj/blob/develop/pages/Modes.md",
+      "throws": [
+        "ArgumentError"
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "object",
+          "type": "Any"
+        },
+        {
+          "arg": "mode",
+          "type": "Or[strict, null, compat, json, rails, object, custom, wab]"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:escape_mode? => Or[newline, json, xss_safe, ascii, unicode_xss...], :float_precision? => Integer, :time_format? => Or[], :use_as_json? => Bool, :use_raw_json? => Bool, :use_to_hash? => Bool, :use_to_json? => Bool, \"RestKeys\" => Any]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

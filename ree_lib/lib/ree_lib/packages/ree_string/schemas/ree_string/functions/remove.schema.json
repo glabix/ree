@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "remove",
+  "path": "packages/ree_string/package/ree_string/functions/remove.rb",
+  "mount_as": "fn",
+  "class": "ReeString::Remove",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Alters the string by removing all occurrences of the patterns.\n  remove(\"foo bar test\", [\" test\", /bar/])         # => \"foo \"",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "str",
+          "type": "String"
+        },
+        {
+          "arg": "patterns",
+          "type": "ArrayOf[Or[String, Regexp]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "transform_keys",
+  "path": "packages/ree_hash/package/ree_hash/functions/transform_keys.rb",
+  "mount_as": "fn",
+  "class": "ReeHash::TransformKeys",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Transforms keys with passed parameter (block), deep transform is by default",
+      "throws": [
+
+      ],
+      "return": "Hash",
+      "args": [
+        {
+          "arg": "hash",
+          "type": "Hash"
+        },
+        {
+          "arg": "deep",
+          "type": "Bool"
+        },
+        {
+          "arg": "proc",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

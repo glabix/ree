@@ -1,0 +1,21 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "hash_utils",
+  "entry_path": "packages/hash_utils/package/hash_utils.rb",
+  "tags": [
+    "hash_utils"
+  ],
+  "depends_on": [
+
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "except",
+      "schema": "packages/hash_utils/schemas/hash_utils/functions/except.schema.json"
+    }
+  ]
+}

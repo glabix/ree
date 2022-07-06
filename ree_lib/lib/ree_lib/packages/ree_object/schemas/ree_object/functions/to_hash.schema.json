@@ -1,0 +1,33 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "to_hash",
+  "path": "packages/ree_object/package/ree_object/functions/to_hash.rb",
+  "mount_as": "fn",
+  "class": "ReeObject::ToHash",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+        "ArgumentError",
+        "ReeObject::ToHash::MissingIncludeKeyErr",
+        "ReeObject::ToHash::RecursiveObjectErr"
+      ],
+      "return": "Or[Hash, ArrayOf[Any], Date, Time, Numeric, String, FalseClass, TrueClass, NilClass, Symbol]",
+      "args": [
+        {
+          "arg": "obj",
+          "type": "Any"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:include? => ArrayOf[Or[Symbol, Hash]], :exclude? => ArrayOf[Or[Symbol, Hash]], :output_keys? => Or[symbol, string], :missing? => Or[skip, nil, raise]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

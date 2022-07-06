@@ -1,0 +1,13 @@
+{
+  "ree_version": "0.1.0",
+  "schema_type": "packages",
+  "packages": [
+    {
+      "name": "hash_utils",
+      "schema": "packages/hash_utils/Package.schema.json"
+    }
+  ],
+  "gem_packages": [
+
+  ]
+}

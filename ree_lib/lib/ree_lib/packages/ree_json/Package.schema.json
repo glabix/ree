@@ -1,0 +1,27 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_json",
+  "entry_path": "packages/ree_json/package/ree_json.rb",
+  "tags": [
+    "ree_json"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_hash"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "from_json",
+      "schema": "packages/ree_json/schemas/ree_json/functions/from_json.schema.json"
+    },
+    {
+      "name": "to_json",
+      "schema": "packages/ree_json/schemas/ree_json/functions/to_json.schema.json"
+    }
+  ]
+}

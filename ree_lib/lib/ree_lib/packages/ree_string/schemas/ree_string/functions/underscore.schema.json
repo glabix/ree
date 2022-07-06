@@ -1,0 +1,38 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "underscore",
+  "path": "packages/ree_string/package/ree_string/functions/underscore.rb",
+  "mount_as": "fn",
+  "class": "ReeString::Underscore",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Makes an underscored, lowercase form from the expression in the string.\n\nChanges '::' to '/' to convert namespaces to paths.\n\n  underscore('ActiveModel')               # => \"active_model\"\n  underscore('ActiveModel::Errors')       # => \"active_model/errors\"\n  underscore(\"NRIS\", {acronyms: ['NRI']}) # => \"nri_s\"\n\nAs a rule of thumb you can think of +underscore+ as the inverse of\n#camelize, though there are cases where that does not hold:\n\n  camelize(underscore('SSLError'))  # => \"SslError\"",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "camel_cased_word",
+          "type": "String"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:acronyms? => ArrayOf[String]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "acronyms_underscore_regex",
+      "package_name": "ree_string",
+      "as": "acronyms_underscore_regex",
+      "imports": [
+
+      ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "html_scrubber",
+  "path": "packages/ree_text/package/ree_text/functions/html_scrubber.rb",
+  "mount_as": "fn",
+  "class": "ReeText::HtmlScrubber",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Allows you to permit only your own tags and/or attributes. If tags or attributes are not set, Loofah's behavior will be used.\n+tags=+\nIf set, elements excluded will be stripped.\nIf not, elements are stripped based on Loofahs +HTML5::Scrub.allowed_element?+.\n\n+attributes=+\nIf set, attributes excluded will be removed.\nIf not, attributes are removed based on Loofahs +HTML5::Scrub.scrub_attributes+.",
+      "throws": [
+
+      ],
+      "return": "Loofah::Scrubber",
+      "args": [
+        {
+          "arg": "opts",
+          "type": "Ksplat[:prune? => Bool, :tags? => ArrayOf[String], :attributes? => ArrayOf[String]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "unescape_html",
+      "package_name": "ree_text",
+      "as": "unescape_html",
+      "imports": [
+
+      ]
+    }
+  ]
+}

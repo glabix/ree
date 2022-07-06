@@ -1,0 +1,15 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "time",
+  "path": "bc/tools/clock/package/clock/time.rb",
+  "mount_as": "object",
+  "class": "Clock::Time",
+  "factory": null,
+  "methods": [
+
+  ],
+  "links": [
+
+  ]
+}

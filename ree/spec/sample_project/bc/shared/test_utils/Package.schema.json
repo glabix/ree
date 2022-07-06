@@ -1,0 +1,21 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "test_utils",
+  "entry_path": "bc/shared/test_utils/package/test_utils.rb",
+  "tags": [
+    "test_utils"
+  ],
+  "depends_on": [
+
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "json_pretty_printer",
+      "schema": "bc/shared/test_utils/schemas/test_utils/json_pretty_printer.schema.json"
+    }
+  ]
+}

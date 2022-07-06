@@ -1,0 +1,83 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_string",
+  "entry_path": "packages/ree_string/package/ree_string.rb",
+  "tags": [
+    "ree_string"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_text"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "acronyms_camelize_regex",
+      "schema": "packages/ree_string/schemas/ree_string/functions/acronyms_camelize_regex.schema.json"
+    },
+    {
+      "name": "acronyms_underscore_regex",
+      "schema": "packages/ree_string/schemas/ree_string/functions/acronyms_underscore_regex.schema.json"
+    },
+    {
+      "name": "camelize",
+      "schema": "packages/ree_string/schemas/ree_string/functions/camelize.schema.json"
+    },
+    {
+      "name": "dasherize",
+      "schema": "packages/ree_string/schemas/ree_string/functions/dasherize.schema.json"
+    },
+    {
+      "name": "deconstantize",
+      "schema": "packages/ree_string/schemas/ree_string/functions/deconstantize.schema.json"
+    },
+    {
+      "name": "demodulize",
+      "schema": "packages/ree_string/schemas/ree_string/functions/demodulize.schema.json"
+    },
+    {
+      "name": "indent",
+      "schema": "packages/ree_string/schemas/ree_string/functions/indent.schema.json"
+    },
+    {
+      "name": "pluralize",
+      "schema": "packages/ree_string/schemas/ree_string/functions/pluralize.schema.json"
+    },
+    {
+      "name": "remove",
+      "schema": "packages/ree_string/schemas/ree_string/functions/remove.schema.json"
+    },
+    {
+      "name": "squish",
+      "schema": "packages/ree_string/schemas/ree_string/functions/squish.schema.json"
+    },
+    {
+      "name": "strip_heredoc",
+      "schema": "packages/ree_string/schemas/ree_string/functions/strip_heredoc.schema.json"
+    },
+    {
+      "name": "truncate",
+      "schema": "packages/ree_string/schemas/ree_string/functions/truncate.schema.json"
+    },
+    {
+      "name": "truncate_bytes",
+      "schema": "packages/ree_string/schemas/ree_string/functions/truncate_bytes.schema.json"
+    },
+    {
+      "name": "truncate_words",
+      "schema": "packages/ree_string/schemas/ree_string/functions/truncate_words.schema.json"
+    },
+    {
+      "name": "underscore",
+      "schema": "packages/ree_string/schemas/ree_string/functions/underscore.schema.json"
+    },
+    {
+      "name": "upcase_first",
+      "schema": "packages/ree_string/schemas/ree_string/functions/upcase_first.schema.json"
+    }
+  ]
+}

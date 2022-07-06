@@ -1,0 +1,46 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "number_to_percentage",
+  "path": "packages/ree_number/package/ree_number/functions/number_to_percentage.rb",
+  "mount_as": "fn",
+  "class": "ReeNumber::NumberToPercentage",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Converts Integer, String or Float to a String with percentage at the end.\nThe +opts+ parameter takes a hash of any of these keys:\n    <tt>:format</tt>, <tt>:precision</tt>, \n    <tt>:significant</tt>, <tt>:strip_insignificant_zeros</tt>, <tt>:delimiter</tt>,\n    <tt>:round_mode</tt>\n  number_to_percentage(100)                                                      # => \"100.000%\"\n  number_to_percentage(123.400, precision: 3, strip_insignificant_zeros: true)   # => \"123.4%\"\n  number_to_percentage.(\"-0.13\", format_percentage: \" %\", precision: 2)          # => \"-0.13 %\"",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "number",
+          "type": "Or[Integer, String, Float]"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:format? => String, :precision? => Integer, :significant? => Bool, :strip_insignificant_zeros? => Bool, :delimiter? => String, :round_mode? => Or[up, down, truncate, half_up, default, half_down, half_even, banker, ceiling, floor]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "number_to_rounded",
+      "package_name": "ree_number",
+      "as": "number_to_rounded",
+      "imports": [
+        "ROUND_MODES"
+      ]
+    },
+    {
+      "target": "slice",
+      "package_name": "ree_hash",
+      "as": "slice",
+      "imports": [
+
+      ]
+    }
+  ]
+}

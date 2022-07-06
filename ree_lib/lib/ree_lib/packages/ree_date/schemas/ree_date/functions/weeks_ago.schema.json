@@ -1,0 +1,46 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "weeks_ago",
+  "path": "packages/ree_date/package/ree_date/functions/weeks_ago.rb",
+  "mount_as": "fn",
+  "class": "ReeDate::WeeksAgo",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns a new date the specified number of weeks ago.",
+      "throws": [
+
+      ],
+      "return": "Date",
+      "args": [
+        {
+          "arg": "date",
+          "type": "Nilor[Date]"
+        },
+        {
+          "arg": "week_count",
+          "type": "Integer"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "advance",
+      "package_name": "ree_date",
+      "as": "advance",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "today",
+      "package_name": "ree_date",
+      "as": "today",
+      "imports": [
+
+      ]
+    }
+  ]
+}
