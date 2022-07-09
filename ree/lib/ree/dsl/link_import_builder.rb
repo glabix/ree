@@ -38,7 +38,7 @@ class Ree::LinkImportBuilder
   # @return [ArrayOf[String]] List of names of imported constants
   def build_for_const(klass, source_const, proc)
     result = Ree::ImportDsl.new.execute(klass, proc)
-    mod_const = Object.const_get(source_const.to_s.split("::").first)
+    mod_const = Object.const_get(source_const.name.split("::").first)
     const_list = [result] + result.constants
 
     const_list.each do |const_obj|

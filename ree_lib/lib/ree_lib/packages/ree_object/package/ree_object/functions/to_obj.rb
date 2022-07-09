@@ -4,14 +4,37 @@ class ReeObject::ToObj
   include Ree::FnDSL
 
   fn :to_obj do
-    link :is_blank
-    link :to_hash
-    link 'ree_object/functions/to_hash', -> { BASIC_TYPES }
+    link :as_json, import: -> { BASIC_TYPES }
+    link :slice, from: :ree_hash
+    link :except, from: :ree_hash
+    link 'ree_hash/contracts/hash_keys_contract', -> { HashKeysContract }
   end
 
-  contract(Any => Or[Object, ArrayOf[Object], *BASIC_TYPES])
-  def call(obj)
-    dump = to_hash(obj)
+  contract(
+    Any,
+    Ksplat[
+      include?: HashKeysContract,
+      exclude?: HashKeysContract,
+      global_exclude?: ArrayOf[Symbol]
+    ] => Or[Object, ArrayOf[Object], *BASIC_TYPES]
+  ).throws(ArgumentError)
+  def call(obj, **opts)
+    dump = as_json(obj)
+
+    options = prepare_options(opts)
+
+    if opts[:include]
+      dump = slice(dump, options[:include])
+    end
+
+    if opts[:exclude]
+      dump = except(dump, options[:exclude])
+    end
+
+    if opts[:global_exclude]
+      dump = except(dump, global_except: options[:global_exclude])
+    end
+
     ancestors = dump.class.ancestors
     return dump if ancestors.intersection(BASIC_TYPES).size > 0
       
@@ -54,5 +77,21 @@ class ReeObject::ToObj
     end
     
     obj
+  end
+
+  def prepare_options(opts)
+    if opts[:include] && (opts[:exclude] || opts[:global_exclude])
+      intersection = opts_keys(opts[:include]).intersection(opts_keys(opts[:exclude] || opts[:global_exclude]))
+
+      if intersection.length > 0
+        raise ArgumentError, "Exclude and include have the same values: #{intersection}"
+      end
+    end
+
+    opts
+  end
+
+  def opts_keys(arr)
+    arr.reject { |e| e.is_a?(Hash) }
   end
 end

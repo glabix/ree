@@ -6,7 +6,6 @@ class ReeNumber::NumberToHuman
   fn :number_to_human do
     link :round_helper, import: -> { ROUND_MODES }
     link :number_to_rounded
-    link :slice, from: :ree_hash
     link :t, from: :ree_i18n
     link :number_to_delimited
     link :slice, from: :ree_hash
@@ -144,7 +143,7 @@ class ReeNumber::NumberToHuman
 
     number = round_helper(
       number,
-      **slice(options, :precision, :significant, :round_mode)
+      **slice(options, [:precision, :significant, :round_mode])
     )
 
     number = Float(number)
@@ -159,7 +158,7 @@ class ReeNumber::NumberToHuman
       number,
       **slice(
         options,
-        :precision, :significant, :strip_insignificant_zeros, :round_mode
+        [:precision, :significant, :strip_insignificant_zeros, :round_mode]
       )
     )
 
@@ -174,7 +173,7 @@ class ReeNumber::NumberToHuman
 
     number_to_delimited(
       result_number,
-      **slice(options, :separator, :delimiter)
+      **slice(options, [:separator, :delimiter])
     )
   end
 

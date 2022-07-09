@@ -65,9 +65,9 @@ class ReeNumber::NumberToCurrency
       number_s = number_to_delimited(
         number_to_rounded(
           number_f, 
-          **slice(options, :precision, :significant, :strip_insignificant_zeros, :round_mode)
+          **slice(options, [:precision, :significant, :strip_insignificant_zeros, :round_mode])
         ),
-        **slice(options, :delimiter, :separator)
+        **slice(options, [:delimiter, :separator])
       )
     else
       number_s = number.to_s.strip

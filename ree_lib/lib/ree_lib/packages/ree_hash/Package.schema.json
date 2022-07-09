@@ -7,12 +7,21 @@
     "ree_hash"
   ],
   "depends_on": [
-
+    {
+      "name": "ree_date"
+    },
+    {
+      "name": "ree_validator"
+    }
   ],
   "env_vars": [
 
   ],
   "objects": [
+    {
+      "name": "build_filter_keys",
+      "schema": "packages/ree_hash/schemas/ree_hash/functions/build_filter_keys.schema.json"
+    },
     {
       "name": "except",
       "schema": "packages/ree_hash/schemas/ree_hash/functions/except.schema.json"

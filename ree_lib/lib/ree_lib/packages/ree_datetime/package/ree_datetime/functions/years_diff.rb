@@ -26,7 +26,10 @@ class ReeDatetime::YearsDiff
     y_delta = s_delta / YEAR_SECONDS
     opts[:precision] = 0
 
-    round_helper(y_delta, **slice(opts, :precision, :round_mode)).to_i
+    round_helper(
+      y_delta,
+      **slice(opts, [:precision, :round_mode])
+    ).to_i
   end
 end
 

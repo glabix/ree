@@ -26,7 +26,10 @@ class ReeDatetime::HoursDiff
     h_delta = s_delta / HOUR_SECONDS
     opts[:precision] = 0
 
-    round_helper(h_delta, **slice(opts, :precision, :round_mode)).to_i
+    round_helper(
+      h_delta,
+      **slice(opts, [:precision, :round_mode])
+    ).to_i
   end
 end
 

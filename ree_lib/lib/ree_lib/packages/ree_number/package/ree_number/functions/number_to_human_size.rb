@@ -120,7 +120,7 @@ class ReeNumber::NumberToHumanSize
         human_size, 
         **slice(
           options, 
-          :precision, :significant, :strip_insignificant_zeros, :round_mode
+          [:precision, :significant, :strip_insignificant_zeros, :round_mode]
         )
       )
     end
@@ -134,11 +134,7 @@ class ReeNumber::NumberToHumanSize
 
     number_to_delimited(
       result_number, 
-      **slice(
-        options, 
-        :separator, 
-        :delimiter
-      )
+      **slice(options, [:separator, :delimiter])
     )
   end
 

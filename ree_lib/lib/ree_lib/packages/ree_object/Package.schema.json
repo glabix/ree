@@ -8,22 +8,17 @@
   ],
   "depends_on": [
     {
-      "name": "ree_date"
-    },
-    {
-      "name": "ree_datetime"
-    },
-    {
       "name": "ree_hash"
-    },
-    {
-      "name": "ree_number"
     }
   ],
   "env_vars": [
 
   ],
   "objects": [
+    {
+      "name": "as_json",
+      "schema": "packages/ree_object/schemas/ree_object/functions/as_json.schema.json"
+    },
     {
       "name": "deep_dup",
       "schema": "packages/ree_object/schemas/ree_object/functions/deep_dup.schema.json"
@@ -39,10 +34,6 @@
     {
       "name": "not_blank",
       "schema": "packages/ree_object/schemas/ree_object/functions/not_blank.schema.json"
-    },
-    {
-      "name": "to_hash",
-      "schema": "packages/ree_object/schemas/ree_object/functions/to_hash.schema.json"
     },
     {
       "name": "to_obj",

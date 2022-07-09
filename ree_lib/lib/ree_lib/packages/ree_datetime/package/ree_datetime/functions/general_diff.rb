@@ -28,7 +28,7 @@ class ReeDatetime::GeneralDiff
     results = []
     end_time = end_time.to_time
 
-    opts = slice(opts, :round_mode)
+    opts = slice(opts, [:round_mode])
 
     y_delta = years_diff(start_time, end_time, **opts)
     results << y_delta
@@ -58,7 +58,6 @@ class ReeDatetime::GeneralDiff
     s_delta = end_time > past_time ? seconds_diff(past_time, end_time, **opts) : 0
     results << s_delta * SECONDS_IN_INTERVAL[:seconds]
 
-    hash_result = Hash[INTERVALS.zip(results)]
+    Hash[INTERVALS.zip(results)]
   end
-
 end

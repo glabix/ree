@@ -8,7 +8,7 @@
   "factory": null,
   "methods": [
     {
-      "doc": "",
+      "doc": "Create deep duplicate of source object.\nDuplicate object will also have singleton methods copied from source object.\n\nOptions:\n  :freeze - freeze duplicate object\n  \nExamples of usage:\n  deep_dup({name: 'John'}) => {name: 'John'}\n  deep_dup({name: 'John'}, freeze: true) => {name: 'John'}",
       "throws": [
 
       ],

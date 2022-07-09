@@ -46,7 +46,7 @@ class ReeNumber::NumberToPercentage
       number,
       **slice(
         options,
-        :precision, :significant, :strip_insignificant_zeros, :round_mode
+        [:precision, :significant, :strip_insignificant_zeros, :round_mode]
       )
     )
 

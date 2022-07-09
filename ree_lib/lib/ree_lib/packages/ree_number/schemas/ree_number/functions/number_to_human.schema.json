@@ -59,14 +59,6 @@
       ]
     },
     {
-      "target": "slice",
-      "package_name": "ree_hash",
-      "as": "slice",
-      "imports": [
-
-      ]
-    },
-    {
       "target": "t",
       "package_name": "ree_i18n",
       "as": "t",

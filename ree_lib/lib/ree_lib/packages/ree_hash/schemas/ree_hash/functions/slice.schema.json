@@ -8,9 +8,10 @@
   "factory": null,
   "methods": [
     {
-      "doc": "Replaces the hash with only the given keys.\nReturns a hash containing the removed key/value pairs.\n\n  hash = { a: 1, b: 2, c: 3, d: 4 }\n  slice(hash, :a, :b)  # => {:c=>3, :d=>4}",
+      "doc": "Replaces the hash with only the given keys.\nReturns a hash containing the removed key/value pairs.\n\n  hash = { a: 1, b: {e: 2, f: 1}, c: 3, d: 4 }\n  slice(hash, [:a, :b])  # => {a: 1, b: 2}\n  slice(hash, [:a, b: [:e]])  # => {a: 1, b: {e: 2}}",
       "throws": [
-        "ReeHash::Slice::MissingKeyErr"
+        "ReeHash::Slice::MissingKeyErr",
+        "ReeHash::Slice::InvalidFilterKey"
       ],
       "return": "Hash",
       "args": [
@@ -20,7 +21,7 @@
         },
         {
           "arg": "keys",
-          "type": "SplatOf[Symbol]"
+          "type": "[:key0, .., :keyM => [:keyN, .., :keyZ]]"
         },
         {
           "arg": "opts",
@@ -30,6 +31,13 @@
     }
   ],
   "links": [
+    {
+      "target": "build_filter_keys",
+      "package_name": "ree_hash",
+      "as": "build_filter_keys",
+      "imports": [
 
+      ]
+    }
   ]
 }

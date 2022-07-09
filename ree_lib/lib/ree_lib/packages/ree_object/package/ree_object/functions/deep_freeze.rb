@@ -5,6 +5,13 @@ class ReeObject::DeepFreeze
 
   fn :deep_freeze
 
+  doc(<<~DOC)
+    Deeply freezes object.
+      
+    Examples of usage:
+      deep_freeze(Object.new)
+  DOC
+
   contract(Any => Any)
   def call(obj)
     recursively_freeze(obj, {})

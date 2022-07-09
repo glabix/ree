@@ -5,6 +5,18 @@ class ReeObject::DeepDup
 
   fn :deep_dup
 
+  doc(<<~DOC)
+    Create deep duplicate of source object.
+    Duplicate object will also have singleton methods copied from source object.
+
+    Options:
+      :freeze - freeze duplicate object
+      
+    Examples of usage:
+      deep_dup({name: 'John'}) => {name: 'John'}
+      deep_dup({name: 'John'}, freeze: true) => {name: 'John'}
+  DOC
+
   contract(
     Any,
     Ksplat[
