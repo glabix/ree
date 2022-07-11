@@ -18,9 +18,14 @@ export function updatePackageDeps(
   ) { 
     getFileFromManager(currentFilePath).then(currentFile => {
       if (toPackageName !== fromPackageName) {
-        updatePackageDependsOn(currentFile, fromPackageName).then(() =>
+        const packageFacade = getPackageObjectFromCurrentPath(currentFile.fileName)
+        if (!packageFacade.deps().map(d => d.name).includes(fromPackageName)) {
+          updatePackageDependsOn(currentFile, fromPackageName).then(() =>
+            updateObjectLinks(currentFile, objectName, fromPackageName, toPackageName)
+          )
+        } else {
           updateObjectLinks(currentFile, objectName, fromPackageName, toPackageName)
-        )
+        }
       } else {
         updateObjectLinks(currentFile, objectName, fromPackageName, toPackageName)
       }
