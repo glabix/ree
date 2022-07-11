@@ -6,7 +6,7 @@ RSpec.describe :number_to_human_size do
   context "zero" do
     it {
       expect(number_to_human_size(0)).to eq("0 Bytes")
-    }    
+    }
   end
 
   context "general" do
