@@ -2,7 +2,7 @@ import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
 import { Position } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { forest } from '../forest'
-import { loadPackagesSchema } from '../utils/packagesUtils'
+import { getGemDir, loadPackagesSchema } from '../utils/packagesUtils'
 import { getPackageNameFromPath, getProjectRootDir } from '../utils/packageUtils'
 import { PackageFacade } from '../utils/packageFacade'
 
@@ -25,14 +25,14 @@ export default class CompletionAnalyzer {
       return defaultCompletion
     }
 
-    const packages = loadPackagesSchema(filePath)
-    if (!packages) { return defaultCompletion }
+    const packagesSchema = loadPackagesSchema(filePath)
+    if (!packagesSchema) { return defaultCompletion }
 
     const currentPackage = getPackageNameFromPath(filePath)
     const projectRootDir = getProjectRootDir(filePath)
     if (!projectRootDir) { return defaultCompletion }
   
-    const objectsFromAllPackages = packages.map((pckg) => {
+    const currentProjectPackages = packagesSchema.packages.map((pckg) => {
       let packageFacade = new PackageFacade(path.join(projectRootDir, pckg.schema))
       
       let objects = packageFacade.objects().map(obj => (
@@ -60,6 +60,39 @@ export default class CompletionAnalyzer {
 
       return objects
     }).flat()
+
+    // get gemPackages
+    const gemPackageObjects = packagesSchema.gemPackages.map((pckg) => {
+      let gemPath = getGemDir(pckg.name)
+      let packageFacade = new PackageFacade(path.join(gemPath, pckg.schema))
+      
+      let objects = packageFacade.objects().map(obj => (
+          
+          {
+            label: obj.name,
+            labelDetails: {
+              description: `from: ${pckg.name}`
+            },
+            kind: CompletionItemKind.Method,
+            data: {
+              objectSchema: obj.schema,
+              fromPackageName: pckg.name,
+              toPackageName: currentPackage,
+              currentFilePath: filePath,
+              projectRootDir: gemPath || projectRootDir
+            }
+          }
+        )
+      )
+
+      if (token) {
+        objects = objects.filter(e => e.label.match(RegExp(`^${token}`)))
+      }
+
+      return objects
+    }).flat()
+
+    const objectsFromAllPackages = currentProjectPackages.concat(...gemPackageObjects)
 
     if (objectsFromAllPackages.length === 0) { return defaultCompletion }
 

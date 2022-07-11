@@ -69,10 +69,10 @@ export function generatePackage() {
 
       vscode.window.showInformationMessage(`Package ${name} was generated`)
 
-      const packages = loadPackagesSchema(rootProjectDir)
-      if (!packages) { return }
+      const packagesSchema = loadPackagesSchema(rootProjectDir)
+      if (!packagesSchema) { return }
 
-      const packageSchema = packages.find(p => p.name == name)
+      const packageSchema = packagesSchema.packages.find(p => p.name == name)
       if (!packageSchema) { return }
 
       const packageSchemaPath = path.join(rootProjectDir, packageSchema.schema)
