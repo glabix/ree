@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "execute_request",
+  "path": "packages/ree_http/package/ree_http/execute_request.rb",
+  "mount_as": "fn",
+  "class": "ReeHttp::ExecuteRequest",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Net::HTTPResponse",
+      "args": [
+        {
+          "arg": "request",
+          "type": "Net::HTTPRequest"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:headers? => HashOf[Or[String, Symbol], Any], :body? => Or[HashOf[Or[Symbol, String], Or[Integer, Float, Bool, String, Hash]], String], :open_timeout? => Integer, :timeout? => Integer, :auth? => Ksplat[:basic? => ReeHttp::BasicAuth], :query_params? => HashOf[Or[String, Symbol], Any], :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :client_cert? => Ksplat[\"key\" => File, :passphrase? => String, \"pub\" => File], :proxy? => ReeHttp::Proxy]"
+        },
+        {
+          "arg": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "build_requester",
+      "package_name": "ree_http",
+      "as": "build_requester",
+      "imports": [
+
+      ]
+    }
+  ]
+}

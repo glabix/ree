@@ -1,0 +1,51 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "execute_request",
+  "path": "packages/ree_http/package/ree_http/functions/execute_request.rb",
+  "mount_as": "fn",
+  "class": "ReeHttp::ExecuteRequest",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns response.\nOptions:\n  request - configured request, preferably by build_request\n  strict_redirect_mode - if response code in [300, 301, 302] and strict_redirect_mode=false, will be redirected with GET method, if strict_redirect_mode=true(default) will raise RedirectMethodError\n  redirects_count - count of redirects, if redirects more than redirects_count will raise TooManyRedirectsError\n  timeout - timeout of waiting of response after request was sent, default 60\n  write_timeout - timeout of waiting of sending request, if you send large file maybe should be increased, default 30\n  force_ssl - Turn on/off SSL. This flag must be set before starting session. If you change use_ssl value after session started, a Net::HTTP object raises IOError.\n  ca_certs - adds ca_certs by reading files\n  proxy - auth on proxy server, address required",
+      "throws": [
+        "ReeHttp::HttpExceptions::TooManyRedirectsError",
+        "ReeHttp::HttpExceptions::RedirectMethodError"
+      ],
+      "return": "Net::HTTPResponse",
+      "args": [
+        {
+          "arg": "request",
+          "type": "Net::HTTPRequest"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:write_timeout? => Integer, :timeout? => Integer, :redirects_count? => Integer, :strict_redirect_mode? => Bool, :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :proxy? => {:username => String, :password => String}]"
+        },
+        {
+          "arg": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "build_request_executor",
+      "package_name": "ree_http",
+      "as": "build_request_executor",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "slice",
+      "package_name": "ree_hash",
+      "as": "slice",
+      "imports": [
+
+      ]
+    }
+  ]
+}

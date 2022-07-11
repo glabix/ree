@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "build_request_executor",
+  "path": "packages/ree_http/package/ree_http/functions/build_request_executor.rb",
+  "mount_as": "fn",
+  "class": "ReeHttp::BuildRequestExecutor",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns configured Net::HTTP, it uses in execute_request.\nOptions:\n  uri - uri for sending request\n  timeout - timeout of waiting of response after request was sent, default 60\n  write_timeout - timeout of waiting of sending request, if you send large file maybe should be increased, default 30\n  force_ssl - Turn on/off SSL. This flag must be set before starting session. If you change use_ssl value after session started, a Net::HTTP object raises IOError.\n  ca_certs - adds ca_certs by reading files\n  proxy - auth on proxy server, address required",
+      "throws": [
+
+      ],
+      "return": "Net::HTTP",
+      "args": [
+        {
+          "arg": "uri",
+          "type": "URI"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:timeout? => Integer, :write_timeout? => Integer, :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :proxy? => {:address => String, :port? => Integer, :username? => String, :password? => String}]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

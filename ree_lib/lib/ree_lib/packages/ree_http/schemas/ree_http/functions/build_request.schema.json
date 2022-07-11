@@ -1,0 +1,58 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "build_request",
+  "path": "packages/ree_http/package/ree_http/functions/build_request.rb",
+  "mount_as": "fn",
+  "class": "ReeHttp::BuildRequest",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Returns request, should be executed with execute_request.\nSupport methods: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS\n\nOptions:\n  method - one of the supported methods\n  url - url of request\n  headers - headers of the request\n  body - body of the request, if File was given file will be read and added to the body as String. Can't use with form_data\n  form_data - form_data of the request, if File was given file, file will be read with specific file_name\n  query_params - query string of the request. Will added after the path like <path>?a=100&b=simple\n  force_ssl - use True that if you want send request with HTTPS protocol. Will be applied with 443 port if protocol in URI is HTTP or HTTPS. If True In other cases will change only protocol, not port. If false, dont change anything\n  auth - can be \"Basic\" or \"Bearer\", use username & password or bearer_token respectively",
+      "throws": [
+        "ArgumentError"
+      ],
+      "return": "Net::HTTPRequest",
+      "args": [
+        {
+          "arg": "method",
+          "type": "Symbol"
+        },
+        {
+          "arg": "url",
+          "type": "String"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:headers? => HashOf[Or[String, Symbol], Or[String, Integer]], :body? => Or[HashOf[Or[Symbol, String], Or[Integer, Float, Bool, String, Hash, Array]], String, File], :form_data? => HashOf[Or[Symbol, String], Or[Integer, Float, Bool, String, Array, File]], :query_params? => HashOf[Or[String, Symbol], Or[String, Integer]], :force_ssl? => Bool, :basic_auth? => {:username => String, :password => String}, :bearer_token? => String]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "not_blank",
+      "package_name": "ree_object",
+      "as": "not_blank",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "slice",
+      "package_name": "ree_hash",
+      "as": "slice",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "to_json",
+      "package_name": "ree_json",
+      "as": "to_json",
+      "imports": [
+
+      ]
+    }
+  ]
+}

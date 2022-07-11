@@ -31,6 +31,10 @@
       "schema": "packages/ree_hash/Package.schema.json"
     },
     {
+      "name": "ree_http",
+      "schema": "packages/ree_http/Package.schema.json"
+    },
+    {
       "name": "ree_i18n",
       "schema": "packages/ree_i18n/Package.schema.json"
     },
