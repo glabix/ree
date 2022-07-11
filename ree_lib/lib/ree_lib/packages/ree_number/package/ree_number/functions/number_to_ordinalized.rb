@@ -14,7 +14,7 @@ class ReeNumber::NumberToOrdinalized
   doc(<<~DOC)
     Turns a number into an ordinal string used to denote the position in an
     ordered sequence such as 1st, 2nd, 3rd, 4th.
-   
+
       ordinalize(1)     # => "1st"
       ordinalize(2)     # => "2nd"
       ordinalize(1002)  # => "1002nd"
@@ -51,7 +51,7 @@ class ReeNumber::NumberToOrdinalized
       number_key %= 10
     end
 
-    t("human.ordinals.#{number_key}", locale: locale)
+    t("human.ordinals.#{number_key}", locale: locale, default_by_locale: :en)
   end
 
   def ordinalize(number, locale)

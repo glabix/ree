@@ -26,6 +26,8 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     msgpack (1.5.3)
+    nokogiri (1.13.6-x86_64-darwin)
+      racc (~> 1.4)
     nokogiri (1.13.6-x86_64-linux)
       racc (~> 1.4)
     oj (3.13.14)
@@ -53,6 +55,7 @@ GEM
       concurrent-ruby (~> 1.0)
 
 PLATFORMS
+  x86_64-darwin-19
   x86_64-linux
 
 DEPENDENCIES

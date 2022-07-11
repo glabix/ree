@@ -29,12 +29,12 @@ class ReeNumber::NumberToHumanSize
     representation (e.g., giving it 1500 yields 1.46 KB). This
     method is useful for reporting file sizes to users. You can
     customize the format in the +options+ hash.
-    
+
     See <tt>number_to_human</tt> if you want to pretty-print a
     generic number.
-    
+
     ==== Options
-    
+
     * <tt>:locale</tt> - Sets the locale to be used for formatting
       (defaults to current locale).
     * <tt>:precision</tt> - Sets the precision of the number
@@ -60,7 +60,7 @@ class ReeNumber::NumberToHumanSize
 
       number_to_human_size(12345)
       # => "12.1 KB"
-      
+
       number_to_human_size(1234567)
       # => "1.18 MB"
 
@@ -96,7 +96,7 @@ class ReeNumber::NumberToHumanSize
   DOC
 
   contract(
-    Or[Integer, Float, String], 
+    Or[Integer, Float, String],
     Ksplat[
       locale?: Symbol,
       precision?: Integer,
@@ -111,41 +111,43 @@ class ReeNumber::NumberToHumanSize
     options = DEFAULTS.merge(opts)
 
     number = Float(number)
-  
-    if smaller_than_base?(number) 
+
+    if smaller_than_base?(number)
       number_to_format = number.to_i.to_s
     else
       human_size = number / (BASE**exponent(number))
       number_to_format = number_to_rounded(
-        human_size, 
+        human_size,
         **slice(
-          options, 
+          options,
           [:precision, :significant, :strip_insignificant_zeros, :round_mode]
         )
       )
     end
 
-    t_number = conversion_format(options[:units], options[:locale])
     storage_unit_key = storage_unit_key(number)
+
     unit = unit(options[:locale], storage_unit_key, number)
     result_number = options[:format]
       .gsub("%n", number_to_format)
       .gsub("%u", unit)
 
     number_to_delimited(
-      result_number, 
+      result_number,
       **slice(options, [:separator, :delimiter])
     )
   end
 
   private
 
-  def conversion_format(units, locale)
-    t("human.sizes", locale: locale, raise: true )
-  end
-
   def unit(locale, storage_unit_key, number)
-    t(storage_unit_key, locale: locale, count: number.to_i, raise: true)
+    t(
+      storage_unit_key,
+      locale: locale,
+      count: number.to_i,
+      raise: true,
+      default_by_locale: :en
+    )
   end
 
   def storage_unit_key(number)
@@ -156,7 +158,7 @@ class ReeNumber::NumberToHumanSize
   def exponent(number)
     max = STORAGE_UNITS.size - 1
     exp = (Math.log(number) / Math.log(BASE)).to_i
-    exp = max if exp > max 
+    exp = max if exp > max
     exp
   end
 
