@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { PACKAGES_SCHEMA_FILE, PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
-import { IPackageSchema, loadPackagesSchema } from '../utils/packagesUtils'
+import { IGemPackageSchema, IPackageSchema, loadPackagesSchema, getGemDir } from '../utils/packagesUtils'
 import { getProjectRootDir } from '../utils/packageUtils'
 
 var fs = require('fs')
@@ -29,18 +29,27 @@ export function goToPackage() {
     return
   }
 
-  const packages = loadPackagesSchema(projectPath)
+  const packagesSchema = loadPackagesSchema(projectPath)
 
-  if (!packages) {
+  if (!packagesSchema) {
     vscode.window.showErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
     return
   }
 
-  selectPackage(packages, (selected: string | undefined) => {
+  const allPackages = [...packagesSchema.packages, ...packagesSchema.gemPackages] as Array<IPackageSchema | IGemPackageSchema>
+
+  selectPackage(allPackages, (selected: string | undefined) => {
     if (selected === undefined) { return }
 
-    const p = packages.find(p => p.name == selected)
-    const packageSchemaPath = path.join(projectPath, p?.schema)
+    const cleanedSelected = selected.replace(/\s\(.*\)/, '')
+    const p = allPackages.find(p => p.name === cleanedSelected)
+    if (!p) { return }
+
+    let projectRoot = projectPath
+    if ('gem' in p) {
+      projectRoot = getGemDir(p.name)
+    }
+    const packageSchemaPath = path.join(projectRoot, p?.schema)
     const entryPath = packageSchemaPath.split(PACKAGE_SCHEMA_FILE)[0] + `package/${p?.name}.rb`
 
     if (!fs.existsSync(entryPath)) {
@@ -52,11 +61,11 @@ export function goToPackage() {
   })
 }
 
-function selectPackage(packages: IPackageSchema[], cb: SelectPackageCb) {
+function selectPackage(packages: Array<IPackageSchema | IGemPackageSchema>, cb: SelectPackageCb) {
   vscode
     .window
     .showQuickPick(
-      packages.map(p => p.name).sort(),
+      packages.map(p => (p && ('gem' in p)) ? `${p.name} (${p.gem})` : p.name).sort(),
       {
         title: "Navigate to Ree Package",
         placeHolder: "Type package name...",
