@@ -30,7 +30,7 @@ class ReeDao::BuildPgConnection
     },
     Ksplat[
       RestKeys => Any # inherited from `build_connection` opts
-    ] => nil
+    ] => Sequel::Postgres::Database
   )
   def call(conn_opts, **opts)
     build_connection(conn_opts, **opts)

@@ -12,7 +12,7 @@
       "throws": [
 
       ],
-      "return": "Any",
+      "return": "Sequel::Postgres::Database",
       "args": [
         {
           "arg": "conn_opts",
