@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "apply_data_migration",
+  "path": "bounded_contexts/libs/ree_migrations/package/ree_migrations/functions/apply_data_migration.rb",
+  "mount_as": "fn",
+  "class": "ReeMigrations::ApplyDataMigration",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "connection",
+          "type": "Sequel::Database"
+        },
+        {
+          "arg": "migration_file_path",
+          "type": "String"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

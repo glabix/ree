@@ -47,6 +47,10 @@
       "schema": "packages/ree_mapper/Package.schema.json"
     },
     {
+      "name": "ree_migrations",
+      "schema": "packages/ree_migrations/Package.schema.json"
+    },
+    {
       "name": "ree_number",
       "schema": "packages/ree_number/Package.schema.json"
     },

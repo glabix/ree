@@ -1,0 +1,15 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "migrate_db",
+  "path": "bounded_contexts/libs/ree_migrations/package/ree_migrations/migrate_db.rb",
+  "mount_as": "object",
+  "class": "ReeMigrations::MigrateDb",
+  "factory": null,
+  "methods": [
+
+  ],
+  "links": [
+
+  ]
+}
