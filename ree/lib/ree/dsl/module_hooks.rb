@@ -2,10 +2,8 @@
 
 module Kernel
   def package(&proc)
-    path = caller[0].split(':').first
-
     dsl = Ree::PackageDsl.new(
-      Ree.container.packages_facade, self, path
+      Ree.container.packages_facade, self
     )
 
     dsl.instance_exec(&proc) if block_given?

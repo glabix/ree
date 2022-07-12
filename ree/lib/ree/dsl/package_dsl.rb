@@ -4,13 +4,13 @@ class Ree::PackageDsl
   include Ree::Args
 
   attr_reader :package
-  
+
   # @param [Ree::PackagesFacade] packages_facade
   # @param [Module] mod
   # @param [Nilor[String]] path
-  def initialize(packages_facade, mod, path)
+  def initialize(packages_facade, mod)
     @packages_facade = packages_facade
-    @package = register_package(mod, path)
+    @package = register_package(mod)
   end
 
   # @param [ArrayOf[String]] lists
@@ -21,7 +21,7 @@ class Ree::PackageDsl
 
     list += [@package.name.to_s]
     list.uniq
-    
+
     @package.set_tags(list)
   end
 
@@ -32,7 +32,7 @@ class Ree::PackageDsl
     if depends_on == @package.name
       raise_error("A package cannot depend on itself")
     end
-    
+
     if @package.get_dep(depends_on)
       raise_error("Dependent package :#{depends_on} already added for package :#{@package.name}")
     end
@@ -48,7 +48,7 @@ class Ree::PackageDsl
     end
 
     @packages_facade.load_package_entry(dep_package.name)
-    
+
     package_dep
   end
 
@@ -68,7 +68,7 @@ class Ree::PackageDsl
     if @package.get_env_var(var_name)
       raise_error("Duplicate env var '#{var_name}'")
     end
-    
+
     @package.set_env_var(
       Ree::PackageEnvVar.new(
         var_name, doc
@@ -103,15 +103,15 @@ class Ree::PackageDsl
     end
   end
 
-  def register_package(mod, path)
+  def register_package(mod)
     check_module(mod)
     check_arg(mod, :module, Module)
-    check_arg(path, :path, String)
 
     if mod.name.nil?
       raise Ree::Error.new("package decorator should be applied to a named module", :invalid_dsl_usage)
     end
 
+    path = Object.const_source_location(mod.name)[0].split(':').first
     module_name = mod.to_s
     list = module_name.split('::')
 
@@ -129,11 +129,11 @@ class Ree::PackageDsl
     package = @packages_facade.get_package(name)
     package.set_module(mod)
     package.set_tags([name])
-    
+
     package.reset
     package.set_entry_loaded
     package.set_loaded
-    
+
     package
   end
 
