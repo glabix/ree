@@ -1,7 +1,7 @@
 # frozen_string_literal = true
 
 package_require('ree_dao')
-package_require('ree_dto/entity')
+package_require('ree_dto/entity_dsl')
 
 RSpec.describe :build_sqlite_connection do
   link :build_sqlite_connection, from: :ree_dao
