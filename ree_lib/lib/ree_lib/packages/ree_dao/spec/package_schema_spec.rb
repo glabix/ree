@@ -1,4 +1,4 @@
-RSpec.describe "ReeDto" do
+RSpec.describe "ReeDao" do
   it "generates package schema" do
     require 'fileutils'
 
@@ -7,7 +7,7 @@ RSpec.describe "ReeDto" do
 
     FileUtils.cd packages_schema_dir do
       expect(
-        system("bundle exec ree gen.package_json ree_dto --silence")
+        system("bundle exec ree gen.package_json ree_dao --silence")
       ).to eq(true)
     end
   end

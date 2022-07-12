@@ -71,7 +71,7 @@ module Ree
       @packages_schema_path = packages_schema_path
     end
   end
-  
+
   class << self
     include Ree::Args
 
@@ -133,7 +133,7 @@ module Ree
       check_arg(env, :env, Symbol)
       @prelaod_for == env
     end
-    
+
     def init(dir, irb: false)
       check_arg(dir, :dir, String)
 
@@ -145,7 +145,7 @@ module Ree
       @root_dir = Pathname.new(@packages_schema_path).dirname.to_s
 
       ree_setup_path = File.join(@root_dir, REE_SETUP)
-      
+
       if File.exists?(ree_setup_path)
         require(ree_setup_path)
       end
@@ -153,7 +153,7 @@ module Ree
       if irb
         require('irb')
         enable_irb_mode
-        
+
         FileUtils.cd(@root_dir) do
           IRB.start(@root_dir)
         end
@@ -180,7 +180,7 @@ module Ree
     def register_gem(gem_name, dir)
       check_arg(gem_name, :gem_name, Symbol)
       check_arg(dir, :dir, String)
-      
+
       if gem(gem_name)
         raise Ree::Error.new("Ree already registered gem `#{name}`", :duplicate_gem)
       end
@@ -193,7 +193,7 @@ module Ree
       packages_schema_path = locate_packages_schema(dir)
       gem_dir = Pathname.new(packages_schema_path).dirname.to_s
       ree_setup_path = File.join(gem_dir, REE_SETUP)
-      
+
       if File.exists?(ree_setup_path)
         require(ree_setup_path)
       end
@@ -229,15 +229,16 @@ module Ree
       container.packages_facade.write_object_schema(package_name, object_name)
     end
 
-    def generate_schemas_for_all_packages
-      Ree.logger.debug("generate_schemas_for_all_packages")
+    def generate_schemas_for_all_packages(silence = false)
+      Ree.logger.debug("generate_schemas_for_all_packages") if !silence
       facade = container.packages_facade
 
       facade.class.write_packages_schema
       facade.load_packages_schema
 
       facade.packages_store.packages.each do |package|
-        puts("Generating Package.schema.json for :#{package.name} package")
+        puts("Generating Package.schema.json for :#{package.name} package") if !silence
+
         facade.load_entire_package(package.name)
         facade.write_package_schema(package.name)
       end

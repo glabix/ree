@@ -2,19 +2,19 @@ module Ree
   module CLI
     class GeneratePackageSchema
       class << self
-        def run(package_name:, project_path:, include_objects: false)
+        def run(package_name:, project_path:, include_objects: false, silence: false)
           path = Ree.locate_packages_schema(project_path)
           dir = Pathname.new(path).dirname.to_s
 
           Ree.init(dir)
 
           if package_name.strip.empty?
-            puts("Generating Package.schema.json for all packages")
-            Ree.generate_schemas_for_all_packages
+            puts("Generating Package.schema.json for all packages") if !silence
+            Ree.generate_schemas_for_all_packages(silence)
             return
           end
 
-          puts("Generating Package.schema.json for :#{package_name} package")
+          puts("Generating Package.schema.json for :#{package_name} package") if !silence
 
           package_name = package_name.to_sym
 
@@ -31,12 +31,12 @@ module Ree
 
               path = Ree::PathHelper.abs_object_schema_path(object)
 
-              puts("  #{object.name}: #{path}")
+              puts("  #{object.name}: #{path}") if !silence
             end
           end
 
-          puts("output: #{schema_path}")
-          puts("done")
+          puts("output: #{schema_path}") if !silence
+          puts("done") if !silence
         end
       end
     end
