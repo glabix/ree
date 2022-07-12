@@ -23,8 +23,8 @@
           "type": "Regexp"
         },
         {
-          "arg": "error_code",
-          "type": "Symbol"
+          "arg": "error",
+          "type": "Nilor[SubclassOf[StandardError]]"
         }
       ]
     }

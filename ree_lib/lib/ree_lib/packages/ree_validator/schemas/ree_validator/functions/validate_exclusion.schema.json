@@ -23,8 +23,8 @@
           "type": "Or[ArrayOf[Any], SetOf[Any], RangeOf[Any]]"
         },
         {
-          "arg": "error_code",
-          "type": "Symbol"
+          "arg": "error",
+          "type": "Nilor[SubclassOf[StandardError]]"
         }
       ]
     }

@@ -5,16 +5,23 @@ RSpec.describe :validate_regexp do
 
   context "valid" do
     it {
-      expect(validate_regexp("string", /string/, :code)).to eq(true)
+      expect(validate_regexp("string", /string/)).to eq(true)
     }
   end
 
   context "invalid" do
     it {
       expect {
-        validate_regexp('string', /$sss^/, :code)
+        validate_regexp('string', /$sss^/)
       }.to raise_error(ReeValidator::ValidateRegexp::RegexpErr) do |e|
-        expect(e.extra_code).to eq(:code)
+        expect(e.message).to eq("value does not match regexp /$sss^/")
+      end
+    }
+
+    it {
+      expect {
+        validate_regexp('string', /$sss^/, Class.new(StandardError))
+      }.to raise_error(StandardError) do |e|
         expect(e.message).to eq("value does not match regexp /$sss^/")
       end
     }

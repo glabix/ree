@@ -10,10 +10,7 @@
     {
       "doc": "",
       "throws": [
-        "ReeValidator::ValidatePaging::MinPageErr",
-        "ReeValidator::ValidatePaging::MinPerPageErr",
-        "ReeValidator::ValidatePaging::MaxPerPageErr",
-        "ReeValidator::ValidatePaging::MaxResultWindowErr"
+        "ReeValidator::ValidatePaging::PagingErr"
       ],
       "return": "Bool",
       "args": [
@@ -32,6 +29,10 @@
         {
           "arg": "max_per_page",
           "type": "Integer"
+        },
+        {
+          "arg": "error",
+          "type": "Nilor[SubclassOf[StandardError]]"
         },
         {
           "arg": "opts",

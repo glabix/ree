@@ -12,7 +12,7 @@ class ReeDao::BuildPgConnection
   contract(
     {
       conn_str?: String,
-      adapter?: String,
+      adapter: String,
       database?: String,
       encoding?: String,
       user?: String,

@@ -10,10 +10,7 @@
     {
       "doc": "",
       "throws": [
-        "ReeValidator::ValidateLength::MinLengthErr",
-        "ReeValidator::ValidateLength::MaxLengthErr",
-        "ReeValidator::ValidateLength::EqualToLengthErr",
-        "ReeValidator::ValidateLength::NotEqualToLengthErr"
+        "ReeValidator::ValidateLength::LenthErr"
       ],
       "return": "Bool",
       "args": [
@@ -22,8 +19,8 @@
           "type": "Proc#call"
         },
         {
-          "arg": "error_code",
-          "type": "Symbol"
+          "arg": "error",
+          "type": "Nilor[SubclassOf[StandardError]]"
         },
         {
           "arg": "opts",
