@@ -2,7 +2,7 @@
 
 module ReeHttp
   module Constants
-    DEULT_TIMEOUT = 60
+    DEFAULT_TIMEOUT = 60
     DEFAULT_WRITE_TIMEOUT = 30
     DEFAULT_FORCE_SSL = false
     HTTPS = 'https'

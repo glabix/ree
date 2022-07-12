@@ -8,7 +8,7 @@
   "factory": null,
   "methods": [
     {
-      "doc": "Returns configured Net::HTTP, it uses in execute_request.\nOptions:\n  uri - uri for sending request\n  timeout - timeout of waiting of response after request was sent, default 60\n  write_timeout - timeout of waiting of sending request, if you send large file maybe should be increased, default 30\n  force_ssl - Turn on/off SSL. This flag must be set before starting session. If you change use_ssl value after session started, a Net::HTTP object raises IOError.\n  ca_certs - adds ca_certs by reading files\n  proxy - auth on proxy server, address required",
+      "doc": "Builds Net::HTTP object that could be further used for execution",
       "throws": [
 
       ],

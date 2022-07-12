@@ -7,7 +7,10 @@ class ReeHttp::BuildRequest
     link :to_json, from: :ree_json
     link :slice, from: :ree_hash
     link :not_blank, from: :ree_object
-    link 'ree_http/constants', -> { HTTPS & HTTP & HTTPS_PORT & HTTP_PORT & DEFAULT_FORCE_SSL}
+
+    link 'ree_http/constants', -> {
+      HTTPS & HTTP & HTTPS_PORT & HTTP_PORT & DEFAULT_FORCE_SSL
+    }
   end
 
   DEFAULT_PROTOCOL_PORTS = [HTTPS_PORT, HTTP_PORT]
@@ -18,18 +21,8 @@ class ReeHttp::BuildRequest
   }.freeze
 
   doc(<<~DOC)
-    Returns request, should be executed with execute_request.
-    Support methods: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS
-
-    Options:
-      method - one of the supported methods
-      url - url of request
-      headers - headers of the request
-      body - body of the request, if File was given file will be read and added to the body as String. Can't use with form_data
-      form_data - form_data of the request, if File was given file, file will be read with specific file_name
-      query_params - query string of the request. Will added after the path like <path>?a=100&b=simple
-      force_ssl - use True that if you want send request with HTTPS protocol. Will be applied with 443 port if protocol in URI is HTTP or HTTPS. If True In other cases will change only protocol, not port. If false, dont change anything
-      auth - can be "Basic" or "Bearer", use username & password or bearer_token respectively
+    Builds Net::HTTPRequest with specified method, url, headers, body, form data,
+    query params, basic auth or bearer token. Forces SSL mode
   DOC
 
   contract(
@@ -60,7 +53,6 @@ class ReeHttp::BuildRequest
 
     uri.scheme = opts[:force_ssl] ? HTTPS : uri.scheme
 
-    # because ports can be custom
     if DEFAULT_PROTOCOL_PORTS.include?(uri.port)
       uri.port = opts[:force_ssl] ? HTTPS_PORT : uri.port
     end

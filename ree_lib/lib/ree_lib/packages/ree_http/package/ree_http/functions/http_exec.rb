@@ -7,13 +7,17 @@ class ReeHttp::HttpExec
     link :build_request
     link :execute_request
     link :slice, from: :ree_hash
+
+    link 'ree_http/constants', -> {
+      DEFAULT_TIMEOUT & DEFAULT_WRITE_TIMEOUT & DEFAULT_FORCE_SSL
+    }
   end
 
   DEFAULTS = {
     headers: {},
-    timeout: 60,
-    write_timeout: 30,
-    force_ssl: false,
+    timeout: DEFAULT_TIMEOUT,
+    write_timeout: DEFAULT_WRITE_TIMEOUT,
+    force_ssl: DEFAULT_FORCE_SSL,
   }.freeze
 
   OPTS_CONTRACT = {
@@ -39,6 +43,32 @@ class ReeHttp::HttpExec
       password?: String
     }
   }
+
+  doc(<<~DOC)
+    Sends HTTP request to a specified destination.
+
+    Options:
+      method - request method (:get, :post, :delete, :put, :patch, :head, :options)
+      url - request URL
+      headers - request headers
+      body - request body (String, Hash or File). Should not be used together with form data
+      form_data - request form data. Files are being sent with corresponding filenames
+      query_params - request query string params
+      basic_auth - sets basic auth credentials
+      strict_redirect_mode - see build_request_executor
+      redirects_count - see build_request_executor
+      timeout - see build_request_executor
+      force_ssl - see build_request_executor
+      write_timeout - see build_request_executor
+      ca_certs - see build_request_executor
+      proxy - see build_request_executor
+
+    Examples usage:
+      http_exec('https://example.com', :get)
+      http_exec('https://example.com', :post, form_data: {name: 'John', file: file})
+      http_exec('https://example.com', :delete, basic_auth: {username: 'John', password: 'password'})
+      http_exec('http://example.com', :options, force_ssl: true)
+  DOC
 
   contract(
     Or[:get, :post, :put, :patch, :head, :options, :delete],

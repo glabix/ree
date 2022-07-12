@@ -8,7 +8,7 @@
   "factory": null,
   "methods": [
     {
-      "doc": "",
+      "doc": "Sends HTTP request to a specified destination.\n\nOptions:\n  method - request method (:get, :post, :delete, :put, :patch, :head, :options)\n  url - request URL\n  headers - request headers\n  body - request body (String, Hash or File). Should not be used together with form data\n  form_data - request form data. Files are being sent with corresponding filenames\n  query_params - request query string params\n  basic_auth - sets basic auth credentials\n  strict_redirect_mode - see build_request_executor\n  redirects_count - see build_request_executor\n  timeout - see build_request_executor\n  force_ssl - see build_request_executor\n  write_timeout - see build_request_executor\n  ca_certs - see build_request_executor\n  proxy - see build_request_executor\n\nExamples usage:\n  http_exec('https://example.com', :get)\n  http_exec('https://example.com', :post, form_data: {name: 'John', file: file})\n  http_exec('https://example.com', :delete, basic_auth: {username: 'John', password: 'password'})\n  http_exec('http://example.com', :options, force_ssl: true)",
       "throws": [
 
       ],
