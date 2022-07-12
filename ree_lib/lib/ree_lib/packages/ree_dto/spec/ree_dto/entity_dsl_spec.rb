@@ -1,10 +1,12 @@
 # frozen_string_literal = true
 
-package_require('ree_dto/entity')
+package_require('ree_dto/entity_dsl')
 
-RSpec.describe ReeEntity do
+RSpec.describe ReeDto::EntityDSL do
   before :all do
-    class TestDTO < ReeEntity
+    class TestDTO
+      include ReeDto::EntityDSL
+
       properties(
         id: Nilor[Integer],
         name: String,
@@ -29,7 +31,7 @@ RSpec.describe ReeEntity do
       name: 'Arthur'
     )
   end
-  
+
 
   it { expect(@test_dto.id).to eq(1) }
   it { expect(@test_dto.name).to eq('John') }

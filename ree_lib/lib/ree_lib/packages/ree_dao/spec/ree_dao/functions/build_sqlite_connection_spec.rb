@@ -7,7 +7,7 @@ RSpec.describe :build_sqlite_connection do
   link :build_sqlite_connection, from: :ree_dao
 
   after do
-    Ree.disable_irb_mode  
+    Ree.disable_irb_mode
   end
 
   before :all do
@@ -19,7 +19,7 @@ RSpec.describe :build_sqlite_connection do
 
     connection.create_table :users do
       primary_key :id
-  
+
       column  :name, 'varchar(256)'
       column  :age, :integer
     end
@@ -27,7 +27,7 @@ RSpec.describe :build_sqlite_connection do
     connection.disconnect
   end
 
-  Ree.enable_irb_mode  
+  Ree.enable_irb_mode
 
   class ReeDao::Db
     include Ree::BeanDSL
@@ -44,7 +44,9 @@ RSpec.describe :build_sqlite_connection do
     end
   end
 
-  class ReeDao::User < ReeDto::Entity
+  class ReeDao::User
+    include ReeDto::EntityDSL
+
     properties(
       id: Nilor[Integer],
       name: String,
@@ -121,7 +123,7 @@ RSpec.describe :build_sqlite_connection do
 
   it {
     dao.delete_all
-    
+
     user = ReeDao::User.new(name: 'John', age: 30)
     dao.put(user)
 
