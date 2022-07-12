@@ -3,7 +3,7 @@ import { Position } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { forest } from '../forest'
 import { getGemDir, loadPackagesSchema } from '../utils/packagesUtils'
-import { getPackageNameFromPath, getProjectRootDir } from '../utils/packageUtils'
+import { getPackageNameFromPath, getProjectRootDir, getObjectNameFromPath } from '../utils/packageUtils'
 import { PackageFacade } from '../utils/packageFacade'
 
 const fs = require('fs')
@@ -31,6 +31,9 @@ export default class CompletionAnalyzer {
     const currentPackage = getPackageNameFromPath(filePath)
     const projectRootDir = getProjectRootDir(filePath)
     if (!projectRootDir) { return defaultCompletion }
+
+    const objectName = getObjectNameFromPath(filePath)
+    if (!objectName) { return defaultCompletion }
   
     const currentProjectPackages = packagesSchema.packages.map((pckg) => {
       let packageFacade = new PackageFacade(path.join(projectRootDir, pckg.schema))
@@ -115,9 +118,7 @@ export default class CompletionAnalyzer {
        .map(e => e.text)
        .map(e => e.replace(':', ''))
 
-    // TODO: add to linked name of current file (ex. so I can't add build_user if I already in build_user)
-
-    return objectsFromAllPackages.filter(obj => !linkedDependencies.includes(obj.label))
+    return objectsFromAllPackages.filter(obj => !linkedDependencies.includes(obj.label) || obj.label !== objectName)
   }
 }
 
