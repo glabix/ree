@@ -1,6 +1,6 @@
 # frozen_string_literal  = true
 
-class Ree::PackageDsl
+class Ree::BuildPackageDsl
   include Ree::Args
 
   attr_reader :package

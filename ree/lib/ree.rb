@@ -28,7 +28,7 @@ module Ree
   autoload :ObjectSchemaBuilder, 'ree/core/object_schema_builder'
   autoload :Package, 'ree/core/package'
   autoload :PackageDep, 'ree/core/package_dep'
-  autoload :PackageDsl, 'ree/dsl/package_dsl'
+  autoload :BuildPackageDsl, 'ree/dsl/build_package_dsl'
   autoload :PackageDSL, 'ree/package_dsl'
   autoload :PackageEnvVar, 'ree/core/package_env_var'
   autoload :PackageLoader, 'ree/core/package_loader'

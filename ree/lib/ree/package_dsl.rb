@@ -11,10 +11,8 @@ module Ree::PackageDSL
 
   module ClassMethods
     def package(&proc)
-      path = caller[0].split(':').first
-
-      dsl = Ree::PackageDsl.new(
-        Ree.container.packages_facade, self, path
+      dsl = Ree::BuildPackageDsl.new(
+        Ree.container.packages_facade, self
       )
 
       dsl.instance_exec(&proc) if block_given?
