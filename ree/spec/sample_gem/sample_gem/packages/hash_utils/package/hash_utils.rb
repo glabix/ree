@@ -2,5 +2,6 @@
 
 module HashUtils
 include Ree::PackageDSL
+  
   package
 end
