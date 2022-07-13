@@ -1,3 +1,5 @@
 module Errors
-  package
+  include Ree::PackageDSL
+  
+	package
 end

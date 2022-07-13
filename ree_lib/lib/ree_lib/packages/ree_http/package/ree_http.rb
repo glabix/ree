@@ -4,6 +4,8 @@ require 'openssl'
 require 'logger'
 
 module ReeHttp
+  include Ree::PackageDSL
+
   package do
     depends_on :ree_json
     depends_on :ree_hash

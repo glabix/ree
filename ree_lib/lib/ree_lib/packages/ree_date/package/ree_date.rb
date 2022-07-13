@@ -3,5 +3,7 @@
 require 'date'
 
 module ReeDate
+  include Ree::PackageDSL
+
   package
 end

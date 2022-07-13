@@ -2,6 +2,8 @@ ENV['clock.string_var'] = 'string'
 ENV['clock.int_var'] = 'int'
 
 module Clock
+  include Ree::PackageDSL
+
   package do
     tags ['wip']
 

@@ -1,5 +1,7 @@
 module Roles
-  package do
+  include Ree::PackageDSL
+  
+	package do
     tags       ['roles']
 
     depends_on :accounts
