@@ -17,6 +17,7 @@ module Ree
   autoload :FnDSL, 'ree/fn_dsl'
   autoload :Gen, 'ree/gen'
   autoload :ImportDsl, 'ree/dsl/import_dsl'
+  autoload :LinkDSL, 'ree/link_dsl'
   autoload :LinkImportBuilder, 'ree/dsl/link_import_builder'
   autoload :LinkValidator, 'ree/core/link_validator'
   autoload :Object, 'ree/core/object'

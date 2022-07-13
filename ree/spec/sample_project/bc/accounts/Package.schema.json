@@ -56,6 +56,10 @@
       "schema": "bc/accounts/schemas/accounts/repo/factory_users_repo.schema.json"
     },
     {
+      "name": "function",
+      "schema": "bc/accounts/schemas/accounts/services/function.schema.json"
+    },
+    {
       "name": "perform_async",
       "schema": "bc/accounts/schemas/accounts/services/perform_async.schema.json"
     },

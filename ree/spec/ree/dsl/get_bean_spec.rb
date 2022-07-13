@@ -19,7 +19,7 @@ RSpec.describe Accounts::RegisterAccountCmd do
     def initialize
       @store = []
     end
-    
+
     def put(entity)
       @store.push(entity)
     end
@@ -36,7 +36,7 @@ RSpec.describe Accounts::RegisterAccountCmd do
       @store
     end
   end
-  
+
   it {
     users_repo = TestRepo.new
     cmd = Accounts::RegisterAccountCmd.new
@@ -48,5 +48,8 @@ RSpec.describe Accounts::RegisterAccountCmd do
     expect(user.id).to eq(1)
     expect(user.name).to eq('John Doe')
     expect(user.email).to eq('email@test.com')
+    expect(user.send(:user_states)).to be_a(Accounts::UserStates)
+    expect(user.send(:function)).to eq(:function)
+    expect(user.class::Entity).to eq(Accounts::Entity)
   }
 end
