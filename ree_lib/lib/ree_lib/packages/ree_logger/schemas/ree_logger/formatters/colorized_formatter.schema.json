@@ -1,0 +1,30 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "colorized_formatter",
+  "path": "packages/ree_logger/package/ree_logger/formatters/colorized_formatter.rb",
+  "mount_as": "object",
+  "class": "ReeLogger::ColorizedFormatter",
+  "factory": null,
+  "methods": [
+
+  ],
+  "links": [
+    {
+      "target": "not_blank",
+      "package_name": "ree_object",
+      "as": "not_blank",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "now",
+      "package_name": "ree_datetime",
+      "as": "now",
+      "imports": [
+
+      ]
+    }
+  ]
+}

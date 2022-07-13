@@ -43,6 +43,10 @@
       "schema": "packages/ree_json/Package.schema.json"
     },
     {
+      "name": "ree_logger",
+      "schema": "packages/ree_logger/Package.schema.json"
+    },
+    {
       "name": "ree_mapper",
       "schema": "packages/ree_mapper/Package.schema.json"
     },

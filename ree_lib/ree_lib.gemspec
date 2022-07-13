@@ -34,7 +34,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency "oj"
   spec.add_dependency "i18n"
   spec.add_dependency "sequel"
-  
+  spec.add_dependency "binding_of_caller"
+  spec.add_dependency "rainbow"
+
   spec.add_development_dependency 'sqlite3'
   spec.add_development_dependency 'pg'
 
