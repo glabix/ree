@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ree_lib (0.1.0)
+    ree_lib (0.1.1)
       i18n
       loofah
       oj
@@ -22,25 +22,20 @@ GEM
     crack (0.4.5)
       rexml
     crass (1.0.6)
-    debase (3.0.0.beta.3)
-      debase-ruby_core_source (~> 0.10.15)
-    debase-ruby_core_source (0.10.16)
     diff-lcs (1.5.0)
     hashdiff (1.0.1)
     highline (2.0.3)
-    i18n (1.10.0)
+    i18n (1.11.0)
       concurrent-ruby (~> 1.0)
     loofah (2.18.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     msgpack (1.5.3)
-    nokogiri (1.13.6-arm64-darwin)
-      racc (~> 1.4)
     nokogiri (1.13.6-x86_64-darwin)
       racc (~> 1.4)
     nokogiri (1.13.6-x86_64-linux)
       racc (~> 1.4)
-    oj (3.13.14)
+    oj (3.13.16)
     pg (1.4.1)
     public_suffix (4.0.7)
     racc (1.6.0)
@@ -61,9 +56,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.11.0)
     rspec-support (3.11.0)
-    ruby-debug-ide (0.7.3)
-      rake (>= 0.8.1)
-    sequel (5.57.0)
+    sequel (5.58.0)
     sqlite3 (1.4.4)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
@@ -73,18 +66,15 @@ GEM
       hashdiff (>= 0.4.0, < 2.0.0)
 
 PLATFORMS
-  arm64-darwin-21
   x86_64-darwin-19
   x86_64-linux
 
 DEPENDENCIES
   bootsnap
-  debase
   pg
   rake (~> 13.0)
   ree_lib!
   rspec
-  ruby-debug-ide
   sqlite3
   webmock
 

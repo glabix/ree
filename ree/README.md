@@ -80,6 +80,7 @@ require 'oj'
 
 module ReeJson
 include Ree::PackageDSL
+
   package
 end
 ``` 
