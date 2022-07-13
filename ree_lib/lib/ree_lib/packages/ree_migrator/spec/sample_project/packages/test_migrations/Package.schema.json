@@ -13,6 +13,13 @@
 
   ],
   "objects": [
-
+    {
+      "name": "data_migrations",
+      "schema": "packages/test_migrations/schemas/test_migrations/data_migrations.schema.json"
+    },
+    {
+      "name": "schema_migrations",
+      "schema": "packages/test_migrations/schemas/test_migrations/schema_migrations.schema.json"
+    }
   ]
 }

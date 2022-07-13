@@ -1,0 +1,24 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "data_migrations",
+  "path": "packages/test_migrations/package/test_migrations/data_migrations.rb",
+  "mount_as": "fn",
+  "class": "TestMigrations::DataMigrations",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}
