@@ -1,14 +1,14 @@
 {
   "schema_type": "object",
   "ree_version": "0.1.0",
-  "name": "transform_keys",
-  "path": "packages/ree_hash/package/ree_hash/functions/transform_keys.rb",
+  "name": "transform_values",
+  "path": "packages/ree_hash/package/ree_hash/functions/transform_values.rb",
   "mount_as": "fn",
-  "class": "ReeHash::TransformKeys",
+  "class": "ReeHash::TransformValues",
   "factory": null,
   "methods": [
     {
-      "doc": "Transforms keys with passed parameter (block). By default transforms deeply",
+      "doc": "Transforms values with passed parameter (block). By default transforms deeply",
       "throws": [
 
       ],
