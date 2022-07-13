@@ -22,12 +22,12 @@ class Ree::PackageLoader
     recursively_load_package(name, Hash.new(false))
     @loaded_packages[name]
   end
-  
+
   def load_file(path, package_name)
     @loaded_paths[package_name] ||= {}
     return if @loaded_paths[package_name][path]
     @loaded_paths[package_name][path] = true
-    
+
     Ree.logger.debug("load_file(:#{package_name}, '#{path}')")
     Kernel.require(path)
   end
@@ -63,15 +63,17 @@ class Ree::PackageLoader
       loaded_packages[name] = true
     end
 
-    package.env_vars.each do |env_var|
-      if !ENV.has_key?(env_var.name)
-        msg = <<~DOC
-          package: :#{package.name}
-          path: #{File.join(Ree::PathHelper.project_root_dir(package), package.entry_rpath)}
-          error: Package :#{name} requires env var '#{env_var.name}' to be set
-        DOC
+    if !ENV.has_key?('REE_SKIP_ENV_VARS_CHECK')
+      package.env_vars.each do |env_var|
+        if !ENV.has_key?(env_var.name)
+          msg = <<~DOC
+            package: :#{package.name}
+            path: #{File.join(Ree::PathHelper.project_root_dir(package), package.entry_rpath)}
+            error: Package :#{name} requires env var '#{env_var.name}' to be set
+          DOC
 
-        raise Ree::Error.new(msg, :env_var_not_set)
+          raise Ree::Error.new(msg, :env_var_not_set)
+        end
       end
     end
 
@@ -82,7 +84,7 @@ class Ree::PackageLoader
     end
 
     package.set_schema_loaded
-    
+
     @loaded_packages[name] = package
   end
 end
