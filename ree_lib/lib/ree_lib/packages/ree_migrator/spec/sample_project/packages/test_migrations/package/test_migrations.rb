@@ -1,0 +1,3 @@
+module TestMigrations
+  package
+end

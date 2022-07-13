@@ -1,0 +1,18 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "test_migrations",
+  "entry_path": "packages/test_migrations/package/test_migrations.rb",
+  "tags": [
+    "test_migrations"
+  ],
+  "depends_on": [
+
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+
+  ]
+}
