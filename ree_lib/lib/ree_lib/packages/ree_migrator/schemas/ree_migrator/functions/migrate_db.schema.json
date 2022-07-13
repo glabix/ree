@@ -2,9 +2,9 @@
   "schema_type": "object",
   "ree_version": "0.1.0",
   "name": "migrate_db",
-  "path": "packages/ree_migrations/package/ree_migrations/functions/migrate_db.rb",
+  "path": "packages/ree_migrator/package/ree_migrator/functions/migrate_db.rb",
   "mount_as": "fn",
-  "class": "ReeMigrations::MigrateDb",
+  "class": "ReeMigrator::MigrateDb",
   "factory": null,
   "methods": [
     {
@@ -28,7 +28,7 @@
   "links": [
     {
       "target": "apply_migrations",
-      "package_name": "ree_migrations",
+      "package_name": "ree_migrator",
       "as": "apply_migrations",
       "imports": [
 
@@ -36,7 +36,7 @@
     },
     {
       "target": "create_migrations_table",
-      "package_name": "ree_migrations",
+      "package_name": "ree_migrator",
       "as": "create_migrations_table",
       "imports": [
 

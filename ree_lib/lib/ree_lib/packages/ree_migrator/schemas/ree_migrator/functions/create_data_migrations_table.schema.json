@@ -1,10 +1,10 @@
 {
   "schema_type": "object",
   "ree_version": "0.1.0",
-  "name": "apply_schema_migration",
-  "path": "bounded_contexts/libs/ree_migrations/package/ree_migrations/functions/apply_schema_migration.rb",
+  "name": "create_data_migrations_table",
+  "path": "bounded_contexts/libs/ree_migrator/package/ree_migrator/functions/create_data_migrations_table.rb",
   "mount_as": "fn",
-  "class": "ReeMigrations::ApplySchemaMigration",
+  "class": "ReeMigrator::CreateDataMigrationsTable",
   "factory": null,
   "methods": [
     {
@@ -17,10 +17,6 @@
         {
           "arg": "connection",
           "type": "Sequel::Database"
-        },
-        {
-          "arg": "migration_file_path",
-          "type": "String"
         }
       ]
     }

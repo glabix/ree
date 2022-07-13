@@ -3,7 +3,7 @@
 require 'sequel'
 require 'ostruct'
 
-module ReeMigrations
+module ReeMigrator
   package do
     depends_on :ree_object
     depends_on :ree_datetime

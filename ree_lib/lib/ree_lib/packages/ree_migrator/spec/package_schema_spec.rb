@@ -1,4 +1,4 @@
-RSpec.describe "ReeMigrations" do
+RSpec.describe "ReeMigrator" do
   it "generates package schema" do
     require 'fileutils'
 
@@ -7,7 +7,7 @@ RSpec.describe "ReeMigrations" do
 
     FileUtils.cd packages_schema_dir do
       expect(
-        system("bundle exec ree gen.package_json ree_migrations --silence")
+        system("bundle exec ree gen.package_json ree_migrator --silence")
       ).to eq(true)
     end
   end

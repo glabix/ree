@@ -3,7 +3,7 @@
 require "logger"
 require "pathname"
 
-class ReeMigrations::MigrateDb
+class ReeMigrator::MigrateDb
   include Ree::FnDSL
 
   fn :migrate_db do

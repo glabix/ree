@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ReeMigrations::CreateMigrationsTable
+class ReeMigrator::CreateMigrationsTable
   include Ree::FnDSL
 
   fn :create_migrations_table do
