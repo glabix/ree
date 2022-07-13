@@ -5,52 +5,51 @@ RSpec.describe :validate_presence do
 
   context "valid" do
     it {
-      expect(validate_presence("string", :string)).to eq(true)
-      expect(validate_presence([1], :array)).to eq(true)
-      expect(validate_presence({id: 1}, :hash)).to eq(true)
-      expect(validate_presence(Set.new([1]), :code)).to eq(true)
-      expect(validate_presence(Object.new, :code)).to eq(true)
+      expect(validate_presence("string")).to eq(true)
+      expect(validate_presence([1])).to eq(true)
+      expect(validate_presence({id: 1})).to eq(true)
+      expect(validate_presence(Set.new([1]))).to eq(true)
+      expect(validate_presence(Object.new)).to eq(true)
     }
   end
 
   context "invalid" do
     it {
       expect {
-        validate_presence([], :code)
+        validate_presence([])
       }.to raise_error(ReeValidator::ValidatePresence::PresenceErr) do |e|
-        expect(e.extra_code).to eq(:code)
         expect(e.message).to eq("can not be blank")
       end
     }
 
     it {
       expect {
-        validate_presence(nil, :code)
+        validate_presence(nil)
       }.to raise_error(ReeValidator::ValidatePresence::PresenceErr)
     }
 
     it {
       expect {
-        validate_presence("", :code)
+        validate_presence("")
       }.to raise_error(ReeValidator::ValidatePresence::PresenceErr)
     }
 
     it {
       expect {
-        validate_presence("  ", :code)
+        validate_presence("  ")
       }.to raise_error(ReeValidator::ValidatePresence::PresenceErr)
     }
 
     it {
       expect {
-        validate_presence(Set.new([]), :code)
+        validate_presence(Set.new([]))
       }.to raise_error(ReeValidator::ValidatePresence::PresenceErr)
     }
 
     it {
       expect {
-        validate_presence({}, :code)
-      }.to raise_error(ReeValidator::ValidatePresence::PresenceErr)
+        validate_presence({}, Class.new(StandardError))
+      }.to raise_error(StandardError)
     }
   end
 end

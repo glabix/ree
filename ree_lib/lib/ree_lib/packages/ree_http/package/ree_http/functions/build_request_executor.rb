@@ -1,24 +1,23 @@
+# frozen_string_literal: true
+
 class ReeHttp::BuildRequestExecutor
   include Ree::FnDSL
 
-  fn :build_request_executor
+  fn :build_request_executor do
+    link 'ree_http/constants', -> {
+      DEFAULT_TIMEOUT & DEFAULT_WRITE_TIMEOUT & DEFAULT_FORCE_SSL
+    }
+  end
 
   DEFAULTS = {
-    timeout: 60,
-    write_timeout: 30,
-    force_ssl: false,
+    timeout: DEFAULT_TIMEOUT,
+    write_timeout: DEFAULT_WRITE_TIMEOUT,
+    force_ssl: DEFAULT_FORCE_SSL,
     proxy: {}
   }.freeze
 
   doc(<<~DOC)
-    Returns configured Net::HTTP, it uses in execute_request.
-    Options:
-      uri - uri for sending request
-      timeout - timeout of waiting of response after request was sent, default 60
-      write_timeout - timeout of waiting of sending request, if you send large file maybe should be increased, default 30
-      force_ssl - Turn on/off SSL. This flag must be set before starting session. If you change use_ssl value after session started, a Net::HTTP object raises IOError.
-      ca_certs - adds ca_certs by reading files
-      proxy - auth on proxy server, address required
+    Builds Net::HTTP object that could be further used for execution
   DOC
 
   contract(

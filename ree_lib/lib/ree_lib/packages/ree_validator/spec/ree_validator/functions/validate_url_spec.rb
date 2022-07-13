@@ -5,17 +5,16 @@ RSpec.describe :validate_url do
 
   context "valid" do
     it {
-      expect(validate_url("https://google.com", :code)).to eq(true)
-      expect(validate_url("https://google.com?param", :code)).to eq(true)
-      expect(validate_url("http://google.com", :code)).to eq(true)
-      expect(validate_url("ftp://google.com", :code)).to eq(true)
-      expect(validate_url("192.168.0.1", :code)).to eq(true)
-      expect(validate_url("google.com", :code)).to eq(true)
+      expect(validate_url("https://google.com")).to eq(true)
+      expect(validate_url("https://google.com?param")).to eq(true)
+      expect(validate_url("http://google.com")).to eq(true)
+      expect(validate_url("ftp://google.com")).to eq(true)
+      expect(validate_url("192.168.0.1")).to eq(true)
+      expect(validate_url("google.com")).to eq(true)
 
       expect(
         validate_url(
           "https://google.com",
-          :code,
           schemes: ['https', 'http'],
           ports: [80, 443],
           domains: ['google.com', 'test.com'],
@@ -29,11 +28,9 @@ RSpec.describe :validate_url do
       expect {
         validate_url(
           "ftp://google.com",
-          :code,
           schemes: ['http']
         )
-      }.to raise_error(ReeValidator::ValidateUrl::InvalidSchemeErr) do |e|
-        expect(e.extra_code).to eq(:code)
+      }.to raise_error(ReeValidator::ValidateUrl::UrlErr) do |e|
         expect(e.message).to eq('scheme should be one of ["http"]')
       end
     }
@@ -42,11 +39,9 @@ RSpec.describe :validate_url do
       expect {
         validate_url(
           "ftp://google.com",
-          :code,
           ports: [80]
         )
-      }.to raise_error(ReeValidator::ValidateUrl::InvalidPortErr) do |e|
-        expect(e.extra_code).to eq(:code)
+      }.to raise_error(ReeValidator::ValidateUrl::UrlErr) do |e|
         expect(e.message).to eq('port should be one of [80]')
       end
     }
@@ -55,11 +50,10 @@ RSpec.describe :validate_url do
       expect {
         validate_url(
           "https://google.com",
-          :code,
+          Class.new(StandardError),
           domains: ['test.com']
         )
-      }.to raise_error(ReeValidator::ValidateUrl::InvalidDomainErr) do |e|
-        expect(e.extra_code).to eq(:code)
+      }.to raise_error(StandardError) do |e|
         expect(e.message).to eq('domain should be one of ["test.com"]')
       end
     }

@@ -1,32 +1,49 @@
-class ReeDto::Entity
-  def to_s
-    variables = self
-      .instance_variables
-      .map(&:to_s)
-      .map { |v| v.gsub('@', '') }
-      .sort
+# frozen_string_literal: true
 
-    max_length = variables.sort_by(&:size).last.size
-    result     = "\n#{self.class}\n"
-
-    result << variables
-      .map { |variable|
-        name = variable.to_s
-        extra_spaces = ' ' * (max_length - name.size)
-        %Q(  #{name}#{extra_spaces} = #{instance_variable_get("@#{variable}")})
-      }
-      .join("\n")
-
-    result
+module ReeDto::EntityDSL
+  def self.included(base)
+    base.include(InstanceMethods)
+    base.extend(ClassMethods)
   end
 
-  def inspect
-    to_s
+  def self.extended(base)
+    base.include(InstanceMethods)
+    base.extend(ClassMethods)
   end
 
-  class << self
-    contract(Hash => nil)
-    def properties(args)
+  module InstanceMethods
+    def to_s
+      variables = self
+        .instance_variables
+        .map(&:to_s)
+        .map { |v| v.gsub('@', '') }
+        .sort
+
+      max_length = variables.sort_by(&:size).last.size
+      result     = "\n#{self.class}\n"
+
+      result << variables
+        .map { |variable|
+          name = variable.to_s
+          extra_spaces = ' ' * (max_length - name.size)
+          %Q(  #{name}#{extra_spaces} = #{instance_variable_get("@#{variable}")})
+        }
+        .join("\n")
+
+      result
+    end
+
+    def inspect
+      to_s
+    end
+  end
+
+  module ClassMethods
+    include Ree::Contracts::Core
+    include Ree::Contracts::ArgContracts
+
+    contract(Ksplat[RestKeys => Any] => nil)
+    def properties(**args)
       args.each do |name, contract_class|
         contract None => contract_class
         class_eval %Q(
@@ -90,5 +107,3 @@ class ReeDto::Entity
     end
   end
 end
-
-ReeEntity = ReeDto::Entity

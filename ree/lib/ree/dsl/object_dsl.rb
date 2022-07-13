@@ -6,17 +6,17 @@ class Ree::ObjectDsl
   include Ree::Args
 
   attr_reader :package, :object
-  
+
   # @param [Ree::PackagesFacade] packages_facade
   # @param [Class] klass
   # @param [Symbol] name
   # @param [Nilor[String]] abs_path
   # @param [Symbol] mount_as
-  def initialize(packages_facade, klass, name, abs_path, mount_as)
+  def initialize(packages_facade, klass, name, mount_as)
     @packages_facade = packages_facade
-    
+
     @object = register_object(
-      klass, name, abs_path, mount_as,
+      klass, name, mount_as,
     )
 
     @package = @packages_facade.get_loaded_package(@object.package_name)
@@ -166,7 +166,7 @@ class Ree::ObjectDsl
       Ree::PathHelper.abs_package_dir(package),
       Ree::PACKAGE, path
     )
-    
+
     if !File.exists?(file_path)
       file_path = "#{file_path}.rb"
 
@@ -210,11 +210,16 @@ class Ree::ObjectDsl
 
   MOUNT_AS = [:fn, :object]
 
-  def register_object(object_name, klass, path, mount_as)
+  def register_object(object_name, klass, mount_as)
     check_arg(object_name, :object_name, Symbol)
     check_arg(klass, :klass, Class)
-    check_arg(path, :path, String)
     check_arg(mount_as, :mount_as, Symbol)
+
+    if klass.name.nil?
+      raise Ree::Error.new("Anonymous classes are not supported", :invalid_dsl_usage)
+    end
+
+    path = Object.const_source_location(klass.name)[0].split(':').first
 
     if !MOUNT_AS.include?(mount_as)
       raise Ree::Error.new("Mount as should be one of #{MOUNT_AS.inspect}", :invalid_dsl_usage)
@@ -228,10 +233,6 @@ class Ree::ObjectDsl
       raise Ree::Error.new("Object name does not correspond to a file name (#{object_name}, #{object_name_from_path}.rb). Fix object name or rename object file", :invalid_dsl_usage)
     end
 
-    if klass.name.nil?
-      raise Ree::Error.new("Anonymous classes are not supported", :invalid_dsl_usage)
-    end
-    
     class_name = klass.to_s
     list = class_name.split('::')
 

@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "apply_migration",
+  "path": "packages/ree_migrations/package/ree_migrations/functions/apply_migration.rb",
+  "mount_as": "fn",
+  "class": "ReeMigrations::ApplyMigration",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+        "ArgumentError"
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "connection",
+          "type": "Sequel::Database"
+        },
+        {
+          "arg": "migration_path",
+          "type": "String"
+        },
+        {
+          "arg": "type",
+          "type": "Or[schema, data]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "now",
+      "package_name": "ree_datetime",
+      "as": "now",
+      "imports": [
+
+      ]
+    }
+  ]
+}

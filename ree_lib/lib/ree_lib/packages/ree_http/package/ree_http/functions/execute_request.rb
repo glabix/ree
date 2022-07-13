@@ -7,6 +7,10 @@ class ReeHttp::ExecuteRequest
     link :build_request_executor
     link :slice, from: :ree_hash
     link 'ree_http/http_exceptions', -> { HttpExceptions }
+
+    link 'ree_http/constants', -> {
+      DEFAULT_TIMEOUT & DEFAULT_WRITE_TIMEOUT & DEFAULT_FORCE_SSL
+    }
   end
 
   include HttpExceptions
@@ -22,22 +26,29 @@ class ReeHttp::ExecuteRequest
   DEFAULTS = {
     redirects_count: MAX_REDIRECT_COUNT,
     strict_redirect_mode: true,
-    timeout: 60,
-    write_timeout: 30,
-    force_ssl: false,
+    timeout: DEFAULT_TIMEOUT,
+    write_timeout: DEFAULT_WRITE_TIMEOUT,
+    force_ssl: DEFAULT_FORCE_SSL,
   }.freeze
 
   doc(<<~DOC)
-    Returns response.
-    Options:
-      request - configured request, preferably by build_request
-      strict_redirect_mode - if response code in [300, 301, 302] and strict_redirect_mode=false, will be redirected with GET method, if strict_redirect_mode=true(default) will raise RedirectMethodError
-      redirects_count - count of redirects, if redirects more than redirects_count will raise TooManyRedirectsError
-      timeout - timeout of waiting of response after request was sent, default 60
-      write_timeout - timeout of waiting of sending request, if you send large file maybe should be increased, default 30
-      force_ssl - Turn on/off SSL. This flag must be set before starting session. If you change use_ssl value after session started, a Net::HTTP object raises IOError.
-      ca_certs - adds ca_certs by reading files
-      proxy - auth on proxy server, address required
+    Executes prepared Net::HTTPRequest.
+
+    Optional options:
+      strict_redirect_mode - raise RedirectMethodError if strict_redirect_mode=true (default)
+      otherwise redirects with GET method if response code in [300, 301, 302]
+
+      redirects_count - raise TooManyRedirectsError if we have more redirects than specified otherwise proceed redirects
+
+      timeout - wait response timeout (defaults to 60 seconds)
+
+      write_timeout - send request timeout (defaults to 30 seconds)
+
+      force_ssl - force SSL on
+
+      ca_certs - sets path of a CA certification files
+
+      proxy - set proxy server auth
   DOC
 
   contract(
@@ -50,8 +61,10 @@ class ReeHttp::ExecuteRequest
        force_ssl?: Bool,
        ca_certs?: ArrayOf[File],
        proxy?: {
-        username: String,
-        password: String
+         address: String,
+         port?: Integer,
+         username?: String,
+         password?: String
        }
      ],
      Optblock => Net::HTTPResponse
@@ -77,6 +90,7 @@ class ReeHttp::ExecuteRequest
     )
 
     process_redirect_response(response, request, opts, &block)
+
     response
   end
 

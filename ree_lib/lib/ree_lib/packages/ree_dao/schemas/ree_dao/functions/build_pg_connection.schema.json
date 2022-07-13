@@ -12,11 +12,11 @@
       "throws": [
 
       ],
-      "return": "Any",
+      "return": "Sequel::Postgres::Database",
       "args": [
         {
           "arg": "conn_opts",
-          "type": "{:conn_str? => String, :adapter? => String, :database? => String, :encoding? => String, :user? => String, :password? => String, :host? => String, :port? => String, :convert_infinite_timestamps? => Or[string, nil, float], :connect_timeout? => Integer, :driver_options? => Hash, :notice_receiver? => Proc, :sslmode? => Or[disable, allow, prefer, require, verify-ca, verify-full...], :sslrootcert? => String, :search_path? => String, :use_iso_date_format? => Bool}"
+          "type": "{:conn_str? => String, :adapter => String, :database? => String, :encoding? => String, :user? => String, :password? => String, :host? => String, :port? => String, :convert_infinite_timestamps? => Or[string, nil, float], :connect_timeout? => Integer, :driver_options? => Hash, :notice_receiver? => Proc, :sslmode? => Or[disable, allow, prefer, require, verify-ca, verify-full...], :sslrootcert? => String, :search_path? => String, :use_iso_date_format? => Bool}"
         },
         {
           "arg": "opts",

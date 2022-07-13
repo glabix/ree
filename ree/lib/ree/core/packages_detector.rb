@@ -9,7 +9,7 @@ class Ree::PackagesDetector
     if !Dir.exists?(dir)
       raise Ree::Error.new("dir does not exist: #{dir}", :invalid_dir)
     end
-    
+
     files = File.join(dir, "**/", Ree::PACKAGE_SCHEMA_FILE)
     names = {}
 
@@ -18,7 +18,7 @@ class Ree::PackagesDetector
         .new(file)
         .relative_path_from(Pathname.new(dir))
         .to_s
-        
+
       name = package_schema_path.split('/')[-2]
       entry_path = Ree::PathHelper.package_entry_path(package_schema_path)
 
@@ -27,11 +27,11 @@ class Ree::PackagesDetector
       end
 
       if names.has_key?(name)
-        raise Ree::Error.new("package '#{package[:name]}' has duplicate defintions.\n\t1) #{package[:path]},\n\t2) #{names[:path]}", :duplicate_package)
+        raise Ree::Error.new("package '#{name}' has duplicate defintions.\n\t1) #{names[name]},\n\t2) #{entry_path}", :duplicate_package)
       end
 
-      names[name] = true
-      
+      names[name] = entry_path
+
       {
         name: name.to_sym,
         entry_path: entry_path,

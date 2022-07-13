@@ -5,9 +5,9 @@ class ReeValidator::ValidateEmail
 
   fn :validate_email do
     link :t, from: :ree_i18n
-
-    def_error(:validation) { InvalidEmailErr }
   end
+
+  InvalidEmailErr = Class.new(StandardError)
 
   EMAIL_ADDRESS = begin
     letter         = 'a-zA-Z'
@@ -34,15 +34,16 @@ class ReeValidator::ValidateEmail
     pattern        = /\A#{addr_spec}\z/u
   end
 
-  contract(String, Symbol => Bool).throws(InvalidEmailErr)
-  def call(email, error_code)
+  contract(
+    String,
+    Nilor[SubclassOf[StandardError]] => Bool
+  ).throws(InvalidEmailErr)
+  def call(email, error = nil)
     if !EMAIL_ADDRESS.match(email)
-      raise InvalidEmailErr.new(
-        t(
-          'validator.email.invalid_email',
-          default_by_locale: :en
-        ),
-        error_code
+      klass = error || InvalidEmailErr
+
+      raise klass.new(
+        t('validator.email.invalid_email', default_by_locale: :en)
       )
     end
 

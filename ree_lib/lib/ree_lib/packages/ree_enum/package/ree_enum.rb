@@ -7,6 +7,7 @@ module ReeEnum
 end
 
 require_relative 'ree_enum/dsl'
+require_relative 'ree_enum/enumerable'
 
 # Example of Usage
 # class YourPackageName::YourEnumName

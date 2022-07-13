@@ -8,7 +8,7 @@
   "factory": null,
   "methods": [
     {
-      "doc": "Returns request, should be executed with execute_request.\nSupport methods: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS\n\nOptions:\n  method - one of the supported methods\n  url - url of request\n  headers - headers of the request\n  body - body of the request, if File was given file will be read and added to the body as String. Can't use with form_data\n  form_data - form_data of the request, if File was given file, file will be read with specific file_name\n  query_params - query string of the request. Will added after the path like <path>?a=100&b=simple\n  force_ssl - use True that if you want send request with HTTPS protocol. Will be applied with 443 port if protocol in URI is HTTP or HTTPS. If True In other cases will change only protocol, not port. If false, dont change anything\n  auth - can be \"Basic\" or \"Bearer\", use username & password or bearer_token respectively",
+      "doc": "Builds Net::HTTPRequest with specified method, url, headers, body, form data,\nquery params, basic auth or bearer token. Forces SSL mode",
       "throws": [
         "ArgumentError"
       ],
