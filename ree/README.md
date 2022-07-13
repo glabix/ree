@@ -79,9 +79,8 @@ Gems should be required in the package entry files (read about packages below).
 require 'oj'
 
 module ReeJson
-  include Ree::PackageDSL
-  
-	package
+include Ree::PackageDSL
+  package
 end
 ``` 
 This practice gives you the following benefits:

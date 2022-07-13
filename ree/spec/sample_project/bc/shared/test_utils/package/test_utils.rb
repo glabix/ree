@@ -1,7 +1,6 @@
 require 'json'
 
 module TestUtils
-  include Ree::PackageDSL
-  
-	package
+include Ree::PackageDSL
+  package
 end
