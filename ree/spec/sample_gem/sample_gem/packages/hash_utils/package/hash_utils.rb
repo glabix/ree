@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module HashUtils
-include Ree::PackageDSL
+  include Ree::PackageDSL
   
   package
 end
