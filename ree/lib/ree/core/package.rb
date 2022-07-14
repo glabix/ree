@@ -5,7 +5,7 @@ require 'pathname'
 class Ree::Package
   attr_reader :ree_version, :name, :schema_rpath, :entry_rpath,
               :module, :tags, :preload, :default_links, :gem_name
-              
+
   def initialize(ree_version, name, entry_rpath, schema_rpath, gem_name = nil)
     @ree_version = ree_version
     @name = name
@@ -94,7 +94,7 @@ class Ree::Package
   end
 
   def dir
-    @dir ||= Pathname.new(@schema_rpath).dirname.to_s
+    @dir ||= @schema_rpath ? Pathname.new(@schema_rpath).dirname.to_s : nil
   end
 
   def gem?

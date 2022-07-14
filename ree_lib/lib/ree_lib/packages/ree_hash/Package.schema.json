@@ -45,6 +45,10 @@
     {
       "name": "transform_keys",
       "schema": "packages/ree_hash/schemas/ree_hash/functions/transform_keys.schema.json"
+    },
+    {
+      "name": "transform_values",
+      "schema": "packages/ree_hash/schemas/ree_hash/functions/transform_values.schema.json"
     }
   ]
 }

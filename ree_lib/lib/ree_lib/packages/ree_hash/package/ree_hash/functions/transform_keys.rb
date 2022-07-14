@@ -4,8 +4,8 @@ class ReeHash::TransformKeys
   include Ree::FnDSL
 
   fn :transform_keys
-  
-  doc("Transforms keys with passed parameter (block), deep transform is by default ")
+
+  doc("Transforms keys with passed parameter (block). By default transforms deeply")
   contract(Hash, Kwargs[deep: Bool], Block => Hash)
   def call(hash, deep: true, &proc)
     recursively_transform_keys(hash, deep, &proc)
@@ -23,7 +23,7 @@ class ReeHash::TransformKeys
 
       object.keys.each do |key|
         value = object[key]
-        
+
         result[yield(key)] = if deep
           recursively_transform_keys(value, deep, &block)
         else

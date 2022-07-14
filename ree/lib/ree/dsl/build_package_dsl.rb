@@ -1,6 +1,6 @@
 # frozen_string_literal  = true
 
-class Ree::PackageDsl
+class Ree::BuildPackageDsl
   include Ree::Args
 
   attr_reader :package
@@ -126,7 +126,13 @@ class Ree::PackageDsl
       raise Ree::Error.new("Package module '#{module_name}' does not correspond to package name 'name'. Fix file name or module name.")
     end
 
-    package = @packages_facade.get_package(name)
+    package = @packages_facade.get_package(name, false)
+
+    if package.nil?
+      package = Ree::Package.new(Ree::VERSION, name, nil, nil, nil)
+      @packages_facade.store_package(package)
+    end
+
     package.set_module(mod)
     package.set_tags([name])
 

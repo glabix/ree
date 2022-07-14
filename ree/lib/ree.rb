@@ -17,6 +17,7 @@ module Ree
   autoload :FnDSL, 'ree/fn_dsl'
   autoload :Gen, 'ree/gen'
   autoload :ImportDsl, 'ree/dsl/import_dsl'
+  autoload :LinkDSL, 'ree/link_dsl'
   autoload :LinkImportBuilder, 'ree/dsl/link_import_builder'
   autoload :LinkValidator, 'ree/core/link_validator'
   autoload :Object, 'ree/core/object'
@@ -28,7 +29,8 @@ module Ree
   autoload :ObjectSchemaBuilder, 'ree/core/object_schema_builder'
   autoload :Package, 'ree/core/package'
   autoload :PackageDep, 'ree/core/package_dep'
-  autoload :PackageDsl, 'ree/dsl/package_dsl'
+  autoload :BuildPackageDsl, 'ree/dsl/build_package_dsl'
+  autoload :PackageDSL, 'ree/package_dsl'
   autoload :PackageEnvVar, 'ree/core/package_env_var'
   autoload :PackageLoader, 'ree/core/package_loader'
   autoload :PackageSchema, 'ree/core/package_schema'
@@ -258,6 +260,5 @@ module Ree
   end
 end
 
-require_relative 'ree/dsl/module_hooks'
 require_relative 'ree/dsl/object_hooks'
 require_relative 'ree/dsl/package_require'

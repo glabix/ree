@@ -4,6 +4,8 @@ require 'date'
 require 'tzinfo'
 
 module ReeDatetime
+  include Ree::PackageDSL
+
   package do
     depends_on :ree_date
     depends_on :ree_hash

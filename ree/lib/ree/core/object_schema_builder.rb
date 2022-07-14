@@ -15,9 +15,9 @@ class Ree::ObjectSchemaBuilder
     end
 
     if !object.loaded?
-      raise Ree::Error.new("object schema should be loaded", :invalid_schema)
+      raise Ree::Error.new("object `#{object.name}` from package `#{object.package_name}` is not loaded", :invalid_schema)
     end
-    
+
     data = {
       Schema::SCHEMA_TYPE => Schema::OBJECT,
       Schema::REE_VERSION => Ree::VERSION,
@@ -46,7 +46,7 @@ class Ree::ObjectSchemaBuilder
   private
 
   Arg = Ree::Contracts::CalledArgsValidator::Arg
-  
+
   def map_object_methods(object)
     if !object.fn?
       return []
@@ -61,12 +61,12 @@ class Ree::ObjectSchemaBuilder
     begin
       if method_decorator.nil?
         parameters = klass.instance_method(:call).parameters
-        
+
         args = parameters.inject({}) do |res, param|
           res[param.last] = Arg.new(
             param.last, param.first, nil, nil
           )
-          
+
           res
         end
       else

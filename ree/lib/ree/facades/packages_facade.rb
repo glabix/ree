@@ -56,11 +56,12 @@ class Ree::PackagesFacade
     Ree.logger.debug("write_package_schema(:#{package_name})")
 
     load_entire_package(package_name)
-
     package = get_package(package_name)
-    schema_path = Ree::PathHelper.abs_package_schema_path(package)
 
-    Ree::PackageSchemaBuilder.new.call(package, schema_path)
+    if package.dir
+      schema_path = Ree::PathHelper.abs_package_schema_path(package)
+      Ree::PackageSchemaBuilder.new.call(package, schema_path)
+    end
   end
 
   # @param [Symbol] package_name
@@ -144,6 +145,12 @@ class Ree::PackagesFacade
 
     Ree.logger.debug("read_package_schema_json(:#{package_name})")
     package = get_package(package_name)
+
+    if !package.dir
+      package.set_schema_loaded
+      return package
+    end
+
     schema_path = Ree::PathHelper.abs_package_schema_path(package)
     @loaded_schemas[package_name] = Ree::PackageSchemaLoader.new.call(schema_path, package)
   end
@@ -164,15 +171,21 @@ class Ree::PackagesFacade
 
   # @param [Symbol] package_name
   # @return [Ree::Package]
-  def get_package(package_name)
+  def get_package(package_name, raise_if_missing = true)
     check_arg(package_name, :package_name, Symbol)
     package = @packages_store.get(package_name)
 
-    if !package
+    if !package && raise_if_missing
       raise Ree::Error.new("Package :#{package_name} is not found in Packages.schema.json. Run `ree gen.packages_json` to update schema.", :package_schema_not_found)
     end
 
     package
+  end
+
+  # @param [Ree::Package] package
+  # @return [Ree::Package]
+  def store_package(package)
+    @packages_store.add_package(package)
   end
 
   # @param [String] path

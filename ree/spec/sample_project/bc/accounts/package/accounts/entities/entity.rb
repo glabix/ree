@@ -1,0 +1,2 @@
+class Accounts::Entity
+end

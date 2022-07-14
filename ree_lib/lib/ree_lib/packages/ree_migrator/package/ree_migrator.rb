@@ -4,6 +4,8 @@ require 'sequel'
 require 'ostruct'
 
 module ReeMigrator
+  include Ree::PackageDSL
+
   package do
     depends_on :ree_object
     depends_on :ree_datetime
