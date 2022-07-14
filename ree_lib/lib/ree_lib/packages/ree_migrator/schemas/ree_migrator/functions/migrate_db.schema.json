@@ -41,6 +41,14 @@
       "imports": [
 
       ]
+    },
+    {
+      "target": "logger",
+      "package_name": "ree_logger",
+      "as": "logger",
+      "imports": [
+
+      ]
     }
   ]
 }

@@ -1,4 +1,4 @@
-#frozen_string_literal = true
+# frozen_string_literal = true
 
 RSpec.describe :index_by do
   link :index_by, from: :ree_array

@@ -1,4 +1,4 @@
-#frozen_string_literal = true
+# frozen_string_literal = true
 
 RSpec.describe :transform_values do
   link :transform_values, from: :ree_hash

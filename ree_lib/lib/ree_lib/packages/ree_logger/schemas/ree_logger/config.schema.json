@@ -11,6 +11,14 @@
   ],
   "links": [
     {
+      "target": "is_blank",
+      "package_name": "ree_object",
+      "as": "is_blank",
+      "imports": [
+
+      ]
+    },
+    {
       "target": "to_obj",
       "package_name": "ree_object",
       "as": "to_obj",

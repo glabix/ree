@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 module ReeDao
   module DatasetExtensions
     def self.included(base)
       alias_methods(base)
       base.include(InstanceMethods)
     end
-  
+
     def self.extended(base)
       alias_methods(base)
       base.include(InstanceMethods)
@@ -24,18 +26,18 @@ module ReeDao
         proc { |hash|
           if @opts[:schema_mapper]
             entity = @opts[:schema_mapper].db_load(hash)
-  
+
             if @opts[:mode] == :write
               set_persistence_state(entity, hash)
             end
-    
+
             entity
           else
             hash
           end
         }
       end
-      
+
       # override methods
       def find(id, mode = :write, mapper: nil)
         where(primary_key => id).first(mode, mapper: mapper)
@@ -83,7 +85,7 @@ module ReeDao
         end
 
         key = insert_conflict(opts).insert(raw)
-        
+
         set_entity_primary_key(entity, raw, key)
         set_persistence_state(entity, raw)
 
@@ -143,7 +145,7 @@ module ReeDao
           __original_delete
         end
       end
-      
+
       def with_lock
         for_update
       end
@@ -153,7 +155,7 @@ module ReeDao
       def primary_key
         @opts[:primary_key] || :id
       end
-      
+
       def with_mapper(mode, mapper)
         clone(
           mode: mode, schema_mapper: mapper || @opts[:schema_mapper]
