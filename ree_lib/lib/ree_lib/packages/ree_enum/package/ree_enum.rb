@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module ReeEnum
+  include Ree::PackageDSL
+
   package
 end
 

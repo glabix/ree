@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module ReeMapper
+  include Ree::PackageDSL
+	
   package do
     depends_on :ree_string
     depends_on :ree_datetime

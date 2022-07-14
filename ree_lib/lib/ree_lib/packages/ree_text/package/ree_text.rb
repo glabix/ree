@@ -3,6 +3,8 @@
 require 'loofah'
 
 module ReeText
+  include Ree::PackageDSL
+	
   package do
     depends_on :ree_hash
     depends_on :ree_object

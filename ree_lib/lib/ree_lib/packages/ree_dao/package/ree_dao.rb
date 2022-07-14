@@ -1,6 +1,8 @@
 require 'sequel'
 
 module ReeDao
+  include Ree::PackageDSL
+	
   package do
     depends_on :ree_mapper
     depends_on :ree_string
