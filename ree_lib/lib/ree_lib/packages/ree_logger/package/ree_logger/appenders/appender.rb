@@ -8,7 +8,7 @@ class ReeLogger::Appender
     @formatter = formatter
   end
 
-  def append(log_event, progname)
+  def append(log_event, progname = nil)
     raise NotImplementedError, "should be implemented in derived class"
   end
 end

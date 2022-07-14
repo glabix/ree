@@ -47,9 +47,12 @@ class ReeLogger::FileAppender < ReeLogger::Appender
     )
   end
 
-  def append(event, progname)
+  contract(ReeLogger::LogEvent, Nilor[String] => nil)
+  def append(event, progname = nil)
     message = @formatter.format(event, progname)
     logger << (message + "\n")
     file.flush if auto_flush
+
+    nil
   end
 end

@@ -44,7 +44,7 @@ class ReeLogger::MultiLogger < Logger
     if block_given?
       @silenced = true
       block.call
-      unsilence!
+      unsilence
     else
       @silenced = true
     end

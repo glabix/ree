@@ -17,6 +17,14 @@
       "imports": [
 
       ]
+    },
+    {
+      "target": "now",
+      "package_name": "ree_datetime",
+      "as": "now",
+      "imports": [
+
+      ]
     }
   ]
 }
