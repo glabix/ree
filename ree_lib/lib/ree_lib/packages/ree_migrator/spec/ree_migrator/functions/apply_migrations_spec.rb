@@ -38,5 +38,12 @@ RSpec.describe :apply_migrations do
         File.join(__dir__, '../../data_migrations')
       )
     )
+
+    data_first = db[:test_table].first[:id]
+    data_second = db[:test_table][1][:id]
+
+    expect(db[:test_table].columns.first).to eq(:id)
+    expect(data_first).to eq(12345)
+    expect(data_second).to eq(555555)
   }
 end
