@@ -61,6 +61,7 @@ module ReeDao
 
       def put(entity)
         raw = @opts[:schema_mapper].db_dump(entity)
+        remove_null_primary_key(raw)
         key = insert(raw)
 
         set_entity_primary_key(entity, raw, key)
@@ -71,6 +72,7 @@ module ReeDao
 
       def put_with_conflict(entity, opts = {})
         raw = @opts[:schema_mapper].db_dump(entity)
+        remove_null_primary_key(raw)
 
         if opts.key?(:update) && opts[:update].empty?
           opts.delete(:update)
@@ -154,6 +156,20 @@ module ReeDao
 
       def primary_key
         @opts[:primary_key] || :id
+      end
+
+      def remove_null_primary_key(raw)
+        return if primary_key.is_a?(Array)
+
+        if raw.has_key?(primary_key) && raw[primary_key].nil?
+          raw.delete(primary_key)
+        else
+          str_key = primary_key.to_s
+
+          if raw.has_key?(str_key) && raw[str_key].nil?
+            raw.delete(str_key)
+          end
+        end
       end
 
       def with_mapper(mode, mapper)
