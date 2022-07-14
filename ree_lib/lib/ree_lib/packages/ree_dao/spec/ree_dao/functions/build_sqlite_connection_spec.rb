@@ -29,14 +29,22 @@ RSpec.describe :build_sqlite_connection do
 
   Ree.enable_irb_mode
 
-  class ReeDao::Db
+  module ReeDaoTest
+    include Ree::PackageDSL
+
+    package do
+      depends_on :ree_dao
+    end
+  end
+
+  class ReeDaoTest::Db
     include Ree::BeanDSL
 
     bean :db do
       singleton
       factory :build
 
-      link :build_sqlite_connection
+      link :build_sqlite_connection, from: :ree_dao
     end
 
     def build
@@ -44,7 +52,7 @@ RSpec.describe :build_sqlite_connection do
     end
   end
 
-  class ReeDao::User
+  class ReeDaoTest::User
     include ReeDto::EntityDSL
 
     properties(
@@ -56,7 +64,7 @@ RSpec.describe :build_sqlite_connection do
     attr_accessor :name
   end
 
-  class ReeDao::UsersDao
+  class ReeDaoTest::UsersDao
     include ReeDao::DSL
 
     dao :users_dao do
@@ -65,17 +73,17 @@ RSpec.describe :build_sqlite_connection do
 
     table :users
 
-    schema ReeDao::User do
+    schema ReeDaoTest::User do
       integer :id, null: true
       string :name
       integer :age
     end
   end
 
-  let(:dao) { ReeDao::UsersDao.new }
+  let(:dao) { ReeDaoTest::UsersDao.new }
 
   it {
-    user = ReeDao::User.new(name: 'John', age: 30)
+    user = ReeDaoTest::User.new(name: 'John', age: 30)
     dao.put(user)
 
     u = dao.find(user.id)
@@ -88,12 +96,12 @@ RSpec.describe :build_sqlite_connection do
   it {
     dao.delete_all
 
-    user = ReeDao::User.new(name: 'John', age: 30)
+    user = ReeDaoTest::User.new(name: 'John', age: 30)
     dao.put(user)
 
     u = dao.find(user.id)
 
-    expect(u).to be_a(ReeDao::User)
+    expect(u).to be_a(ReeDaoTest::User)
 
     state = u.instance_variable_get(:@persistence_state)
 
@@ -106,25 +114,25 @@ RSpec.describe :build_sqlite_connection do
   it {
     dao.delete_all
 
-    user = ReeDao::User.new(name: 'John', age: 30)
+    user = ReeDaoTest::User.new(name: 'John', age: 30)
     dao.put(user)
 
     u = dao.find(user.id, :read)
-    expect(u).to be_a(ReeDao::User)
+    expect(u).to be_a(ReeDaoTest::User)
     expect(u.instance_variable_get(:@persistence_state)).to eq(nil)
 
     all = dao.all
     expect(all.size).to eq(1)
     u = all.first
 
-    expect(u).to be_a(ReeDao::User)
+    expect(u).to be_a(ReeDaoTest::User)
     expect(u.instance_variable_get(:@persistence_state)).to be_a(Hash)
   }
 
   it {
     dao.delete_all
 
-    user = ReeDao::User.new(name: 'John', age: 30)
+    user = ReeDaoTest::User.new(name: 'John', age: 30)
     dao.put(user)
 
     user.name = 'Doe'
