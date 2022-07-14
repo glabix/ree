@@ -5,6 +5,7 @@ class ReeMigrator::ApplyMigration
 
   fn :apply_migration do
     link :now, from: :ree_datetime
+    link :logger, from: :ree_logger
   end
 
   contract(
@@ -17,6 +18,7 @@ class ReeMigrator::ApplyMigration
       raise ArgumentError.new("file not found: #{migration_path}")
     end
 
+    logger.info("Applying migration: #{migration_path}")
     load(migration_path)
 
     migration = Sequel::Migration.descendants.last

@@ -15,16 +15,12 @@ class ReeMigrator::CreateMigrationsTable
   contract(Sequel::Database => nil)
   def call(connection)
     if !connection.tables.include?(:migrations)
-      connection[
-        %Q(
-          CREATE TABLE migrations (
-            "id" integer PRIMARY KEY,
-            "filename" text,
-            "created_at" TIMESTAMP NOT NULL,
-            "type" VARCHAR(8)
-          )
-        )
-      ].all
+      connection.create_table :migrations do
+        primary_key :id
+        column :filename, "varchar(1024)", null: false
+        column :created_at, DateTime, null: false
+        column :type, "varchar(16)", null: false
+      end
     end
 
     nil

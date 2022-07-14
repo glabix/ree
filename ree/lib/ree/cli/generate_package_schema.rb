@@ -1,12 +1,17 @@
+require 'fileutils'
+
 module Ree
   module CLI
     class GeneratePackageSchema
       class << self
         def run(package_name:, project_path:, include_objects: false, silence: false)
+          ENV['REE_SKIP_ENV_VARS_CHECK'] = 'true'
+
           path = Ree.locate_packages_schema(project_path)
           dir = Pathname.new(path).dirname.to_s
 
           Ree.init(dir)
+          Ree.set_dev_mode
 
           if package_name.strip.empty?
             puts("Generating Package.schema.json for all packages") if !silence
@@ -26,6 +31,11 @@ module Ree
           schema_path = Ree::PathHelper.abs_package_schema_path(package)
 
           if include_objects
+            schemas_path = Ree::PathHelper.abs_package_object_schemas_path(package)
+
+            FileUtils.rm_rf(schemas_path)
+            FileUtils.mkdir_p(schemas_path)
+
             package.objects.each do |object|
               Ree.write_object_schema(package.name, object.name)
 

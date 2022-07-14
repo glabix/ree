@@ -3,6 +3,7 @@
 require 'logger'
 require 'pathname'
 require_relative 'ree/version'
+require 'fileutils'
 
 module Ree
   autoload :Args, 'ree/args'
@@ -119,6 +120,10 @@ module Ree
     # Ree will use schema files to load packages and registered objects
     def set_performance_mode
       @performance_mode = true
+    end
+
+    def set_dev_mode
+      @performance_mode = false
     end
 
     def performance_mode?
@@ -243,6 +248,16 @@ module Ree
 
         facade.load_entire_package(package.name)
         facade.write_package_schema(package.name)
+
+        schemas_path = Ree::PathHelper.abs_package_object_schemas_path(package)
+
+        FileUtils.rm_rf(schemas_path)
+        FileUtils.mkdir_p(schemas_path)
+
+        package.objects.each do |object|
+          next if !object.schema_rpath
+          write_object_schema(package.name, object.name)
+        end
       end
     end
 
