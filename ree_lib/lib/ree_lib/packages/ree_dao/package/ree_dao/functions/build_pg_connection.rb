@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'sequel/adapters/postgres'
-
 class ReeDao::BuildPgConnection
   include Ree::FnDSL
 
@@ -30,9 +28,10 @@ class ReeDao::BuildPgConnection
     },
     Ksplat[
       RestKeys => Any # inherited from `build_connection` opts
-    ] => Sequel::Postgres::Database
+    ] => Sequel::Database
   )
   def call(conn_opts, **opts)
+    require 'sequel/adapters/postgres'
     build_connection(conn_opts, **opts)
   end
 end

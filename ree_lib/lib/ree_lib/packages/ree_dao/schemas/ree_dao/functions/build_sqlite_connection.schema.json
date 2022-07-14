@@ -12,7 +12,7 @@
       "throws": [
 
       ],
-      "return": "Sequel::SQLite::Database",
+      "return": "Sequel::Database",
       "args": [
         {
           "arg": "conn_opts",
