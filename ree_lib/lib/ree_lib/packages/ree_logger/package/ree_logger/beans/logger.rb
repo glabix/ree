@@ -25,13 +25,13 @@ class ReeLogger::Logger
       end
 
       appenders << FileAppender.new(
-        config.levels.file, nil, config.file_path
+        config.levels.file, nil, config.file_path, auto_flush: config.file_auto_flush
       )
     end
 
     if config.levels.stdout
       appenders << StdoutAppender.new(
-        config.levels.file, nil
+        config.levels.stdout, nil
       )
     end
 

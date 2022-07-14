@@ -22,8 +22,8 @@ class ReeLogger::FileAppender < ReeLogger::Appender
     String,
     Ksplat[
       auto_flush?: Bool,
-      log_file_count: Integer,
-      log_file_size: Integer
+      log_file_count?: Integer,
+      log_file_size?: Integer
     ] => Any
   )
   def initialize(level, formatter, file_path, **opts)
