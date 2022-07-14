@@ -44,7 +44,7 @@ class Ree::PackagesFacade
     object = package.get_object(object_name)
 
     if !object && perf_mode?(package)
-      raise Ree::Error.new("Bean :#{object_name} for package :#{package_name} not found")
+      raise Ree::Error.new("Ree object :#{object_name} for package :#{package_name} not found")
     end
 
     object
