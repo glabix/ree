@@ -4,6 +4,8 @@ require 'rainbow'
 require 'binding_of_caller'
 
 module ReeLogger
+  include Ree::PackageDSL
+
   package do
     depends_on :ree_object
     depends_on :ree_datetime
