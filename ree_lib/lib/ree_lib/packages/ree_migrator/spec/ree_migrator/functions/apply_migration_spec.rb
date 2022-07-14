@@ -38,4 +38,20 @@ RSpec.describe :apply_migration do
     expect(migration[:created_at]).to be_a(DateTime)
     expect(migration[:type]).to eq('schema')
   }
+
+  it {
+    db = ReeMigratorTest::Db.new
+
+    apply_migration(
+      db,
+      File.expand_path(
+        File.join(__dir__, '../../data_migrations/create_data.rb')
+      ),
+      :data
+    )
+
+    data = db[:test_table].first[:id]
+
+    expect(data).to eq(12345)
+  }
 end
