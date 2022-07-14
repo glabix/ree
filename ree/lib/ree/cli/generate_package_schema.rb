@@ -5,6 +5,8 @@ module Ree
     class GeneratePackageSchema
       class << self
         def run(package_name:, project_path:, include_objects: false, silence: false)
+          ENV['REE_SKIP_ENV_VARS_CHECK'] = 'true'
+
           path = Ree.locate_packages_schema(project_path)
           dir = Pathname.new(path).dirname.to_s
 
