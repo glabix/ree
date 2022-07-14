@@ -121,6 +121,10 @@ module Ree
       @performance_mode = true
     end
 
+    def set_dev_mode
+      @performance_mode = false
+    end
+
     def performance_mode?
       !!@performance_mode
     end
