@@ -2,11 +2,14 @@
   "schema_type": "package",
   "ree_version": "0.1.0",
   "name": "ree_migrator",
-  "entry_path": "bounded_contexts/libs/ree_migrator/package/ree_migrator.rb",
+  "entry_path": "packages/ree_migrator/package/ree_migrator.rb",
   "tags": [
     "ree_migrator"
   ],
   "depends_on": [
+    {
+      "name": "ree_date"
+    },
     {
       "name": "ree_datetime"
     },

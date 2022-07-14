@@ -1,5 +1,0 @@
-#!/usr/bin/env ruby
-require "bundler/setup"
-require "ree"
-
-Ree.init(__dir__, irb: true)

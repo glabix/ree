@@ -20,15 +20,15 @@ class ReeMigrator::ApplyMigration
     load(migration_path)
 
     migration = Sequel::Migration.descendants.last
-    connection.instance_eval(&migration.up)
-
     migration_name = File.basename(migration_path)
 
-    connection[:schema_migrations].insert(
+    connection.instance_eval(&migration.up)
+
+    connection[:migrations].insert({
       filename: migration_name,
-      type: type,
+      type: type.to_s,
       created_at: now
-    )
+    })
 
     nil
   end
