@@ -31,6 +31,14 @@
   ],
   "links": [
     {
+      "target": "logger",
+      "package_name": "ree_logger",
+      "as": "logger",
+      "imports": [
+
+      ]
+    },
+    {
       "target": "now",
       "package_name": "ree_datetime",
       "as": "now",

@@ -31,7 +31,7 @@ class ReeLogger::Logger
 
     if config.levels.stdout
       appenders << StdoutAppender.new(
-        config.levels.file, nil
+        config.levels.stdout, nil
       )
     end
 
