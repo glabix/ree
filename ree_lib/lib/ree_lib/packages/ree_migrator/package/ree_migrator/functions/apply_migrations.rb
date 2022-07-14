@@ -28,8 +28,8 @@ class ReeMigrator::ApplyMigrations
     migrations = YAML.load(File.read(migrations_yml_path))
     return [] if is_blank(migrations)
 
-    applied_schema_migrations = indexed_migrations(SCHEMA)
-    applied_data_migrations = indexed_migrations(DATA)
+    applied_schema_migrations = indexed_migrations(connection, SCHEMA)
+    applied_data_migrations = indexed_migrations(connection, DATA)
     schema_migrations = Dir.glob(File.join(schema_migrations_path, RUBY_EXT))
     data_migrations  = Dir.glob(File.join(data_migrations_path, RUBY_EXT))
 
@@ -68,7 +68,7 @@ class ReeMigrator::ApplyMigrations
 
   private
 
-  def indexed_migrations(type)
+  def indexed_migrations(connection, type)
     connection[:migrations]
       .select_map(:filename)
       .where(type: type)
