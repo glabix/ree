@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "group_by",
+  "path": "packages/ree_array/package/ree_array/functions/group_by.rb",
+  "mount_as": "fn",
+  "class": "ReeArray::GroupBy",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "HashOf[Any, ArrayOf[Any]]",
+      "args": [
+        {
+          "arg": "list",
+          "type": "ArrayOf[Any]"
+        },
+        {
+          "arg": "proc",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

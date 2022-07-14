@@ -14,12 +14,20 @@
   ],
   "objects": [
     {
+      "name": "group_by",
+      "schema": "packages/ree_array/schemas/ree_array/functions/group_by.schema.json"
+    },
+    {
       "name": "in_groups",
       "schema": "packages/ree_array/schemas/ree_array/functions/in_groups.schema.json"
     },
     {
       "name": "in_groups_of",
       "schema": "packages/ree_array/schemas/ree_array/functions/in_groups_of.schema.json"
+    },
+    {
+      "name": "index_by",
+      "schema": "packages/ree_array/schemas/ree_array/functions/index_by.schema.json"
     },
     {
       "name": "split_by",
