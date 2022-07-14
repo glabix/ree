@@ -18,7 +18,8 @@ class ReeMigrator::CreateMigrationsTable
       connection[
         %Q(
           CREATE TABLE migrations (
-            "filename" text PRIMARY KEY,
+            "id" integer PRIMARY KEY,
+            "filename" text,
             "created_at" TIMESTAMP NOT NULL,
             "type" VARCHAR(8)
           )

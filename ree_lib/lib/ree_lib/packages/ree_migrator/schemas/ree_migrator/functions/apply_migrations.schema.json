@@ -44,9 +44,25 @@
       ]
     },
     {
+      "target": "index_by",
+      "package_name": "ree_array",
+      "as": "index_by",
+      "imports": [
+
+      ]
+    },
+    {
       "target": "is_blank",
       "package_name": "ree_object",
       "as": "is_blank",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "logger",
+      "package_name": "ree_logger",
+      "as": "logger",
       "imports": [
 
       ]

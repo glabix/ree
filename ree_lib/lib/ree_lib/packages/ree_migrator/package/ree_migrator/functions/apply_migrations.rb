@@ -5,8 +5,9 @@ class ReeMigrator::ApplyMigrations
 
   fn :apply_migrations do
     link :is_blank, from: :ree_object
+    link :index_by, from: :ree_array
     link :apply_migration
-    # link :logger, from: :ree_logger
+    link :logger, from: :ree_logger
   end
 
   RUBY_EXT = '*.rb'
@@ -23,7 +24,7 @@ class ReeMigrator::ApplyMigrations
     String => ArrayOf[String]
   ).throws(InvalidMigrationYmlErr, MigrationNotFoundErr)
   def call(connection, migrations_yml_path, schema_migrations_path, data_migrations_path)
-    # logger.info("Parsing migrations.yml from #{migrations_yml_path}")
+    logger.info("Parsing migrations.yml from #{migrations_yml_path}")
 
     migrations = YAML.load(File.read(migrations_yml_path))
     return [] if is_blank(migrations)
@@ -69,10 +70,12 @@ class ReeMigrator::ApplyMigrations
   private
 
   def indexed_migrations(connection, type)
-    connection[:migrations]
-      .select_map(:filename)
+    migrations = connection[:migrations]
+      .select(:filename)
       .where(type: type)
-      .index_by { _1[:filename] }
+      .all
+
+    index_by(migrations) { _1[:filename] }
   end
 
   def run_migration(connection, migration_type, migration_name, applied_migrations, migrations, migrations_path)

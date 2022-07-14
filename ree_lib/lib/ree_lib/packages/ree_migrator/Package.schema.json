@@ -8,10 +8,16 @@
   ],
   "depends_on": [
     {
+      "name": "ree_array"
+    },
+    {
       "name": "ree_date"
     },
     {
       "name": "ree_datetime"
+    },
+    {
+      "name": "ree_logger"
     },
     {
       "name": "ree_object"

@@ -29,21 +29,21 @@ RSpec.describe :apply_migrations do
     apply_migrations(
       db,
       File.expand_path(
-        File.join(__dir__, '../../migrations.yml')
+        File.join(__dir__, '../../sample_migrations/migrations.yml')
       ),
       File.expand_path(
-        File.join(__dir__, '../../schema_migrations')
+        File.join(__dir__, '../../sample_migrations/schema_migrations')
       ),
       File.expand_path(
-        File.join(__dir__, '../../data_migrations')
+        File.join(__dir__, '../../sample_migrations/data_migrations')
       )
     )
 
-    data_first = db[:test_table].first[:id]
-    data_second = db[:test_table][1][:id]
+    data_first = db[:test_table].order(:id).first[:id]
+    data_second = db[:test_table].order(:id).all[1][:id]
 
     expect(db[:test_table].columns.first).to eq(:id)
-    expect(data_first).to eq(12345)
-    expect(data_second).to eq(555555)
+    expect(data_first).to eq(1)
+    expect(data_second).to eq(2)
   }
 end

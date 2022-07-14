@@ -27,31 +27,32 @@ RSpec.describe :apply_migration do
     apply_migration(
       db,
       File.expand_path(
-        File.join(__dir__, '../../schema_migrations/create_users.rb')
+        File.join(__dir__, '../../sample_migrations/schema_migrations/create_test_table.rb')
       ),
       :schema
     )
 
-    migration = db[:migrations].first
-
-    expect(migration[:filename]).to eq("create_users.rb")
-    expect(migration[:created_at]).to be_a(DateTime)
-    expect(migration[:type]).to eq('schema')
-  }
-
-  it {
-    db = ReeMigratorTest::Db.new
-
     apply_migration(
       db,
       File.expand_path(
-        File.join(__dir__, '../../data_migrations/create_data.rb')
+        File.join(__dir__, '../../sample_migrations/data_migrations/populate_test_table.rb')
       ),
       :data
     )
 
-    data = db[:test_table].first[:id]
+    migrations = db[:migrations].order(:id).all
+    migration = migrations.first
 
-    expect(data).to eq(12345)
+    expect(migration[:id]).to be_a(Integer)
+    expect(migration[:filename]).to eq("create_test_table.rb")
+    expect(migration[:created_at]).to be_a(DateTime)
+    expect(migration[:type]).to eq('schema')
+
+    migration = migrations.last
+
+    expect(migration[:id]).to be_a(Integer)
+    expect(migration[:filename]).to eq("populate_test_table.rb")
+    expect(migration[:created_at]).to be_a(DateTime)
+    expect(migration[:type]).to eq('data')
   }
 end

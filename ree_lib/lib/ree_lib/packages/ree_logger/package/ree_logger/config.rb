@@ -6,7 +6,9 @@ class ReeLogger::Config
   bean :config do
     singleton
     factory :build
+
     link :to_obj, from: :ree_object
+    link :is_blank, from: :ree_object
     link :validate_inclusion, from: :ree_validator
   end
 
@@ -50,7 +52,7 @@ class ReeLogger::Config
   end
 
   def parse_level(level)
-    return if level.nil?
+    return if is_blank(level)
     validate_inclusion(level, LEVELS)
     level.to_sym
   end
