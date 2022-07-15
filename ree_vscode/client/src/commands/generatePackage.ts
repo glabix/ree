@@ -3,6 +3,7 @@ import * as vscode from 'vscode'
 import { getProjectRootDir } from '../utils/packageUtils'
 import { isReeInstalled, ExecCommand } from '../utils/reeUtils'
 import { loadPackagesSchema } from '../utils/packagesUtils'
+import { buildFullArgsArray } from './generatePackageSchema'
 import { PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
 
@@ -99,7 +100,7 @@ function execGeneratePackage(rootProjectDir: string, relativePath: string, name:
       code: child.status
     }
   } catch(e) {
-    vscode.window.showInformationMessage(`Error. ${e}`)
+    vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
   }
 }

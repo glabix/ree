@@ -107,28 +107,25 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
 export function execGeneratePackageSchema(rootProjectDir: string, name: string): ExecCommand | undefined {
   try {
     let spawnSync = require('child_process').spawnSync
-    let argsArr = null
-
-    if (name) {
-      argsArr = ['gen.package_json', name.toString(), '--project_path', rootProjectDir, '--trace']
-    } else {
-      argsArr = ['gen.package_json', '--project_path', rootProjectDir, '--trace']
-    }
-
-    let child = spawnSync(
-      'ree',
-      argsArr,
-      { cwd: rootProjectDir }
-    )
+    const appDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
+    const projectDir = appDirectory ? appDirectory : rootProjectDir
+    const fullArgsArr = buildFullArgsArray(projectDir, getArgsArray(projectDir, name))
+    const child = spawnSync(...fullArgsArr)
 
     return {
-      message: child.status === 0 ? child.stdout.toString() : child.stderr.toString(),
+      message: child.status === 0 ? child?.stdout?.toString() : child?.stderr?.toString(),
       code: child.status
     }
   } catch(e) {
-    vscode.window.showInformationMessage(`Error. ${e}`)
+    vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
   }
+}
+
+function getArgsArray(projectDir: string, name?: string) {
+  if (name) { return ['gen.package_json', name.toString(), '--project_path', projectDir, '--trace'] }
+  
+  return  ['gen.package_json', '--project_path', projectDir, '--trace']
 }
 
 function getCurrentPackage(fileName?: string): PackageFacade | null {
@@ -147,5 +144,42 @@ function getCurrentPackage(fileName?: string): PackageFacade | null {
   if (!currentPackage) { return }
 
   return currentPackage
+}
+
+export function buildFullArgsArray(rootProjectDir: string, argsArray: string[]): Array<any> {
+  let projectDir = rootProjectDir
+  const dockerPresented = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('presented') as boolean
+  const containerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
+  const appDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
+
+  if (dockerPresented) {
+    projectDir = appDirectory
+    return [
+      'docker', [
+        'exec',
+        '-i',
+        '-e',
+        'REE_SKIP_ENV_VARS_CHECK=true',
+        '-w',
+        '/app',
+        containerName,
+        'bundle',
+        'exec',
+        'ree',
+        ...argsArray
+      ]
+    ]
+  } else {
+    return [
+      'env', [
+        'REE_SKIP_ENV_VARS_CHECK=true',
+        'ree',
+        ...argsArray,
+      ],
+      {
+        cwd: projectDir
+      }
+    ]
+  }
 }
 
