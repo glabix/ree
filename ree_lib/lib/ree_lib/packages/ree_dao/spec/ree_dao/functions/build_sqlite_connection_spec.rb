@@ -17,11 +17,21 @@ RSpec.describe :build_sqlite_connection do
       connection.drop_table(:users)
     end
 
+    if connection.table_exists?(:products)
+      connection.drop_table(:products)
+    end
+
     connection.create_table :users do
       primary_key :id
 
       column  :name, 'varchar(256)'
       column  :age, :integer
+    end
+
+    connection.create_table :products do
+      primary_key :id
+
+      column  :title, 'varchar(256)'
     end
 
     connection.disconnect
@@ -64,6 +74,17 @@ RSpec.describe :build_sqlite_connection do
     attr_accessor :name
   end
 
+  class ReeDaoTest::Product
+    include ReeDto::EntityDSL
+
+    properties(
+      id: Nilor[Integer],
+      title: String,
+    )
+
+    attr_accessor :title
+  end
+
   class ReeDaoTest::UsersDao
     include ReeDao::DSL
 
@@ -80,7 +101,21 @@ RSpec.describe :build_sqlite_connection do
     end
   end
 
+  class ReeDaoTest::ProductsDao
+    include ReeDao::DSL
+
+    dao :products_dao do
+      link :db
+    end
+
+    schema ReeDaoTest::Product do
+      integer :id, null: true
+      string :title
+    end
+  end
+
   let(:dao) { ReeDaoTest::UsersDao.new }
+  let(:products_dao) { ReeDaoTest::ProductsDao.new }
 
   it {
     user = ReeDaoTest::User.new(name: 'John', age: 30)
@@ -140,5 +175,21 @@ RSpec.describe :build_sqlite_connection do
 
     user = dao.find(user.id)
     expect(user.name).to eq('Doe')
+  }
+
+  it {
+    dao.delete_all
+    products_dao.delete_all
+
+    user = ReeDaoTest::User.new(name: 'John', age: 30)
+    dao.put(user)
+
+    product = ReeDaoTest::Product.new(title: 'Product')
+    products_dao.put(product)
+
+    user = dao.find(user.id)
+    product = products_dao.find(product.id)
+    expect(user.name).to eq('John')
+    expect(product.title).to eq('Product')
   }
 end
