@@ -36,7 +36,7 @@ class Ree::ObjectCompiler
       eval_list.push(indent + "end")
       eval_list.push("\n")
     end
-    
+
     if object.factory || object.singleton
       eval_list.push(indent + "def self.new(**kwargs)")
 
@@ -72,7 +72,7 @@ class Ree::ObjectCompiler
 
     eval_list.push("\n")
     eval_list.push(indent + "def initialize(**kwargs)")
-    
+
     indent = inc_indent(indent)
 
     links.each do |_|
@@ -123,7 +123,7 @@ class Ree::ObjectCompiler
     klass.class_eval <<-ruby_eval, __FILE__, __LINE__ + 1
       #{str}
     ruby_eval
-    
+
     # compile all linked objects
     links.each do |link|
       pckg = @packages_facade.get_loaded_package(link.package_name)
@@ -138,7 +138,7 @@ class Ree::ObjectCompiler
   end
 
   private
-    
+
   def inc_indent(indent)
     indent += "  "
   end
