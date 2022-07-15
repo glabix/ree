@@ -4,7 +4,7 @@ class Ree::PackagesFacade
   include Ree::Args
 
   attr_reader :packages_store, :package_loader
-  
+
   def initialize
     load_packages_schema
     @package_loader = Ree::PackageLoader.new(@packages_store)
@@ -44,7 +44,7 @@ class Ree::PackagesFacade
     object = package.get_object(object_name)
 
     if !object && perf_mode?(package)
-      raise Ree::Error.new("Bean :#{object_name} for package :#{package_name} not found")
+      raise Ree::Error.new("Ree object :#{object_name} for package :#{package_name} not found")
     end
 
     object
@@ -56,11 +56,12 @@ class Ree::PackagesFacade
     Ree.logger.debug("write_package_schema(:#{package_name})")
 
     load_entire_package(package_name)
-
     package = get_package(package_name)
-    schema_path = Ree::PathHelper.abs_package_schema_path(package)
-    
-    Ree::PackageSchemaBuilder.new.call(package, schema_path)
+
+    if package.dir
+      schema_path = Ree::PathHelper.abs_package_schema_path(package)
+      Ree::PackageSchemaBuilder.new.call(package, schema_path)
+    end
   end
 
   # @param [Symbol] package_name
@@ -73,7 +74,7 @@ class Ree::PackagesFacade
     if !object || (object && !object&.schema_rpath)
       raise Ree::Error.new("Object :#{object_name} schema path not found")
     end
-    
+
     schema_path = Ree::PathHelper.abs_object_schema_path(object)
 
     Ree::ObjectSchemaBuilder.new.call(object, schema_path)
@@ -84,7 +85,7 @@ class Ree::PackagesFacade
   def load_package_entry(package_name)
     package = @packages_store.get(package_name)
     return if package.loaded?
-    
+
     Ree.logger.debug("load_package_entry(:#{package_name})")
 
     load_file(
@@ -99,7 +100,7 @@ class Ree::PackagesFacade
   def load_package_object(package_name, object_name)
     package = get_loaded_package(package_name)
     load_package_entry(package_name)
-    
+
     object = get_object(package_name, object_name)
     return object if object && object.loaded?
 
@@ -121,12 +122,12 @@ class Ree::PackagesFacade
     end
 
     Ree.logger.debug("load_package_object(:#{package_name}, :#{object_name})")
-    
+
     if object.rpath
       object_path = Ree::PathHelper.abs_object_path(object)
       load_file(object_path, package_name)
     end
-    
+
     object
   end
 
@@ -144,6 +145,12 @@ class Ree::PackagesFacade
 
     Ree.logger.debug("read_package_schema_json(:#{package_name})")
     package = get_package(package_name)
+
+    if !package.dir
+      package.set_schema_loaded
+      return package
+    end
+
     schema_path = Ree::PathHelper.abs_package_schema_path(package)
     @loaded_schemas[package_name] = Ree::PackageSchemaLoader.new.call(schema_path, package)
   end
@@ -164,15 +171,21 @@ class Ree::PackagesFacade
 
   # @param [Symbol] package_name
   # @return [Ree::Package]
-  def get_package(package_name)
+  def get_package(package_name, raise_if_missing = true)
     check_arg(package_name, :package_name, Symbol)
     package = @packages_store.get(package_name)
 
-    if !package
+    if !package && raise_if_missing
       raise Ree::Error.new("Package :#{package_name} is not found in Packages.schema.json. Run `ree gen.packages_json` to update schema.", :package_schema_not_found)
     end
 
     package
+  end
+
+  # @param [Ree::Package] package
+  # @return [Ree::Package]
+  def store_package(package)
+    @packages_store.add_package(package)
   end
 
   # @param [String] path

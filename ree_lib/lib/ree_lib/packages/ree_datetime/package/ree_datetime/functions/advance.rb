@@ -32,7 +32,7 @@ class ReeDatetime::Advance
   def call(date_time, **opts)
     changed_date = advance(
       date_time.to_date,
-      **slice(opts, :years, :months, :quarters, :weeks, :days)
+      **slice(opts, [:years, :months, :quarters, :weeks, :days])
     )
 
     datetime_advanced_by_date = change(

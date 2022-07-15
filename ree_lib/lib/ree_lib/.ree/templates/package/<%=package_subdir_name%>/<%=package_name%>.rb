@@ -1,4 +1,6 @@
 module <%= Ree::StringUtils.camelize(package_name) %>
+  include Ree::PackageDSL
+
   package do
     # Example of usage:
     # tags ['wip']

@@ -10,30 +10,42 @@
     {
       "doc": "",
       "throws": [
-
+        "ArgumentError"
       ],
-      "return": "Or[Object, ArrayOf[Object], Date, Time, Numeric, String, FalseClass, TrueClass, NilClass, Symbol]",
+      "return": "Or[Object, ArrayOf[Object], Date, Time, Numeric, String, FalseClass, TrueClass, NilClass, Symbol, Module, Class]",
       "args": [
         {
           "arg": "obj",
           "type": "Any"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:include? => [:key0, .., :keyM => [:keyN, .., :keyZ]], :exclude? => [:key0, .., :keyM => [:keyN, .., :keyZ]], :global_exclude? => ArrayOf[Symbol]]"
         }
       ]
     }
   ],
   "links": [
     {
-      "target": "is_blank",
+      "target": "as_json",
       "package_name": "ree_object",
-      "as": "is_blank",
+      "as": "as_json",
+      "imports": [
+        "BASIC_TYPES"
+      ]
+    },
+    {
+      "target": "except",
+      "package_name": "ree_hash",
+      "as": "except",
       "imports": [
 
       ]
     },
     {
-      "target": "to_hash",
-      "package_name": "ree_object",
-      "as": "to_hash",
+      "target": "slice",
+      "package_name": "ree_hash",
+      "as": "slice",
       "imports": [
 
       ]

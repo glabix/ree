@@ -6,7 +6,6 @@ class ReeNumber::NumberToHuman
   fn :number_to_human do
     link :round_helper, import: -> { ROUND_MODES }
     link :number_to_rounded
-    link :slice, from: :ree_hash
     link :t, from: :ree_i18n
     link :number_to_delimited
     link :slice, from: :ree_hash
@@ -30,16 +29,16 @@ class ReeNumber::NumberToHuman
     is more readable by humans (e.g.: 1200000000 becomes "1.2
     Billion"). This is useful for numbers that can get very large
     (and too hard to read).
-    
+
     See <tt>number_to_human_size</tt> if you want to print a file
     size.
-    
+
     You can also define your own unit-quantifier names if you want
     to use other decimal units (e.g.: 1500 becomes "1.5
     kilometers", 0.150 becomes "150 milliliters", etc). You may
     define a wide range of unit quantifiers, even fractional ones
     (centi, deci, mili, etc).
-    
+
     ==== Options
     * <tt>:locale</tt> - Sets the locale to be used for formatting
       (defaults to current locale).
@@ -107,26 +106,26 @@ class ReeNumber::NumberToHuman
 
       number_to_human(1234567, precision: 1, separator: ',', significant: false)
       # => "1,2 Million"
-    
+
       number_to_human(500000000, precision: 5)
       # => "500 Million"
 
       number_to_human(12345012345, significant: false)
       # => "12.345 Billion"
-    
+
     Non-significant zeros after the decimal separator are stripped
     out by default (set <tt>:strip_insignificant_zeros</tt> to
     +false+ to change that):
-    
+
     number_to_human(12.00001)
     # => "12"
 
     number_to_human(12.00001, strip_insignificant_zeros: false)
     # => "12.0"
   DOC
-  
+
   contract(
-    Or[Integer, Float, String], 
+    Or[Integer, Float, String],
     Ksplat[
       units?: String,
       locale?: Symbol,
@@ -144,7 +143,7 @@ class ReeNumber::NumberToHuman
 
     number = round_helper(
       number,
-      **slice(options, :precision, :significant, :round_mode)
+      **slice(options, [:precision, :significant, :round_mode])
     )
 
     number = Float(number)
@@ -159,7 +158,7 @@ class ReeNumber::NumberToHuman
       number,
       **slice(
         options,
-        :precision, :significant, :strip_insignificant_zeros, :round_mode
+        [:precision, :significant, :strip_insignificant_zeros, :round_mode]
       )
     )
 
@@ -174,7 +173,7 @@ class ReeNumber::NumberToHuman
 
     number_to_delimited(
       result_number,
-      **slice(options, :separator, :delimiter)
+      **slice(options, [:separator, :delimiter])
     )
   end
 
@@ -186,15 +185,15 @@ class ReeNumber::NumberToHuman
     when Hash
       units[exp] || ""
     when String, Symbol
-      t("human.#{units}.#{exp}", locale: locale)
+      t("human.#{units}.#{exp}", locale: locale, default_by_locale: :en)
     else
-      t("human.decimal_units.#{exp}", count: number.to_i)
+      t("human.decimal_units.#{exp}", count: number.to_i, default_by_locale: :en)
     end
   end
 
   def calculate_exponent(number, locale, units)
     exponent = number != 0 ? Math.log10(number.abs).floor : 0
-    
+
     unit_exponents(units, locale).find { |e| exponent >= e } || 0
   end
 
@@ -203,7 +202,7 @@ class ReeNumber::NumberToHuman
     when Hash
       units
     when String, Symbol
-      t("human.#{units}", locale: locale, raise: true)
+      t("human.#{units}", locale: locale, raise: true, default_by_locale: :en)
     else
       raise ArgumentError, ":units must be a Hash or String translation scope."
     end.keys.map { |e_name| INVERTED_DECIMAL_UNITS[e_name] }.sort_by(&:-@)

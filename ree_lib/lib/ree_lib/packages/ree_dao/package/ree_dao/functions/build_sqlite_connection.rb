@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'sequel/adapters/sqlite'
 
 class ReeDao::BuildSqliteConnection
   include Ree::FnDSL
@@ -17,9 +16,10 @@ class ReeDao::BuildSqliteConnection
     },
     Ksplat[
       RestKeys => Any # inherited from `build_connection` opts
-    ] => Sequel::SQLite::Database
+    ] => Sequel::Database
   )
   def call(conn_opts, **opts)
+    require 'sequel/adapters/sqlite'
     build_connection(conn_opts.merge(adapter: 'sqlite'), **opts)
   end
 end

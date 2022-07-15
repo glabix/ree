@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "build_request_executor",
+  "path": "packages/ree_http/package/ree_http/functions/build_request_executor.rb",
+  "mount_as": "fn",
+  "class": "ReeHttp::BuildRequestExecutor",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Builds Net::HTTP object that could be further used for execution",
+      "throws": [
+
+      ],
+      "return": "Net::HTTP",
+      "args": [
+        {
+          "arg": "uri",
+          "type": "URI"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:timeout? => Integer, :write_timeout? => Integer, :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :proxy? => {:address => String, :port? => Integer, :username? => String, :password? => String}]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

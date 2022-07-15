@@ -9,11 +9,12 @@ RSpec.describe Ree::CLI::GeneratePackageSchema do
       subject.run(
         package_name: package_name,
         project_path: project_dir,
-        include_objects: true
+        include_objects: true,
+        silence: true
       )
 
       package_dir = File.join(project_dir, "bc", package_name)
-      
+
       FileUtils.cd(package_dir) do
         ensure_exists(Ree::PACKAGE_SCHEMA_FILE)
       end
@@ -24,10 +25,11 @@ RSpec.describe Ree::CLI::GeneratePackageSchema do
         subject.run(
           package_name: package_name,
           project_path: project_dir,
-          include_objects: true
+          include_objects: true,
+          silence: false
         )
       }
-      
+
       expect(output).to include(Ree::PACKAGE_SCHEMA_FILE)
     end
   end

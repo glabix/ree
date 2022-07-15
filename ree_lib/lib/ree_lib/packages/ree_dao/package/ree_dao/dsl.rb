@@ -38,23 +38,21 @@ module ReeDao::DSL
   module ClassMethods
     include Ree::Contracts::Core
     include Ree::Contracts::ArgContracts
-    
+
     contract Symbol, Block => Ree::Object
     def dao(name, &proc)
       if !block_given?
         raise Ree::Error.new("dao requires block to link specific db connection as :db => link :some_db, as: :db", :invalid_dsl_usage)
       end
 
-      path = caller[0].split(':').first
-
       dsl = Ree::ObjectDsl.new(
-        Ree.container.packages_facade, name, self, path, :object
+        Ree.container.packages_facade, name, self, :object
       )
 
       dsl.instance_exec(&proc)
 
       db_link = dsl.object.links.detect { _1.as == :db }
-      
+
       if !db_link
         raise Ree::Error.new("dao should link specific db connection as :db => link :some_db, as: :db", :invalid_dsl_usage)
       end
@@ -100,7 +98,7 @@ module ReeDao::DSL
         .call
         .use(:db_dump)
         .use(:db_load, dto: dto_class, &proc)
-        
+
       self.instance_variable_set(:@schema_mapper, mapper)
       nil
     end

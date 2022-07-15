@@ -1,0 +1,62 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "http_exec",
+  "path": "packages/ree_http/package/ree_http/functions/http_exec.rb",
+  "mount_as": "fn",
+  "class": "ReeHttp::HttpExec",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Sends HTTP request to a specified destination.\n\nOptions:\n  method - request method (:get, :post, :delete, :put, :patch, :head, :options)\n  url - request URL\n  headers - request headers\n  body - request body (String, Hash or File). Should not be used together with form data\n  form_data - request form data. Files are being sent with corresponding filenames\n  query_params - request query string params\n  basic_auth - sets basic auth credentials\n  strict_redirect_mode - see build_request_executor\n  redirects_count - see build_request_executor\n  timeout - see build_request_executor\n  force_ssl - see build_request_executor\n  write_timeout - see build_request_executor\n  ca_certs - see build_request_executor\n  proxy - see build_request_executor\n\nExamples usage:\n  http_exec('https://example.com', :get)\n  http_exec('https://example.com', :post, form_data: {name: 'John', file: file})\n  http_exec('https://example.com', :delete, basic_auth: {username: 'John', password: 'password'})\n  http_exec('http://example.com', :options, force_ssl: true)",
+      "throws": [
+
+      ],
+      "return": "Net::HTTPResponse",
+      "args": [
+        {
+          "arg": "method",
+          "type": "Or[get, post, put, patch, head, options, delete]"
+        },
+        {
+          "arg": "url",
+          "type": "String"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:headers? => HashOf[Or[String, Symbol], Or[String, Integer]], :body? => Or[String, Hash, File], :form_data? => HashOf[Or[Symbol, String], Or[Integer, Float, Bool, String, Array, File]], :write_timeout? => Integer, :timeout? => Integer, :redirects_count? => Integer, :strict_redirect_mode? => Bool, :query_params? => HashOf[Or[String, Symbol], Any], :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :basic_auth? => {:username => String, :password => String}, :bearer_token? => String, :proxy? => {:address => String, :port? => Integer, :username? => String, :password? => String}]"
+        },
+        {
+          "arg": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "build_request",
+      "package_name": "ree_http",
+      "as": "build_request",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "execute_request",
+      "package_name": "ree_http",
+      "as": "execute_request",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "slice",
+      "package_name": "ree_hash",
+      "as": "slice",
+      "imports": [
+
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "http_post",
+  "path": "packages/ree_http/package/ree_http/functions/http_post.rb",
+  "mount_as": "fn",
+  "class": "ReeHttp::HttpPost",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Sends POST HTTP request to a specified destination.\nSee http_exec for usage examples.",
+      "throws": [
+
+      ],
+      "return": "Net::HTTPResponse",
+      "args": [
+        {
+          "arg": "url",
+          "type": "String"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:headers? => HashOf[Or[String, Symbol], Or[String, Integer]], :body? => Or[String, Hash, File], :form_data? => HashOf[Or[Symbol, String], Or[Integer, Float, Bool, String, Array, File]], :write_timeout? => Integer, :timeout? => Integer, :redirects_count? => Integer, :strict_redirect_mode? => Bool, :query_params? => HashOf[Or[String, Symbol], Any], :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :basic_auth? => {:username => String, :password => String}, :bearer_token? => String, :proxy? => {:address => String, :port? => Integer, :username? => String, :password? => String}]"
+        },
+        {
+          "arg": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "http_exec",
+      "package_name": "ree_http",
+      "as": "http_exec",
+      "imports": [
+        "OPTS_CONTRACT"
+      ]
+    }
+  ]
+}

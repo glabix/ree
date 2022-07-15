@@ -8,7 +8,7 @@
   "factory": null,
   "methods": [
     {
-      "doc": "",
+      "doc": "Deeply freezes object.\n  \nExamples of usage:\n  deep_freeze(Object.new)",
       "throws": [
 
       ],

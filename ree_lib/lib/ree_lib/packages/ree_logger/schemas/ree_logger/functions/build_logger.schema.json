@@ -1,0 +1,39 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "build_logger",
+  "path": "packages/ree_logger/package/ree_logger/functions/build_logger.rb",
+  "mount_as": "fn",
+  "class": "ReeLogger::BuildLogger",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "ReeLogger::MultiLogger",
+      "args": [
+        {
+          "arg": "appenders",
+          "type": "ArrayOf[ReeLogger::Appender]"
+        },
+        {
+          "arg": "progname",
+          "type": "Nilor[String]"
+        },
+        {
+          "arg": "rate_limiter",
+          "type": "Nilor[ReeLogger::RateLimiter]"
+        },
+        {
+          "arg": "filter_words",
+          "type": "ArrayOf[String]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

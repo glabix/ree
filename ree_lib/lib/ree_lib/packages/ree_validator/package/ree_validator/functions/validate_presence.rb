@@ -5,23 +5,31 @@ class ReeValidator::ValidatePresence
 
   fn :validate_presence do
     link :t, from: :ree_i18n
-
-    def_error(:validation) { PresenceErr }
   end
 
-  contract(Any, Symbol => Bool).throws(PresenceErr)
-  def call(value, error_code)
+  PresenceErr = Class.new(StandardError)
+
+  contract(
+    Any,
+    Nilor[SubclassOf[StandardError]] => Bool
+  ).throws(PresenceErr)
+  def call(value, error = nil)
     if (value.nil? ||
       (value.is_a?(String) && value.strip.length == 0) ||
       (value.is_a?(Array) && value.size == 0) ||
       (value.is_a?(Hash) && value.size == 0) ||
       (value.is_a?(Set) && value.size == 0))
-      raise PresenceErr.new(
-        t('validator.presence.can_not_be_blank', default_by_locale: :en),
-        error_code
+
+      klass = error || PresenceErr
+
+      raise klass.new(
+        t(
+          'validator.presence.can_not_be_blank',
+          default_by_locale: :en
+        )
       )
     end
-      
+
     true
   end
 end

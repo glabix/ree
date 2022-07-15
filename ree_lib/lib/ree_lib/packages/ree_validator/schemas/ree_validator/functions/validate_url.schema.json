@@ -10,7 +10,7 @@
     {
       "doc": "",
       "throws": [
-        "ReeValidator::ValidateUrl::InvalidUrlErr"
+        "ReeValidator::ValidateUrl::UrlErr"
       ],
       "return": "Bool",
       "args": [
@@ -19,8 +19,8 @@
           "type": "String"
         },
         {
-          "arg": "error_code",
-          "type": "Symbol"
+          "arg": "error",
+          "type": "Nilor[SubclassOf[StandardError]]"
         },
         {
           "arg": "opts",

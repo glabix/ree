@@ -1,0 +1,22 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "default_formatter",
+  "path": "packages/ree_logger/package/ree_logger/formatters/default_formatter.rb",
+  "mount_as": "object",
+  "class": "ReeLogger::DefaultFormatter",
+  "factory": null,
+  "methods": [
+
+  ],
+  "links": [
+    {
+      "target": "not_blank",
+      "package_name": "ree_object",
+      "as": "not_blank",
+      "imports": [
+
+      ]
+    }
+  ]
+}

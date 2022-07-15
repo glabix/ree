@@ -55,7 +55,7 @@ class ReeNumber::NumberToRounded
       number, 
       **slice(
         options, 
-        :precision, :significant, :round_mode
+        [:precision, :significant, :round_mode]
       )
     )
 
@@ -87,7 +87,7 @@ class ReeNumber::NumberToRounded
       formatted_string = rounded_number
     end
 
-    delimited_number = number_to_delimited(formatted_string, **slice(options, :separator, :delimiter))
+    delimited_number = number_to_delimited(formatted_string, **slice(options, [:separator, :delimiter]))
     options[:strip_insignificant_zeros] ? format_number(delimited_number) : delimited_number
   end
 

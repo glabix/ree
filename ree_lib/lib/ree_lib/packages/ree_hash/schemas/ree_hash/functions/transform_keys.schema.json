@@ -8,7 +8,7 @@
   "factory": null,
   "methods": [
     {
-      "doc": "Transforms keys with passed parameter (block), deep transform is by default",
+      "doc": "Transforms keys with passed parameter (block). By default transforms deeply",
       "throws": [
 
       ],

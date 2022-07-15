@@ -5,7 +5,6 @@ class ReeDatetime::SecondsDiff
 
   fn :seconds_diff do
     link :round_helper, from: :ree_number, import: -> { ROUND_MODES }
-    link :slice, from: :ree_hash
   end
 
 

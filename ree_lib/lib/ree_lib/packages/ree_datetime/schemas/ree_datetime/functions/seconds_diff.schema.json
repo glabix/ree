@@ -37,14 +37,6 @@
       "imports": [
         "ROUND_MODES"
       ]
-    },
-    {
-      "target": "slice",
-      "package_name": "ree_hash",
-      "as": "slice",
-      "imports": [
-
-      ]
     }
   ]
 }

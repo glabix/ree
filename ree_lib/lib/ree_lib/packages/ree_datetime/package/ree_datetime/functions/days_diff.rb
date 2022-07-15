@@ -26,7 +26,10 @@ class ReeDatetime::DaysDiff
     d_delta = s_delta / DAY_SECONDS
     opts[:precision] = 0
 
-    round_helper(d_delta, **slice(opts, :precision, :round_mode)).to_i
+    round_helper(
+      d_delta,
+      **slice(opts, [:precision, :round_mode])
+    ).to_i
   end
 end
 

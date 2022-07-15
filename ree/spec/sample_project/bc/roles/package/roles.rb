@@ -1,4 +1,6 @@
 module Roles
+  include Ree::PackageDSL
+  
   package do
     tags       ['roles']
 

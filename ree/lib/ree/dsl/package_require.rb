@@ -6,6 +6,8 @@ def package_require(path)
   packages_facade = Ree.container.packages_facade
   package = packages_facade.get_package(package_name)
 
+  return false if package.dir.nil?
+
   path = File.join(
     Ree::PathHelper.abs_package_module_dir(package), list.join('/')
   )
@@ -28,6 +30,8 @@ def package_file_exists?(path)
   package_name = list.shift.to_sym
   packages_facade = Ree.container.packages_facade
   package = packages_facade.get_package(package_name)
+
+  return false if package.dir.nil?
 
   path = File.join(
     Ree::PathHelper.abs_package_module_dir(package), list.join('/')

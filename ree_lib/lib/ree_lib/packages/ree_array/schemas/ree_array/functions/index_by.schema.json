@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "index_by",
+  "path": "packages/ree_array/package/ree_array/functions/index_by.rb",
+  "mount_as": "fn",
+  "class": "ReeArray::IndexBy",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Hash",
+      "args": [
+        {
+          "arg": "list",
+          "type": "ArrayOf[Any]"
+        },
+        {
+          "arg": "proc",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

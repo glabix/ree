@@ -9,10 +9,13 @@ RSpec.describe :to_obj do
 
       def initialize
         @name = 'John'
+        @work = 'Company'
+        @array = [1, 'string', 3, { 'name' => 'Johny', 'last_name': 'Doe'}]
         @settings = Object.new
         @settings.instance_exec do
-          @pass = 'pass'
+          @name = 'Steven'
           @last_name = 'Doe'
+          @pass = 'pass'
         end
       end 
     end
@@ -101,6 +104,71 @@ RSpec.describe :to_obj do
       expect(obj[2].name).to eq('John')
       expect(obj2[2][1]).to be_a(Object)
       expect(obj2[2][1].name).to eq('John')
+    }
+  end
+
+  context "exclude option" do
+    it {
+      obj = to_obj(klass.new, exclude: [:name])
+
+      expect(obj.respond_to?(:name)).to be false
+      expect(obj.respond_to?(:work)).to be true
+    } 
+
+    it {
+      obj = to_obj(klass.new, exclude: [:name, {settings: [:pass]}])
+
+      expect(obj.respond_to?(:name)).to be false
+      expect(obj.respond_to?(:work)).to be true
+      expect(obj.settings.respond_to?(:pass)).to be false
+    }    
+  end
+
+  context "global exclude option" do
+    it {
+      obj = to_obj(klass.new, global_exclude: [:name])
+
+      expect(obj.respond_to?(:name)).to be false
+      expect(obj.settings.pass).to eq('pass')
+      expect(obj.settings.respond_to?(:name)).to be false
+      expect(obj.array[3].last_name).to eq('Doe')
+      expect(obj.array[3].respond_to?(:name)).to be false
+    }    
+  end
+
+  context "include option" do
+    it {
+      obj = to_obj(klass.new, include: [:name, :work])
+
+      expect(obj.name).to eq('John')
+      expect(obj.work).to eq('Company')
+      expect(obj.respond_to?(:array)).to be false
+      expect(obj.respond_to?(:settings)).to be false
+    }
+  end
+
+  context "same include and exclude hash" do
+    it {
+      obj = to_obj(klass.new, include: [:settings], exclude:[{settings: [:pass]}])
+
+      expect(obj.settings).to be_a(Object)
+      expect(obj.settings.name).to eq('Steven')
+      expect(obj.settings.respond_to?(:pass)).to be false
+      expect(obj.respond_to?(:work)).to be false
+    }
+  end
+
+  context "same include and exclude key" do
+    it {
+      expect {
+        to_obj(klass.new, include: [:name], exclude:[:name])
+      }.to raise_error(ArgumentError, /Exclude and include have the same values: /)
+    }
+
+    it {
+      expect {
+        to_obj(klass.new, include: [:name, :work], global_exclude:[:name])
+      }.to raise_error(ArgumentError, /Exclude and include have the same values: /)
     }
   end
 end

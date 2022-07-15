@@ -1,0 +1,38 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "config",
+  "path": "packages/ree_logger/package/ree_logger/config.rb",
+  "mount_as": "object",
+  "class": "ReeLogger::Config",
+  "factory": "build",
+  "methods": [
+
+  ],
+  "links": [
+    {
+      "target": "is_blank",
+      "package_name": "ree_object",
+      "as": "is_blank",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "to_obj",
+      "package_name": "ree_object",
+      "as": "to_obj",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "validate_inclusion",
+      "package_name": "ree_validator",
+      "as": "validate_inclusion",
+      "imports": [
+
+      ]
+    }
+  ]
+}

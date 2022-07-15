@@ -1,0 +1,51 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "execute_request",
+  "path": "packages/ree_http/package/ree_http/functions/execute_request.rb",
+  "mount_as": "fn",
+  "class": "ReeHttp::ExecuteRequest",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Executes prepared Net::HTTPRequest.\n\nOptional options:\n  strict_redirect_mode - raise RedirectMethodError if strict_redirect_mode=true (default)\n  otherwise redirects with GET method if response code in [300, 301, 302]\n\n  redirects_count - raise TooManyRedirectsError if we have more redirects than specified otherwise proceed redirects\n\n  timeout - wait response timeout (defaults to 60 seconds)\n\n  write_timeout - send request timeout (defaults to 30 seconds)\n\n  force_ssl - force SSL on\n\n  ca_certs - sets path of a CA certification files\n\n  proxy - set proxy server auth",
+      "throws": [
+        "ReeHttp::HttpExceptions::TooManyRedirectsError",
+        "ReeHttp::HttpExceptions::RedirectMethodError"
+      ],
+      "return": "Net::HTTPResponse",
+      "args": [
+        {
+          "arg": "request",
+          "type": "Net::HTTPRequest"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:write_timeout? => Integer, :timeout? => Integer, :redirects_count? => Integer, :strict_redirect_mode? => Bool, :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :proxy? => {:address => String, :port? => Integer, :username? => String, :password? => String}]"
+        },
+        {
+          "arg": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "build_request_executor",
+      "package_name": "ree_http",
+      "as": "build_request_executor",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "slice",
+      "package_name": "ree_hash",
+      "as": "slice",
+      "imports": [
+
+      ]
+    }
+  ]
+}

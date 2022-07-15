@@ -1,0 +1,74 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "http_patch",
+  "path": "packages/ree_http/package/ree_http/http_patch.rb",
+  "mount_as": "fn",
+  "class": "ReeHttp::HttpPatch",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Net::HTTPResponse",
+      "args": [
+        {
+          "arg": "url",
+          "type": "String"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:headers? => HashOf[Or[String, Symbol], Any], :body? => Or[HashOf[Or[Symbol, String], Or[Integer, Float, Bool, String, Hash]], String], :open_timeout? => Integer, :timeout? => Integer, :auth? => Ksplat[:basic? => ReeHttp::BasicAuth], :query_params? => HashOf[Or[String, Symbol], Any], :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :proxy? => ReeHttp::Proxy]"
+        },
+        {
+          "arg": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "add_auth",
+      "package_name": "ree_http",
+      "as": "add_auth",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "build_request",
+      "package_name": "ree_http",
+      "as": "build_request",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "build_requester",
+      "package_name": "ree_http",
+      "as": "build_requester",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "slice",
+      "package_name": "ree_hash",
+      "as": "slice",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "to_json",
+      "package_name": "ree_json",
+      "as": "to_json",
+      "imports": [
+
+      ]
+    }
+  ]
+}

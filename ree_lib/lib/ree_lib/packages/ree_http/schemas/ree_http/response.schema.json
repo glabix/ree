@@ -1,0 +1,15 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "response",
+  "path": "packages/ree_http/package/ree_http/response.rb",
+  "mount_as": "object",
+  "class": "ReeHttp::Response",
+  "factory": null,
+  "methods": [
+
+  ],
+  "links": [
+
+  ]
+}

@@ -2,6 +2,8 @@ ENV['accounts.string_var'] = 'string'
 ENV['accounts.integer_var'] = 'integer'
 
 module Accounts
+  include Ree::PackageDSL
+
   package do
     tags       ['account']
 

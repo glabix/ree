@@ -28,7 +28,7 @@ class ReeText::ToSentence
       to_sentence(["one", "two", "three"], last_word_connector: ", and also ")  # =>"one, two, and also three"
       to_sentence(["one", "two"], two_words_connector: " & ")                   # => "one &amp; two"
   DOC
-  
+
   contract(
     Array,
     Kwargs[
@@ -43,7 +43,7 @@ class ReeText::ToSentence
   def call(array, locale: nil, **opts)
     locale = locale || DEFAULTS[:locale]
 
-    i18n_connectors = t("sentence", locale: locale)
+    i18n_connectors = t("sentence", locale: locale, default_by_locale: :en)
     DEFAULT_CONNECTORS.merge(i18n_connectors)
     options  = DEFAULT_CONNECTORS.merge(opts)
 
@@ -58,12 +58,12 @@ class ReeText::ToSentence
       safe_join(
         [
           safe_join(
-            array[0...-1], 
+            array[0...-1],
             sep: options[:words_connector]
-          ), 
-          options[:last_word_connector], 
+          ),
+          options[:last_word_connector],
           array[-1]
-        ], 
+        ],
         sep: ""
       )
     end

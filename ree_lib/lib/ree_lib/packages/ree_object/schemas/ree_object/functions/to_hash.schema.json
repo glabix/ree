@@ -10,19 +10,13 @@
     {
       "doc": "",
       "throws": [
-        "ArgumentError",
-        "ReeObject::ToHash::MissingIncludeKeyErr",
         "ReeObject::ToHash::RecursiveObjectErr"
       ],
-      "return": "Or[Hash, ArrayOf[Any], Date, Time, Numeric, String, FalseClass, TrueClass, NilClass, Symbol]",
+      "return": "Or[Hash, ArrayOf[Any], Date, Time, Numeric, String, FalseClass, TrueClass, NilClass, Symbol, Module, Class]",
       "args": [
         {
           "arg": "obj",
           "type": "Any"
-        },
-        {
-          "arg": "opts",
-          "type": "Ksplat[:include? => ArrayOf[Or[Symbol, Hash]], :exclude? => ArrayOf[Or[Symbol, Hash]], :output_keys? => Or[symbol, string], :missing? => Or[skip, nil, raise]]"
         }
       ]
     }

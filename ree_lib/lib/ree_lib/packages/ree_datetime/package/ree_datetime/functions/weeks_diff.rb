@@ -26,6 +26,9 @@ class ReeDatetime::WeeksDiff
     w_delta = s_delta / WEEK_SECONDS
     opts[:precision] = 0
 
-    round_helper(w_delta, **slice(opts, :precision, :round_mode)).to_i
+    round_helper(
+      w_delta,
+      **slice(opts, [:precision, :round_mode])
+    ).to_i
   end
 end

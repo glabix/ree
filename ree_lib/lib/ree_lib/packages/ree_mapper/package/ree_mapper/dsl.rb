@@ -33,10 +33,8 @@ module ReeMapper::DSL
 
     contract Symbol, Optblock => Ree::Object
     def mapper(name, &proc)
-      path = caller[0].split(':').first
-
       dsl = Ree::ObjectDsl.new(
-        Ree.container.packages_facade, name, self, path, :object
+        Ree.container.packages_facade, name, self, :object
       )
 
       dsl.instance_exec(&proc) if block_given?

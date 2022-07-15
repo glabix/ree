@@ -19,25 +19,25 @@ RSpec.describe ReeValidator::ValidatePaging do
     it {
       expect {
         validate_paging(page: -1, per_page: 10, min_per_page: 10, max_per_page: 20)
-      }.to raise_error(ReeValidator::ValidatePaging::MinPageErr, 'min page 1')
+      }.to raise_error(ReeValidator::ValidatePaging::PagingErr, 'min page 1')
     }
-  
+
     it {
       expect {
         validate_paging(page: 1, per_page: 9, min_per_page: 10, max_per_page: 20)
-      }.to raise_error(ReeValidator::ValidatePaging::MinPerPageErr, "per_page should be >= 10")
+      }.to raise_error(ReeValidator::ValidatePaging::PagingErr, "per_page should be >= 10")
     }
-  
+
     it {
       expect {
         validate_paging(page: 1, per_page: 21, min_per_page: 10, max_per_page: 20)
-      }.to raise_error(ReeValidator::ValidatePaging::MaxPerPageErr, "per_page should be <= 20")
+      }.to raise_error(ReeValidator::ValidatePaging::PagingErr, "per_page should be <= 20")
     }
-  
+
     it {
       expect {
         validate_paging(page: 5, per_page: 10, min_per_page: 10, max_per_page: 20, max_result_window: 42)
-      }.to raise_error(ReeValidator::ValidatePaging::MaxResultWindowErr, "product of page and per_page should be <= 42")
+      }.to raise_error(ReeValidator::ValidatePaging::PagingErr, "product of page and per_page should be <= 42")
     }
   end
 
@@ -49,25 +49,25 @@ RSpec.describe ReeValidator::ValidatePaging do
     it {
       expect {
         validate_paging(page: -1, per_page: 10, min_per_page: 10, max_per_page: 20)
-      }.to raise_error(ReeValidator::ValidatePaging::MinPageErr, 'page should be more than 1')
+      }.to raise_error(ReeValidator::ValidatePaging::PagingErr, 'page should be more than 1')
     }
-  
+
     it {
       expect {
         validate_paging(page: 1, per_page: 9, min_per_page: 10, max_per_page: 20)
-      }.to raise_error(ReeValidator::ValidatePaging::MinPerPageErr, "per_page should be >= 10")
+      }.to raise_error(ReeValidator::ValidatePaging::PagingErr, "per_page should be >= 10")
     }
-  
+
     it {
       expect {
         validate_paging(page: 1, per_page: 21, min_per_page: 10, max_per_page: 20)
-      }.to raise_error(ReeValidator::ValidatePaging::MaxPerPageErr, "per_page should be <= 20")
+      }.to raise_error(ReeValidator::ValidatePaging::PagingErr, "per_page should be <= 20")
     }
-  
+
     it {
       expect {
         validate_paging(page: 5, per_page: 10, min_per_page: 10, max_per_page: 20, max_result_window: 42)
-      }.to raise_error(ReeValidator::ValidatePaging::MaxResultWindowErr, "product of page and per_page should be <= 42")
+      }.to raise_error(ReeValidator::ValidatePaging::PagingErr, "product of page and per_page should be <= 42")
     }
   end
 end
