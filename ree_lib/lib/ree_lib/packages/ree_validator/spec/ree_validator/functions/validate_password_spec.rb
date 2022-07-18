@@ -17,10 +17,10 @@ RSpec.describe ReeValidator::ValidatePassword do
 
   context 'valid password with options' do
     it {
-      short_password = validate_password('Pass1!', min: 5)
+      short_password = validate_password('Pass1!', min_length: 5)
       expect(short_password).to eq(true)
 
-      long_password = validate_password('Password1!' * 2, max: 20)
+      long_password = validate_password('Password1!' * 2, max_length: 20)
       expect(long_password).to eq(true)
 
       digit_password = validate_password('Pass111!', digit_count: 3)
@@ -40,14 +40,14 @@ RSpec.describe ReeValidator::ValidatePassword do
   context 'invalid password' do
     it {
       expect {
-        validate_password('Pass!', min: 6)
+        validate_password('Pass!', min_length: 6)
       }.to raise_error(
         ReeValidator::ValidatePassword::PasswordErr,
         'password length can not be less than 6'
       )
 
       expect {
-        validate_password('Password1!' * 2, max: 10)
+        validate_password('Password1!' * 2, max_length: 10)
       }.to raise_error(
         ReeValidator::ValidatePassword::PasswordErr,
         'password length can not be more than 10'
@@ -57,28 +57,28 @@ RSpec.describe ReeValidator::ValidatePassword do
         validate_password('Password1!', uppercase_char_count: 3)
       }.to raise_error(
         ReeValidator::ValidatePassword::PasswordErr,
-        'number of uppercase chars must be more than 3'
+        'number of uppercase characters should be more than 3'
       )
 
       expect{
         validate_password('Pas!', lowercase_char_count: 3)
       }.to raise_error(
         ReeValidator::ValidatePassword::PasswordErr,
-        'number of lowercase chars must be more than 3'
+        'number of lowercase characters should be more than 3'
       )
 
       expect{
         validate_password('Password1!', digit_count: 3)
       }.to raise_error(
         ReeValidator::ValidatePassword::PasswordErr,
-        'number of digits must be more than 3'
+        'number of digits should be more than 3'
       )
 
       expect{
         validate_password('Password1!', special_symbol_count: 3)
       }.to raise_error(
         ReeValidator::ValidatePassword::PasswordErr,
-        'number of special symbols must be more than 3'
+        'number of special symbols should be more than 3'
       )
     }
   end

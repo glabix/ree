@@ -9,7 +9,7 @@ class ReeValidator::ValidatePassword
   end
 
   DEFAULTS = {
-    min: 1,
+    min_length: 1,
     digit_count: 0,
     lowercase_char_count: 0,
     uppercase_char_count: 0,
@@ -37,10 +37,10 @@ class ReeValidator::ValidatePassword
 
   contract(
     String,
-    Nilor[Or[SubclassOf[StandardError], StandardError]],
+    Nilor[StandardError],
     Ksplat[
-      min?: Integer,
-      max?: Integer,
+      min_length?: Integer,
+      max_length?: Integer,
       digit_count?: Integer,
       lowercase_char_count?: Integer,
       uppercase_char_count?: Integer,
@@ -50,61 +50,77 @@ class ReeValidator::ValidatePassword
   def call(password, error = nil, **opts)
     opts = DEFAULTS.merge(opts)
 
-    if opts[:max]
+    if opts[:max_length]
       validate_length(
         password,
-        error ||= PasswordErr.new(
-          t("validator.password.max_password_length",
-            {number: opts[:max]},
-            default_by_locale: :en)
+        error || PasswordErr.new(
+          t(
+            "validator.password.max_password_length",
+            {number: opts[:max_length]},
+            default_by_locale: :en
+          )
         ),
-        max: opts[:max]
+        max: opts[:max_length]
       )
     end
 
     validate_length(
       password,
       error || PasswordErr.new(
-        t("validator.password.min_password_length",
-          {number: opts[:min]},
-          default_by_locale: :en)
+        t(
+          "validator.password.min_password_length",
+          {number: opts[:min_length]},
+          default_by_locale: :en
+        )
       ),
-      min: opts[:min]
+      min: opts[:min_length]
     )
 
     if !password.match?(/\A(?=.*\d{#{opts[:digit_count]},})/x)
       error ||= PasswordErr.new(
-        t("validator.password.wrong_number_of_digits",
-        {number: opts[:digit_count]},
-        default_by_locale: :en)
+        t(
+          "validator.password.wrong_number_of_digits",
+          {number: opts[:digit_count]},
+          default_by_locale: :en
+        )
       )
+
       raise error
     end
 
     if !password.match?(/\A(?=.*[a-z]{#{opts[:lowercase_char_count]},})/x)
       error ||= PasswordErr.new(
-        t("validator.password.wrong_number_of_lowercase_chars",
-        {number: opts[:lowercase_char_count]},
-        default_by_locale: :en)
+        t(
+          "validator.password.wrong_number_of_lowercase_chars",
+          {number: opts[:lowercase_char_count]},
+          default_by_locale: :en
+        )
       )
+
       raise error
     end
 
     if !password.match?(/\A(?=.*[A-Z]{#{opts[:uppercase_char_count]},})/x)
       error ||= PasswordErr.new(
-        t("validator.password.wrong_number_of_uppercase_chars",
-        {number: opts[:uppercase_char_count]},
-        default_by_locale: :en)
+        t(
+          "validator.password.wrong_number_of_uppercase_chars",
+          {number: opts[:uppercase_char_count]},
+          default_by_locale: :en
+        )
       )
+
       raise error
     end
 
     if !password.match?(/\A(?=.*[[:^alnum:]]{#{opts[:special_symbol_count]},})/x)
       error ||= PasswordErr.new(
-        t("validator.password.wrong_number_of_special_symbols",
-        {number: opts[:special_symbol_count]},
-        default_by_locale: :en)
+        t(
+          "validator.password.wrong_number_of_special_symbols",
+          {number: opts[:special_symbol_count]},
+          default_by_locale: :en
+        )
       )
+
       raise error
     end
 
