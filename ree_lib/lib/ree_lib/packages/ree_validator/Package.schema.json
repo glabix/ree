@@ -9,6 +9,9 @@
   "depends_on": [
     {
       "name": "ree_i18n"
+    },
+    {
+      "name": "ree_object"
     }
   ],
   "env_vars": [
@@ -34,6 +37,10 @@
     {
       "name": "validate_paging",
       "schema": "packages/ree_validator/schemas/ree_validator/functions/validate_paging.schema.json"
+    },
+    {
+      "name": "validate_password",
+      "schema": "packages/ree_validator/schemas/ree_validator/functions/validate_password.schema.json"
     },
     {
       "name": "validate_presence",

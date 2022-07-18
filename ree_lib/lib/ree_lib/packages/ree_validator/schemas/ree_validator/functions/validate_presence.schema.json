@@ -27,6 +27,14 @@
   ],
   "links": [
     {
+      "target": "is_blank",
+      "package_name": "ree_object",
+      "as": "is_blank",
+      "imports": [
+
+      ]
+    },
+    {
       "target": "t",
       "package_name": "ree_i18n",
       "as": "t",

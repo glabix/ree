@@ -5,7 +5,7 @@ require "concurrent/map"
 class ReeObject::IsBlank
   include Ree::FnDSL
 
-  fn :is_blank 
+  fn :is_blank
 
   BLANK_RE = /\A[[:space:]]*\z/
 
@@ -20,7 +20,7 @@ class ReeObject::IsBlank
   contract(Any => Bool)
   def call(obj)
     return is_string_blank?(obj) if obj.is_a?(String)
-    return obj.empty? if obj.is_a?(Array) || obj.is_a?(Hash)
+    return obj.empty? if obj.is_a?(Array) || obj.is_a?(Hash) || obj.is_a?(Set)
     return true if obj.nil?
     return true if obj == false
     return false if obj == true

@@ -25,3 +25,10 @@ en:
       error: value should not be one of %{list}
     regexp:
       error: value does not match regexp %{regexp}
+    password:
+      min_password_length: password length can not be less than %{number}
+      max_password_length: password length can not be more than %{number}
+      wrong_number_of_digits: number of digits should be more than %{number}
+      wrong_number_of_lowercase_chars: number of lowercase characters should be more than %{number}
+      wrong_number_of_uppercase_chars: number of uppercase characters should be more than %{number}
+      wrong_number_of_special_symbols: number of special symbols should be more than %{number}

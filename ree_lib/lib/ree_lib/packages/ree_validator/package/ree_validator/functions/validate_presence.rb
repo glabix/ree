@@ -4,6 +4,7 @@ class ReeValidator::ValidatePresence
   include Ree::FnDSL
 
   fn :validate_presence do
+    link :is_blank, from: :ree_object
     link :t, from: :ree_i18n
   end
 
@@ -14,11 +15,7 @@ class ReeValidator::ValidatePresence
     Nilor[StandardError] => Bool
   ).throws(PresenceErr)
   def call(value, error = nil)
-    if (value.nil? ||
-      (value.is_a?(String) && value.strip.length == 0) ||
-      (value.is_a?(Array) && value.size == 0) ||
-      (value.is_a?(Hash) && value.size == 0) ||
-      (value.is_a?(Set) && value.size == 0))
+    if (is_blank(value))
 
       error ||= PresenceErr.new(
         t(

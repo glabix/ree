@@ -25,3 +25,10 @@ ru:
       error: значение не должно быть одним из %{list}
     regexp:
       error: значение не соответствует регулярному выражению %{regexp}
+    password:
+      min_password_length: минимальная длина должна быть больше %{number}
+      max_password_length: максимальная длина должна быть не больше %{number}
+      wrong_number_of_digits: количество цифр должен быть не менее %{number}
+      wrong_number_of_lowercase_chars: количество букв в нижнем регистре должно быть не менее %{number}
+      wrong_number_of_uppercase_chars: количество букв в верхнем регистре должно быть не менее %{number}
+      wrong_number_of_special_symbols: количество специальных символов должно быть не менее %{number}
