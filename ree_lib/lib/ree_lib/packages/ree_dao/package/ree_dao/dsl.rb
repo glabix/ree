@@ -15,13 +15,27 @@ module ReeDao::DSL
 
   module InstanceMethods
     def build
-      build_dao(
+      dataset_class = db.dataset_class
+      klass = Class.new(dataset_class)
+      filters = self.class.instance_variable_get(:@filters) || []
+
+      filters.each do |filter|
+        klass.define_method(filter.name, &filter.proc)
+      end
+
+      db.dataset_class = klass
+
+      dao = build_dao(
         connection: db,
         table_name: self.class.instance_variable_get(:@table),
         mapper: self.class.instance_variable_get(:@schema_mapper) || (raise Ree::Error.new("Dao schema mapper is not set. Use `schema` DSL to define it", :invalid_dsl_usage)),
         primary_key: self.class.instance_variable_get(:@primary_key),
         default_select_columns: self.class.instance_variable_get(:@default_select_columns),
       )
+
+      db.dataset_class = dataset_class
+
+      dao
     end
   end
 
@@ -94,6 +108,22 @@ module ReeDao::DSL
         .use(:db_load, dto: dto_class, &proc)
 
       self.instance_variable_set(:@schema_mapper, mapper)
+      nil
+    end
+
+    DaoFilter = Struct.new(:name, :proc)
+
+    contract Symbol, Proc => nil
+    def filter(name, proc)
+      filters = self.instance_variable_get(:@filters)
+
+      if filters.nil?
+        filters = []
+        self.instance_variable_set(:@filters, filters)
+      end
+
+      filters.push(DaoFilter.new(name, proc))
+
       nil
     end
   end

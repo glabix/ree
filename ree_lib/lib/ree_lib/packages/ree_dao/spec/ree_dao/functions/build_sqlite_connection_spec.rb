@@ -99,6 +99,8 @@ RSpec.describe :build_sqlite_connection do
       string :name
       integer :age
     end
+
+    filter :by_name, -> (name) { where(name: name) }
   end
 
   class ReeDaoTest::ProductsDao
@@ -192,4 +194,37 @@ RSpec.describe :build_sqlite_connection do
     expect(user.name).to eq('John')
     expect(product.title).to eq('Product')
   }
+
+  context "scoped filters" do
+    it {
+      dao.delete_all
+
+      user = ReeDaoTest::User.new(name: 'John', age: 30)
+      dao.put(user)
+
+      user = ReeDaoTest::User.new(name: 'Peter', age: 32)
+      dao.put(user)
+
+      expect(dao.by_name('John').count).to eq(1)
+      expect(dao.by_name('Peter').count).to eq(1)
+      expect(dao.count).to eq(2)
+    }
+
+    it {
+      expect {
+        products_dao.by_name('test')
+      }.to raise_error(NoMethodError)
+    }
+  end
+
+  context "#count" do
+    it {
+      dao.delete_all
+
+      user = ReeDaoTest::User.new(name: 'John', age: 30)
+      dao.put(user)
+
+      expect(dao.count).to eq(1)
+    }
+  end
 end

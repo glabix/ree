@@ -17,11 +17,10 @@ class ReeDao::BuildDao
     ] => Any
   )
   def call(connection:, table_name:, mapper:, **opts)
-    connection[table_name]
-      .clone(
-        mode: :write,
-        schema_mapper: mapper,
-        primary_key: opts[:primary_key] || :id
-      )
+    connection[table_name].clone(
+      mode: :write,
+      schema_mapper: mapper,
+      primary_key: opts[:primary_key] || :id
+    )
   end
 end

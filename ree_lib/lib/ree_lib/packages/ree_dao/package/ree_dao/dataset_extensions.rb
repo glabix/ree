@@ -22,22 +22,6 @@ module ReeDao
       PERSISTENCE_STATE_VARIABLE = :@persistence_state
       IMPORT_BATCH_SIZE = 1000
 
-      def row_proc
-        proc { |hash|
-          if @opts[:schema_mapper]
-            entity = @opts[:schema_mapper].db_load(hash)
-
-            if @opts[:mode] == :write
-              set_persistence_state(entity, hash)
-            end
-
-            entity
-          else
-            hash
-          end
-        }
-      end
-
       # override methods
       def find(id, mode = :write, mapper: nil)
         where(primary_key => id).first(mode, mapper: mapper)
@@ -60,7 +44,7 @@ module ReeDao
       end
 
       def put(entity)
-        raw = @opts[:schema_mapper].db_dump(entity)
+        raw = opts[:schema_mapper].db_dump(entity)
         remove_null_primary_key(raw)
         key = insert(raw)
 
@@ -71,7 +55,7 @@ module ReeDao
       end
 
       def put_with_conflict(entity, opts = {})
-        raw = @opts[:schema_mapper].db_dump(entity)
+        raw = opts[:schema_mapper].db_dump(entity)
         remove_null_primary_key(raw)
 
         if opts.key?(:update) && opts[:update].empty?
@@ -97,7 +81,7 @@ module ReeDao
       def import_all(entities, batch_size: IMPORT_BATCH_SIZE)
         return if entities.empty?
 
-        mapper = @opts[:schema_mapper]
+        mapper = opts[:schema_mapper]
         columns = columns
         raw = {}
 
@@ -127,7 +111,7 @@ module ReeDao
       end
 
       def update(entity)
-        raw = @opts[:schema_mapper].db_dump(entity)
+        raw = opts[:schema_mapper].db_dump(entity)
         raw = extract_changes(entity, raw)
 
         unless raw.empty?
@@ -155,7 +139,7 @@ module ReeDao
       private
 
       def primary_key
-        @opts[:primary_key] || :id
+        opts[:primary_key] || :id
       end
 
       def remove_null_primary_key(raw)
@@ -174,7 +158,17 @@ module ReeDao
 
       def with_mapper(mode, mapper)
         clone(
-          mode: mode, schema_mapper: mapper || @opts[:schema_mapper]
+          mode: mode, schema_mapper: mapper || opts[:schema_mapper],
+        ).with_row_proc(
+          Proc.new { |hash|
+            entity = (mapper || opts[:schema_mapper]).db_load(hash)
+
+            if mode == :write
+              self.set_persistence_state(entity, hash)
+            end
+
+            entity
+          }
         )
       end
 
