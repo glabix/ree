@@ -2,7 +2,7 @@
 
 module ReeMapper
   include Ree::PackageDSL
-	
+
   package do
     depends_on :ree_string
     depends_on :ree_datetime
@@ -10,7 +10,7 @@ module ReeMapper
 
   package_require('ree_string/functions/underscore')
   package_require('ree_datetime/functions/in_default_time_zone')
-  
+
   require_relative 'ree_mapper/types/abstract_type'
   require_relative 'ree_mapper/errors/error'
   require_relative 'ree_mapper/errors/coercion_error'
@@ -40,6 +40,50 @@ module ReeMapper
 
   require_relative 'ree_mapper/default_factory'
   require_relative 'ree_mapper/dsl'
+
+  def self.get_mapper_factory(mod)
+    if !mod.is_a?(Module)
+      raise Ree::Error.new("module should be provided", :invalid_dsl_usage)
+    end
+
+    if mod.name.nil?
+      raise Ree::Error.new("anonymous modules are not supported", :invalid_dsl_usage)
+    end
+
+    if mod.name.split('::').size > 1
+      raise Ree::Error.new("top level module should be provided", :invalid_dsl_usage)
+    end
+
+    factory = mod.instance_variable_get(:@mapper_factory)
+    return factory if factory
+
+    if !mod.instance_variable_get(:@mapper_semaphore)
+      mod.instance_variable_set(:@mapper_semaphore, Mutex.new)
+    end
+
+    mod.instance_variable_get(:@mapper_semaphore).synchronize do
+      factory = self.build_mapper_factory(mod)
+      mod.instance_variable_set(:@mapper_factory, factory)
+    end
+
+    factory
+  end
+
+  private
+
+  def self.build_mapper_factory(mod)
+    pckg_name = ReeString::Underscore.new.call(mod.name)
+    factory_path = "#{pckg_name}/mapper_factory"
+
+    mapper_factory_klass = if package_file_exists?(factory_path) && mod != self
+      package_require(factory_path)
+      Object.const_get("#{mod.name}::MapperFactory")
+    else
+      ReeMapper::DefaultFactory
+    end
+
+    mapper_factory_klass.new
+  end
 end
 
 =begin
@@ -76,7 +120,7 @@ Example of mapper usage:
 
   class Products::ProductQuery
     include Ree::BeanDSL
-    
+
     bean :product_query do
       link :product_caster
     end

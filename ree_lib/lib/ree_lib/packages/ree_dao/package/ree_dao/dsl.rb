@@ -4,23 +4,13 @@ package_require('ree_string/functions/underscore')
 
 module ReeDao::DSL
   def self.included(base)
-    setup_semaphore(base)
     base.extend(ClassMethods)
     base.include(InstanceMethods)
   end
 
   def self.extended(base)
-    setup_semaphore(base)
     base.extend(ClassMethods)
     base.include(InstanceMethods)
-  end
-
-  def self.setup_semaphore(base)
-    mod = Object.const_get(base.name.split('::').first)
-    return if mod.const_defined?(:MAPPER_SEMAPHORE)
-
-    mod.const_set(:MAPPER_SEMAPHORE, Mutex.new)
-    mod.private_constant :MAPPER_SEMAPHORE
   end
 
   module InstanceMethods
@@ -94,42 +84,17 @@ module ReeDao::DSL
 
     contract(Class, Block => nil)
     def schema(dto_class, &proc)
-      mapper = build_or_get_mapper_factory
+      mapper_factory = ReeMapper.get_mapper_factory(
+        Object.const_get(self.name.split('::').first)
+      )
+
+      mapper = mapper_factory
         .call
         .use(:db_dump)
         .use(:db_load, dto: dto_class, &proc)
 
       self.instance_variable_set(:@schema_mapper, mapper)
       nil
-    end
-
-    private
-
-    def build_or_get_mapper_factory
-      mod = Object.const_get(name.split('::').first)
-      factory = mod.instance_variable_get(:@mapper_factory)
-      return factory if factory
-
-      mod.const_get(:MAPPER_SEMAPHORE).synchronize do
-        factory = build_mapper_factory(mod)
-        mod.instance_variable_set(:@mapper_factory, factory)
-      end
-
-      factory
-    end
-
-    def build_mapper_factory(mod)
-      pckg_name = ReeString::Underscore.new.call(mod.name)
-      factory_path = "#{pckg_name}/mapper_factory"
-
-      mapper_factory_klass = if package_file_exists?(factory_path) && mod != ReeMapper
-        package_require(factory_path)
-        Object.const_get("#{mod.name}::MapperFactory")
-      else
-        ReeMapper::DefaultFactory
-      end
-
-      mapper_factory_klass.new
     end
   end
 end

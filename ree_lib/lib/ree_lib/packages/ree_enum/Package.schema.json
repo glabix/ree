@@ -7,7 +7,12 @@
     "ree_enum"
   ],
   "depends_on": [
-
+    {
+      "name": "ree_mapper"
+    },
+    {
+      "name": "ree_validator"
+    }
   ],
   "env_vars": [
 
