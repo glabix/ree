@@ -12,19 +12,19 @@ class ReeValidator::ValidateInclusion
   contract(
     Any,
     Or[ArrayOf[Any], SetOf[Any], RangeOf[Any]],
-    Nilor[SubclassOf[StandardError]] => Bool
+    Nilor[StandardError] => Bool
   )
   def call(value, list_or_set, error = nil)
     if !list_or_set.include?(value)
-      klass = error || InclusionErr
-
-      raise klass.new(
+      error ||= InclusionErr.new(
         t(
           'validator.inclusion.error',
           {list: list_or_set.to_a},
           default_by_locale: :en
         )
       )
+
+      raise error
     end
 
     true

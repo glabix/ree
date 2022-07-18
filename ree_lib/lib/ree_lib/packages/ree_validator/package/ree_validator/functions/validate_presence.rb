@@ -11,7 +11,7 @@ class ReeValidator::ValidatePresence
 
   contract(
     Any,
-    Nilor[SubclassOf[StandardError]] => Bool
+    Nilor[StandardError] => Bool
   ).throws(PresenceErr)
   def call(value, error = nil)
     if (value.nil? ||
@@ -20,14 +20,14 @@ class ReeValidator::ValidatePresence
       (value.is_a?(Hash) && value.size == 0) ||
       (value.is_a?(Set) && value.size == 0))
 
-      klass = error || PresenceErr
-
-      raise klass.new(
+      error ||= PresenceErr.new(
         t(
           'validator.presence.can_not_be_blank',
           default_by_locale: :en
         )
       )
+
+      raise error
     end
 
     true

@@ -30,9 +30,9 @@ RSpec.describe :validate_exclusion do
 
     it {
       expect {
-        validate_exclusion(1, (1..2), Class.new(StandardError))
+        validate_exclusion(1, (1..2), Class.new(StandardError).new("message"))
       }.to raise_error(StandardError) do |e|
-        expect(e.message).to eq("value should not be one of [1, 2]")
+        expect(e.message).to eq("message")
       end
     }
   end

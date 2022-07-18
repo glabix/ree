@@ -13,7 +13,7 @@ class ReeValidator::ValidateUrl
 
   contract(
     String,
-    Nilor[SubclassOf[StandardError]],
+    Nilor[StandardError],
     Ksplat[
       schemes?: ArrayOf[String],
       ports?: ArrayOf[Integer],
@@ -24,44 +24,50 @@ class ReeValidator::ValidateUrl
     begin
       uri = URI.parse(url)
 
-      klass = error || UrlErr
-
       if opts[:schemes] && (opts[:schemes] & [uri.scheme]).size == 0
-        raise klass.new(
+        error ||= UrlErr.new(
           t(
             'validator.url.invalid_scheme',
             {schemes: opts[:schemes]},
             default_by_locale: :en
           )
         )
+
+        raise error
       end
 
       if opts[:ports] && (opts[:ports] & [uri.port]).size == 0
-        raise klass.new(
+        error ||= UrlErr.new(
           t(
             'validator.url.invalid_port',
             {ports: opts[:ports]},
             default_by_locale: :en
           )
         )
+
+        raise error
       end
 
       if opts[:domains] && (opts[:domains] & [uri.hostname]).size == 0
-        raise klass.new(
+        error ||= UrlErr.new(
           t(
             'validator.url.invalid_domain',
             {domains: opts[:domains]},
             default_by_locale: :en
           )
         )
+
+        raise error
       end
     rescue URI::InvalidURIError
-      raise klass.new(
+      error ||= UrlErr.new(
         t(
           'validator.url.invalid_url',
           default_by_locale: :en
         )
       )
+
+      raise error
     end
 
     true

@@ -39,9 +39,9 @@ RSpec.describe :validate_length do
 
     it {
       expect {
-        validate_length([1, 2], Class.new(StandardError), not_equal_to: 2)
+        validate_length([1, 2], Class.new(StandardError).new("message"), not_equal_to: 2)
       }.to raise_error(StandardError) do |e|
-        expect(e.message).to eq("length should not be equal to 2")
+        expect(e.message).to eq("message")
       end
     }
   end

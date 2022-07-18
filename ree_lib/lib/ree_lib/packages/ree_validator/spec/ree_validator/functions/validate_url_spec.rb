@@ -50,11 +50,11 @@ RSpec.describe :validate_url do
       expect {
         validate_url(
           "https://google.com",
-          Class.new(StandardError),
+          Class.new(StandardError).new('message'),
           domains: ['test.com']
         )
       }.to raise_error(StandardError) do |e|
-        expect(e.message).to eq('domain should be one of ["test.com"]')
+        expect(e.message).to eq('message')
       end
     }
   end

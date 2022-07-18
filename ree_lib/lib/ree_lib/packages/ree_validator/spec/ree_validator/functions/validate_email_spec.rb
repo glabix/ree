@@ -17,7 +17,7 @@ RSpec.describe :validate_email do
 
   it {
     expect {
-      validate_email('test', Class.new(StandardError))
-    }.to raise_error(StandardError)
+      validate_email('test', Class.new(StandardError).new("message"))
+    }.to raise_error(StandardError, "message")
   }
 end

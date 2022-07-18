@@ -36,15 +36,15 @@ class ReeValidator::ValidateEmail
 
   contract(
     String,
-    Nilor[SubclassOf[StandardError]] => Bool
+    Nilor[StandardError] => Bool
   ).throws(InvalidEmailErr)
   def call(email, error = nil)
     if !EMAIL_ADDRESS.match(email)
-      klass = error || InvalidEmailErr
-
-      raise klass.new(
+      error ||= InvalidEmailErr.new(
         t('validator.email.invalid_email', default_by_locale: :en)
       )
+
+      raise error
     end
 
     true

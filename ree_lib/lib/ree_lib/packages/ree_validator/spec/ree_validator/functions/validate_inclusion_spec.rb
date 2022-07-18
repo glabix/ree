@@ -30,9 +30,9 @@ RSpec.describe :validate_inclusion do
 
     it {
       expect {
-        validate_inclusion(3, (1..2), Class.new(StandardError))
+        validate_inclusion(3, (1..2), Class.new(StandardError).new("message"))
       }.to raise_error(StandardError) do |e|
-        expect(e.message).to eq("value should be one of [1, 2]")
+        expect(e.message).to eq("message")
       end
     }
   end

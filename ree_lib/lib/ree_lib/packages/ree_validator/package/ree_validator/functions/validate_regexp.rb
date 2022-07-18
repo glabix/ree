@@ -12,19 +12,19 @@ class ReeValidator::ValidateRegexp
   contract(
     String,
     Regexp,
-    Nilor[SubclassOf[StandardError]] => Bool
+    Nilor[StandardError] => Bool
   )
   def call(value, regexp, error = nil)
     if !regexp.match(value)
-      klass = error || RegexpErr
-
-      raise klass.new(
+      error ||= RegexpErr.new(
         t(
           'validator.regexp.error',
           {regexp: regexp.inspect},
           default_by_locale: :en
         )
       )
+
+      raise error
     end
 
     true

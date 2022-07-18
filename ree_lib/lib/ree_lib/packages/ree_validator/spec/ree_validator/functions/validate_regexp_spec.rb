@@ -20,9 +20,9 @@ RSpec.describe :validate_regexp do
 
     it {
       expect {
-        validate_regexp('string', /$sss^/, Class.new(StandardError))
+        validate_regexp('string', /$sss^/, Class.new(StandardError).new("message"))
       }.to raise_error(StandardError) do |e|
-        expect(e.message).to eq("value does not match regexp /$sss^/")
+        expect(e.message).to eq("message")
       end
     }
   end

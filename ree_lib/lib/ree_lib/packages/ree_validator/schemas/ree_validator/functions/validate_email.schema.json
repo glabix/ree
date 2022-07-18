@@ -20,7 +20,7 @@
         },
         {
           "arg": "error",
-          "type": "Nilor[SubclassOf[StandardError]]"
+          "type": "Nilor[StandardError]"
         }
       ]
     }

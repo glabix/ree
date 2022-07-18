@@ -48,8 +48,8 @@ RSpec.describe :validate_presence do
 
     it {
       expect {
-        validate_presence({}, Class.new(StandardError))
-      }.to raise_error(StandardError)
+        validate_presence({}, Class.new(StandardError).new("message"))
+      }.to raise_error(StandardError, "message")
     }
   end
 end
