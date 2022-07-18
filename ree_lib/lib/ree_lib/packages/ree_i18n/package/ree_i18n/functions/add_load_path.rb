@@ -10,5 +10,7 @@ class ReeI18n::AddLoadPath
   contract(Or[String, ArrayOf[String]] => ArrayOf[String])
   def call(paths)
     I18n.load_path += wrap(paths)
+    I18n.load_path.uniq!
+    I18n.load_path
   end
 end

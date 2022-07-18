@@ -5,7 +5,9 @@ require 'set'
 class ReeI18n::T
   include Ree::FnDSL
 
-  fn :t
+  fn :t do
+    link :except, from: :ree_hash
+  end
 
   DEFAULT_BY_LOCALE = Object.new
 
@@ -13,7 +15,7 @@ class ReeI18n::T
     :throw, :raise, :locale, :scope, :default, :deep_interpolation,
     :count, :exception_handler, :default_by_locale
   ])
-  
+
   doc(<<~DOC)
     Translates, pluralizes and interpolates a given key using a given locale,
     scope, and default, as well as interpolation values.
@@ -60,7 +62,7 @@ class ReeI18n::T
         raise ArgumentError, "translation context contains reserved key :#{k}"
       end
     end
-    
+
     opts = context.merge(options)
     default_by_locale = opts.delete(:default_by_locale)
 
@@ -75,7 +77,12 @@ class ReeI18n::T
     result = I18n.t(key, **opts)
 
     if result == DEFAULT_BY_LOCALE
-      result = call(key, context, **options.merge(locale: default_by_locale))
+      result = call(
+        key, context,
+        **except(
+          options.merge(locale: default_by_locale), [:default_by_locale]
+        )
+      )
     end
 
     result
