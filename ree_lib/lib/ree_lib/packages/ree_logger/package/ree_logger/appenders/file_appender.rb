@@ -22,8 +22,8 @@ class ReeLogger::FileAppender < ReeLogger::Appender
     String,
     Ksplat[
       auto_flush?: Bool,
-      log_file_count: Integer,
-      log_file_size: Integer
+      log_file_count?: Integer,
+      log_file_size?: Integer
     ] => Any
   )
   def initialize(level, formatter, file_path, **opts)
@@ -47,9 +47,12 @@ class ReeLogger::FileAppender < ReeLogger::Appender
     )
   end
 
-  def append(event, progname)
+  contract(ReeLogger::LogEvent, Nilor[String] => nil)
+  def append(event, progname = nil)
     message = @formatter.format(event, progname)
     logger << (message + "\n")
     file.flush if auto_flush
+
+    nil
   end
 end

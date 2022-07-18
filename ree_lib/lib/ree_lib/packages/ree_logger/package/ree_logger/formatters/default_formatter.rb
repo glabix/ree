@@ -6,6 +6,7 @@ class ReeLogger::DefaultFormatter < ReeLogger::Formatter
   bean :default_formatter do
     link 'ree_logger/log_event', -> { LogEvent }
     link :not_blank, from: :ree_object
+    link :now, from: :ree_datetime
   end
 
   contract LogEvent, Nilor[String] => String
@@ -16,7 +17,7 @@ class ReeLogger::DefaultFormatter < ReeLogger::Formatter
       ""
     end
 
-    out = "#{prefix}%-6s%s" % ["#{event.level.to_s.upcase}:", event.message]
+    out = "#{prefix}%-6s %s %s" % ["[#{now.strftime("%d/%m/%y %H:%M:%S")}]", "#{event.level.to_s.upcase}:", event.message]
 
     if not_blank(event.parameters)
       out += "#{prefix}\nPARAMETERS: #{event.parameters}"

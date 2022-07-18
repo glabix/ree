@@ -19,6 +19,7 @@ class ReeLogger::Config
   def build
     to_obj({
       file_path: ENV['LOG_FILE_PATH'],
+      file_auto_flush: parse_bool_string(ENV['LOG_FILE_AUTO_FLUSH']),
       levels: {
         file: parse_level(ENV['LOG_LEVEL_FILE']),
         stdout: parse_level(ENV['LOG_LEVEL_STDOUT']),
@@ -49,6 +50,11 @@ class ReeLogger::Config
     end
 
     v
+  end
+
+  def parse_bool_string(bool)
+    return false if is_blank(bool)
+    return bool.to_s.downcase == "true"
   end
 
   def parse_level(level)

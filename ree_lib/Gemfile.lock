@@ -64,6 +64,7 @@ GEM
     rspec-support (3.11.0)
     sequel (5.58.0)
     sqlite3 (1.4.4)
+    timecop (0.9.5)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
     webmock (3.14.0)
@@ -73,6 +74,7 @@ GEM
 
 PLATFORMS
   x86_64-darwin-19
+  x86_64-darwin-21
   x86_64-linux
 
 DEPENDENCIES
@@ -82,6 +84,7 @@ DEPENDENCIES
   ree_lib!
   rspec
   sqlite3
+  timecop
   webmock
 
 BUNDLED WITH
