@@ -2,11 +2,11 @@
   "name": "ree",
   "displayName": "Ree",
   "description": "A set of tools to simplify work with ree gem",
-  "version": "0.0.8",
-  "publisher": "Planiro",
+  "version": "0.0.9",
+  "publisher": "Glabix",
   "repository": {
     "type": "git",
-    "url": "git@gitlab.com:planiro/vscode-ree.git"
+    "url": "git@github.com:glabix/ree.git"
   },
   "engines": {
     "vscode": "^1.66.0"
