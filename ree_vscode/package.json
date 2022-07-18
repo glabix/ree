@@ -2,11 +2,11 @@
   "name": "ree",
   "displayName": "Ree",
   "description": "A set of tools to simplify work with ree gem",
-  "version": "0.0.8",
-  "publisher": "Planiro",
+  "version": "0.0.9",
+  "publisher": "Glabix",
   "repository": {
     "type": "git",
-    "url": "git@gitlab.com:planiro/vscode-ree.git"
+    "url": "git@github.com:glabix/ree.git"
   },
   "engines": {
     "vscode": "^1.66.0"
@@ -64,13 +64,31 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "Language Server Configuration",
+      "title": "Ree",
       "properties": {
         "reeLanguageServer.maxNumberOfProblems": {
           "scope": "resource",
           "type": "number",
           "default": 100,
           "description": "Controls the maximum number of problems produced by the server."
+        },
+        "reeLanguageServer.docker.presented": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": false,
+          "description": "Use Docker for ree command execution"
+        },
+        "reeLanguageServer.docker.containerName": {
+          "scope": "resource",
+          "type": "string",
+          "default": "",
+          "description": "Name of Docker container for ree command execution"
+        },
+        "reeLanguageServer.docker.appDirectory": {
+          "scope": "resource",
+          "type": "string",
+          "default": "",
+          "description": "App directory in Docker container"
         },
         "reeLanguageServer.trace.server": {
           "scope": "window",

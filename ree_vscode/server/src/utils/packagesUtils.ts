@@ -4,15 +4,38 @@ import { getProjectRootDir } from './packageUtils'
 const path = require('path')
 const fs = require('fs')
 
-let cachedPackages: IPackageSchema[] | undefined = undefined
+let cachedPackages: IPackagesSchema | undefined = undefined
 let packagesCtime: number | null = null
+let cachedGemPackages: Object | null = null
+let cachedGems: ICachedGems = {}
+
+interface ExecCommand {
+  message: string
+  code: number
+}
+
+interface ICachedGems {
+  [key: string]: string | undefined
+}
+
+
+interface IPackagesSchema {
+  packages: IPackageSchema[]
+  gemPackages: IGemPackageSchema[]
+}
 
 export interface IPackageSchema {
   name: string
   schema: string
 }
+export interface IGemPackageSchema {
+  gem: string
+  name: string
+  schema: string
+}
 
-export function loadPackagesSchema(currentPath: string): IPackageSchema[] | undefined {
+// export function loadPackagesSchema(currentPath: string): IPackageSchema[] | undefined {
+export function loadPackagesSchema(currentPath: string): IPackagesSchema | undefined {
   const root = getProjectRootDir(currentPath)
   if (!root) { return }
 
@@ -25,21 +48,96 @@ export function loadPackagesSchema(currentPath: string): IPackageSchema[] | unde
     packagesCtime = ctime
 
     return cachedPackages = parsePackagesSchema(
-      fs.readFileSync(schemaPath, { encoding: 'utf8' })
+      fs.readFileSync(schemaPath, { encoding: 'utf8' }), root
     )
   } else {
     return cachedPackages
   }
 }
 
-function parsePackagesSchema(data: string) : IPackageSchema[] | undefined {
+export function getGemPackageSchemaPath(gemPackageName: string): string | undefined {
+  const gemPath = getGemDir(gemPackageName)
+  if (!gemPath) { return }
+
+  const gemPackage = getCachedGemPackage(gemPackageName)
+  if (!gemPackage) { return }
+
+  return path.join(gemPath, gemPackage.schema)
+}
+
+export function getCachedGemPackage(gemPackageName: string): IGemPackageSchema | undefined {
+  if (!cachedPackages) { return }
+
+  const gemPackage = cachedPackages?.gemPackages.find(p => p.name === gemPackageName)
+  if (!gemPackage) { return }
+
+  return gemPackage
+}
+
+export function getGemDir(gemPackageName: string): string | undefined {
+  if (!cachedPackages) { return }
+
+  const gemPackage = cachedPackages?.gemPackages.find(p => p.name === gemPackageName)
+  if (!gemPackage) { return }
+
+  const gemDir = cachedGems[gemPackage.gem]
+  if (!gemDir) { return }
+
+  return path.join(gemDir.trim(), 'lib', gemPackage.gem)
+}
+
+function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | undefined {
   try {
     const schema = JSON.parse(data) as any;
+    const obj = {} as IPackagesSchema
 
-    return schema.packages.map((p: any) => {
+    obj.packages = schema.packages.map((p: any) => {
       return {name: p.name, schema: p.schema} as IPackageSchema
     })
+
+    obj.gemPackages = schema.gem_packages.map((p: any) => {
+      return {gem: p.gem, name: p.name, schema: p.schema} as IGemPackageSchema
+    })
+
+    // cache gemPackages by gem
+    cachedGemPackages = groupBy(obj.gemPackages, 'gem')
+    if (cachedGemPackages) {
+      Object.keys(cachedGemPackages).map((gem: string) => {
+        cachedGems[gem] = execBundlerGetGemPath(gem, rootDir)?.message
+      })
+    }
+
+    return obj
   } catch (err) {
     return undefined
   }
+}
+
+function execBundlerGetGemPath(gemName: string, rootDir: string): ExecCommand | undefined {
+  try {
+    let spawnSync = require('child_process').spawnSync
+    const argsArr = ['show', gemName]
+
+    let child = spawnSync(
+      'bundle',
+      argsArr,
+      { cwd: rootDir }
+    )
+
+    return {
+      message: child.status === 0 ? child.stdout.toString() : child.stderr.toString(),
+      code: child.status
+    }
+  } catch(e) {
+    return undefined
+  }
+}
+
+function groupBy(data: Array<any>, key: string) {
+  return data.reduce((storage, item) => {
+      let group = item[key]
+      storage[group] = storage[group] || []
+      storage[group].push(item)
+      return storage
+  }, {})
 }

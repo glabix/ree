@@ -2,7 +2,7 @@ import { Range } from 'vscode'
 import { Location } from 'vscode-languageserver'
 import { Position, TextDocument } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
-import { loadPackagesSchema } from '../utils/packagesUtils'
+import { loadPackagesSchema, getGemPackageSchemaPath, getGemDir } from '../utils/packagesUtils'
 import { IObjectMethod, loadObjectSchema } from './objectUtils'
 import { PackageFacade } from './packageFacade'
 import { getObjectNameFromPath, getPackageNameFromPath, getProjectRootDir } from './packageUtils'
@@ -78,16 +78,15 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
   }
 
   const objectName = getObjectNameFromPath(filePath)
-
   if (!objectName) { return ret }
 
-  const packages = loadPackagesSchema(filePath)
-  if (!packages) { return ret }
+  const packagesSchema = loadPackagesSchema(filePath)
+  if (!packagesSchema) { return ret }
 
   const packageName = getPackageNameFromPath(filePath)
   if (!packageName) { return ret }
 
-  const pckg = packages.find(p => p.name == packageName)
+  const pckg = packagesSchema.packages.find(p => p.name == packageName)
   if (!pckg) { return ret }
 
   const projectRootDir = getProjectRootDir(filePath)
@@ -95,7 +94,7 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
 
   const packageFacade = new PackageFacade(path.join(projectRootDir, pckg.schema))
 
-  const object = packageFacade.objects().find(o => o.name == objectName)
+  const object = packageFacade.objects().find(o => o.name === objectName)
   if (!object) { return ret }
 
   const currentObject = loadObjectSchema(path.join(projectRootDir, object.schema))
@@ -134,15 +133,28 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
     }
 
     const linkedPackageName = link.package_name
-    const linkedPackage = packages.find(p => p.name == linkedPackageName)
-    if (!linkedPackage) { return ret }
+    const linkedPackage = packagesSchema.packages.find(p => p.name === linkedPackageName)
 
-    const linkedPackageFacade = new PackageFacade(path.join(projectRootDir, linkedPackage.schema))
+    let linkedPackageSchemaPath = null
+    if (!linkedPackage) {
+      // check gemPackages
+      const linkedGemPackage = packagesSchema.gemPackages.find(p => p.name === linkedPackageName)
+      if (!linkedGemPackage) { return ret }
+
+      const gemPackageDir = getGemPackageSchemaPath(linkedPackageName)
+      linkedPackageSchemaPath = gemPackageDir
+
+    } else {
+      linkedPackageSchemaPath = path.join(projectRootDir, linkedPackage.schema)
+    }
+
+    const linkedPackageFacade = new PackageFacade(linkedPackageSchemaPath)
 
     const linkedObjectSchema = linkedPackageFacade.objects().find(o => o.name == link.target)
     if (!linkedObjectSchema) { return ret }
 
-    const linkedObject = loadObjectSchema(path.join(projectRootDir, linkedObjectSchema.schema))
+    const linkedObjectRoot = linkedPackage ? projectRootDir : getGemDir(linkedPackageName)
+    const linkedObject = loadObjectSchema(path.join(linkedObjectRoot, linkedObjectSchema.schema))
     if (!linkedObject) { { return ret } }
 
     return {
@@ -162,7 +174,7 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
         } as Range
       },
       location: {
-        uri: path.join(projectRootDir, linkedObject.path),
+        uri: path.join(linkedObjectRoot, linkedObject.path),
         range: {
           start: {
             line: 0,
@@ -248,7 +260,9 @@ export function splitArgsType(argType: string): string {
   if (contractMatch && contractMatch.groups.args.split(',')?.length < 2) { return argType } // if we have only one arg and don't need to split
   if (!['Ksplat', 'Kwargs'].includes(contractMatch.groups.contract)) { return argType }
 
-  let splittedArgs = contractMatch.groups.args.split(/,\s+\:/).join(',\n   :')
+  const argRegexp = /((\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(\w*)?(\[(.*?)\])?/g
+
+  let splittedArgs = contractMatch.groups.args.match(argRegexp)?.join(',\n   ')
   let resultArgs = `${contractMatch.groups.contract}[\n   ${splittedArgs}\n  ]`
   return resultArgs
 }

@@ -3,6 +3,7 @@ import * as vscode from 'vscode'
 import { getProjectRootDir } from '../utils/packageUtils'
 import { isReeInstalled, ExecCommand } from '../utils/reeUtils'
 import { loadPackagesSchema } from '../utils/packagesUtils'
+import { buildFullArgsArray } from './generatePackageSchema'
 import { PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
 
@@ -69,10 +70,10 @@ export function generatePackage() {
 
       vscode.window.showInformationMessage(`Package ${name} was generated`)
 
-      const packages = loadPackagesSchema(rootProjectDir)
-      if (!packages) { return }
+      const packagesSchema = loadPackagesSchema(rootProjectDir)
+      if (!packagesSchema) { return }
 
-      const packageSchema = packages.find(p => p.name == name)
+      const packageSchema = packagesSchema.packages.find(p => p.name == name)
       if (!packageSchema) { return }
 
       const packageSchemaPath = path.join(rootProjectDir, packageSchema.schema)
@@ -99,7 +100,7 @@ function execGeneratePackage(rootProjectDir: string, relativePath: string, name:
       code: child.status
     }
   } catch(e) {
-    vscode.window.showInformationMessage(`Error. ${e}`)
+    vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
   }
 }

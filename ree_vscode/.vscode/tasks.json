@@ -6,6 +6,7 @@
 		{
 			"type": "npm",
 			"script": "clean-and-watch",
+			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"presentation": {
 				"reveal": "never"

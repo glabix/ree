@@ -27,9 +27,9 @@ export function selectAndGeneratePackageSchema() {
     return
   }
 
-  const packages = loadPackagesSchema(projectPath)
+  const packagesSchema = loadPackagesSchema(projectPath)
 
-  if (!packages) {
+  if (!packagesSchema) {
     vscode.window.showErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
     return
   }
@@ -39,7 +39,7 @@ export function selectAndGeneratePackageSchema() {
 
   const filteredPackages = [
     allPackageOption,
-    ...packages.filter(p => {
+    ...packagesSchema.packages.filter(p => {
       if (p.name === currentPackageName) { p.name = 'Current Package' }
       return p
    })

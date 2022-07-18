@@ -1,5 +1,14 @@
 const fs = require('fs')
 
+let cachedPackages: ICachedGems = {}
+
+interface ICachedGems {
+  [key: string]: {
+    ctime: number
+    schema: any
+  }
+}
+
 export interface IPackageDep {
   name: string
 }
@@ -38,8 +47,28 @@ export class PackageFacade {
       return this.schema
     }
 
-    this.schema = JSON.parse(fs.readFileSync(this.schemaPath, { encoding: 'utf8' }))
+    this.schema = this.getCachedSchema()
     return this.schema as IPackage
+  }
+
+  private getCachedSchema(): any {
+    const ctime = fs.statSync(this.schemaPath).ctimeMs
+
+    if (
+      Object.keys(cachedPackages).length === 0 ||
+      (cachedPackages[this.schemaPath] && cachedPackages[this.schemaPath].ctime !== ctime) ||
+      (!cachedPackages[this.schemaPath])
+      ) {
+      const json = JSON.parse(fs.readFileSync(this.schemaPath, { encoding: 'utf8' }))
+      cachedPackages[this.schemaPath.toString()] = {
+        ctime: ctime,
+        schema: json
+      }
+
+      return json
+    } else {
+      return cachedPackages[this.schemaPath].schema
+    }
   }
 
   name(): string {

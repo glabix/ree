@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { getProjectRootDir } from '../utils/packageUtils'
 import { isReeInstalled, ExecCommand } from '../utils/reeUtils'
+import { buildFullArgsArray } from './generatePackageSchema'
 
 export function generatePackagesSchema(silent: boolean) {
   if (!vscode.workspace.workspaceFolders) {
@@ -40,9 +41,7 @@ function execGeneratePackagesSchema(rootProjectDir: string): ExecCommand | undef
     let spawnSync = require('child_process').spawnSync
 
     let child = spawnSync(
-      'ree',
-      ['gen.packages_json'],
-      { cwd: rootProjectDir }
+      ...buildFullArgsArray(rootProjectDir, ['gen.packages_json'])
     )
 
     return {
@@ -50,7 +49,7 @@ function execGeneratePackagesSchema(rootProjectDir: string): ExecCommand | undef
       code: child.status
     }
   } catch(e) {
-    vscode.window.showInformationMessage(`Error. ${e}`)
+    vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
   }
 }
