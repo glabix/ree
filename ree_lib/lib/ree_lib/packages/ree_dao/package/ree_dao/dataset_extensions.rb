@@ -161,13 +161,19 @@ module ReeDao
           mode: mode, schema_mapper: mapper || opts[:schema_mapper],
         ).with_row_proc(
           Proc.new { |hash|
-            entity = (mapper || opts[:schema_mapper]).db_load(hash)
+            m = mapper || opts[:schema_mapper]
 
-            if mode == :write
-              self.set_persistence_state(entity, hash)
+            if m
+              entity = m.db_load(hash)
+
+              if mode == :write
+                self.set_persistence_state(entity, hash)
+              end
+
+              entity
+            else
+              hash
             end
-
-            entity
           }
         )
       end
