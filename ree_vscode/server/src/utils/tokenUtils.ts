@@ -206,8 +206,10 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
     if (!linkedObjectSchema) { return ret }
 
     const linkedObjectRoot = linkedPackage ? projectRootDir : getGemDir(linkedPackageName)
+    if (!linkedObjectRoot) { return ret }
+
     const linkedObject = loadObjectSchema(path.join(linkedObjectRoot, linkedObjectSchema.schema))
-    if (!linkedObject) { { return ret } }
+    if (!linkedObject) { return ret }
 
     return {
       linkDef: linkDef,

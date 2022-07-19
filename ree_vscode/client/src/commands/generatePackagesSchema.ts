@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { getProjectRootDir } from '../utils/packageUtils'
 import { isReeInstalled, ExecCommand } from '../utils/reeUtils'
-import { buildFullArgsArray } from './generatePackageSchema'
+import { buildReeCommandFullArgsArray } from './generatePackageSchema'
 
 export function generatePackagesSchema(silent: boolean) {
   if (!vscode.workspace.workspaceFolders) {
@@ -41,7 +41,7 @@ function execGeneratePackagesSchema(rootProjectDir: string): ExecCommand | undef
     let spawnSync = require('child_process').spawnSync
 
     let child = spawnSync(
-      ...buildFullArgsArray(rootProjectDir, ['gen.packages_json'])
+      ...buildReeCommandFullArgsArray(rootProjectDir, ['gen.packages_json'])
     )
 
     return {
