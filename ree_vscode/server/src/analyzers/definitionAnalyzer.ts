@@ -48,7 +48,7 @@ export default class DefinitionAnalyzer {
     }
 
     // search in file
-    let findInFileLocation = findTokenInFile(token, doc)
+    let findInFileLocation = findTokenInFile(token, uri)
     if (!findInFileLocation) { return defaultLocation }
 
     return findInFileLocation

@@ -77,6 +77,8 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
     return ret
   }
 
+  const doc = documents.get(uri)
+
   const objectName = getObjectNameFromPath(filePath)
   if (!objectName) { return ret }
 
@@ -104,10 +106,60 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
     return l.target === token || l.as === token || l.imports.includes(token)
   })
 
-  if (!link) { return ret }
+  if (!link) { 
+    // maybe it's a constant
+    let constantTokenLine = findTokenInFile(token, uri)
+    if (!constantTokenLine) { return ret }
+
+    const tokenLineNumber = constantTokenLine.range.start.line
+
+    const lineText = doc.getText().split("\n")[tokenLineNumber]
+    // match link name and from
+    const linkNameMatch = lineText.match(/link\s(?<name>(\:\w+)|(\'\w+(\/\w+)*\'))\,\s(from\:\s(?<from>(\:\w+)|(\'\w+(\/\w+)*\')))?/)
+    if (!linkNameMatch) { return ret }
+    if (!linkNameMatch.groups) { return ret }
+    if (!linkNameMatch.groups.name) { return ret }
+
+    const linkName = linkNameMatch.groups.name
+    if (linkName[0] === "'") { // it's a string link name
+      // join packageEntryPath and linkName
+      const linkPackage = packagesSchema.packages.find(p => p.name === linkName.replace(/\'|\:/g,'').split('/')[0])
+      if (!linkPackage) { return ret }
+
+      const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage.schema))
+      if (!linkPackageFacade) { return ret }
+
+      const packageRootPath = linkPackageFacade.entryPath().split('/').slice(0, -1).join('/')
+      const importLinkRelativePath = packageRootPath + '/' + linkName.replace(/\'|\:/g,'') + '.rb'
+      const importLinkPath = path.join(projectRootDir, importLinkRelativePath)
+      return { location: findTokenInFile(token, url.pathToFileURL(importLinkPath).toString()) } as ILinkedObject
+    } else if (linkName[0] === ':') {
+      if (!linkNameMatch.groups.from) { return ret }
+
+      const linkFrom = linkNameMatch.groups.from.replace(/\'|\:/g,'')
+      const linkPackage = packagesSchema.packages.find(p => p.name == linkFrom)
+      if (!linkPackage) { return ret }
+
+      const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage.schema))
+      const linkObject = linkPackageFacade.objects().find(o => o.name === linkName.replace(/\'|\:/g,''))
+      if (!linkObject) { return ret }
+
+      const curObject = loadObjectSchema(path.join(projectRootDir, linkObject.schema))
+      if (!curObject) { return ret }
+
+      
+      return {
+        location: findTokenInFile(
+          token,
+          url.pathToFileURL(path.join(projectRootDir, curObject.path)).toString()
+        )
+      } as ILinkedObject
+    }
+
+    return ret
+  }
 
   if (link) {
-    const doc = documents.get(uri)
     const linkRegexp = RegExp(`link\\s+:${link.target}`)
     let lineNumber = 0
     let startPos = 0
@@ -198,7 +250,7 @@ export interface ILocalMethod {
 }
 
 export function findMethod(doc: string, token: string): ILocalMethod {
-  const methodRegexp = RegExp(`def\\s+\\${token}`)
+  const methodRegexp = RegExp(`def\\s+${token}`)
   const classMethodRegexp = RegExp(`def\\s+self.${token}`)
   
   let lineNumber = null
@@ -232,10 +284,15 @@ export function findMethod(doc: string, token: string): ILocalMethod {
   }
 }
 
-export function findTokenInFile(token: string, doc: TextDocument): Location | undefined {
+export function findTokenInFile(token: string, uri: string): Location | undefined {
+  let text = documents.get(uri)?.getText()
+  if (!text) {
+    text = fs.readFileSync(url.fileURLToPath(uri), { encoding: 'utf8'})
+  }
+
   let resultLine: number, startCharacter: number, endCharacter : number = 0
   let onlyTokenRegexp = RegExp(`\\b${token}\\b`)
-  for (let [index, line] of doc.getText().split('\n').entries()) {
+  for (let [index, line] of text.split('\n').entries()) {
     let match = line.match(onlyTokenRegexp)
     if (match && match.index) {
       resultLine = index
@@ -243,7 +300,7 @@ export function findTokenInFile(token: string, doc: TextDocument): Location | un
       endCharacter = startCharacter + token.length
 
       return {
-        uri: doc.uri,
+        uri: uri,
         range: {
           start: { line: resultLine, character: startCharacter },
           end: { line: resultLine, character: endCharacter}
