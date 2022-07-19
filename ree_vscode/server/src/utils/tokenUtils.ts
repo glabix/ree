@@ -2,6 +2,7 @@ import { Range } from 'vscode'
 import { Location } from 'vscode-languageserver'
 import { Position, TextDocument } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
+import { forest } from '../forest'
 import { loadPackagesSchema, getGemPackageSchemaPath, getGemDir } from '../utils/packagesUtils'
 import { IObjectMethod, loadObjectSchema } from './objectUtils'
 import { PackageFacade } from './packageFacade'
@@ -113,7 +114,23 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
 
     const tokenLineNumber = constantTokenLine.range.start.line
 
-    const lineText = doc.getText().split("\n")[tokenLineNumber]
+    let tree = forest.getTree(uri)
+    if (!tree) {
+      tree = forest.createTree(uri, doc.getText())
+    }
+
+    const query = tree.getLanguage().query(
+      `(object (do_block ((link) @link)))`
+    )
+
+    const queryMatches = query.matches(tree.rootNode)
+
+    const queryCaptureLinkWithToken = queryMatches.filter(q => (q.captures[0].node.text.match(RegExp(`${token}`))))?.[0]
+    if (!queryCaptureLinkWithToken) { return ret }
+
+    const lineText = queryCaptureLinkWithToken.captures[0].node.text
+    if (!lineText) { return ret }
+
     // match link name and from
     const linkNameMatch = lineText.match(/link\s(?<name>(\:\w+)|(\'\w+(\/\w+)*\'))\,\s(from\:\s(?<from>(\:\w+)|(\'\w+(\/\w+)*\')))?/)
     if (!linkNameMatch) { return ret }
@@ -134,6 +151,8 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
       const importLinkPath = path.join(projectRootDir, importLinkRelativePath)
       return { location: findTokenInFile(token, url.pathToFileURL(importLinkPath).toString()) } as ILinkedObject
     } else if (linkName[0] === ':') {
+      // if import from symbol link name
+      // just find package and object
       if (!linkNameMatch.groups.from) { return ret }
 
       const linkFrom = linkNameMatch.groups.from.replace(/\'|\:/g,'')
