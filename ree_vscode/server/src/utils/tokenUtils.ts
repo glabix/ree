@@ -112,8 +112,6 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
     let constantTokenLine = findTokenInFile(token, uri)
     if (!constantTokenLine) { return ret }
 
-    const tokenLineNumber = constantTokenLine.range.start.line
-
     let tree = forest.getTree(uri)
     if (!tree) {
       tree = forest.createTree(uri, doc.getText())
@@ -149,7 +147,26 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
       const packageRootPath = linkPackageFacade.entryPath().split('/').slice(0, -1).join('/')
       const importLinkRelativePath = packageRootPath + '/' + linkName.replace(/\'|\:/g,'') + '.rb'
       const importLinkPath = path.join(projectRootDir, importLinkRelativePath)
-      return { location: findTokenInFile(token, url.pathToFileURL(importLinkPath).toString()) } as ILinkedObject
+      let constLocation = null
+      const tokenLocation = findTokenInFile(token, url.pathToFileURL(importLinkPath).toString())
+      if (tokenLocation) {
+        constLocation = tokenLocation
+      } else {
+        constLocation = {
+          uri: url.pathToFileURL(importLinkPath).toString(),
+          range: {
+            start: {
+              line: 0,
+              character: 0
+            },
+            end: {
+              line: 0,
+              character: 0
+            }
+          }
+        } as Location
+      }
+      return { location: constLocation } as ILinkedObject
     } else if (linkName[0] === ':') {
       // if import from symbol link name
       // just find package and object
