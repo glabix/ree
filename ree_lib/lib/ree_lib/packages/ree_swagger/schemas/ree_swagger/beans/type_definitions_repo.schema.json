@@ -1,0 +1,15 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "type_definitions_repo",
+  "path": "packages/ree_swagger/package/ree_swagger/beans/type_definitions_repo.rb",
+  "mount_as": "object",
+  "class": "ReeSwagger::TypeDefinitionsRepo",
+  "factory": "build",
+  "methods": [
+
+  ],
+  "links": [
+
+  ]
+}

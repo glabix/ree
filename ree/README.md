@@ -83,7 +83,7 @@ include Ree::PackageDSL
 
   package
 end
-``` 
+```
 This practice gives you the following benefits:
 - single place to manage all your project gems
 - easy way to understand which packages introduced gems to the project

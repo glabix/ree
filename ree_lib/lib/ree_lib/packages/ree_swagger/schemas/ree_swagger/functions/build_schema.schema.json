@@ -1,0 +1,46 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "build_schema",
+  "path": "packages/ree_swagger/package/ree_swagger/functions/build_schema.rb",
+  "mount_as": "fn",
+  "class": "ReeSwagger::BuildSchema",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Hash",
+      "args": [
+        {
+          "arg": "title",
+          "type": "String"
+        },
+        {
+          "arg": "description",
+          "type": "String"
+        },
+        {
+          "arg": "version",
+          "type": "String"
+        },
+        {
+          "arg": "endpoints",
+          "type": "ArrayOf[ReeSwagger::EndpointDto]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "build_endpoint_schema",
+      "package_name": "ree_swagger",
+      "as": "build_endpoint_schema",
+      "imports": [
+
+      ]
+    }
+  ]
+}

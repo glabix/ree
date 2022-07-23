@@ -71,6 +71,10 @@
       "schema": "packages/ree_string/Package.schema.json"
     },
     {
+      "name": "ree_swagger",
+      "schema": "packages/ree_swagger/Package.schema.json"
+    },
+    {
       "name": "ree_text",
       "schema": "packages/ree_text/Package.schema.json"
     },

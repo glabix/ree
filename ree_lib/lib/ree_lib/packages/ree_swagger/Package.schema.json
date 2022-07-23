@@ -1,0 +1,61 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_swagger",
+  "entry_path": "packages/ree_swagger/package/ree_swagger.rb",
+  "tags": [
+    "ree_swagger"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_dto"
+    },
+    {
+      "name": "ree_hash"
+    },
+    {
+      "name": "ree_mapper"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "build_endpoint_schema",
+      "schema": "packages/ree_swagger/schemas/ree_swagger/functions/build_endpoint_schema.schema.json"
+    },
+    {
+      "name": "build_parameters",
+      "schema": "packages/ree_swagger/schemas/ree_swagger/functions/build_parameters.schema.json"
+    },
+    {
+      "name": "build_request_body_schema",
+      "schema": "packages/ree_swagger/schemas/ree_swagger/functions/build_request_body_schema.schema.json"
+    },
+    {
+      "name": "build_schema",
+      "schema": "packages/ree_swagger/schemas/ree_swagger/functions/build_schema.schema.json"
+    },
+    {
+      "name": "build_serializer_schema",
+      "schema": "packages/ree_swagger/schemas/ree_swagger/functions/build_serializer_schema.schema.json"
+    },
+    {
+      "name": "get_caster_definition",
+      "schema": "packages/ree_swagger/schemas/ree_swagger/functions/get_caster_definition.schema.json"
+    },
+    {
+      "name": "get_serializer_definition",
+      "schema": "packages/ree_swagger/schemas/ree_swagger/functions/get_serializer_definition.schema.json"
+    },
+    {
+      "name": "register_type",
+      "schema": "packages/ree_swagger/schemas/ree_swagger/functions/register_type.schema.json"
+    },
+    {
+      "name": "type_definitions_repo",
+      "schema": "packages/ree_swagger/schemas/ree_swagger/beans/type_definitions_repo.schema.json"
+    }
+  ]
+}

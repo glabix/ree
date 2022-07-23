@@ -56,7 +56,7 @@ class ReeMapper::Mapper
     klass.new(strategies, type)
   end
 
-  attr_reader :strategies, :strategy_methods
+  attr_reader :strategies, :strategy_methods, :fields, :type
 
   def initialize(strategies, type)
     @fields = {}
