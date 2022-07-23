@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "ree_version": "0.1.0",
+  "ree_version": "1.0.1",
   "name": "ree_text",
   "entry_path": "packages/ree_text/package/ree_text.rb",
   "tags": [

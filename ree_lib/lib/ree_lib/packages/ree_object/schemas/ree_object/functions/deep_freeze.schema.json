@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "ree_version": "1.0.1",
   "name": "deep_freeze",
   "path": "packages/ree_object/package/ree_object/functions/deep_freeze.rb",
   "mount_as": "fn",

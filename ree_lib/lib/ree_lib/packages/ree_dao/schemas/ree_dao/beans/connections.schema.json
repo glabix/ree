@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "ree_version": "1.0.1",
   "name": "connections",
   "path": "packages/ree_dao/package/ree_dao/beans/connections.rb",
   "mount_as": "object",

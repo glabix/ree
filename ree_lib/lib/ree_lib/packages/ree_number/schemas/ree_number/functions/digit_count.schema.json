@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "ree_version": "1.0.1",
   "name": "digit_count",
   "path": "packages/ree_number/package/ree_number/functions/digit_count.rb",
   "mount_as": "fn",

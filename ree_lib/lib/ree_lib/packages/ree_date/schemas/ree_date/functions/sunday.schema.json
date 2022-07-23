@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "ree_version": "1.0.1",
   "name": "sunday",
   "path": "packages/ree_date/package/ree_date/functions/sunday.rb",
   "mount_as": "fn",

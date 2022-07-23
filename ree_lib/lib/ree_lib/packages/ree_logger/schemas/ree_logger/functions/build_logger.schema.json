@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "ree_version": "1.0.1",
   "name": "build_logger",
   "path": "packages/ree_logger/package/ree_logger/functions/build_logger.rb",
   "mount_as": "fn",

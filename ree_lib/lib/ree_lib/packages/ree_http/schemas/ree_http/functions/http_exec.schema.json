@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "ree_version": "1.0.1",
   "name": "http_exec",
   "path": "packages/ree_http/package/ree_http/functions/http_exec.rb",
   "mount_as": "fn",

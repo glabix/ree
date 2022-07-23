@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "ree_version": "0.1.0",
+  "ree_version": "1.0.1",
   "name": "ree_datetime",
   "entry_path": "packages/ree_datetime/package/ree_datetime.rb",
   "tags": [

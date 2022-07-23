@@ -10,13 +10,13 @@ Gem::Specification.new do |spec|
 
   spec.summary = "Ruby Standard Library Extensions"
   spec.description = "Ree Lib provides set of packages to extend Ruby Standard Library"
-  spec.homepage = "https://github.com/glabix/ree/ree_lib"
+  spec.homepage = "https://github.com/glabix/ree/tree/main/ree_lib"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/glabix/ree/ree_lib"
-  spec.metadata["changelog_uri"] = "https://github.com/glabix/ree/ree_lib/CHANGELOG.md"
+  spec.metadata["source_code_uri"] = "https://github.com/glabix/ree/tree/main/ree_lib"
+  spec.metadata["changelog_uri"] = "https://github.com/glabix/ree/blob/main/ree_lib/CHANGELOG.md"
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
@@ -28,19 +28,16 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "ree"
-  spec.add_dependency "tzinfo"
-  spec.add_dependency "loofah"
-  spec.add_dependency "oj"
-  spec.add_dependency "i18n"
-  spec.add_dependency "sequel"
-  spec.add_dependency "binding_of_caller"
-  spec.add_dependency "rainbow"
+  spec.add_dependency "ree", "~> 1.0.0"
+  spec.add_dependency "tzinfo", "~> 2.0.5"
+  spec.add_dependency "loofah", "~> 2.18.0"
+  spec.add_dependency "oj", "~> 3.13.17"
+  spec.add_dependency "i18n", "~> 1.12.0"
+  spec.add_dependency "sequel", "~> 5.58.0"
+  spec.add_dependency "binding_of_caller", "~> 1.0.0"
+  spec.add_dependency "rainbow", "~> 3.1.1"
 
-  spec.add_development_dependency 'sqlite3'
-  spec.add_development_dependency 'pg'
-  spec.add_development_dependency 'timecop'
-
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
+  spec.add_development_dependency 'sqlite3', "~> 1.4.4"
+  spec.add_development_dependency 'pg', "~> 1.4.1"
+  spec.add_development_dependency 'timecop', "~> 0.9.5"
 end

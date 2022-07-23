@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "ree_version": "1.0.1",
   "name": "apply_migration",
   "path": "packages/ree_migrator/package/ree_migrator/functions/apply_migration.rb",
   "mount_as": "fn",
