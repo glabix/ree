@@ -1,0 +1,51 @@
+{
+  "schema_type": "package",
+  "ree_version": "0.1.0",
+  "name": "ree_errors",
+  "entry_path": "packages/ree_errors/package/ree_errors.rb",
+  "tags": [
+    "ree_errors"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_i18n"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "auth_error",
+      "schema": "packages/ree_errors/schemas/ree_errors/auth_error.schema.json"
+    },
+    {
+      "name": "build_error",
+      "schema": "packages/ree_errors/schemas/ree_errors/build_error.schema.json"
+    },
+    {
+      "name": "conflict_error",
+      "schema": "packages/ree_errors/schemas/ree_errors/conflict_error.schema.json"
+    },
+    {
+      "name": "invalid_param_error",
+      "schema": "packages/ree_errors/schemas/ree_errors/invalid_param_error.schema.json"
+    },
+    {
+      "name": "not_found_error",
+      "schema": "packages/ree_errors/schemas/ree_errors/not_found_error.schema.json"
+    },
+    {
+      "name": "payment_required_error",
+      "schema": "packages/ree_errors/schemas/ree_errors/payment_required_error.schema.json"
+    },
+    {
+      "name": "permission_error",
+      "schema": "packages/ree_errors/schemas/ree_errors/permission_error.schema.json"
+    },
+    {
+      "name": "validation_error",
+      "schema": "packages/ree_errors/schemas/ree_errors/validation_error.schema.json"
+    }
+  ]
+}

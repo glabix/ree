@@ -27,6 +27,10 @@
       "schema": "packages/ree_enum/Package.schema.json"
     },
     {
+      "name": "ree_errors",
+      "schema": "packages/ree_errors/Package.schema.json"
+    },
+    {
       "name": "ree_hash",
       "schema": "packages/ree_hash/Package.schema.json"
     },

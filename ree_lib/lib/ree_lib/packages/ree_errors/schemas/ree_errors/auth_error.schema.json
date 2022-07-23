@@ -1,0 +1,22 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "auth_error",
+  "path": "packages/ree_errors/package/ree_errors/auth_error.rb",
+  "mount_as": "object",
+  "class": "ReeErrors::AuthError",
+  "factory": null,
+  "methods": [
+
+  ],
+  "links": [
+    {
+      "target": "build_error",
+      "package_name": "ree_errors",
+      "as": "build_error",
+      "imports": [
+
+      ]
+    }
+  ]
+}

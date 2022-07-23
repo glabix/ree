@@ -1,0 +1,22 @@
+{
+  "schema_type": "object",
+  "ree_version": "0.1.0",
+  "name": "validation_error",
+  "path": "bounded_contexts/shared/ree_errors/package/ree_errors/validation_error.rb",
+  "mount_as": "object",
+  "class": "ReeErrors::ValidationError",
+  "factory": null,
+  "methods": [
+
+  ],
+  "links": [
+    {
+      "target": "build_error",
+      "package_name": "ree_errors",
+      "as": "build_error",
+      "imports": [
+
+      ]
+    }
+  ]
+}
