@@ -343,6 +343,8 @@ export function findMethodArgument(token: string, uri: string, position: Positio
   )
 
   const queryMatches = query.matches(tree.rootNode)
+  if (queryMatches.length === 0) { return }
+
   const matchWithArg = queryMatches.filter(q => {
     let capWithTokenArg = q.captures.filter(
       _q => _q.name === 'method_params' && 
@@ -365,12 +367,15 @@ export function findMethodArgument(token: string, uri: string, position: Positio
   if (!methodParamsTokenValue) { return }
 
   const methodParamsTokenIndex = methodParamsArr.indexOf(methodParamsTokenValue)
+  if (methodParamsTokenIndex === -1) { return }
+
   const contractArgs = contractParamsCapture.node.children.filter(n => !n.text.match(/^(\(|\)|\,)/)).map(n => n.text.split(' => ')?.[0])
+  if (contractArgs.length === 0) { return }
+
   const contractArgForMethodParam = contractArgs?.[methodParamsTokenIndex]
   if (!contractArgForMethodParam) { return }
 
-  let hover = ''
-  hover = hover +"```ruby\n" + splitArgsType(contractArgForMethodParam) + "\n```"
+  const hover = "```ruby\n" + splitArgsType(contractArgForMethodParam) + "\n```"
 
   return {
     contents: {
