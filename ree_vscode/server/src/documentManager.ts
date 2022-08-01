@@ -1,6 +1,7 @@
 import { TextDocuments, Connection, TextDocumentIdentifier } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Subject } from 'rxjs'
+import { forest } from './forest'
 
 export enum DocumentEventKind {
 	OPEN,
@@ -15,15 +16,21 @@ export interface DocumentEvent {
 
 export default class DocumentManager {
 	private readonly documents: TextDocuments<TextDocument>
-	public subject: Subject<DocumentEvent>
 
 	constructor() {
 		this.documents = new TextDocuments(TextDocument)
-		this.subject = new Subject<DocumentEvent>()
 
-		this.documents.onDidOpen(this.emitDocumentEvent(DocumentEventKind.OPEN))
-		this.documents.onDidChangeContent(this.emitDocumentEvent(DocumentEventKind.CHANGE_CONTENT))
-		this.documents.onDidClose(this.emitDocumentEvent(DocumentEventKind.CLOSE))
+		this.documents.onDidOpen((e) => {
+			forest.createTree(e.document.uri, e.document.getText())
+		})
+
+		this.documents.onDidChangeContent((e) => {
+			forest.updateTree(e.document.uri, e.document.getText())
+		})
+
+		this.documents.onDidClose((e) => {
+			forest.deleteTree(e.document.uri)
+		})
 	}
 
 	public get(id: TextDocumentIdentifier | string): TextDocument {
@@ -33,15 +40,6 @@ export default class DocumentManager {
 
 	public listen(connection: Connection): void {
 		this.documents.listen(connection)
-	}
-
-	private emitDocumentEvent(kind: DocumentEventKind): ({ document } : { document: TextDocument}) => void {
-		return ({ document }): void => {
-			this.subject.next({
-				kind,
-				document,
-			})
-		}
 	}
 }
 

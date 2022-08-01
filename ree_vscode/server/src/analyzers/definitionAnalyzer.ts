@@ -35,7 +35,7 @@ export default class DefinitionAnalyzer {
       } as Location
     }
 
-    const linkedObject = findLinkedObject(uri, token)
+    const linkedObject = findLinkedObject(uri, token, position)
 
     if (linkedObject.location) {
       return {
@@ -48,7 +48,7 @@ export default class DefinitionAnalyzer {
     }
 
     // search in file
-    let findInFileLocation = findTokenInFile(token, doc)
+    let findInFileLocation = findTokenInFile(token, uri)
     if (!findInFileLocation) { return defaultLocation }
 
     return findInFileLocation

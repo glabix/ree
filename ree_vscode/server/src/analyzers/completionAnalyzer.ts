@@ -67,6 +67,8 @@ export default class CompletionAnalyzer {
     // get gemPackages
     const gemPackageObjects = packagesSchema.gemPackages.map((pckg) => {
       let gemPath = getGemDir(pckg.name)
+      if (!gemPath) { return [] }
+
       let packageFacade = new PackageFacade(path.join(gemPath, pckg.schema))
       
       let objects = packageFacade.objects().map(obj => (
