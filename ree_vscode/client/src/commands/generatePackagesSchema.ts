@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { getProjectRootDir } from '../utils/packageUtils'
-import { isReeInstalled, ExecCommand } from '../utils/reeUtils'
+import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, ExecCommand } from '../utils/reeUtils'
 import { buildReeCommandFullArgsArray } from './generatePackageSchema'
 
 export function generatePackagesSchema(silent: boolean) {
@@ -13,9 +13,20 @@ export function generatePackagesSchema(silent: boolean) {
   if (!rootProjectDir) { return }
 
   const checkReeIsInstalled = isReeInstalled(rootProjectDir)
-  
   if (checkReeIsInstalled?.code === 1) {
     vscode.window.showWarningMessage('gem ree is not installed')
+    return
+  }
+
+  const checkIsBundleGemsInstalled = isBundleGemsInstalled(rootProjectDir)
+  if (checkIsBundleGemsInstalled?.code !== 0) {
+    vscode.window.showWarningMessage("Unable to find gems. Run `bundle install` first.")
+    return
+  }
+
+  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()
+  if (checkIsBundleGemsInstalledInDocker && checkIsBundleGemsInstalledInDocker.code !== 0) {
+    vscode.window.showWarningMessage("Unable to find gems in Docker container. Run `bundle install` in container first.")
     return
   }
 

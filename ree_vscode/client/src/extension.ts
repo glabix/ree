@@ -13,7 +13,8 @@ import { clearDocumentProblems, generatePackageSchema } from './commands/generat
 import { updateStatusBar, statusBarCallbacks } from "./commands/statusBar"
 import { goToSpec } from "./commands/goToSpec"
 import { onCreatePackageFile, onRenamePackageFile } from "./commands/documentTemplates"
-import { isReeProject } from "./utils/fileUtils"
+import { isBundleGemsInstalled, isBundleGemsInstalledInDocker } from "./utils/reeUtils"
+import { getCurrentProjectDir } from './utils/fileUtils'
 import { generatePackagesSchema } from "./commands/generatePackagesSchema"
 import { generatePackage } from "./commands/generatePackage"
 import { updatePackageDeps } from './commands/updatePackageDeps'
@@ -106,6 +107,18 @@ export function activate(context: vscode.ExtensionContext) {
     onDidCreateFiles,
     onDidRenameFiles,
   )
+
+
+  let curPath = getCurrentProjectDir()
+  const checkIsBundleGemsInstalled = isBundleGemsInstalled(curPath)
+  if (checkIsBundleGemsInstalled?.code !== 0) {
+    vscode.window.showWarningMessage("Unable to find gems. Run `bundle install` first.")
+  }
+
+  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()
+  if (checkIsBundleGemsInstalledInDocker && checkIsBundleGemsInstalledInDocker.code !== 0) {
+    vscode.window.showWarningMessage("Unable to find gems in Docker container. Run `bundle install` in container first.")
+  }
 
   // Language Client
 

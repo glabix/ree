@@ -1,7 +1,8 @@
 import * as vscode from 'vscode'
 import { PACKAGES_SCHEMA_FILE } from '../core/constants'
 import { IPackageSchema, loadPackagesSchema } from '../utils/packagesUtils'
-import { getPackageNameFromPath, getProjectRootDir } from '../utils/packageUtils'
+import { getCurrentProjectDir } from '../utils/fileUtils'
+import { getPackageNameFromPath } from '../utils/packageUtils'
 import { generatePackageSchema } from './generatePackageSchema'
 
 type SelectPackageCb = (selected: string | undefined) => void;
@@ -21,7 +22,7 @@ export function selectAndGeneratePackageSchema() {
     currentFilePath = activeEditor.document.uri.path
   }
 
-  const projectPath = getProjectRootDir(currentFilePath)
+  const projectPath = getCurrentProjectDir()
   if (!projectPath) {
     vscode.window.showErrorMessage(`Unable to find ${PACKAGES_SCHEMA_FILE}`)
     return

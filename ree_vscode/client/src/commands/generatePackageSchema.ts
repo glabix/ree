@@ -1,8 +1,9 @@
 import * as vscode from 'vscode'
 import { DiagnosticSeverity } from 'vscode-languageclient'
 import { PackageFacade } from '../utils/packageFacade'
-import { getPackageObjectFromCurrentPath, getProjectRootDir } from '../utils/packageUtils'
-import { isReeInstalled, ExecCommand } from '../utils/reeUtils'
+import { getPackageObjectFromCurrentPath } from '../utils/packageUtils'
+import { getCurrentProjectDir } from '../utils/fileUtils'
+import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, ExecCommand } from '../utils/reeUtils'
 
 const path = require('path')
 const diagnosticCollection = vscode.languages.createDiagnosticCollection('ruby')
@@ -17,17 +18,7 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
     return
   }
 
-  let currentFilePath = null
-  const activeEditor = vscode.window.activeTextEditor
-
-  if (!activeEditor) {
-    currentFilePath = vscode.workspace.workspaceFolders[0].uri.path
-  } else {
-    currentFilePath = activeEditor.document.fileName
-  }
-
-  const rootProjectDir = getProjectRootDir(currentFilePath)
-
+  const rootProjectDir = getCurrentProjectDir()
   if (!rootProjectDir) { return }
 
   // check if ree is installed
@@ -35,6 +26,18 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
   
   if (checkReeIsInstalled?.code === 1) {
     vscode.window.showWarningMessage('gem ree is not installed')
+    return
+  }
+
+  const checkIsBundleGemsInstalled = isBundleGemsInstalled(rootProjectDir)
+  if (checkIsBundleGemsInstalled?.code !== 0) {
+    vscode.window.showWarningMessage('Run `bundle install` first.')
+    return
+  }
+
+  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()
+  if (checkIsBundleGemsInstalledInDocker && checkIsBundleGemsInstalledInDocker.code !== 0) {
+    vscode.window.showWarningMessage("Unable to find gems in Docker container. Run `bundle install` in container first.")
     return
   }
 
