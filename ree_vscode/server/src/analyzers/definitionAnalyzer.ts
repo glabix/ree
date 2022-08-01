@@ -35,7 +35,7 @@ export default class DefinitionAnalyzer {
       } as Location
     }
 
-    const linkedObject = findLinkedObject(uri, token)
+    const linkedObject = findLinkedObject(uri, token, position)
 
     if (linkedObject.location) {
       return {

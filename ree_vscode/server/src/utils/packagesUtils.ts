@@ -28,7 +28,7 @@ interface ICachedGems {
 }
 
 
-interface IPackagesSchema {
+export interface IPackagesSchema {
   packages: IPackageSchema[]
   gemPackages: IGemPackageSchema[]
 }

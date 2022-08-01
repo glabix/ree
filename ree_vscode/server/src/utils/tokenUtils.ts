@@ -3,7 +3,7 @@ import { Location, Hover, MarkupKind } from 'vscode-languageserver'
 import { Position, TextDocument } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { forest } from '../forest'
-import { loadPackagesSchema, getGemPackageSchemaPath, getGemDir } from '../utils/packagesUtils'
+import { loadPackagesSchema, getGemPackageSchemaPath, getGemDir, IPackagesSchema } from '../utils/packagesUtils'
 import { IObjectMethod, loadObjectSchema } from './objectUtils'
 import { PackageFacade } from './packageFacade'
 import { getObjectNameFromPath, getPackageNameFromPath, getProjectRootDir } from './packageUtils'
@@ -68,7 +68,7 @@ export interface ILinkedObject {
   location: Location
 }
 
-export function findLinkedObject(uri: string, token: string): ILinkedObject  {
+export function findLinkedObject(uri: string, token: string, position: Position): ILinkedObject  {
   const ret = {} as ILinkedObject
   let filePath = ''
 
@@ -109,90 +109,10 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
 
   if (!link) { 
     // maybe it's a constant
-    let constantTokenLine = findTokenInFile(token, uri)
-    if (!constantTokenLine) { return ret }
+    const constantLocation = findConstant(token, uri, position, doc, packagesSchema, projectRootDir)
+    if (!constantLocation) { return ret }
 
-    let tree = forest.getTree(uri)
-    if (!tree) {
-      tree = forest.createTree(uri, doc.getText())
-    }
-
-    const query = tree.getLanguage().query(
-      `(object (do_block ((link) @link)))`
-    )
-
-    const queryMatches = query.matches(tree.rootNode)
-
-    const queryCaptureLinkWithToken = queryMatches.filter(q => (q.captures[0].node.text.match(RegExp(`${token}`))))?.[0]
-    if (!queryCaptureLinkWithToken) { return ret }
-
-    const lineText = queryCaptureLinkWithToken.captures[0].node.text
-    if (!lineText) { return ret }
-
-    // match link name and from
-    const linkNameMatch = lineText.match(/link\s(?<name>(\:\w+)|(\'\w+(\/\w+)*\'))\,\s(from\:\s(?<from>(\:\w+)|(\'\w+(\/\w+)*\')))?/)
-    if (!linkNameMatch) { return ret }
-    if (!linkNameMatch.groups) { return ret }
-    if (!linkNameMatch.groups.name) { return ret }
-
-    const linkName = linkNameMatch.groups.name
-    if (linkName[0] === "'") { // it's a string link name
-      // join packageEntryPath and linkName
-      const linkPackage = packagesSchema.packages.find(p => p.name === linkName.replace(/\'|\:/g,'').split('/')[0])
-      if (!linkPackage) { return ret }
-
-      const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage.schema))
-      if (!linkPackageFacade) { return ret }
-
-      const packageRootPath = linkPackageFacade.entryPath().split('/').slice(0, -1).join('/')
-      const importLinkRelativePath = packageRootPath + '/' + linkName.replace(/\'|\:/g,'') + '.rb'
-      const importLinkPath = path.join(projectRootDir, importLinkRelativePath)
-      let constLocation = null
-      const tokenLocation = findTokenInFile(token, url.pathToFileURL(importLinkPath).toString())
-      if (tokenLocation) {
-        constLocation = tokenLocation
-      } else {
-        constLocation = {
-          uri: url.pathToFileURL(importLinkPath).toString(),
-          range: {
-            start: {
-              line: 0,
-              character: 0
-            },
-            end: {
-              line: 0,
-              character: 0
-            }
-          }
-        } as Location
-      }
-      return { location: constLocation } as ILinkedObject
-    } else if (linkName[0] === ':') {
-      // if import from symbol link name
-      // just find package and object
-      if (!linkNameMatch.groups.from) { return ret }
-
-      const linkFrom = linkNameMatch.groups.from.replace(/\'|\:/g,'')
-      const linkPackage = packagesSchema.packages.find(p => p.name == linkFrom)
-      if (!linkPackage) { return ret }
-
-      const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage.schema))
-      const linkObject = linkPackageFacade.objects().find(o => o.name === linkName.replace(/\'|\:/g,''))
-      if (!linkObject) { return ret }
-
-      const curObject = loadObjectSchema(path.join(projectRootDir, linkObject.schema))
-      if (!curObject) { return ret }
-
-      
-      return {
-        location: findTokenInFile(
-          token,
-          url.pathToFileURL(path.join(projectRootDir, curObject.path)).toString()
-        )
-      } as ILinkedObject
-    }
-
-    return ret
+    return constantLocation
   }
 
   if (link) {
@@ -285,6 +205,95 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
 export interface ILocalMethod {
   position?: Position
   methodDef?: string
+}
+
+export function findConstant(token: string, uri: string, position: Position, doc: TextDocument, packagesSchema: IPackagesSchema, projectRootDir: string): ILinkedObject | undefined {
+  const ret = {} as ILinkedObject
+  let constantTokenLine = findTokenInFile(token, uri)
+  if (!constantTokenLine) { return ret }
+
+  let tree = forest.getTree(uri)
+  if (!tree) {
+    tree = forest.createTree(uri, doc.getText())
+  }
+
+  const query = tree.getLanguage().query(
+    `(object (do_block ((link) @link)))`
+  )
+
+  const queryMatches = query.matches(tree.rootNode)
+
+  const queryCaptureLinkWithToken = queryMatches.filter(q => {
+    return q.captures[0].node.text.match(RegExp(`${token}`)) && q.captures[0].node.startPosition.row === position.line
+  })?.[0]
+  if (!queryCaptureLinkWithToken) { return ret }
+
+  const lineText = queryCaptureLinkWithToken.captures[0].node.text
+  if (!lineText) { return ret }
+
+  // match link name and from
+  const linkNameMatch = lineText.match(/link\s(?<name>(\:\w+)|(\'\w+(\/\w+)*\'))\,\s(from\:\s(?<from>(\:\w+)|(\'\w+(\/\w+)*\')))?/)
+  if (!linkNameMatch) { return ret }
+  if (!linkNameMatch.groups) { return ret }
+  if (!linkNameMatch.groups.name) { return ret }
+
+  const linkName = linkNameMatch.groups.name
+  if (linkName[0] === "'") { // it's a string link name
+    // join packageEntryPath and linkName
+    const linkPackage = packagesSchema.packages.find(p => p.name === linkName.replace(/\'|\:/g,'').split('/')[0])
+    if (!linkPackage) { return ret }
+
+    const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage.schema))
+    if (!linkPackageFacade) { return ret }
+
+    const packageRootPath = linkPackageFacade.entryPath().split('/').slice(0, -1).join('/')
+    const importLinkRelativePath = packageRootPath + '/' + linkName.replace(/\'|\:/g,'') + '.rb'
+    const importLinkPath = path.join(projectRootDir, importLinkRelativePath)
+
+    let constLocation = null
+    const tokenLocation = findTokenInFile(token, url.pathToFileURL(importLinkPath).toString())
+    if (tokenLocation) {
+      constLocation = tokenLocation
+    } else {
+      constLocation = {
+        uri: url.pathToFileURL(importLinkPath).toString(),
+        range: {
+          start: {
+            line: 0,
+            character: 0
+          },
+          end: {
+            line: 0,
+            character: 0
+          }
+        }
+      } as Location
+    }
+    return { location: constLocation } as ILinkedObject
+  } else if (linkName[0] === ':') {
+    // if import from symbol link name
+    // just find package and object
+    if (!linkNameMatch.groups.from) { return ret }
+
+    const linkFrom = linkNameMatch.groups.from.replace(/\'|\:/g,'')
+    const linkPackage = packagesSchema.packages.find(p => p.name == linkFrom)
+    if (!linkPackage) { return ret }
+
+    const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage.schema))
+    const linkObject = linkPackageFacade.objects().find(o => o.name === linkName.replace(/\'|\:/g,''))
+    if (!linkObject) { return ret }
+
+    const curObject = loadObjectSchema(path.join(projectRootDir, linkObject.schema))
+    if (!curObject) { return ret }
+
+    
+    return {
+      location: findTokenInFile(
+        token,
+        url.pathToFileURL(path.join(projectRootDir, curObject.path)).toString()
+      )
+    } as ILinkedObject
+  }
 }
 
 export function findMethod(doc: string, token: string): ILocalMethod {

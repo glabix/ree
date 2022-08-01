@@ -35,7 +35,7 @@ export default class HoverAnalyzer {
       } as Hover
     }
 
-    const linkedObject = findLinkedObject(uri, token)
+    const linkedObject = findLinkedObject(uri, token, position)
     
     if (linkedObject.linkDef) {
       let hover = ""
