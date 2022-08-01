@@ -1,5 +1,5 @@
 import { Range } from 'vscode'
-import { Location } from 'vscode-languageserver'
+import { Location, Hover, MarkupKind } from 'vscode-languageserver'
 import { Position, TextDocument } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { forest } from '../forest'
@@ -320,6 +320,68 @@ export function findMethod(doc: string, token: string): ILocalMethod {
   } else {
     return {} as ILocalMethod
   }
+}
+
+export function findMethodArgument(token: string, uri: string, position: Position): any {
+  const doc = documents.get(uri)
+  if (!doc) { return }
+
+  let tree = forest.getTree(uri)
+  if (!tree) {
+    tree = forest.createTree(uri, doc.getText())
+  }
+
+  const query = tree.getLanguage().query(
+    `(
+      (contract (_) @contract_params) @contract
+      .
+      [
+        (method (method_parameters)? @method_params) @method
+      ]
+      (#select-adjacent! @contract @method)
+    ) @contractWithMethod`
+  )
+
+  const queryMatches = query.matches(tree.rootNode)
+  const matchWithArg = queryMatches.filter(q => {
+    let capWithTokenArg = q.captures.filter(
+      _q => _q.name === 'method_params' && 
+            _q.node.text.match(RegExp(`${token}`)) &&
+            _q.node.startPosition.row === position.line
+    )
+
+    if (capWithTokenArg.length > 0) { return q }
+  })[0]
+  if (!matchWithArg) { return }
+
+  const contractParamsCapture = matchWithArg.captures.find(c => c.name === 'contract_params')
+  if (!contractParamsCapture) { return }
+
+  const methodParamsCapture = matchWithArg.captures.find(c => c.name === 'method_params')
+  if (!methodParamsCapture) { return }
+
+  const methodParamsArr = methodParamsCapture.node.text.replace(/\(|\)/g, '').split(', ')
+  const methodParamsTokenValue = methodParamsArr.find(e => e.match(RegExp(`${token}`)))
+  if (!methodParamsTokenValue) { return }
+
+  const methodParamsTokenIndex = methodParamsArr.indexOf(methodParamsTokenValue)
+  const contractArgs = contractParamsCapture.node.children.filter(n => !n.text.match(/^(\(|\)|\,)/)).map(n => n.text.split(' => ')?.[0])
+  const contractArgForMethodParam = contractArgs?.[methodParamsTokenIndex]
+  if (!contractArgForMethodParam) { return }
+
+  let hover = ''
+  hover = hover +"```ruby\n" + splitArgsType(contractArgForMethodParam) + "\n```"
+
+  return {
+    contents: {
+      kind: MarkupKind.Markdown,
+      value: hover
+    },
+    range: {
+      start: position,
+      end: position
+    } 
+  } as Hover
 }
 
 export function findTokenInFile(token: string, uri: string): Location | undefined {

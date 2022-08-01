@@ -2,7 +2,7 @@ import { MarkupKind } from 'vscode-languageserver'
 import { Position } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { Hover } from 'vscode-languageserver'
-import { extractToken, findMethod, findLinkedObject, splitArgsType } from '../utils/tokenUtils'
+import { extractToken, findMethod, findLinkedObject, splitArgsType, findMethodArgument } from '../utils/tokenUtils'
 
 export default class HoverAnalyzer {
 	public static analyze(uri: string, position: Position): Hover {
@@ -83,6 +83,10 @@ export default class HoverAnalyzer {
       } as Hover
     }
 
+    // check if it in func params
+    const paramsHover = findMethodArgument(token, uri, position)
+    if (paramsHover) { return paramsHover }
+    
     return defaultHover
   }
 }
