@@ -12,6 +12,14 @@ class ReeMapper::MapperFactory
   }.freeze
 
   contract(Symbol, Any => Class).throws(ArgumentError)
+  def self.register_type(name, object_type)
+    register(
+      name,
+      ReeMapper::Mapper.build(strategies, object_type)
+    )
+  end
+
+  contract(Symbol, Any => Class).throws(ArgumentError)
   def self.register(name, type)
     raise ArgumentError, "name of mapper type should not include `?`" if name.to_s.end_with?('?')
     raise ArgumentError, "type :#{name} already registered" if types.key?(name)
