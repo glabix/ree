@@ -22,7 +22,7 @@ class Ree::PackageSchemaBuilder
     
     data = {
       Schema::SCHEMA_TYPE => Schema::PACKAGE,
-      Schema::REE_VERSION => Ree::VERSION,
+      Schema::SCHEMA_VERSION => Schema::SCHEMA_VERSION_NUMBER,
       Schema::NAME => package.name,
       Schema::ENTRY_PATH => package.entry_rpath,
       Schema::TAGS => package.tags,
