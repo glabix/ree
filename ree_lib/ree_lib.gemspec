@@ -36,6 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "sequel", "~> 5.58.0"
   spec.add_dependency "binding_of_caller", "~> 1.0.0"
   spec.add_dependency "rainbow", "~> 3.1.1"
+  spec.add_dependency "rollbar", "~> 3.3.1"
 
   spec.add_development_dependency 'sqlite3', "~> 1.4.4"
   spec.add_development_dependency 'pg', "~> 1.4.1"

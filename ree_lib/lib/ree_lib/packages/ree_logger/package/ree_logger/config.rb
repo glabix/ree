@@ -23,6 +23,7 @@ class ReeLogger::Config
       levels: {
         file: parse_level(ENV['LOG_LEVEL_FILE']),
         stdout: parse_level(ENV['LOG_LEVEL_STDOUT']),
+        rollbar: parse_level(ENV['LOG_LEVEL_ROLLBAR'])
       },
       rate_limit: {
         interval: get_int_value('LOG_RATE_LIMIT_INTERVAL', RATE_LIMIT_INTERVAL),
