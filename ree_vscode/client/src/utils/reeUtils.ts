@@ -86,7 +86,7 @@ export function isBundleGemsInstalledInDocker(): ExecCommand | undefined {
       )
 
       return {
-        message: child.status === 0 ? child.stdout.toString() : child.stderr.toString(),
+        message: `Docker: ${child.status === 0 ? child.stdout.toString() : child.stderr.toString()}`,
         code: child.status
       }
     }

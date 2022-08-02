@@ -112,12 +112,12 @@ export function activate(context: vscode.ExtensionContext) {
   let curPath = getCurrentProjectDir()
   const checkIsBundleGemsInstalled = isBundleGemsInstalled(curPath)
   if (checkIsBundleGemsInstalled?.code !== 0) {
-    vscode.window.showWarningMessage("Unable to find gems. Run `bundle install` first.")
+    vscode.window.showWarningMessage(checkIsBundleGemsInstalled.message)
   }
 
   const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()
   if (checkIsBundleGemsInstalledInDocker && checkIsBundleGemsInstalledInDocker.code !== 0) {
-    vscode.window.showWarningMessage("Unable to find gems in Docker container. Run `bundle install` in container first.")
+    vscode.window.showWarningMessage(checkIsBundleGemsInstalledInDocker.message)
   }
 
   // Language Client
