@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "ree_object",
   "entry_path": "packages/ree_object/package/ree_object.rb",
   "tags": [

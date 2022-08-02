@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "unescape_html",
   "path": "packages/ree_text/package/ree_text/functions/unescape_html.rb",
   "mount_as": "fn",

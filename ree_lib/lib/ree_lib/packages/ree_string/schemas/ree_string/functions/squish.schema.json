@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "squish",
   "path": "packages/ree_string/package/ree_string/functions/squish.rb",
   "mount_as": "fn",

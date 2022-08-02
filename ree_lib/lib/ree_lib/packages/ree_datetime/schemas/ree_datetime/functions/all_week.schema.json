@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "all_week",
   "path": "packages/ree_datetime/package/ree_datetime/functions/all_week.rb",
   "mount_as": "fn",
