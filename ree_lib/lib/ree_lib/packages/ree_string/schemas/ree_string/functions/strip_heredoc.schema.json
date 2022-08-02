@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "strip_heredoc",
   "path": "packages/ree_string/package/ree_string/functions/strip_heredoc.rb",
   "mount_as": "fn",

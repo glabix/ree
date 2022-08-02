@@ -20,7 +20,7 @@ class Ree::ObjectSchemaBuilder
 
     data = {
       Schema::SCHEMA_TYPE => Schema::OBJECT,
-      Schema::REE_VERSION => Ree::VERSION,
+      Schema::SCHEMA_VERSION => Schema::SCHEMA_VERSION_NUMBER,
       Schema::NAME => object.name,
       Schema::PATH => object.rpath,
       Schema::MOUNT_AS => object.mount_as,

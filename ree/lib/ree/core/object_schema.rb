@@ -3,6 +3,8 @@
 module Ree::ObjectSchema
   SCHEMA_TYPE = 'schema_type'
   REE_VERSION = 'ree_version'
+  SCHEMA_VERSION = 'schema_version'
+  SCHEMA_VERSION_NUMBER = '0.0.1' # !!! Bump version when structure is changed !!!
   NAME = 'name'
   OBJECT = 'object'
   LINKS = 'links'

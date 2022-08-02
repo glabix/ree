@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "build_filter_keys",
   "path": "packages/ree_hash/package/ree_hash/functions/build_filter_keys.rb",
   "mount_as": "fn",

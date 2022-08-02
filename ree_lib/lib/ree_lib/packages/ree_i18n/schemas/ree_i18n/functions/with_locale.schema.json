@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "with_locale",
   "path": "packages/ree_i18n/package/ree_i18n/functions/with_locale.rb",
   "mount_as": "fn",

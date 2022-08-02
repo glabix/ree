@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "ree_errors",
   "entry_path": "packages/ree_errors/package/ree_errors.rb",
   "tags": [

@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "find_time_zones_by_offset",
   "path": "packages/ree_datetime/package/ree_datetime/functions/find_time_zones_by_offset.rb",
   "mount_as": "fn",

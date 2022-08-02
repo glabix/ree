@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "http_put",
   "path": "packages/ree_http/package/ree_http/functions/http_put.rb",
   "mount_as": "fn",

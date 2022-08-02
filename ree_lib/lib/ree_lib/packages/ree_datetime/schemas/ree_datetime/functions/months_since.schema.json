@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "1.0.1",
+  "schema_version": "0.0.1",
   "name": "months_since",
   "path": "packages/ree_datetime/package/ree_datetime/functions/months_since.rb",
   "mount_as": "fn",
