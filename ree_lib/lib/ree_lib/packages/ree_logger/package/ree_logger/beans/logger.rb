@@ -14,6 +14,7 @@ class ReeLogger::Logger
     link 'ree_logger/rate_limiter', -> { RateLimiter }
     link 'ree_logger/appenders/file_appender', -> { FileAppender }
     link 'ree_logger/appenders/stdout_appender', -> { StdoutAppender }
+    link 'ree_logger/appenders/rollbar_appender', -> { RollbarAppender }
   end
 
   def build
@@ -32,6 +33,16 @@ class ReeLogger::Logger
     if config.levels.stdout
       appenders << StdoutAppender.new(
         config.levels.stdout, nil
+      )
+    end
+
+    if config.levels.rollbar
+      appenders << RollbarAppender.new(
+        config.levels.rollbar, {
+          access_token: config.rollbar.access_token,
+          branch: config.rollbar.branch,
+          host: config.rollbar.host
+        }
       )
     end
 

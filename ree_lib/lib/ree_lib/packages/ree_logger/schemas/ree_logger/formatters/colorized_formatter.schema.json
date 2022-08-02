@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "ree_version": "1.0.1",
   "name": "colorized_formatter",
   "path": "packages/ree_logger/package/ree_logger/formatters/colorized_formatter.rb",
   "mount_as": "object",

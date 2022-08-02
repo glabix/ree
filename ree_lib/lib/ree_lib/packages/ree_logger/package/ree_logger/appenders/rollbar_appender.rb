@@ -6,12 +6,14 @@ require 'rollbar'
 class ReeLogger::RollbarAppender < ReeLogger::Appender
   include Ree::LinkDSL
 
+  link 'ree_logger/log_event', -> { LogEvent }
+
   contract(
     Symbol,
     {
       access_token: String,
-      branch?: String,
-      host?: String
+      branch?: Nilor[String],
+      host?: Nilor[String]
     } =>  Any
   )
   def initialize(level, rollbar_opts)
@@ -23,7 +25,7 @@ class ReeLogger::RollbarAppender < ReeLogger::Appender
   end
 
 
-  contract ReeLogger::LogEvent, Nilor[String] => nil
+  contract(LogEvent, Nilor[String] => nil)
   def append(event, progname = nil)
     send_event_to_rollbar(event)
 
@@ -32,7 +34,7 @@ class ReeLogger::RollbarAppender < ReeLogger::Appender
 
   private
 
-  def send_event_to_rollbar(event, message)
+  def send_event_to_rollbar(event)
     rollbar_level = case event.level
                     when :fatal
                       'critical'
