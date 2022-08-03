@@ -28,7 +28,9 @@ class ReeLogger::Config
       rollbar: {
         access_token: ENV['ROLLBAR_ACCESS_TOKEN'],
         branch: ENV['ROLLBAR_BRANCH'],
-        host: ENV['ROLLBAR_HOST']
+        host: ENV['ROLLBAR_HOST'],
+        environment: ENV['ROLLBAR_ENVIRONMENT'],
+        enabled: parse_bool_string(ENV['ROLLBAR_ENABLED'])
       },
       rate_limit: {
         interval: get_int_value('LOG_RATE_LIMIT_INTERVAL', RATE_LIMIT_INTERVAL),

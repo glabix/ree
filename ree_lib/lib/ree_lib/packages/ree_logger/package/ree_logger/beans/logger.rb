@@ -38,11 +38,12 @@ class ReeLogger::Logger
 
     if config.levels.rollbar
       appenders << RollbarAppender.new(
-        config.levels.rollbar, {
-          access_token: config.rollbar.access_token,
-          branch: config.rollbar.branch,
-          host: config.rollbar.host
-        }
+        config.levels.rollbar,
+        access_token: config.rollbar.access_token,
+        branch: config.rollbar.branch,
+        host: config.rollbar.host,
+        environment: config.rollbar.environment,
+        enabled: config.rollbar.enabled
       )
     end
 

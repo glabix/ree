@@ -42,9 +42,8 @@ RSpec.describe ReeLogger::MultiLogger do
   let(:rollbar_appender) {
     ReeLogger::RollbarAppender.new(
       :info,
-      {
-        access_token: ENV['ROLLBAR_ACCESS_TOKEN']
-      }
+      access_token: ENV['ROLLBAR_ACCESS_TOKEN'],
+      environment: ENV['ROLLBAR_ENVIRONMENT']
     )
   }
 

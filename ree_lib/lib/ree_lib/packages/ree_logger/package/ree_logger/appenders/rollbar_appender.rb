@@ -10,13 +10,16 @@ class ReeLogger::RollbarAppender < ReeLogger::Appender
 
   contract(
     Symbol,
-    {
+    Ksplat[
       access_token: String,
       branch?: Nilor[String],
-      host?: Nilor[String]
-    } =>  Any
+      host?: Nilor[String],
+      environment?: Nilor[String],
+      enabled?: Bool,
+      request_data?: Nilor[Hash]
+    ] =>  Any
   )
-  def initialize(level, rollbar_opts)
+  def initialize(level, **rollbar_opts)
     super(
       level, nil
     )
@@ -44,17 +47,33 @@ class ReeLogger::RollbarAppender < ReeLogger::Appender
                       event.level.to_s
                     end
 
-    Rollbar.log(
-      rollbar_level,
-      event.message,
-      exception: event.exception,
-      parameters: event.parameters
-    )
+    request_data ||= {}
+    fingerprint = event.message.to_s
+
+    if event.exception
+      fingerprint += event.exception.class.to_s
+    end
+
+    fingerprint = Digest::MD5.new.update(fingerprint).to_s
+    result = nil
+
+    person_data = { id: request_data["user_id"] }
+
+    Rollbar.scoped(fingerprint: fingerprint, request: request_data, person: person_data) do
+      Rollbar.log(
+        rollbar_level,
+        event.message,
+        event.exception,
+        event.parameters
+      )
+    end
   end
 
   def configure_rollbar(opts)
     Rollbar.configure do |config|
       config.access_token = opts[:access_token]
+      config.environment = opts[:environment] if opts[:environment]
+      config.enabled = opts[:enabled] if opts[:enabled]
       config.branch = opts[:branch] if opts[:branch]
       config.host = opts[:host] if opts[:host]
     end
