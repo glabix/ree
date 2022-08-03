@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "safe_list_sanitizer",
   "path": "packages/ree_text/package/ree_text/functions/safe_list_sanitizer.rb",
   "mount_as": "fn",

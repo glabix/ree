@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "build_request",
   "path": "packages/ree_http/package/ree_http/build_request.rb",
   "mount_as": "fn",

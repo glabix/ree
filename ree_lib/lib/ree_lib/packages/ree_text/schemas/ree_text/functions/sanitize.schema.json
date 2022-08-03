@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "sanitize",
   "path": "packages/ree_text/package/ree_text/functions/sanitize.rb",
   "mount_as": "fn",

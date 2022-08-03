@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "add_auth",
   "path": "packages/ree_http/package/ree_http/add_auth.rb",
   "mount_as": "fn",
