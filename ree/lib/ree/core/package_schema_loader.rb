@@ -7,7 +7,7 @@ class Ree::PackageSchemaLoader
   # Sample Package.schema.json
   # {
   #   "schema_type": "package",
-  #   "ree_version": "1.2.3",
+  #   "schema_version": "1.2.3",
   #   "name": "accounts",
   #   "entry_path": "package/accounts.rb",
   #   "depends_on": [
@@ -62,7 +62,7 @@ class Ree::PackageSchemaLoader
       raise Ree::Error.new("Invalid schema type: #{abs_schema_path}", :invalid_package_schema)
     end
 
-    ree_version = json_schema.fetch(Schema::REE_VERSION)
+    schema_version = json_schema.dig(Schema::SCHEMA_VERSION) ? json_schema.dig(Schema::SCHEMA_VERSION) : Schema::SCHEMA_VERSION_NUMBER
     entry_rpath = json_schema.fetch(Schema::ENTRY_PATH)
     package_name = json_schema.fetch(Schema::NAME).to_sym
 
@@ -83,12 +83,12 @@ class Ree::PackageSchemaLoader
 
     package = if existing_package
       existing_package
-        .set_ree_version(ree_version)
+        .set_schema_version(schema_version)
         .set_entry_rpath(entry_rpath)
         .set_schema_rpath(schema_rpath)
     else
       Ree::Package.new(
-        ree_version,
+        schema_version,
         package_name,
         entry_rpath,
         schema_rpath,

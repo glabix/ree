@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "schema_version": "0.0.1": "0.1.0",
   "name": "migrate_db",
   "path": "bounded_contexts/libs/ree_migrator/package/ree_migrator/migrate_db.rb",
   "mount_as": "object",

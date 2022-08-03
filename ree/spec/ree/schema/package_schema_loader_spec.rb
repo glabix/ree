@@ -7,7 +7,7 @@ RSpec.describe Ree::PackageSchemaLoader do
 
   it 'loads valid file' do
     package = subject.call(File.join(__dir__, 'samples/package_schemas/valid.package.json'))
-    expect(package.ree_version).to eq("1.2.3")
+    expect(package.schema_version).to eq("1.2.3")
     expect(package.name).to eq(:accounts)
     expect(package.entry_rpath).to eq("package/accounts.rb")
     expect(package.deps.size).to eq(2)

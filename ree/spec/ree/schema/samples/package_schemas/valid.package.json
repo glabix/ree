@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "ree_version": "1.2.3",
+  "schema_version": "1.2.3",
   "name": "accounts",
   "entry_path": "package/accounts.rb",
   "tags": [],

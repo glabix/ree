@@ -2,7 +2,6 @@ const fs = require('fs')
 
 interface IObject {
   schema_type: string
-  ree_version: string
   name: string
   path: string
   mount_as: string

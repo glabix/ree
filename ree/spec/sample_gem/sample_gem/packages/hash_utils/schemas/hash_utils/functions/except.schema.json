@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "except",
   "path": "packages/hash_utils/package/hash_utils/functions/except.rb",
   "mount_as": "fn",

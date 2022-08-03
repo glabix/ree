@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "json_pretty_printer",
   "path": "bc/shared/test_utils/package/test_utils/json_pretty_printer.rb",
   "mount_as": "fn",

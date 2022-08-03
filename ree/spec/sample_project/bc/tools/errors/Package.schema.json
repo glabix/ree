@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "ree_version": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "errors",
   "entry_path": "bc/tools/errors/package/errors.rb",
   "tags": [

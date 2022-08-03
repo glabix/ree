@@ -1,6 +1,6 @@
 {
   "schema_type": "packages",
-  "ree_version": "1.2.3",
+  "schema_version": "1.2.3",
   "packages": [
     {
       "name": null,

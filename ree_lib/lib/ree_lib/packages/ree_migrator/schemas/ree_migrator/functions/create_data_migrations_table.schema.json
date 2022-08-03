@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "schema_version": "0.0.1": "0.1.0",
   "name": "create_data_migrations_table",
   "path": "bounded_contexts/libs/ree_migrator/package/ree_migrator/functions/create_data_migrations_table.rb",
   "mount_as": "fn",

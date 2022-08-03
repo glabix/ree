@@ -20,7 +20,7 @@ class Ree::PackagesSchemaBuilder
     end
 
     result = {
-      Schema::REE_VERSION => Ree::VERSION,
+      Schema::SCHEMA_VERSION => Schema::SCHEMA_VERSION_NUMBER,
       Schema::SCHEMA_TYPE => Schema::PACKAGES,
       Schema::PACKAGES => packages.sort_by { _1[:name] }.map {
         {

@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "schema_version": "0.0.1": "0.1.0",
   "name": "set_default_logger",
   "path": "packages/ree_http/package/ree_http/functions/set_default_logger.rb",
   "mount_as": "fn",

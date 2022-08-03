@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "ree_version": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "test_utils",
   "entry_path": "bc/shared/test_utils/package/test_utils.rb",
   "tags": [

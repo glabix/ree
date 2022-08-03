@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "account_serializer",
   "path": "bc/accounts/package/accounts/account_serializer.rb",
   "mount_as": "object",

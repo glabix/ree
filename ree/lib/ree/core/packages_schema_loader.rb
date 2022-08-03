@@ -6,7 +6,7 @@ class Ree::PackagesSchemaLoader
   # Sample Packages.schema.json
   # {
   #   "schema_type": "packages",
-  #   "ree_version": "1.2.3",
+  #   "schema_version": "1.2.3",
   #   "packages": [
   #     {
   #       "name": "accounts",
@@ -41,9 +41,11 @@ class Ree::PackagesSchemaLoader
       raise Ree::Error.new("Invalid schema type: #{abs_schema_path}", :invalid_packages_schema)
     end
 
-    ree_version = schema.fetch(Schema::REE_VERSION)
+    # binding.irb
+
+    schema_version = schema.fetch(Schema::SCHEMA_VERSION)
     data = schema.fetch(Schema::PACKAGES)
-    packages_store ||= Ree::PackagesStore.new(ree_version)
+    packages_store ||= Ree::PackagesStore.new()
     names = {}
 
     data.each do |item|
@@ -62,7 +64,7 @@ class Ree::PackagesSchemaLoader
       names[name] = true
 
       package = Ree::Package.new(
-        ree_version,
+        schema_version,
         name.to_sym,
         Ree::PathHelper.package_entry_path(schema_rpath),
         schema_rpath,
@@ -81,7 +83,7 @@ class Ree::PackagesSchemaLoader
       
       packages_store.add_package(
         Ree::Package.new(
-          ree_version,
+          schema_version,
           name.to_sym,
           Ree::PathHelper.package_entry_path(schema_rpath),
           schema_rpath,

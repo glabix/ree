@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "perform_async",
   "path": "bc/accounts/package/accounts/services/perform_async.rb",
   "mount_as": "fn",

@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "ree_version": "0.1.0",
+  "schema_version": "0.0.1",
   "name": "build_user",
   "path": "bc/accounts/package/accounts/services/build_user.rb",
   "mount_as": "fn",

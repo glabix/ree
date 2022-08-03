@@ -24,7 +24,6 @@ export interface IObjectLink {
 
 export interface IObject {
   schema_type: string
-  ree_version: string
   name: string
   path: string
   mount_as: string

@@ -24,7 +24,6 @@ export interface IObject {
 }
 export interface IPackage {
   schema_type: string
-  ree_version: string
   name: string
   entry_path: string
   tags: string[]
