@@ -22,6 +22,8 @@ class Ree::PackagesFacade
         json,
         mode: 'w'
       )
+
+      json
     end
   end
 
@@ -76,6 +78,8 @@ class Ree::PackagesFacade
       schema = Ree::PackageSchemaBuilder.new.call(package)
       json = JSON.pretty_generate(schema)
       File.write(schema_path, json, mode: 'w')
+
+      json
     end
   end
 
@@ -100,6 +104,8 @@ class Ree::PackagesFacade
     schema = Ree::ObjectSchemaBuilder.new.call(object)
     json = JSON.pretty_generate(schema)
     File.write(schema_path, json, mode: 'w')
+
+    json
   end
 
   # @param [Symbol] package_name

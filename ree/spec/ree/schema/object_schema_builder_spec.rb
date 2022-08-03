@@ -16,9 +16,9 @@ RSpec.describe Ree::ObjectSchemaBuilder do
 
     schema_path = Ree::PathHelper.abs_object_schema_path(object)
 
-    schema = subject.call(object, schema_path)
-    parsed_schema = JSON.parse(schema)
-    valid_schema = JSON.parse(File.read(File.join(__dir__, 'samples/object_schemas/valid.package.json')))
-    expect(parsed_schema).to eq(valid_schema)
+    schema = subject.call(object)
+    json_schema = JSON.pretty_generate(schema)
+    valid_schema = File.read(File.join(__dir__, 'samples/object_schemas/valid.package.json'))
+    expect(json_schema).to eq(valid_schema)
   end
 end

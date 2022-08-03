@@ -7,12 +7,12 @@ RSpec.describe Ree::PackageSchemaLoader do
 
   it 'loads valid file' do
     package = subject.call(File.join(__dir__, 'samples/package_schemas/valid.package.json'))
-    expect(package.schema_version).to eq("1.2.3")
+    expect(package.schema_version).to eq("0.0.1")
     expect(package.name).to eq(:accounts)
-    expect(package.entry_rpath).to eq("package/accounts.rb")
-    expect(package.deps.size).to eq(2)
+    expect(package.entry_rpath).to eq("bc/accounts/package/accounts.rb")
+    expect(package.deps.size).to eq(5)
     expect(package.env_vars.size).to eq(2)
-    expect(package.objects.size).to eq(2)
+    expect(package.objects.size).to eq(12)
   end
 
   it 'does not load file with duplicates' do
