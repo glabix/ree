@@ -13,7 +13,15 @@ class Ree::PackagesFacade
   class << self
     def write_packages_schema
       Ree.logger.debug("write_packages_schema")
-      Ree::PackagesSchemaBuilder.new.call
+      packages_schema = Ree::PackagesSchemaBuilder.new.call
+
+      json = JSON.pretty_generate(packages_schema)
+
+      File.write(
+        File.join(Ree.root_dir, Ree::PACKAGES_SCHEMA_FILE),
+        json,
+        mode: 'w'
+      )
     end
   end
 

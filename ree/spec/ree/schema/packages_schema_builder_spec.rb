@@ -5,11 +5,9 @@ RSpec.describe Ree::PackagesSchemaBuilder do
     Ree::PackagesSchemaBuilder.new
   end
 
-  it 'builder valid Packages.schema.json' do
+  it 'builds valid Packages.schema.json' do
     dir = sample_project_dir
     Ree.init(dir)
-
-    File.write(File.join(dir, Ree::PACKAGES_SCHEMA_FILE), '', mode: 'w')
 
     schema = subject.call
 

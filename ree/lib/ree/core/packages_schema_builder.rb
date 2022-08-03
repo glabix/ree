@@ -36,14 +36,6 @@ class Ree::PackagesSchemaBuilder
         }
       },
     }
-
-    json = JSON.pretty_generate(result)
-
-    File.write(
-      File.join(Ree.root_dir, Ree::PACKAGES_SCHEMA_FILE),
-      json,
-      mode: 'w'
-    )
     
     result
   end
