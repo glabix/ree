@@ -4,6 +4,7 @@ RSpec.describe Ree::PackagesFacade do
   subject do
     Ree::PackagesFacade.new
   end
+  
 
   describe '#self.write_packages_schema' do
     it 'writes Packages.schema.json file' do
