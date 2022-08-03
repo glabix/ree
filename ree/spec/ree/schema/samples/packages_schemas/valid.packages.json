@@ -1,14 +1,33 @@
 {
+  "schema_version": "0.0.1",
   "schema_type": "packages",
-  "schema_version": "1.2.3",
   "packages": [
     {
       "name": "accounts",
       "schema": "bc/accounts/Package.schema.json"
     },
     {
-      "name": "tests",
-      "schema": "bc/tests/Package.schema.json"
+      "name": "clock",
+      "schema": "bc/tools/clock/Package.schema.json"
+    },
+    {
+      "name": "errors",
+      "schema": "bc/tools/errors/Package.schema.json"
+    },
+    {
+      "name": "roles",
+      "schema": "bc/roles/Package.schema.json"
+    },
+    {
+      "name": "test_utils",
+      "schema": "bc/shared/test_utils/Package.schema.json"
+    }
+  ],
+  "gem_packages": [
+    {
+      "gem": "sample_gem",
+      "name": "hash_utils",
+      "schema": "packages/hash_utils/Package.schema.json"
     }
   ]
 }

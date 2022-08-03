@@ -68,7 +68,14 @@ class Ree::PackagesFacade
 
     if package.dir
       schema_path = Ree::PathHelper.abs_package_schema_path(package)
-      Ree::PackageSchemaBuilder.new.call(package, schema_path)
+
+      if !File.exists?(schema_path)
+        raise Ree::Error.new("File does not exist: #{schema_path}", :invalid_path)
+      end
+
+      schema = Ree::PackageSchemaBuilder.new.call(package)
+      json = JSON.pretty_generate(schema)
+      File.write(schema_path, json, mode: 'w')
     end
   end
 

@@ -62,7 +62,7 @@ class Ree::PackageSchemaLoader
       raise Ree::Error.new("Invalid schema type: #{abs_schema_path}", :invalid_package_schema)
     end
 
-    schema_version = json_schema.dig(Schema::SCHEMA_VERSION) ? json_schema.dig(Schema::SCHEMA_VERSION) : Schema::SCHEMA_VERSION_NUMBER
+    schema_version = json_schema.dig(Schema::SCHEMA_VERSION)
     entry_rpath = json_schema.fetch(Schema::ENTRY_PATH)
     package_name = json_schema.fetch(Schema::NAME).to_sym
 

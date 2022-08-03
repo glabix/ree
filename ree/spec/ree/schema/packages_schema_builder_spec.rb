@@ -10,8 +10,10 @@ RSpec.describe Ree::PackagesSchemaBuilder do
     Ree.init(dir)
 
     schema = subject.call
+    json_schema = JSON.pretty_generate(schema)
 
-    expect(schema['packages'].size > 0).to eq(true)
-    expect(schema['gem_packages'].size).to eq(1)
+    valid_json_schema = File.read(File.join(__dir__, 'samples/packages_schemas/valid.packages.json'))
+
+    expect(json_schema).to eq(valid_json_schema)
   end
 end

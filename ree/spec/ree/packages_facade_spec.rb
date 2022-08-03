@@ -2,7 +2,7 @@
 
 RSpec.describe Ree::PackagesFacade do
   subject do
-    Ree::PackagesFacade
+    Ree::PackagesFacade.new
   end
 
   describe '#self.write_packages_schema' do
@@ -10,14 +10,26 @@ RSpec.describe Ree::PackagesFacade do
       dir = sample_project_dir
       Ree.init(dir)
 
-      subject.write_packages_schema
+      facade = Ree.container.packages_facade
+
+      facade.class.write_packages_schema
       packages_schema = File.join(dir, Ree::PACKAGES_SCHEMA_FILE)
       ensure_exists(packages_schema)
+    end
+  end
 
-      schema = JSON.parse(File.read(packages_schema))
+  describe '#write_package_schema' do
+    it 'writes Package.schema.json file for package' do
+      dir = sample_project_dir
+      Ree.init(dir)
+
+      facade = Ree.container.packages_facade
+      package = facade.load_entire_package(:accounts)
+      facade.write_package_schema(package.name)
+
+      package_schema = File.join(dir, package.schema_rpath)
       
-      expect(schema['packages'].size).not_to eq(0)
-      expect(schema['gem_packages'].size).not_to eq(0)
+      ensure_exists(package_schema)
     end
   end
 end

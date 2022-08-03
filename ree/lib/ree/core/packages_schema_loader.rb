@@ -41,8 +41,6 @@ class Ree::PackagesSchemaLoader
       raise Ree::Error.new("Invalid schema type: #{abs_schema_path}", :invalid_packages_schema)
     end
 
-    # binding.irb
-
     schema_version = schema.fetch(Schema::SCHEMA_VERSION)
     data = schema.fetch(Schema::PACKAGES)
     packages_store ||= Ree::PackagesStore.new()
