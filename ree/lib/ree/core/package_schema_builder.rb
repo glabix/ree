@@ -7,8 +7,7 @@ class Ree::PackageSchemaBuilder
   Schema = Ree::PackageSchema
 
   # @param [Ree::Package] package
-  # @param [String] - abs_path Absolute path to Package.schema.json file (ex. /project/bc/accounts/Package.schema.json)
-  # @return [nil]
+  # @return [Hash]
   def call(package)
     Ree.logger.debug("generating package schema for '#{package.name}' package")
 

@@ -4,15 +4,9 @@ class Ree::ObjectSchemaBuilder
   Schema = Ree::ObjectSchema
 
   # @param [Ree::Object] object
-  # @param [String] - path to object.schema.json file (ex. /project/bc/accounts/schemas/accounts/accounts_cfg.schema.json)
-  # @return [String]
-  def call(object, schema_path)
+  # @return [Hash]
+  def call(object)
     Ree.logger.debug("generating object schema for '#{object.name}' package")
-
-    if !File.exists?(schema_path)
-      only_dir_path = schema_path.split('/')[0..-2]
-      FileUtils.mkdir_p(File.join(only_dir_path))
-    end
 
     if !object.loaded?
       raise Ree::Error.new("object `#{object.name}` from package `#{object.package_name}` is not loaded", :invalid_schema)
@@ -37,10 +31,7 @@ class Ree::ObjectSchemaBuilder
       }
     }
 
-    json = JSON.pretty_generate(data)
-
-    File.write(schema_path, json, mode: 'w')
-    json
+    data
   end
 
   private

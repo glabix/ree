@@ -92,7 +92,14 @@ class Ree::PackagesFacade
 
     schema_path = Ree::PathHelper.abs_object_schema_path(object)
 
-    Ree::ObjectSchemaBuilder.new.call(object, schema_path)
+    if !File.exists?(schema_path)
+      only_dir_path = schema_path.split('/')[0..-2]
+      FileUtils.mkdir_p(File.join(only_dir_path))
+    end
+
+    schema = Ree::ObjectSchemaBuilder.new.call(object)
+    json = JSON.pretty_generate(schema)
+    File.write(schema_path, json, mode: 'w')
   end
 
   # @param [Symbol] package_name

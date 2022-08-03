@@ -9,8 +9,10 @@ RSpec.describe Ree::ObjectSchemaBuilder do
     dir = sample_project_dir
     Ree.init(dir)
 
-    Ree.load_package(:accounts)
-    object = Ree.container.packages_facade.get_object(:accounts, :register_account_cmd)
+    package_name = :accounts
+    object_name = :register_account_cmd
+    Ree.load_package(package_name)
+    object = Ree.container.packages_facade.get_object(package_name, object_name)
 
     schema_path = Ree::PathHelper.abs_object_schema_path(object)
 
