@@ -83,7 +83,7 @@ class ReeLogger::MultiLogger < Logger
   end
 
   contract(String, Hash, Nilor[Exception], Bool => nil)
-  def unknown(message, parameters = {}, exception  =nil, log_args = true)
+  def unknown(message, parameters = {}, exception = nil, log_args = true)
     log(:unknown, message, parameters, exception, true)
   end
 
@@ -131,6 +131,14 @@ class ReeLogger::MultiLogger < Logger
         parameters[:method][:name] = method_name
         parameters[:method][:args] = args
       rescue
+      end
+    end
+
+    parameters = transform_values(parameters) do |k, v|
+      if @filter_words.any? { k.to_s.include?(_1) }
+        'FILTERED'
+      else
+        v
       end
     end
 
