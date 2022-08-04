@@ -115,6 +115,7 @@ RSpec.describe ReeLogger::MultiLogger do
     expect { logger_with_appenders.fatal('some fatal message', { email: 'some@mail.com', password: 'password01' }, exception) }.to output(/some fatal message/).to_stdout
     expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("some fatal message")
+    expect(File.read(log_file_path)).to match(":password=>\"FILTERED\"")
   }
 
   it {
