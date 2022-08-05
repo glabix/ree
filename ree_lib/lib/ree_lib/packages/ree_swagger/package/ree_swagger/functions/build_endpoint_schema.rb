@@ -90,30 +90,12 @@ class ReeSwagger::BuildEndpointSchema
 
     endpoint.errors.each do |error|
       if responses.key?(error.status)
-        responses[error.status][:description] += "\n\n#{error.description}"
+        responses[error.status][:description] += "\n- #{error.description}"
         next
       end
 
       responses[error.status] = {
-        description: error.description,
-        content: {
-          :'application/json' => {
-            schema: {
-              type: 'object',
-              properties: {
-                code: {
-                  type: "string"
-                },
-                message: {
-                  type: "string"
-                },
-                type: {
-                  type: "string"
-                }
-              }
-            }
-          }
-        }
+        description: "- #{error.description}",
       }
     end
 

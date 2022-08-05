@@ -3,6 +3,14 @@ RSpec.describe :build_endpoint_schema do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
 
+  before :all do
+    Ree.enable_irb_mode
+  end
+
+  after :all do
+    Ree.disable_irb_mode
+  end
+
   let(:mapper_factory) {
     strategies = [
       build_mapper_strategy(method: :serialize, output: :symbol_key_hash),
@@ -15,6 +23,27 @@ RSpec.describe :build_endpoint_schema do
   }
 
   it {
+    module ReeSwaggerTest
+      include Ree::PackageDSL
+
+      package
+
+      class Locales
+        include ReeEnum::DSL
+
+        enum :locales
+
+        val :en, 0
+        val :ru, 1
+      end
+    end
+
+    mapper_factory.register_type(
+      :locales, ReeSwaggerTest::Locales.type_for_mapper
+    )
+
+    ReeSwaggerTest::Locales.register_as_swagger_type
+
     serializer = mapper_factory.call.use(:serialize) do
       integer :id
     end
@@ -28,6 +57,7 @@ RSpec.describe :build_endpoint_schema do
       integer :id
       string :name
       tag    :tag
+      locales :locale
     end
 
     schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
@@ -78,6 +108,10 @@ RSpec.describe :build_endpoint_schema do
                         name: { type: 'string' },
                         value: { type: 'string' }
                       }
+                    },
+                    locale: {
+                      type: 'string',
+                      enum: ['en', 'ru']
                     }
                   }
                 }
@@ -99,46 +133,11 @@ RSpec.describe :build_endpoint_schema do
               }
             },
             400 => {
-              description: "1st 400 error\n\n2nd 400 error",
-              content: {
-                :'application/json' => {
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      code: {
-                        type: "string"
-                      },
-                      message: {
-                        type: "string"
-                      },
-                      type: {
-                        type: "string"
-                      }
-                    }
-                  }
-                }
-              }
+              description: "- 1st 400 error\n- 2nd 400 error",
+
             },
             401 => {
-              description: "401 error",
-              content: {
-                :'application/json' => {
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      code: {
-                        type: "string"
-                      },
-                      message: {
-                        type: "string"
-                      },
-                      type: {
-                        type: "string"
-                      }
-                    }
-                  }
-                }
-              }
+              description: "- 401 error",
             }
           }
         }

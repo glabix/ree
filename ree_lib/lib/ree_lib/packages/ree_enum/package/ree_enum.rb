@@ -5,6 +5,7 @@ module ReeEnum
 
   package do
     depends_on :ree_mapper
+    depends_on :ree_swagger
     depends_on :ree_validator
   end
 end
