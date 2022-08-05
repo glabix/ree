@@ -10,7 +10,7 @@ class ReeSwagger::GetSerializerDefinition
   contract(Any, Proc => Nilor[Hash])
   def call(type, build_serializer_schema)
     type_definitions_repo
-      .dig(:serializers, type.class.name)
+      .dig(:serializers, type.class)
       &.(type, build_serializer_schema)
   end
 end

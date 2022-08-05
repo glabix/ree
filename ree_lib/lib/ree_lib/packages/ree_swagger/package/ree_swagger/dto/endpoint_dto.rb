@@ -1,5 +1,8 @@
 class ReeSwagger::EndpointDto
   include ReeDto::EntityDSL
+  include Ree::LinkDSL
+
+  link 'ree_swagger/dto/error_dto', -> { ErrorDto }
 
   properties(
     method: Or[:get, :post, :put, :patch, :delete],
@@ -8,6 +11,7 @@ class ReeSwagger::EndpointDto
     serializer: Nilor[ReeMapper::Mapper],
     description: Nilor[String],
     response_status: Integer,
-    response_description: Nilor[String]
+    response_description: Nilor[String],
+    errors: ArrayOf[ErrorDto]
   )
 end

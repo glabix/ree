@@ -1,3 +1,5 @@
+package_require 'ree_swagger/functions/register_type'
+
 module ReeEnum
   module DSL
     def self.included(base)
@@ -92,7 +94,26 @@ module ReeEnum
         end
       end
 
+      def register_as_swagger_type
+        swagger_type_registrator = ReeSwagger::RegisterType.new
+
+        [:casters, :serializers].each do |kind|
+          swagger_type_registrator.call(
+            kind,
+            type_for_mapper.class,
+            ->(*) {
+              {
+                type: 'string',
+                enum: values.all.map(&:to_s)
+              }
+            }
+          )
+        end
+      end
+
       def register_as_mapper_type
+        register_as_swagger_type
+
         mapper_factory = ReeMapper.get_mapper_factory(
           Object.const_get(self.name.split('::').first)
         )

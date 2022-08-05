@@ -11,6 +11,9 @@
       "name": "ree_mapper"
     },
     {
+      "name": "ree_swagger"
+    },
+    {
       "name": "ree_validator"
     }
   ],

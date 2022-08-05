@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ree_lib (1.0.1)
+    ree_lib (1.0.3)
       binding_of_caller (~> 1.0.0)
       i18n (~> 1.12.0)
       loofah (~> 2.18.0)

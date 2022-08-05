@@ -11,6 +11,9 @@
       "name": "ree_dto"
     },
     {
+      "name": "ree_enum"
+    },
+    {
       "name": "ree_hash"
     },
     {
