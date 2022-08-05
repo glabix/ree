@@ -244,6 +244,7 @@ module Ree
       facade.load_packages_schema
 
       facade.packages_store.packages.each do |package|
+        next if package.gem?
         puts("Generating Package.schema.json for :#{package.name} package") if !silence
 
         facade.load_entire_package(package.name)

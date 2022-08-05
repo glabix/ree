@@ -49,7 +49,7 @@ class Ree::PackageSchemaLoader
     if !File.exists?(abs_schema_path)
       raise Ree::Error.new("File not found: #{abs_schema_path}", :invalid_package_schema)
     end
-    
+
     json_schema = begin
       JSON.load_file(abs_schema_path)
     rescue
@@ -57,12 +57,12 @@ class Ree::PackageSchemaLoader
     end
 
     schema_type = json_schema.fetch(Schema::SCHEMA_TYPE)
-    
+
     if schema_type != Schema::PACKAGE
       raise Ree::Error.new("Invalid schema type: #{abs_schema_path}", :invalid_package_schema)
     end
 
-    schema_version = json_schema.dig(Schema::SCHEMA_VERSION)
+    schema_version = json_schema.fetch(Schema::SCHEMA_VERSION) { Schema::SCHEMA_VERSION_NUMBER }
     entry_rpath = json_schema.fetch(Schema::ENTRY_PATH)
     package_name = json_schema.fetch(Schema::NAME).to_sym
 
@@ -118,7 +118,7 @@ class Ree::PackageSchemaLoader
         schema_rpath,
         Ree::PathHelper.object_rpath(schema_rpath),
       )
-      
+
       object.set_package(package.name)
 
       package.set_object(object)

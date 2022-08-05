@@ -18,9 +18,9 @@ class Ree::PackagesSchemaLoader
   #     }
   #   ]
   # }
-  
+
   Schema = Ree::PackagesSchema
-  
+
   # @param [String] path Absolute path to Packages.schema.json file
   # @param Nilor[Ree::PackagesStore] packages_store Existing packages store
   # @return [Ree::PackagesStore]
@@ -36,12 +36,12 @@ class Ree::PackagesSchemaLoader
     end
 
     schema_type = schema.fetch(Schema::SCHEMA_TYPE)
-    
+
     if schema_type != Schema::PACKAGES
       raise Ree::Error.new("Invalid schema type: #{abs_schema_path}", :invalid_packages_schema)
     end
 
-    schema_version = schema.fetch(Schema::SCHEMA_VERSION)
+    schema_version = schema.fetch(Schema::SCHEMA_VERSION) { Schema::SCHEMA_VERSION_NUMBER }
     data = schema.fetch(Schema::PACKAGES)
     packages_store ||= Ree::PackagesStore.new()
     names = {}
@@ -78,7 +78,7 @@ class Ree::PackagesSchemaLoader
           raise Ree::Error.new("Unable to add package `#{existing.name}` from `#{package.gem_name}` gem. Package was already added from `#{existing.gem_name}` gem.", :duplicate_package)
         end
       end
-      
+
       packages_store.add_package(
         Ree::Package.new(
           schema_version,
