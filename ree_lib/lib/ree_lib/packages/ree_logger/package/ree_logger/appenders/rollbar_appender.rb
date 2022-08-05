@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative 'appender'
-require 'rollbar'
 require 'digest'
 
 class ReeLogger::RollbarAppender < ReeLogger::Appender
@@ -22,6 +21,8 @@ class ReeLogger::RollbarAppender < ReeLogger::Appender
   )
   def initialize(level, access_token:, environment:, **opts)
     super(level, nil)
+
+    require 'rollbar'
 
     Rollbar.configure do |config|
       config.enabled = true
