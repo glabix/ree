@@ -83,7 +83,7 @@ class ReeLogger::MultiLogger < Logger
   end
 
   contract(String, Hash, Nilor[Exception], Bool => nil)
-  def unknown(message, parameters = {}, exception  =nil, log_args = true)
+  def unknown(message, parameters = {}, exception = nil, log_args = true)
     log(:unknown, message, parameters, exception, true)
   end
 
