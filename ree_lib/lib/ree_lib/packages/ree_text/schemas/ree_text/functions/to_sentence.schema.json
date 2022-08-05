@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "to_sentence",
   "path": "packages/ree_text/package/ree_text/functions/to_sentence.rb",
   "mount_as": "fn",

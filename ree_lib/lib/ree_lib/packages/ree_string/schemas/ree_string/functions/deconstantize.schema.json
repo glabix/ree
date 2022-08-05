@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "deconstantize",
   "path": "packages/ree_string/package/ree_string/functions/deconstantize.rb",
   "mount_as": "fn",

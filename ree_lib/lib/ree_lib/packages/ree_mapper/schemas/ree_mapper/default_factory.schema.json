@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "default_factory",
   "path": "packages/ree_mapper/package/ree_mapper/default_factory.rb",
   "mount_as": "object",

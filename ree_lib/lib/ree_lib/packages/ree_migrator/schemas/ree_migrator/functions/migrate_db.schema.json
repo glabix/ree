@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "migrate_db",
   "path": "packages/ree_migrator/package/ree_migrator/functions/migrate_db.rb",
   "mount_as": "fn",

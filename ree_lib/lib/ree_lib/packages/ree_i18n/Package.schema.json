@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "ree_i18n",
   "entry_path": "packages/ree_i18n/package/ree_i18n.rb",
   "tags": [

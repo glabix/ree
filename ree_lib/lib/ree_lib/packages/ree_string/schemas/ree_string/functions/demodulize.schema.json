@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "demodulize",
   "path": "packages/ree_string/package/ree_string/functions/demodulize.rb",
   "mount_as": "fn",

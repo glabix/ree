@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "seconds_ago",
   "path": "packages/ree_datetime/package/ree_datetime/functions/seconds_ago.rb",
   "mount_as": "fn",

@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "accounts_cfg",
   "path": "bc/accounts/package/accounts/services/accounts_cfg.rb",
   "mount_as": "object",

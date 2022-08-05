@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "sanitize_css",
   "path": "packages/ree_text/package/ree_text/functions/sanitize_css.rb",
   "mount_as": "fn",

@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "apply_data_migration",
   "path": "bounded_contexts/libs/ree_migrator/package/ree_migrator/functions/apply_data_migration.rb",
   "mount_as": "fn",

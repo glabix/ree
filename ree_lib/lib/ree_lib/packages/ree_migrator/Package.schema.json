@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "ree_migrator",
   "entry_path": "packages/ree_migrator/package/ree_migrator.rb",
   "tags": [

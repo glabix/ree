@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "end_of_year",
   "path": "packages/ree_date/package/ree_date/functions/end_of_year.rb",
   "mount_as": "fn",

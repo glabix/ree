@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "validate_inclusion",
   "path": "packages/ree_validator/package/ree_validator/functions/validate_inclusion.rb",
   "mount_as": "fn",

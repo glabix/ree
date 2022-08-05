@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "strip_tags",
   "path": "packages/ree_text/package/ree_text/functions/strip_tags.rb",
   "mount_as": "fn",

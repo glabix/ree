@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "ree_dto",
   "entry_path": "packages/ree_dto/package/ree_dto.rb",
   "tags": [
