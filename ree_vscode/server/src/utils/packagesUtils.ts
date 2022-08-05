@@ -14,12 +14,21 @@ interface ExecCommand {
   code: number
 }
 
+class ExecCommandError extends Error {
+  constructor(m: string) {
+    super(m)
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, ExecCommandError.prototype)
+  }
+}
+
 interface ICachedGems {
   [key: string]: string | undefined
 }
 
 
-interface IPackagesSchema {
+export interface IPackagesSchema {
   packages: IPackageSchema[]
   gemPackages: IGemPackageSchema[]
 }
@@ -34,7 +43,6 @@ export interface IGemPackageSchema {
   schema: string
 }
 
-// export function loadPackagesSchema(currentPath: string): IPackageSchema[] | undefined {
 export function loadPackagesSchema(currentPath: string): IPackagesSchema | undefined {
   const root = getProjectRootDir(currentPath)
   if (!root) { return }
@@ -102,13 +110,21 @@ function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | 
     // cache gemPackages by gem
     cachedGemPackages = groupBy(obj.gemPackages, 'gem')
     if (cachedGemPackages) {
-      Object.keys(cachedGemPackages).map((gem: string) => {
-        cachedGems[gem] = execBundlerGetGemPath(gem, rootDir)?.message
+      Object.keys(cachedGemPackages).flatMap((gem: string) => {
+        let gemPathCommandResult = execBundlerGetGemPath(gem, rootDir)
+        if (!gemPathCommandResult) { return [] }
+
+        if (gemPathCommandResult.code === 0) {
+          cachedGems[gem] = gemPathCommandResult.message
+        } else {
+          throw new ExecCommandError(`BundlerError: ${gemPathCommandResult.message}`)
+        }
       })
     }
 
     return obj
   } catch (err) {
+    console.error(err)
     return undefined
   }
 }

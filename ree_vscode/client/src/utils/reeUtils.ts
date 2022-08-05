@@ -9,14 +9,89 @@ export interface ExecCommand {
 export function isReeInstalled(projectDir: string): ExecCommand | undefined {
   try {
     let spawnSync = childProcess.spawnSync
-    let child = spawnSync('which', ['ree'], {cwd: projectDir })
+    let rootProjectDir = projectDir
+    const dockerPresented = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('presented') as boolean
+    const containerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
+    const appDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
+    let child = null
+
+    if (dockerPresented) {
+      rootProjectDir = appDirectory
+      child = spawnSync(
+        'docker', [
+          'exec',
+          '-i',
+          '-e',
+          'REE_SKIP_ENV_VARS_CHECK=true',
+          '-w',
+          rootProjectDir,
+          containerName,
+          'bundle',
+          'show',
+          'ree'
+        ]
+      )
+    } else {
+      child = spawnSync('which', ['ree'], {cwd: rootProjectDir })
+    }
 
     return {
       message: child.status === 0 ? child.stdout.toString() : child.stderr.toString(),
       code: child.status
     }
   } catch(e) {
-    vscode.window.showInformationMessage(`Error. ${e}`)
+    vscode.window.errorInformationMessage(`Error. ${e}`)
+    return
+  }
+}
+
+export function isBundleGemsInstalled(projectDir: string): ExecCommand | undefined {
+  try {
+    const spawnSync = childProcess.spawnSync
+    const child = spawnSync('bundle', ['show', 'ree'], {cwd: projectDir })
+
+    return {
+      message: child.status === 0 ? child.stdout.toString() : child.stderr.toString(),
+      code: child.status
+    }
+  } catch(e) {
+    vscode.window.errorInformationMessage(`Error. ${e}`)
+    return
+  }
+}
+
+export function isBundleGemsInstalledInDocker(): ExecCommand | undefined {
+  try {
+    const spawnSync = childProcess.spawnSync
+    
+    const dockerPresented = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('presented') as boolean
+    const containerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
+    const appDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
+
+    if (dockerPresented) {
+      const rootProjectDir = appDirectory
+      const child = spawnSync(
+        'docker', [
+          'exec',
+          '-i',
+          '-e',
+          'REE_SKIP_ENV_VARS_CHECK=true',
+          '-w',
+          rootProjectDir,
+          containerName,
+          'bundle',
+          'show',
+          'ree'
+        ]
+      )
+
+      return {
+        message: `Docker: ${child.status === 0 ? child.stdout.toString() : child.stderr.toString()}`,
+        code: child.status
+      }
+    }
+  } catch(e) {
+    vscode.window.errorInformationMessage(`Error. ${e}`)
     return
   }
 }

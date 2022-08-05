@@ -1,8 +1,9 @@
 import { Range } from 'vscode'
-import { Location } from 'vscode-languageserver'
+import { Location, Hover, MarkupKind } from 'vscode-languageserver'
 import { Position, TextDocument } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
-import { loadPackagesSchema, getGemPackageSchemaPath, getGemDir } from '../utils/packagesUtils'
+import { forest } from '../forest'
+import { loadPackagesSchema, getGemPackageSchemaPath, getGemDir, IPackagesSchema } from '../utils/packagesUtils'
 import { IObjectMethod, loadObjectSchema } from './objectUtils'
 import { PackageFacade } from './packageFacade'
 import { getObjectNameFromPath, getPackageNameFromPath, getProjectRootDir } from './packageUtils'
@@ -67,7 +68,7 @@ export interface ILinkedObject {
   location: Location
 }
 
-export function findLinkedObject(uri: string, token: string): ILinkedObject  {
+export function findLinkedObject(uri: string, token: string, position: Position): ILinkedObject  {
   const ret = {} as ILinkedObject
   let filePath = ''
 
@@ -76,6 +77,8 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
   } catch {
     return ret
   }
+
+  const doc = documents.get(uri)
 
   const objectName = getObjectNameFromPath(filePath)
   if (!objectName) { return ret }
@@ -104,10 +107,15 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
     return l.target === token || l.as === token || l.imports.includes(token)
   })
 
-  if (!link) { return ret }
+  if (!link) { 
+    // maybe it's a constant
+    const constantLocation = findConstant(token, uri, position, doc, packagesSchema, projectRootDir)
+    if (!constantLocation) { return ret }
+
+    return constantLocation
+  }
 
   if (link) {
-    const doc = documents.get(uri)
     const linkRegexp = RegExp(`link\\s+:${link.target}`)
     let lineNumber = 0
     let startPos = 0
@@ -154,8 +162,10 @@ export function findLinkedObject(uri: string, token: string): ILinkedObject  {
     if (!linkedObjectSchema) { return ret }
 
     const linkedObjectRoot = linkedPackage ? projectRootDir : getGemDir(linkedPackageName)
+    if (!linkedObjectRoot) { return ret }
+
     const linkedObject = loadObjectSchema(path.join(linkedObjectRoot, linkedObjectSchema.schema))
-    if (!linkedObject) { { return ret } }
+    if (!linkedObject) { return ret }
 
     return {
       linkDef: linkDef,
@@ -197,8 +207,97 @@ export interface ILocalMethod {
   methodDef?: string
 }
 
+export function findConstant(token: string, uri: string, position: Position, doc: TextDocument, packagesSchema: IPackagesSchema, projectRootDir: string): ILinkedObject | undefined {
+  const ret = {} as ILinkedObject
+  let constantTokenLine = findTokenInFile(token, uri)
+  if (!constantTokenLine) { return ret }
+
+  let tree = forest.getTree(uri)
+  if (!tree) {
+    tree = forest.createTree(uri, doc.getText())
+  }
+
+  const query = tree.getLanguage().query(
+    `(object (do_block ((link) @link)))`
+  )
+
+  const queryMatches = query.matches(tree.rootNode)
+
+  const queryCaptureLinkWithToken = queryMatches.filter(q => {
+    return q.captures[0].node.text.match(RegExp(`${token}`)) && q.captures[0].node.startPosition.row === position.line
+  })?.[0]
+  if (!queryCaptureLinkWithToken) { return ret }
+
+  const lineText = queryCaptureLinkWithToken.captures[0].node.text
+  if (!lineText) { return ret }
+
+  // match link name and from
+  const linkNameMatch = lineText.match(/link\s(?<name>(\:\w+)|(\'\w+(\/\w+)*\'))\,\s(from\:\s(?<from>(\:\w+)|(\'\w+(\/\w+)*\')))?/)
+  if (!linkNameMatch) { return ret }
+  if (!linkNameMatch.groups) { return ret }
+  if (!linkNameMatch.groups.name) { return ret }
+
+  const linkName = linkNameMatch.groups.name
+  if (linkName[0] === "'") { // it's a string link name
+    // join packageEntryPath and linkName
+    const linkPackage = packagesSchema.packages.find(p => p.name === linkName.replace(/\'|\:/g,'').split('/')[0])
+    if (!linkPackage) { return ret }
+
+    const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage.schema))
+    if (!linkPackageFacade) { return ret }
+
+    const packageRootPath = linkPackageFacade.entryPath().split('/').slice(0, -1).join('/')
+    const importLinkRelativePath = packageRootPath + '/' + linkName.replace(/\'|\:/g,'') + '.rb'
+    const importLinkPath = path.join(projectRootDir, importLinkRelativePath)
+
+    let constLocation = null
+    const tokenLocation = findTokenInFile(token, url.pathToFileURL(importLinkPath).toString())
+    if (tokenLocation) {
+      constLocation = tokenLocation
+    } else {
+      constLocation = {
+        uri: url.pathToFileURL(importLinkPath).toString(),
+        range: {
+          start: {
+            line: 0,
+            character: 0
+          },
+          end: {
+            line: 0,
+            character: 0
+          }
+        }
+      } as Location
+    }
+    return { location: constLocation } as ILinkedObject
+  } else if (linkName[0] === ':') {
+    // if import from symbol link name
+    // just find package and object
+    if (!linkNameMatch.groups.from) { return ret }
+
+    const linkFrom = linkNameMatch.groups.from.replace(/\'|\:/g,'')
+    const linkPackage = packagesSchema.packages.find(p => p.name == linkFrom)
+    if (!linkPackage) { return ret }
+
+    const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage.schema))
+    const linkObject = linkPackageFacade.objects().find(o => o.name === linkName.replace(/\'|\:/g,''))
+    if (!linkObject) { return ret }
+
+    const curObject = loadObjectSchema(path.join(projectRootDir, linkObject.schema))
+    if (!curObject) { return ret }
+
+    
+    return {
+      location: findTokenInFile(
+        token,
+        url.pathToFileURL(path.join(projectRootDir, curObject.path)).toString()
+      )
+    } as ILinkedObject
+  }
+}
+
 export function findMethod(doc: string, token: string): ILocalMethod {
-  const methodRegexp = RegExp(`def\\s+\\${token}`)
+  const methodRegexp = RegExp(`def\\s+${token}`)
   const classMethodRegexp = RegExp(`def\\s+self.${token}`)
   
   let lineNumber = null
@@ -232,10 +331,82 @@ export function findMethod(doc: string, token: string): ILocalMethod {
   }
 }
 
-export function findTokenInFile(token: string, doc: TextDocument): Location | undefined {
+export function findMethodArgument(token: string, uri: string, position: Position): any {
+  const doc = documents.get(uri)
+  if (!doc) { return }
+
+  let tree = forest.getTree(uri)
+  if (!tree) {
+    tree = forest.createTree(uri, doc.getText())
+  }
+
+  const query = tree.getLanguage().query(
+    `(
+      (contract (_) @contract_params) @contract
+      .
+      [
+        (method (method_parameters)? @method_params) @method
+      ]
+      (#select-adjacent! @contract @method)
+    ) @contractWithMethod`
+  )
+
+  const queryMatches = query.matches(tree.rootNode)
+  if (queryMatches.length === 0) { return }
+
+  const matchWithArg = queryMatches.filter(q => {
+    let capWithTokenArg = q.captures.filter(
+      _q => _q.name === 'method_params' && 
+            _q.node.text.match(RegExp(`${token}`)) &&
+            _q.node.startPosition.row === position.line
+    )
+
+    if (capWithTokenArg.length > 0) { return q }
+  })[0]
+  if (!matchWithArg) { return }
+
+  const contractParamsCapture = matchWithArg.captures.find(c => c.name === 'contract_params')
+  if (!contractParamsCapture) { return }
+
+  const methodParamsCapture = matchWithArg.captures.find(c => c.name === 'method_params')
+  if (!methodParamsCapture) { return }
+
+  const methodParamsArr = methodParamsCapture.node.text.replace(/\(|\)/g, '').split(', ')
+  const methodParamsTokenValue = methodParamsArr.find(e => e.match(RegExp(`${token}`)))
+  if (!methodParamsTokenValue) { return }
+
+  const methodParamsTokenIndex = methodParamsArr.indexOf(methodParamsTokenValue)
+  if (methodParamsTokenIndex === -1) { return }
+
+  const contractArgs = contractParamsCapture.node.children.filter(n => !n.text.match(/^(\(|\)|\,)/)).map(n => n.text.split(' => ')?.[0])
+  if (contractArgs.length === 0) { return }
+
+  const contractArgForMethodParam = contractArgs?.[methodParamsTokenIndex]
+  if (!contractArgForMethodParam) { return }
+
+  const hover = "```ruby\n" + splitArgsType(contractArgForMethodParam) + "\n```"
+
+  return {
+    contents: {
+      kind: MarkupKind.Markdown,
+      value: hover
+    },
+    range: {
+      start: position,
+      end: position
+    } 
+  } as Hover
+}
+
+export function findTokenInFile(token: string, uri: string): Location | undefined {
+  let text = documents.get(uri)?.getText()
+  if (!text) {
+    text = fs.readFileSync(url.fileURLToPath(uri), { encoding: 'utf8'})
+  }
+
   let resultLine: number, startCharacter: number, endCharacter : number = 0
   let onlyTokenRegexp = RegExp(`\\b${token}\\b`)
-  for (let [index, line] of doc.getText().split('\n').entries()) {
+  for (let [index, line] of text.split('\n').entries()) {
     let match = line.match(onlyTokenRegexp)
     if (match && match.index) {
       resultLine = index
@@ -243,7 +414,7 @@ export function findTokenInFile(token: string, doc: TextDocument): Location | un
       endCharacter = startCharacter + token.length
 
       return {
-        uri: doc.uri,
+        uri: uri,
         range: {
           start: { line: resultLine, character: startCharacter },
           end: { line: resultLine, character: endCharacter}

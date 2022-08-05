@@ -64,7 +64,10 @@ export function getCurrentProjectDir (): string | null {
     return null
   }
 
-  return vscode.workspace.workspaceFolders[0].uri.path
+  const activeEditor = vscode.window.activeTextEditor
+  if (!activeEditor) { return vscode.workspace.workspaceFolders[0].uri.path }
+
+  return getProjectRootDir(activeEditor.document.fileName)
 }
 
 export function isReeProject(): boolean {

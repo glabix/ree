@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import { PACKAGES_SCHEMA_FILE, PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
 import { IGemPackageSchema, IPackageSchema, loadPackagesSchema, getGemDir } from '../utils/packagesUtils'
-import { getProjectRootDir } from '../utils/packageUtils'
+import { getCurrentProjectDir } from '../utils/fileUtils'
 
 var fs = require('fs')
 var path = require("path")
@@ -15,15 +15,7 @@ export function goToPackage() {
     return
   }
 
-  let currentFilePath = null
-  const activeEditor = vscode.window.activeTextEditor
-  if (!activeEditor) {
-    currentFilePath = vscode.workspace.workspaceFolders[0].uri.path
-  } else {
-    currentFilePath = activeEditor.document.fileName
-  }
-
-  const projectPath = getProjectRootDir(currentFilePath)
+  const projectPath = getCurrentProjectDir()
   if (!projectPath) {
     vscode.window.showErrorMessage(`Unable to find ${PACKAGES_SCHEMA_FILE}`)
     return

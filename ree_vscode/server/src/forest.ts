@@ -80,32 +80,3 @@
  }
  
  export const forest = new Forest()
-
- export const forestStream = documents.subject.pipe(
-   switchMap((event: DocumentEvent) => {
-     const { kind, document } = event
-     const uri = document.uri
-     const forestEvent: ForestEvent = {
-       document,
-       kind: ForestEventKind.OPEN
-     }
- 
-     switch (kind) {
-       case DocumentEventKind.OPEN:
-         forestEvent.tree = forest.createTree(uri, document.getText())
-         forestEvent.kind = ForestEventKind.OPEN
-         break
-       case DocumentEventKind.CHANGE_CONTENT:
-         forestEvent.tree = forest.updateTree(uri, document.getText())
-         forestEvent.kind = ForestEventKind.UPDATE
-         break
-       case DocumentEventKind.CLOSE:
-         forest.deleteTree(uri)
-         forestEvent.kind = ForestEventKind.DELETE
-         break
-     }
- 
-     return of(forestEvent)
-   })
- )
- 

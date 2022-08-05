@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { getProjectRootDir } from '../utils/packageUtils'
-import { isReeInstalled, ExecCommand } from '../utils/reeUtils'
-import { buildFullArgsArray } from './generatePackageSchema'
+import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, ExecCommand } from '../utils/reeUtils'
+import { buildReeCommandFullArgsArray } from './generatePackageSchema'
 
 export function generatePackagesSchema(silent: boolean) {
   if (!vscode.workspace.workspaceFolders) {
@@ -13,9 +13,20 @@ export function generatePackagesSchema(silent: boolean) {
   if (!rootProjectDir) { return }
 
   const checkReeIsInstalled = isReeInstalled(rootProjectDir)
-  
   if (checkReeIsInstalled?.code === 1) {
-    vscode.window.showWarningMessage('gem ree is not installed')
+    vscode.window.showWarningMessage('Gem ree is not installed')
+    return
+  }
+
+  const checkIsBundleGemsInstalled = isBundleGemsInstalled(rootProjectDir)
+  if (checkIsBundleGemsInstalled?.code !== 0) {
+    vscode.window.showWarningMessage(checkIsBundleGemsInstalled.message)
+    return
+  }
+
+  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()
+  if (checkIsBundleGemsInstalledInDocker && checkIsBundleGemsInstalledInDocker.code !== 0) {
+    vscode.window.showWarningMessage(checkIsBundleGemsInstalledInDocker.message)
     return
   }
 
@@ -41,7 +52,7 @@ function execGeneratePackagesSchema(rootProjectDir: string): ExecCommand | undef
     let spawnSync = require('child_process').spawnSync
 
     let child = spawnSync(
-      ...buildFullArgsArray(rootProjectDir, ['gen.packages_json'])
+      ...buildReeCommandFullArgsArray(rootProjectDir, ['gen.packages_json'])
     )
 
     return {
