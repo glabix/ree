@@ -22,9 +22,8 @@ RSpec.describe ReeLogger::RollbarAppender do
   it "sends log event to Rollbar" do
     appender = rollbar_appender.new(
       :info,
-      {
-        access_token: ENV['ROLLBAR_ACCESS_TOKEN']
-      }
+      access_token: ENV['LOG_ROLLBAR_ACCESS_TOKEN'],
+      environment: ENV['LOG_ROLLBAR_ENVIRONMENT']
     )
 
     expect(appender).to respond_to(:append)

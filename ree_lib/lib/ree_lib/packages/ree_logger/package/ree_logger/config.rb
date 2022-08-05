@@ -17,20 +17,22 @@ class ReeLogger::Config
   RATE_LIMIT_MAX_COUNT = 600
 
   def build
+    is_rollbar_enabled = parse_bool_string(ENV['LOG_ROLLBAR_ENABLED'])
+
     to_obj({
       file_path: ENV['LOG_FILE_PATH'],
       file_auto_flush: parse_bool_string(ENV['LOG_FILE_AUTO_FLUSH']),
       levels: {
         file: parse_level(ENV['LOG_LEVEL_FILE']),
         stdout: parse_level(ENV['LOG_LEVEL_STDOUT']),
-        rollbar: parse_level(ENV['LOG_LEVEL_ROLLBAR'])
+        rollbar: is_rollbar_enabled ? parse_level(ENV['LOG_LEVEL_ROLLBAR']) : nil,
       },
       rollbar: {
-        access_token: ENV['ROLLBAR_ACCESS_TOKEN'],
-        branch: ENV['ROLLBAR_BRANCH'],
-        host: ENV['ROLLBAR_HOST'],
-        environment: ENV['ROLLBAR_ENVIRONMENT'],
-        enabled: parse_bool_string(ENV['ROLLBAR_ENABLED'])
+        enabled: is_rollbar_enabled,
+        access_token: is_rollbar_enabled ? ENV.fetch('LOG_ROLLBAR_ACCESS_TOKEN') : nil,
+        environment: is_rollbar_enabled ? ENV.fetch('LOG_ROLLBAR_ENVIRONMENT') : nil,
+        branch: ENV['LOG_ROLLBAR_BRANCH'],
+        host: ENV['LOG_ROLLBAR_HOST']
       },
       rate_limit: {
         interval: get_int_value('LOG_RATE_LIMIT_INTERVAL', RATE_LIMIT_INTERVAL),

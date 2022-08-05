@@ -11,7 +11,7 @@ RSpec.describe ReeLogger::MultiLogger do
 
   before(:all) do
     tmp_file_log = ENV['LOG_FILE_PATH']
-    
+
     if !is_blank(tmp_file_log)
       File.open(tmp_file_log, 'w') {|file| file.truncate(0) }
     end
@@ -42,8 +42,8 @@ RSpec.describe ReeLogger::MultiLogger do
   let(:rollbar_appender) {
     ReeLogger::RollbarAppender.new(
       :info,
-      access_token: ENV['ROLLBAR_ACCESS_TOKEN'],
-      environment: ENV['ROLLBAR_ENVIRONMENT']
+      access_token: ENV['LOG_ROLLBAR_ACCESS_TOKEN'],
+      environment: ENV['LOG_ROLLBAR_ENVIRONMENT']
     )
   }
 
@@ -78,7 +78,7 @@ RSpec.describe ReeLogger::MultiLogger do
   it {
     expect { logger_with_appenders.info('hello world') }.to output(/hello world/).to_stdout
     expect(Rollbar).to have_received(:log)
-    expect(File.read(log_file_path)).to match("hello world") 
+    expect(File.read(log_file_path)).to match("hello world")
   }
 
   it {
@@ -87,7 +87,7 @@ RSpec.describe ReeLogger::MultiLogger do
     expect(File.read(log_file_path)).to match("John")
     expect(File.read(log_file_path)).to match(":password=>\"FILTERED\"")
   }
-  
+
   it {
     expect { logger_with_appenders.debug('debug message') }.to_not output(/debug message/).to_stdout
     expect(Rollbar).not_to have_received(:log)
@@ -137,5 +137,5 @@ RSpec.describe ReeLogger::MultiLogger do
     }.to_not output.to_stdout
   }
 
-  
+
 end

@@ -11,6 +11,7 @@ module ReeLogger
     depends_on :ree_datetime
     depends_on :ree_validator
     depends_on :ree_hash
+    depends_on :ree_swagger
 
     env_var 'LOG_FILE_PATH'
     env_var 'LOG_LEVEL_FILE'

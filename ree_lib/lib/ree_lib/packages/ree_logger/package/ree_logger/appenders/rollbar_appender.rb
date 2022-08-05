@@ -2,6 +2,7 @@
 
 require_relative 'appender'
 require 'rollbar'
+require 'digest'
 
 class ReeLogger::RollbarAppender < ReeLogger::Appender
   include Ree::LinkDSL
@@ -10,72 +11,68 @@ class ReeLogger::RollbarAppender < ReeLogger::Appender
 
   contract(
     Symbol,
-    Ksplat[
+    Kwargs[
       access_token: String,
+      environment: String,
+    ],
+    Ksplat[
       branch?: Nilor[String],
       host?: Nilor[String],
-      environment?: Nilor[String],
-      enabled?: Bool,
-      request_data?: Nilor[Hash]
     ] =>  Any
   )
-  def initialize(level, **rollbar_opts)
-    super(
-      level, nil
-    )
+  def initialize(level, access_token:, environment:, **opts)
+    super(level, nil)
 
-    configure_rollbar(rollbar_opts)
+    Rollbar.configure do |config|
+      config.enabled = true
+      config.access_token = access_token
+      config.environment = environment
+      config.branch = opts[:branch] if opts[:branch]
+      config.host = opts[:host] if opts[:host]
+    end
   end
-
 
   contract(LogEvent, Nilor[String] => nil)
   def append(event, progname = nil)
-    send_event_to_rollbar(event)
+    rollbar_level =
+      case event.level
+      when :fatal
+        'critical'
+      when :unknown
+        'critical'
+      else
+        event.level.to_s
+      end
 
-    nil
-  end
-
-  private
-
-  def send_event_to_rollbar(event)
-    rollbar_level = case event.level
-                    when :fatal
-                      'critical'
-                    when :unknown
-                      'critical'
-                    else
-                      event.level.to_s
-                    end
-
-    request_data ||= {}
     fingerprint = event.message.to_s
 
     if event.exception
       fingerprint += event.exception.class.to_s
     end
 
-    fingerprint = Digest::MD5.new.update(fingerprint).to_s
-    result = nil
+    scope = {}
+    parameters = event.parameters.dup
 
-    person_data = { id: request_data["user_id"] }
-
-    Rollbar.scoped(fingerprint: fingerprint, request: request_data, person: person_data) do
-      Rollbar.log(
-        rollbar_level,
-        event.message,
-        event.exception,
-        event.parameters
+    if parameters.key?(:rollbar_scope) && parameters[:rollbar_scope].is_a?(Hash)
+      scope = scope.merge(
+        parameters.delete(:rollbar_scope)
       )
     end
-  end
 
-  def configure_rollbar(opts)
-    Rollbar.configure do |config|
-      config.access_token = opts[:access_token]
-      config.environment = opts[:environment] if opts[:environment]
-      config.enabled = opts[:enabled] if opts[:enabled]
-      config.branch = opts[:branch] if opts[:branch]
-      config.host = opts[:host] if opts[:host]
+    if !scope[:fingerprint]
+      fingerprint = event.message.to_s
+
+      if event.exception
+        fingerprint += event.exception.class.to_s
+      end
+
+      scope[:fingerprint] = Digest::MD5.new.update(fingerprint).to_s
     end
+
+    Rollbar.scoped(scope) do
+      Rollbar.log(rollbar_level, event.message, event.exception, parameters)
+    end
+
+    nil
   end
 end

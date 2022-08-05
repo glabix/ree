@@ -17,6 +17,9 @@
       "name": "ree_object"
     },
     {
+      "name": "ree_swagger"
+    },
+    {
       "name": "ree_validator"
     }
   ],

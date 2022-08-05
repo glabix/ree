@@ -36,14 +36,16 @@ class ReeLogger::Logger
       )
     end
 
-    if config.levels.rollbar
+    if config.rollbar.enabled
+      opts = {}
+      opts[:branch] = config.rollbar.branch if config.rollbar.branch
+      opts[:host] = config.rollbar.host if config.rollbar.host
+
       appenders << RollbarAppender.new(
         config.levels.rollbar,
         access_token: config.rollbar.access_token,
-        branch: config.rollbar.branch,
-        host: config.rollbar.host,
         environment: config.rollbar.environment,
-        enabled: config.rollbar.enabled
+        **opts
       )
     end
 

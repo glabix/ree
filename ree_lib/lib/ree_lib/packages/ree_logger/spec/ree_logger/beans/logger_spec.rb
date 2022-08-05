@@ -8,7 +8,7 @@ RSpec.describe :logger do
 
   before(:all) do
     tmp_file_log = ENV['LOG_FILE_PATH']
-    
+
     if !is_blank(tmp_file_log)
       File.open(tmp_file_log, 'w') {|file| file.truncate(0) }
     end
@@ -31,11 +31,11 @@ RSpec.describe :logger do
   }
 
   it {
-    expect { logger.info('hello world', { param: 1, another_param: { name: 'John'} }) }.to output(/John/).to_stdout
+    expect { logger.info('hello world', { rollbar_scope: {fingerprint: 'test', test: 'test'}, param: 1, another_param: { name: 'John'} }) }.to output(/John/).to_stdout
     expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("John")
   }
-  
+
   it {
     expect { logger.debug('debug message') }.to_not output(/debug message/).to_stdout
     expect(Rollbar).not_to have_received(:log)
