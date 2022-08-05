@@ -6,8 +6,8 @@ class Accounts::RegisterAccountCmd
     
     link :transaction
     link :build_user, import: -> { User & UserStates.as(States) }
-    link :users_repo, methods: [:put]
-    link :factory_users_repo, methods: [:put]
+    link :users_repo
+    link :factory_users_repo
     link :welcome_email
     link :except, from: :hash_utils
 

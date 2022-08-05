@@ -12,7 +12,8 @@ RSpec.describe :build_schema do
         caster:          nil,
         serializer:      nil,
         response_status: 200,
-        description:     nil
+        description:     nil,
+        errors:          []
       )]
     )
 

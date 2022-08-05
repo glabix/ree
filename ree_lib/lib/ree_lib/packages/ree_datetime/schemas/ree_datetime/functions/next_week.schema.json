@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "next_week",
   "path": "packages/ree_datetime/package/ree_datetime/functions/next_week.rb",
   "mount_as": "fn",

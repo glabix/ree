@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "welcome_email",
   "path": "bc/accounts/package/accounts/emails/welcome_email.rb",
   "mount_as": "object",

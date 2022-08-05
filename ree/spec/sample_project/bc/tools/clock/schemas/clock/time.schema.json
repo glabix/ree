@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "time",
   "path": "bc/tools/clock/package/clock/time.rb",
   "mount_as": "object",

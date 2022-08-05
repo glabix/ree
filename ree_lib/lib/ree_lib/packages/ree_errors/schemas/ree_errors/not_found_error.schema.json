@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "not_found_error",
   "path": "packages/ree_errors/package/ree_errors/not_found_error.rb",
   "mount_as": "object",

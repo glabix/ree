@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "is_weekend",
   "path": "packages/ree_datetime/package/ree_datetime/functions/is_weekend.rb",
   "mount_as": "fn",

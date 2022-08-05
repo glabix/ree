@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "all_quarter",
   "path": "packages/ree_date/package/ree_date/functions/all_quarter.rb",
   "mount_as": "fn",

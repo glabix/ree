@@ -40,14 +40,12 @@ class Ree::ObjectDsl
   # @param [Symbol] object_name
   # @param [Nilor[Symbol]] as
   # @param [Nilor[Symbol]] from
-  # @param [Nilor[ArrayOf[Symbol]]] methods
   # @param [Nilor[Proc]] import
-  def link_object(object_name, as: nil, from: nil, methods: nil, import: nil)
+  def link_object(object_name, as: nil, from: nil, import: nil)
     check_arg(object_name, :object_name, Symbol)
     check_arg(as, :as, Symbol) if as
     check_arg(from, :from, Symbol) if from
     check_arg(import, :import, Proc) if import
-    check_arg_array_of(methods, :methods, Symbol) if methods
 
     link_package_name = from.nil? ? @object.package_name : from
     link_object_name = object_name

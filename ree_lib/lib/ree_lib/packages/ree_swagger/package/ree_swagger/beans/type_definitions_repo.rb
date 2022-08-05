@@ -9,40 +9,40 @@ class ReeSwagger::TypeDefinitionsRepo
   def build
     {
       serializers: {
-        'ReeMapper::Integer' => ->(*) {
+        ReeMapper::Integer => ->(*) {
           { type: 'integer' }
         },
-        'ReeMapper::String' => ->(*) {
+        ReeMapper::String => ->(*) {
           { type: 'string' }
         },
-        'ReeMapper::Bool' => ->(*) {
+        ReeMapper::Bool => ->(*) {
           { type: 'boolean' }
         },
-        'ReeMapper::Float' => ->(*) {
+        ReeMapper::Float => ->(*) {
           {
             type: 'number',
             format: 'float'
           }
         },
-        'ReeMapper::Array' => ->(type, build_serializer_schema) {
+        ReeMapper::Array => ->(type, build_serializer_schema) {
           {
             type: 'array',
             items: build_serializer_schema.(type.of.type)
           }
         },
-        'ReeMapper::DateTime' => ->(*) {
+        ReeMapper::DateTime => ->(*) {
           {
             type: 'string',
             format: 'date-time'
           }
         },
-        'ReeMapper::Date' => ->(*) {
+        ReeMapper::Date => ->(*) {
           {
             type: 'string',
             format: 'date'
           }
         },
-        'ReeMapper::Time' => ->(*) {
+        ReeMapper::Time => ->(*) {
           {
             type: 'string',
             format: 'date-time'
@@ -50,40 +50,40 @@ class ReeSwagger::TypeDefinitionsRepo
         }
       },
       casters: {
-        'ReeMapper::Integer' => ->(*) {
+        ReeMapper::Integer => ->(*) {
           { type: 'integer' }
         },
-        'ReeMapper::String' => ->(*) {
+        ReeMapper::String => ->(*) {
           { type: 'string' }
         },
-        'ReeMapper::Bool' => ->(*) {
+        ReeMapper::Bool => ->(*) {
           { type: 'boolean' }
         },
-        'ReeMapper::Float' => ->(*) {
+        ReeMapper::Float => ->(*) {
           {
             type: 'number',
             format: 'float'
           }
         },
-        'ReeMapper::Array' => ->(type, build_caster_schema) {
+        ReeMapper::Array => ->(type, build_caster_schema) {
           {
             type: 'array',
             items: build_caster_schema.(type.of.type)
           }
         },
-        'ReeMapper::DateTime' => ->(*) {
+        ReeMapper::DateTime => ->(*) {
           {
             type: 'string',
             format: 'date-time'
           }
         },
-        'ReeMapper::Date' => ->(*) {
+        ReeMapper::Date => ->(*) {
           {
             type: 'string',
             format: 'date'
           }
         },
-        'ReeMapper::Time' => ->(*) {
+        ReeMapper::Time => ->(*) {
           {
             type: 'string',
             format: 'date-time'

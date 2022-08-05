@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "http_get",
   "path": "packages/ree_http/package/ree_http/functions/http_get.rb",
   "mount_as": "fn",

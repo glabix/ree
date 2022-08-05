@@ -3,6 +3,14 @@ RSpec.describe :build_endpoint_schema do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
 
+  before :all do
+    Ree.enable_irb_mode
+  end
+
+  after :all do
+    Ree.disable_irb_mode
+  end
+
   let(:mapper_factory) {
     strategies = [
       build_mapper_strategy(method: :serialize, output: :symbol_key_hash),
@@ -15,6 +23,27 @@ RSpec.describe :build_endpoint_schema do
   }
 
   it {
+    module ReeSwaggerTest
+      include Ree::PackageDSL
+
+      package
+
+      class Locales
+        include ReeEnum::DSL
+
+        enum :locales
+
+        val :en, 0
+        val :ru, 1
+      end
+    end
+
+    mapper_factory.register_type(
+      :locales, ReeSwaggerTest::Locales.type_for_mapper
+    )
+
+    ReeSwaggerTest::Locales.register_as_swagger_type
+
     serializer = mapper_factory.call.use(:serialize) do
       integer :id
     end
@@ -28,6 +57,7 @@ RSpec.describe :build_endpoint_schema do
       integer :id
       string :name
       tag    :tag
+      locales :locale
     end
 
     schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
@@ -36,7 +66,21 @@ RSpec.describe :build_endpoint_schema do
       caster:          caster,
       serializer:      serializer,
       response_status: 200,
-      description:     nil
+      description:     nil,
+      errors:          [
+        ReeSwagger::ErrorDto.new(
+          status: 400,
+          description: "1st 400 error"
+        ),
+        ReeSwagger::ErrorDto.new(
+          status: 400,
+          description: "2nd 400 error"
+        ),
+        ReeSwagger::ErrorDto.new(
+          status: 401,
+          description: "401 error"
+        )
+      ]
     ))
 
     expect(schema).to eq(ReeSwagger::PathDto.new(
@@ -64,6 +108,10 @@ RSpec.describe :build_endpoint_schema do
                         name: { type: 'string' },
                         value: { type: 'string' }
                       }
+                    },
+                    locale: {
+                      type: 'string',
+                      enum: ['en', 'ru']
                     }
                   }
                 }
@@ -83,6 +131,13 @@ RSpec.describe :build_endpoint_schema do
                   }
                 }
               }
+            },
+            400 => {
+              description: "- 1st 400 error\n- 2nd 400 error",
+
+            },
+            401 => {
+              description: "- 401 error",
             }
           }
         }
@@ -109,7 +164,8 @@ RSpec.describe :build_endpoint_schema do
       caster:          caster,
       serializer:      nil,
       response_status: 200,
-      description:     nil
+      description:     nil,
+      errors:          []
     ))
 
     expect(schema).to eq(ReeSwagger::PathDto.new(
@@ -167,7 +223,8 @@ RSpec.describe :build_endpoint_schema do
         caster:          nil,
         serializer:      nil,
         response_status: 200,
-        description:     nil
+        description:     nil,
+        errors:          []
       ))
     }.to raise_error(
       ReeSwagger::BuildEndpointSchema::MissingCasterError,
@@ -187,7 +244,8 @@ RSpec.describe :build_endpoint_schema do
         caster:          caster,
         serializer:      nil,
         response_status: 200,
-        description:     nil
+        description:     nil,
+        errors:          []
       ))
     }.to raise_error(
       ReeSwagger::BuildEndpointSchema::MissingCasterError,

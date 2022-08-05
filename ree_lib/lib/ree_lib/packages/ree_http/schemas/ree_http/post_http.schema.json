@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "post_http",
   "path": "packages/ree_http/package/ree_http/post_http.rb",
   "mount_as": "fn",

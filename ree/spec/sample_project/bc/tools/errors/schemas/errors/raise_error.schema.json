@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "raise_error",
   "path": "bc/tools/errors/package/errors/raise_error.rb",
   "mount_as": "fn",

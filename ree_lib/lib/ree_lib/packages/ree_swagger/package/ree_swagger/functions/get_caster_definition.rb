@@ -10,7 +10,7 @@ class ReeSwagger::GetCasterDefinition
   contract(Any, Proc => Nilor[Hash])
   def call(type, schema_builder)
     type_definitions_repo
-      .dig(:casters, type.class.name)
+      .dig(:casters, type.class)
       &.(type, schema_builder)
   end
 end

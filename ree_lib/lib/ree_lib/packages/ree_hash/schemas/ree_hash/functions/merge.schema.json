@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "merge",
   "path": "packages/ree_hash/package/ree_hash/functions/merge.rb",
   "mount_as": "fn",

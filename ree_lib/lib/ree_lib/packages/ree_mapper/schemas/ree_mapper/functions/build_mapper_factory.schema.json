@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "build_mapper_factory",
   "path": "packages/ree_mapper/package/ree_mapper/functions/build_mapper_factory.rb",
   "mount_as": "fn",

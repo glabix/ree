@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "hash_utils",
   "entry_path": "packages/hash_utils/package/hash_utils.rb",
   "tags": [

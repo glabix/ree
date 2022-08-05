@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "build_endpoint_schema",
   "path": "packages/ree_swagger/package/ree_swagger/functions/build_endpoint_schema.rb",
   "mount_as": "fn",

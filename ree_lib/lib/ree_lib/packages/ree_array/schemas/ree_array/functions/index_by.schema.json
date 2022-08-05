@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "index_by",
   "path": "packages/ree_array/package/ree_array/functions/index_by.rb",
   "mount_as": "fn",

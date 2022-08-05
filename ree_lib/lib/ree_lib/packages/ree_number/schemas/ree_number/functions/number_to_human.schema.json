@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "0.0.1",
+  "schema_version": "1.0",
   "name": "number_to_human",
   "path": "packages/ree_number/package/ree_number/functions/number_to_human.rb",
   "mount_as": "fn",
