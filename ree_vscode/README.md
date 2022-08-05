@@ -43,3 +43,7 @@ Initial release of Ree extension
 ### 0.0.9
 * Docker integration. Added plugin settings to configure docker container name & app folder. Plugin will execute Ree commands inside docker container if enabled
 * Code navigation, autocompletion & hints are now supported for gem packages
+
+### 0.0.10
+* Added hints for method args
+* Added Go to definition support for linked constants
