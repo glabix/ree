@@ -36,7 +36,21 @@ RSpec.describe :build_endpoint_schema do
       caster:          caster,
       serializer:      serializer,
       response_status: 200,
-      description:     nil
+      description:     nil,
+      errors:          [
+        ReeSwagger::ErrorDto.new(
+          status: 400,
+          description: "1st 400 error"
+        ),
+        ReeSwagger::ErrorDto.new(
+          status: 400,
+          description: "2nd 400 error"
+        ),
+        ReeSwagger::ErrorDto.new(
+          status: 401,
+          description: "401 error"
+        )
+      ]
     ))
 
     expect(schema).to eq(ReeSwagger::PathDto.new(
@@ -83,6 +97,48 @@ RSpec.describe :build_endpoint_schema do
                   }
                 }
               }
+            },
+            400 => {
+              description: "1st 400 error\n\n2nd 400 error",
+              content: {
+                :'application/json' => {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      code: {
+                        type: "string"
+                      },
+                      message: {
+                        type: "string"
+                      },
+                      type: {
+                        type: "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            401 => {
+              description: "401 error",
+              content: {
+                :'application/json' => {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      code: {
+                        type: "string"
+                      },
+                      message: {
+                        type: "string"
+                      },
+                      type: {
+                        type: "string"
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -109,7 +165,8 @@ RSpec.describe :build_endpoint_schema do
       caster:          caster,
       serializer:      nil,
       response_status: 200,
-      description:     nil
+      description:     nil,
+      errors:          []
     ))
 
     expect(schema).to eq(ReeSwagger::PathDto.new(
@@ -167,7 +224,8 @@ RSpec.describe :build_endpoint_schema do
         caster:          nil,
         serializer:      nil,
         response_status: 200,
-        description:     nil
+        description:     nil,
+        errors:          []
       ))
     }.to raise_error(
       ReeSwagger::BuildEndpointSchema::MissingCasterError,
@@ -187,7 +245,8 @@ RSpec.describe :build_endpoint_schema do
         caster:          caster,
         serializer:      nil,
         response_status: 200,
-        description:     nil
+        description:     nil,
+        errors:          []
       ))
     }.to raise_error(
       ReeSwagger::BuildEndpointSchema::MissingCasterError,
