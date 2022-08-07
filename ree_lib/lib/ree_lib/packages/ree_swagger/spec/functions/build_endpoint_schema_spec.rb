@@ -66,7 +66,8 @@ RSpec.describe :build_endpoint_schema do
       caster:          caster,
       serializer:      serializer,
       response_status: 200,
-      description:     nil,
+      description:     "description",
+      summary:         "summary",
       errors:          [
         ReeSwagger::ErrorDto.new(
           status: 400,
@@ -139,7 +140,9 @@ RSpec.describe :build_endpoint_schema do
             401 => {
               description: "- 401 error",
             }
-          }
+          },
+          summary: "summary",
+          description: "description",
         }
       }
     ))
@@ -165,6 +168,7 @@ RSpec.describe :build_endpoint_schema do
       serializer:      nil,
       response_status: 200,
       description:     nil,
+      summary:         nil,
       errors:          []
     ))
 
@@ -224,6 +228,7 @@ RSpec.describe :build_endpoint_schema do
         serializer:      nil,
         response_status: 200,
         description:     nil,
+        summary:         nil,
         errors:          []
       ))
     }.to raise_error(
@@ -245,6 +250,7 @@ RSpec.describe :build_endpoint_schema do
         serializer:      nil,
         response_status: 200,
         description:     nil,
+        summary:         nil,
         errors:          []
       ))
     }.to raise_error(

@@ -9,6 +9,7 @@ class ReeSwagger::EndpointDto
     path: String,
     caster: Nilor[ReeMapper::Mapper],
     serializer: Nilor[ReeMapper::Mapper],
+    summary: Nilor[String],
     description: Nilor[String],
     response_status: Integer,
     response_description: Nilor[String],

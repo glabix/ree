@@ -14,7 +14,7 @@ class ReeSwagger::BuildEndpointSchema
   METHODS_WITH_BODY = [:post, :put, :patch].freeze
   MissingCasterError = Class.new(StandardError)
 
-  contract(EndpointDto => ReeSwagger::PathDto)
+  contract(EndpointDto => PathDto)
   def call(endpoint)
     path_params = []
 
@@ -103,12 +103,15 @@ class ReeSwagger::BuildEndpointSchema
       responses: responses
     }
 
+    method_schema[:summary] =  endpoint.summary if endpoint.summary
+    method_schema[:description] =  endpoint.description if endpoint.description
+
     method_schema[:parameters]  = parameters   if parameters
     method_schema[:requestBody] = request_body if request_body
 
     schema = {endpoint.method => method_schema}
 
-    ReeSwagger::PathDto.new(
+    PathDto.new(
       path: path,
       schema: schema
     )
