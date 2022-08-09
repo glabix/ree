@@ -60,9 +60,18 @@ RSpec.describe :build_endpoint_schema do
       locales :locale
     end
 
+    file_caster = mapper_factory.call.use(:cast) do
+      integer :id
+    end
+
+    file_serializer = mapper_factory.call.use(:serialize) do
+      string :data
+    end
+
     schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
       method:          :post,
       path:            '/versions/:id',
+      respond_to:      :json,
       caster:          caster,
       serializer:      serializer,
       response_status: 200,
@@ -84,10 +93,22 @@ RSpec.describe :build_endpoint_schema do
       ]
     ))
 
-    expect(schema).to eq(ReeSwagger::PathDto.new(
-      path: '/versions/{id}',
+    csv_schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
+      method:          :get,
+      path:            '/files/:id',
+      respond_to:      :csv,
+      caster:          file_caster,
+      serializer:      file_serializer,
+      response_status: 200,
+      description:     "file",
+      summary:         "file summary",
+      errors:          []
+    ))
+
+    expect(csv_schema).to eq(ReeSwagger::PathDto.new(
+      path: '/files/{id}',
       schema: {
-        post: {
+        get: {
           parameters: [
             {
               name: 'id',
@@ -96,53 +117,23 @@ RSpec.describe :build_endpoint_schema do
               schema: { type: 'integer' }
             }
           ],
-          requestBody: {
-            content: {
-              :'application/json' => {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    name: { type: 'string' },
-                    tag: {
-                      type: 'object',
-                      properties: {
-                        name: { type: 'string' },
-                        value: { type: 'string' }
-                      }
-                    },
-                    locale: {
-                      type: 'string',
-                      enum: ['en', 'ru']
-                    }
-                  }
-                }
-              }
-            }
-          },
           responses: {
             200 => {
               description: '',
               content: {
-                :'application/json' => {
+                :'text/csv' => {
                   schema: {
                     type: 'object',
                     properties: {
-                      id: { type: 'integer' }
+                      data: { type: 'string' }
                     }
                   }
                 }
               }
-            },
-            400 => {
-              description: "- 1st 400 error\n- 2nd 400 error",
-
-            },
-            401 => {
-              description: "- 401 error",
             }
           },
-          summary: "summary",
-          description: "description",
+          summary: "file summary",
+          description: "file",
         }
       }
     ))
@@ -165,6 +156,7 @@ RSpec.describe :build_endpoint_schema do
       method:          :get,
       path:            '/versions/:id',
       caster:          caster,
+      respond_to:      :json,
       serializer:      nil,
       response_status: 200,
       description:     nil,
@@ -224,6 +216,7 @@ RSpec.describe :build_endpoint_schema do
       build_endpoint_schema(ReeSwagger::EndpointDto.new(
         method:          :get,
         path:            '/versions/:id',
+        respond_to:      :json,
         caster:          nil,
         serializer:      nil,
         response_status: 200,
@@ -246,6 +239,7 @@ RSpec.describe :build_endpoint_schema do
       build_endpoint_schema(ReeSwagger::EndpointDto.new(
         method:          :get,
         path:            '/versions/:id',
+        respond_to:      :json,
         caster:          caster,
         serializer:      nil,
         response_status: 200,
