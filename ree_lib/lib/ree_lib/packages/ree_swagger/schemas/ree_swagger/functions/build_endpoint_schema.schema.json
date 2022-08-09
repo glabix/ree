@@ -45,6 +45,14 @@
       "imports": [
 
       ]
+    },
+    {
+      "target": "get_mime_type",
+      "package_name": "ree_swagger",
+      "as": "get_mime_type",
+      "imports": [
+
+      ]
     }
   ]
 }

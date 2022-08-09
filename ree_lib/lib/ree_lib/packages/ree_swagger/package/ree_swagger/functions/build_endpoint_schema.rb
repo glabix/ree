@@ -4,6 +4,7 @@ class ReeSwagger::BuildEndpointSchema
   include Ree::FnDSL
 
   fn :build_endpoint_schema do
+    link :get_mime_type
     link :build_parameters
     link :build_request_body_schema
     link :build_serializer_schema
@@ -31,6 +32,8 @@ class ReeSwagger::BuildEndpointSchema
       }
       .join('/')
 
+    mime_type = get_mime_type(endpoint.respond_to)
+
     missed_caster = path_params - endpoint.caster&.fields&.keys.to_a
 
     if missed_caster.any?
@@ -47,7 +50,7 @@ class ReeSwagger::BuildEndpointSchema
 
       request_body = request_body_schema && {
         content: {
-          :'application/json' => {
+          :"#{mime_type}" => {
             schema: request_body_schema
           }
         }
@@ -65,7 +68,7 @@ class ReeSwagger::BuildEndpointSchema
 
         request_body_schema && {
           content: {
-            :'application/json' => {
+            :"#{mime_type}" => {
               schema: request_body_schema
             }
           }
@@ -78,7 +81,7 @@ class ReeSwagger::BuildEndpointSchema
 
     if endpoint.serializer
       response_schema[:content] = {
-        :'application/json' => {
+        :"#{mime_type}" => {
           schema: build_serializer_schema(endpoint.serializer)
         }
       }
