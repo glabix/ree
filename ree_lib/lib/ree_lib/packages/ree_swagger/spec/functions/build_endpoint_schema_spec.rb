@@ -70,8 +70,8 @@ RSpec.describe :build_endpoint_schema do
 
     schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
       method:          :post,
-      path:            '/versions/:id',
       respond_to:      :json,
+      path:            '/versions/:id',
       caster:          caster,
       serializer:      serializer,
       response_status: 200,
@@ -103,6 +103,69 @@ RSpec.describe :build_endpoint_schema do
       description:     "file",
       summary:         "file summary",
       errors:          []
+    ))
+
+    expect(schema).to eq(ReeSwagger::PathDto.new(
+      path: '/versions/{id}',
+      schema: {
+        post: {
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'integer' }
+            }
+          ],
+          requestBody: {
+            content: {
+              :'application/json' => {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    tag: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                        value: { type: 'string' }
+                      }
+                    },
+                    locale: {
+                      type: 'string',
+                      enum: ['en', 'ru']
+                    }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            200 => {
+              description: '',
+              content: {
+                :'application/json' => {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer' }
+                    }
+                  }
+                }
+              }
+            },
+            400 => {
+              description: "- 1st 400 error\n- 2nd 400 error",
+
+            },
+            401 => {
+              description: "- 401 error",
+            }
+          },
+          summary: "summary",
+          description: "description",
+        }
+      }
     ))
 
     expect(csv_schema).to eq(ReeSwagger::PathDto.new(
