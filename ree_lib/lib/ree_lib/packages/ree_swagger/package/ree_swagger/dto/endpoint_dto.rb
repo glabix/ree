@@ -9,6 +9,7 @@ class ReeSwagger::EndpointDto
   properties(
     method: Or[:get, :post, :put, :patch, :delete],
     respond_to: Or[*MIME_TYPES.keys],
+    sections: Nilor[ArrayOf[String]],
     path: String,
     caster: Nilor[ReeMapper::Mapper],
     serializer: Nilor[ReeMapper::Mapper],

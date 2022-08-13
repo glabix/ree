@@ -108,6 +108,7 @@ class ReeSwagger::BuildEndpointSchema
 
     method_schema[:summary] =  endpoint.summary if endpoint.summary
     method_schema[:description] =  endpoint.description if endpoint.description
+    method_schema[:tags] = endpoint.sections if endpoint.sections
 
     method_schema[:parameters]  = parameters   if parameters
     method_schema[:requestBody] = request_body if request_body

@@ -72,6 +72,7 @@ RSpec.describe :build_endpoint_schema do
       method:          :post,
       respond_to:      :json,
       path:            '/versions/:id',
+      sections:        ["versions"],
       caster:          caster,
       serializer:      serializer,
       response_status: 200,
@@ -95,8 +96,9 @@ RSpec.describe :build_endpoint_schema do
 
     csv_schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
       method:          :get,
-      path:            '/files/:id',
       respond_to:      :csv,
+      path:            '/files/:id',
+      sections:        ["files"],
       caster:          file_caster,
       serializer:      file_serializer,
       response_status: 200,
@@ -129,13 +131,15 @@ RSpec.describe :build_endpoint_schema do
                       properties: {
                         name: { type: 'string' },
                         value: { type: 'string' }
-                      }
+                      },
+                      required: ['name', 'value']
                     },
                     locale: {
                       type: 'string',
                       enum: ['en', 'ru']
                     }
-                  }
+                  },
+                  required: ['name', 'tag', 'locale']
                 }
               }
             }
@@ -164,6 +168,7 @@ RSpec.describe :build_endpoint_schema do
           },
           summary: "summary",
           description: "description",
+          tags: ["versions"]
         }
       }
     ))
@@ -197,6 +202,7 @@ RSpec.describe :build_endpoint_schema do
           },
           summary: "file summary",
           description: "file",
+          tags: ["files"]
         }
       }
     ))
@@ -257,9 +263,11 @@ RSpec.describe :build_endpoint_schema do
                     properties: {
                       x: { type: 'integer' },
                       y: { type: 'integer' }
-                    }
+                    },
+                    required: ['x', 'y']
                   }
-                }
+                },
+                required: ['text', 'point']
               },
               style: 'deepObject'
             }
