@@ -19,10 +19,10 @@ class ReeSwagger::BuildSchema
       },
       components: {
         securitySchemas: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT'
+          apiKeyAuth: {
+            type: 'apiKey',
+            in: 'header',
+            name: 'Authorization'
           }
         }
       },

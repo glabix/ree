@@ -66,9 +66,16 @@ class ReeSwagger::BuildEndpointSchema
           path_params
         )
 
+        # request_body_schema && {
+        #   content: {
+        #     :"#{mime_type}" => {
+        #       schema: request_body_schema
+        #     }
+        #   }
+        # }
         request_body_schema && {
           content: {
-            :"#{mime_type}" => {
+            :"application/x-www-form-urlencoded" => {
               schema: request_body_schema
             }
           }
@@ -112,7 +119,7 @@ class ReeSwagger::BuildEndpointSchema
 
     method_schema[:parameters]  = parameters   if parameters
     method_schema[:requestBody] = request_body if request_body
-    method_schema[:security] = [{ bearerAuth: [] }] if endpoint.authenticate
+    method_schema[:security] = [{ apiKeyAuth: [] }] if endpoint.authenticate
 
     schema = {endpoint.method => method_schema}
 
