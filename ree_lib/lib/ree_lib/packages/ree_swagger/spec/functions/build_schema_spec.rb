@@ -6,8 +6,10 @@ RSpec.describe :build_schema do
       title: 'Sample API',
       description: 'Sample API description',
       version: '0.0.1',
+      api_url: 'https://some-api.com/api/v1',
       endpoints: [ReeSwagger::EndpointDto.new(
         method:          :get,
+        authenticate:    true,
         path:            '/version',
         respond_to:      :json,
         caster:          nil,
@@ -27,9 +29,24 @@ RSpec.describe :build_schema do
           description: 'Sample API description',
           version: '0.0.1'
         },
+        components: {
+          securitySchemas: {
+            bearerAuth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT'
+            }
+          }
+        },
+        servers: [
+          { url: 'https://some-api.com/api/v1' }
+        ],
         paths: {
           '/version' => {
             get: {
+              security: [
+                {bearerAuth: []}
+              ],
               responses: {
                 200 => {
                   description: ''

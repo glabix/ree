@@ -13,6 +13,7 @@ class ReeSwagger::EndpointDto
     path: String,
     caster: Nilor[ReeMapper::Mapper],
     serializer: Nilor[ReeMapper::Mapper],
+    authenticate: Bool,
     summary: Nilor[String],
     description: Nilor[String],
     response_status: Integer,
