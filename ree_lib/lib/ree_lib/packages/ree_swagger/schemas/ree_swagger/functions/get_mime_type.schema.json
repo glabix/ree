@@ -1,0 +1,27 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.0",
+  "name": "get_mime_type",
+  "path": "packages/ree_swagger/package/ree_swagger/functions/get_mime_type.rb",
+  "mount_as": "fn",
+  "class": "ReeSwagger::GetMimeType",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "String",
+      "args": [
+        {
+          "arg": "type",
+          "type": "Or[html, text, js, css, ics, csv, vcf, vtt, png, jpeg, gif, bmp, tiff, svg, mpeg, mp3, ogg, m4a, webm, mp4, otf, ttf, woff, woff2, xml, rss, atom, yaml, multipart_f..., url_encoded..., json, pdf, zip, gzip]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

@@ -49,6 +49,10 @@
       "schema": "packages/ree_swagger/schemas/ree_swagger/functions/get_caster_definition.schema.json"
     },
     {
+      "name": "get_mime_type",
+      "schema": "packages/ree_swagger/schemas/ree_swagger/functions/get_mime_type.schema.json"
+    },
+    {
       "name": "get_serializer_definition",
       "schema": "packages/ree_swagger/schemas/ree_swagger/functions/get_serializer_definition.schema.json"
     },

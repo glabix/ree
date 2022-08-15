@@ -9,6 +9,7 @@ RSpec.describe :build_schema do
       endpoints: [ReeSwagger::EndpointDto.new(
         method:          :get,
         path:            '/version',
+        respond_to:      :json,
         caster:          nil,
         serializer:      nil,
         response_status: 200,

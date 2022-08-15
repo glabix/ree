@@ -60,9 +60,19 @@ RSpec.describe :build_endpoint_schema do
       locales :locale
     end
 
+    file_caster = mapper_factory.call.use(:cast) do
+      integer :id
+    end
+
+    file_serializer = mapper_factory.call.use(:serialize) do
+      string :data
+    end
+
     schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
       method:          :post,
+      respond_to:      :json,
       path:            '/versions/:id',
+      sections:        ["versions"],
       caster:          caster,
       serializer:      serializer,
       response_status: 200,
@@ -82,6 +92,19 @@ RSpec.describe :build_endpoint_schema do
           description: "401 error"
         )
       ]
+    ))
+
+    csv_schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
+      method:          :get,
+      respond_to:      :csv,
+      path:            '/files/:id',
+      sections:        ["files"],
+      caster:          file_caster,
+      serializer:      file_serializer,
+      response_status: 200,
+      description:     "file",
+      summary:         "file summary",
+      errors:          []
     ))
 
     expect(schema).to eq(ReeSwagger::PathDto.new(
@@ -108,13 +131,15 @@ RSpec.describe :build_endpoint_schema do
                       properties: {
                         name: { type: 'string' },
                         value: { type: 'string' }
-                      }
+                      },
+                      required: ['name', 'value']
                     },
                     locale: {
                       type: 'string',
                       enum: ['en', 'ru']
                     }
-                  }
+                  },
+                  required: ['name', 'tag', 'locale']
                 }
               }
             }
@@ -143,6 +168,41 @@ RSpec.describe :build_endpoint_schema do
           },
           summary: "summary",
           description: "description",
+          tags: ["versions"]
+        }
+      }
+    ))
+
+    expect(csv_schema).to eq(ReeSwagger::PathDto.new(
+      path: '/files/{id}',
+      schema: {
+        get: {
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'integer' }
+            }
+          ],
+          responses: {
+            200 => {
+              description: '',
+              content: {
+                :'text/csv' => {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      data: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          summary: "file summary",
+          description: "file",
+          tags: ["files"]
         }
       }
     ))
@@ -165,6 +225,7 @@ RSpec.describe :build_endpoint_schema do
       method:          :get,
       path:            '/versions/:id',
       caster:          caster,
+      respond_to:      :json,
       serializer:      nil,
       response_status: 200,
       description:     nil,
@@ -202,9 +263,11 @@ RSpec.describe :build_endpoint_schema do
                     properties: {
                       x: { type: 'integer' },
                       y: { type: 'integer' }
-                    }
+                    },
+                    required: ['x', 'y']
                   }
-                }
+                },
+                required: ['text', 'point']
               },
               style: 'deepObject'
             }
@@ -224,6 +287,7 @@ RSpec.describe :build_endpoint_schema do
       build_endpoint_schema(ReeSwagger::EndpointDto.new(
         method:          :get,
         path:            '/versions/:id',
+        respond_to:      :json,
         caster:          nil,
         serializer:      nil,
         response_status: 200,
@@ -246,6 +310,7 @@ RSpec.describe :build_endpoint_schema do
       build_endpoint_schema(ReeSwagger::EndpointDto.new(
         method:          :get,
         path:            '/versions/:id',
+        respond_to:      :json,
         caster:          caster,
         serializer:      nil,
         response_status: 200,

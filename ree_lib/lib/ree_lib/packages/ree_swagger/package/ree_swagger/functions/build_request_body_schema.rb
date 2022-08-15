@@ -16,11 +16,14 @@ class ReeSwagger::BuildRequestBodySchema
       return get_caster_definition(mapper.type, method(:call).to_proc)
     end
 
+    required_fields = []
+
     properties = mapper.fields.each_with_object({}) do |(_name, field), acc|
       next if path_params.include?(field.name)
 
       swagger_field = {}
 
+      required_fields << field.name.to_s if !field.optional
       field_mapper = field.type
       swagger_type = call(field_mapper)
       swagger_field.merge!(swagger_type) if swagger_type
@@ -37,7 +40,8 @@ class ReeSwagger::BuildRequestBodySchema
 
     {
       type: 'object',
-      properties: properties
+      properties: properties,
+      required: required_fields
     }
   end
 end
