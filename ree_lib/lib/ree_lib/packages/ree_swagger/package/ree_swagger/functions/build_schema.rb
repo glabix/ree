@@ -18,7 +18,7 @@ class ReeSwagger::BuildSchema
         version:     version
       },
       components: {
-        securitySchemas: {
+        securitySchemes: {
           ApiKeyAuth: {
             type: 'apiKey',
             in: 'header',

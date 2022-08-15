@@ -30,7 +30,7 @@ RSpec.describe :build_schema do
           version: '0.0.1'
         },
         components: {
-          securitySchemas: {
+          securitySchemes: {
             bearerAuth: {
               type: 'http',
               scheme: 'bearer',
