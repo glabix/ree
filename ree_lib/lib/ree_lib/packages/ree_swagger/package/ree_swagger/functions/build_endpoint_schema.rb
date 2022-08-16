@@ -66,16 +66,9 @@ class ReeSwagger::BuildEndpointSchema
           path_params
         )
 
-        # request_body_schema && {
-        #   content: {
-        #     :"#{mime_type}" => {
-        #       schema: request_body_schema
-        #     }
-        #   }
-        # }
         request_body_schema && {
           content: {
-            :"application/x-www-form-urlencoded" => {
+            :"#{mime_type}" => {
               schema: request_body_schema
             }
           }
