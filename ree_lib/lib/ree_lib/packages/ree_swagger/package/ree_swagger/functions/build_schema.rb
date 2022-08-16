@@ -8,8 +8,8 @@ class ReeSwagger::BuildSchema
     link 'ree_swagger/dto/endpoint_dto', -> { EndpointDto }
   end
 
-  contract(String, String, String, ArrayOf[EndpointDto] => Hash)
-  def call(title:, description:, version:, endpoints:)
+  contract(String, String, String, String, ArrayOf[EndpointDto] => Hash)
+  def call(title:, description:, version:, api_url:, endpoints:)
     {
       openapi: "3.0.0",
       info: {
@@ -17,6 +17,16 @@ class ReeSwagger::BuildSchema
         description: description,
         version:     version
       },
+      components: {
+        securitySchemes: {
+          ApiKeyAuth: {
+            type: 'apiKey',
+            in: 'header',
+            name: 'Authorization'
+          }
+        }
+      },
+      servers: [{ url: api_url }],
       paths: endpoints.each_with_object(Hash.new { _1[_2] = {} }) {
         path_dto = build_endpoint_schema(_1)
         _2[path_dto.path].merge!(path_dto.schema)

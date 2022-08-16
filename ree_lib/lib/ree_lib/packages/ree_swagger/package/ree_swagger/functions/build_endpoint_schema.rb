@@ -112,6 +112,7 @@ class ReeSwagger::BuildEndpointSchema
 
     method_schema[:parameters]  = parameters   if parameters
     method_schema[:requestBody] = request_body if request_body
+    method_schema[:security] = [{ ApiKeyAuth: [] }] if endpoint.authenticate
 
     schema = {endpoint.method => method_schema}
 

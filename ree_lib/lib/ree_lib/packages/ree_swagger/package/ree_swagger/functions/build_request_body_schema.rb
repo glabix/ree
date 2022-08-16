@@ -38,10 +38,11 @@ class ReeSwagger::BuildRequestBodySchema
 
     return if properties.empty?
 
-    {
+    obj = {
       type: 'object',
       properties: properties,
-      required: required_fields
     }
+    obj[:required] = required_fields if required_fields.size != 0
+    obj
   end
 end
