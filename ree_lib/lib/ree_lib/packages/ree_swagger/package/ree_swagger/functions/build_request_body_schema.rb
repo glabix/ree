@@ -42,9 +42,7 @@ class ReeSwagger::BuildRequestBodySchema
       type: 'object',
       properties: properties,
     }
-
-    obj[:required] = required_fields if required_fields != 0
-
+    obj[:required] = required_fields if required_fields.size != 0
     obj
   end
 end
