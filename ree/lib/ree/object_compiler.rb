@@ -89,7 +89,7 @@ class Ree::ObjectCompiler
       eval_list.push(indent + "#{object.after_init}")
     end
 
-    if object.compiled_frozen
+    if object.freeze?
       eval_list.push(indent + 'freeze')
     end
 
