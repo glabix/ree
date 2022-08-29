@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ree_lib (1.0.12)
+    ree_lib (1.0.13)
       binding_of_caller (~> 1.0.0)
       i18n (~> 1.12.0)
       loofah (~> 2.18.0)
@@ -38,13 +38,13 @@ GEM
     msgpack (1.5.4)
     nokogiri (1.13.8-x86_64-linux)
       racc (~> 1.4)
-    oj (3.13.20)
+    oj (3.13.21)
     pg (1.4.2)
     public_suffix (4.0.7)
     racc (1.6.0)
     rainbow (3.1.1)
     rake (13.0.6)
-    ree (1.0.3)
+    ree (1.0.4)
       commander (~> 4.6.0)
     rexml (3.2.5)
     rollbar (3.3.1)
