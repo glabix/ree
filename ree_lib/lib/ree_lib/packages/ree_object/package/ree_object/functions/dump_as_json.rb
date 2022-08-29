@@ -40,13 +40,13 @@ class ReeObject::DumpAsJson
     elsif obj.is_a?(Array)
       {
         'type' => ARRAY,
-        'class' => obj.class,
+        'class' => 'Array',
         'value' => obj.map { recursively_convert(_1, cache) }
       }
     elsif obj.is_a?(Hash)
       {
         'type' => HASH,
-        'class' => obj.class,
+        'class' => 'Hash',
         'value' => convert_hash(obj, cache)
       }
     elsif obj.is_a?(Proc)
