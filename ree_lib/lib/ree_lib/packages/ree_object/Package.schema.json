@@ -28,8 +28,16 @@
       "schema": "packages/ree_object/schemas/ree_object/functions/deep_freeze.schema.json"
     },
     {
+      "name": "dump_as_json",
+      "schema": "packages/ree_object/schemas/ree_object/functions/dump_as_json.schema.json"
+    },
+    {
       "name": "is_blank",
       "schema": "packages/ree_object/schemas/ree_object/functions/is_blank.schema.json"
+    },
+    {
+      "name": "load_json_dump",
+      "schema": "packages/ree_object/schemas/ree_object/functions/load_json_dump.schema.json"
     },
     {
       "name": "not_blank",
