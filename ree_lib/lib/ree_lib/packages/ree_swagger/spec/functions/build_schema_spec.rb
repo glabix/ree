@@ -31,10 +31,10 @@ RSpec.describe :build_schema do
         },
         components: {
           securitySchemes: {
-            bearerAuth: {
-              type: 'http',
-              scheme: 'bearer',
-              bearerFormat: 'JWT'
+            ApiKeyAuth: {
+              in: "header",
+              name: "Authorization",
+              type: "apiKey",
             }
           }
         },
@@ -45,7 +45,7 @@ RSpec.describe :build_schema do
           '/version' => {
             get: {
               security: [
-                {bearerAuth: []}
+                {ApiKeyAuth: []}
               ],
               responses: {
                 200 => {
