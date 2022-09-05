@@ -7,6 +7,8 @@ class ReeJson::FromJson
     }
   end
 
+  ParseJsonError = Class.new(StandardError)
+
   contract(
     Any,
     Kwargs[
@@ -16,7 +18,7 @@ class ReeJson::FromJson
       symbol_keys?: Bool,
       RestKeys => Any
     ] => Hash
-  ).throws(ArgumentError)
+  ).throws(ParseJsonError)
   def call(object, mode: :rails, **opts)
     options = DEFAULT_OPTIONS
       .dup
@@ -25,5 +27,7 @@ class ReeJson::FromJson
       )
 
     Oj.load(object, options)
+  rescue ArgumentError, EncodingError
+    raise ParseJsonError.new
   end
 end

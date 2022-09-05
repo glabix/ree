@@ -10,7 +10,7 @@
     {
       "doc": "",
       "throws": [
-        "ArgumentError"
+        "ReeJson::FromJson::ParseJsonError"
       ],
       "return": "Hash",
       "args": [

@@ -17,7 +17,9 @@ RSpec.describe Ree::ObjectDsl do
       class TestBean
         include Ree::BeanDSL
 
-        bean :test_bean
+        bean :test_bean do
+          freeze false
+        end
 
         def call
           :ok
@@ -25,7 +27,9 @@ RSpec.describe Ree::ObjectDsl do
       end
     end
 
-    result = TestPackageModule::TestBean.new.call
+    bean = TestPackageModule::TestBean.new
+    result = bean.call
     expect(result).to eq(:ok)
+    expect(bean.frozen?).to eq(false)
   }
 end

@@ -11,4 +11,8 @@ RSpec.describe :from_json do
     result = from_json("{\":id\":{\"^o\":\"Object\"}}", mode: :object)
     expect(result[:id]).to be_a(Object)
   }
+
+  it {
+    expect{from_json("{213: \"123\"}")}.to raise_error(ReeJson::FromJson::ParseJsonError)
+  }
 end

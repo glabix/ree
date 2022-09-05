@@ -1,0 +1,27 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.0",
+  "name": "dump_as_json",
+  "path": "packages/ree_object/package/ree_object/functions/dump_as_json.rb",
+  "mount_as": "fn",
+  "class": "ReeObject::DumpAsJson",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+        "ReeObject::DumpAsJson::RecursiveObjectErr"
+      ],
+      "return": "Or[Hash, ArrayOf[Any], Date, Time, Numeric, String, FalseClass, TrueClass, NilClass, Symbol, Module, Class]",
+      "args": [
+        {
+          "arg": "obj",
+          "type": "Any"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.0",
+  "name": "load_json_dump",
+  "path": "packages/ree_object/package/ree_object/functions/load_json_dump.rb",
+  "mount_as": "fn",
+  "class": "ReeObject::LoadJsonDump",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "dump",
+          "type": "Hash"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}
