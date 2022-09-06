@@ -26,10 +26,11 @@ export function onCreatePackageFile(filePath: string) {
   const templateContent = fs.readFileSync(templatePath, { encoding: 'utf8' })
 
   const actualTemplateContent = templateContent
-    .replace("PACKAGE_MODULE", variables.moduleName)
-    .replace("PACKAGE_NAME", variables.packageName)
-    .replace("OBJECT_CLASS", variables.className)
-    .replace("OBJECT_NAME", variables.objectName)
+    .replace(/PACKAGE_MODULE/g, variables.moduleName)
+    .replace(/PACKAGE_NAME/g, variables.packageName)
+    .replace(/MODULE_NAME/g, variables.moduleName)
+    .replace(/OBJECT_CLASS/g, variables.className)
+    .replace(/OBJECT_NAME/g, variables.objectName)
   
   fs.appendFileSync(filePath, actualTemplateContent)
 }
