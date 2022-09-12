@@ -20,9 +20,7 @@ export function updatePackageDeps(
       if (toPackageName !== fromPackageName) {
         const packageFacade = getPackageObjectFromCurrentPath(currentFile.fileName)
         if (!packageFacade.deps().map(d => d.name).includes(fromPackageName)) {
-          updatePackageDependsOn(currentFile, fromPackageName).then(() =>
-            updateObjectLinks(currentFile, objectName, fromPackageName, toPackageName)
-          )
+          updateObjectLinks(currentFile, objectName, fromPackageName, toPackageName)
         } else {
           updateObjectLinks(currentFile, objectName, fromPackageName, toPackageName)
         }
