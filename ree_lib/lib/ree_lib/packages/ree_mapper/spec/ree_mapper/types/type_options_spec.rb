@@ -34,6 +34,9 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
         integer? :opt_number
         integer :opt_number_long, optional: true
         array? :opt_array, each: integer
+        array? :opt_array_with_blk do
+          integer :id
+        end
       }
     }
 
@@ -56,6 +59,10 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
 
     it {
       expect(mapper.cast({ number: 1, opt_array: [1] })).to eq({ number: 1, opt_array: [1] })
+    }
+
+    it {
+      expect(mapper.cast({ number: 1, opt_array_with_blk: [{ id: 1 }] })).to eq({ number: 1, opt_array_with_blk: [{ id: 1 }] })
     }
   end
 
