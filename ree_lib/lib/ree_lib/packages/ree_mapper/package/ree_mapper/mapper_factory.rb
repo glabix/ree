@@ -90,11 +90,11 @@ class ReeMapper::MapperFactory
     @mapper.add_field(type, field_name, optional: optional, **opts)
   end
 
-  contract(Symbol, Any, Ksplat[RestKeys => Any] => Nilor[ReeMapper::Field])
-  def array?(field_name, each:, **opts)
+  contract(Symbol, Kwargs[each: Nilor[ReeMapper::Field]], Ksplat[RestKeys => Any], Optblock => Nilor[ReeMapper::Field])
+  def array?(field_name, each: nil, **opts, &blk)
     raise ArgumentError if opts.key?(:optional)
 
-    array(field_name, each: each, optional: true, **opts)
+    array(field_name, each: each, optional: true, **opts, &blk)
   end
 
   contract(Symbol, Kwargs[key: Nilor[Symbol]], Ksplat[RestKeys => Any], Block => nil)
