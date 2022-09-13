@@ -31,7 +31,7 @@ module Ree
           schema_path = Ree::PathHelper.abs_package_schema_path(package)
 
           if include_objects
-            schemas_path = Ree::PathHelper.abs_package_object_schemas_path(package)
+            schemas_path = Ree::PathHelper.abs_package_schemas_dir(package)
 
             FileUtils.rm_rf(schemas_path)
             FileUtils.mkdir_p(schemas_path)

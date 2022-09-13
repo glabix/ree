@@ -245,12 +245,13 @@ module Ree
 
       facade.packages_store.packages.each do |package|
         next if package.gem?
+        next if package.dir.nil?
         puts("Generating Package.schema.json for :#{package.name} package") if !silence
 
         facade.load_entire_package(package.name)
         facade.write_package_schema(package.name)
 
-        schemas_path = Ree::PathHelper.abs_package_object_schemas_path(package)
+        schemas_path = Ree::PathHelper.abs_package_schemas_dir(package)
 
         FileUtils.rm_rf(schemas_path)
         FileUtils.mkdir_p(schemas_path)

@@ -6,11 +6,6 @@ class Ree::PathHelper
   SCHEMAS_FOLDER = 'schemas'
 
   class << self
-    def abs_package_object_schemas_path(package)
-      root_dir = project_root_dir(package)
-      File.join(root_dir, SCHEMAS_FOLDER)
-    end
-
     # @param [Ree::Object] object
     # @return [String] Absolute object file path
     def abs_object_path(object)
@@ -68,6 +63,14 @@ class Ree::PathHelper
     def abs_package_module_dir(package)
       File.join(
         project_root_dir(package), package.dir, Ree::PACKAGE, package.name.to_s
+      )
+    end
+
+    # @param [Ree::Package] package Package schema
+    # @return [String] Absolute package schemas folder path (ex. /data/project/bc/accounts/schemas)
+    def abs_package_schemas_dir(package)
+      File.join(
+        project_root_dir(package), package.dir, Ree::SCHEMAS
       )
     end
 
