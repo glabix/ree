@@ -32,14 +32,14 @@ class ReeMapper::Mapper
                 if @#{method}_strategy.has_value?(obj, field)
                   value = @#{method}_strategy.get_value(obj, field)
                   unless value.nil? && field.null
-                    value = field.type.public_send(:#{method}, value, role: role)
+                    value = field.type.#{method}(value, role: role)
                   end
                   @#{method}_strategy.assign_value(acc, field, value)
                 elsif field.optional || @#{method}_strategy.always_optional
                   if field.has_default?
                     value = field.default
                     unless value.nil? && field.null
-                      value = field.type.public_send(:#{method}, value, role: role)
+                      value = field.type.#{method}(value, role: role)
                     end
                     @#{method}_strategy.assign_value(acc, field, value)
                   end
