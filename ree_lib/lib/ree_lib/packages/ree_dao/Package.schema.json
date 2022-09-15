@@ -43,6 +43,10 @@
     {
       "name": "connections",
       "schema": "packages/ree_dao/schemas/ree_dao/beans/connections.schema.json"
+    },
+    {
+      "name": "persist_assoc",
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/persist_assoc.schema.json"
     }
   ]
 }

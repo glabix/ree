@@ -28,7 +28,7 @@ module ReeDao::DSL
       dao = build_dao(
         connection: db,
         table_name: self.class.instance_variable_get(:@table),
-        mapper: self.class.instance_variable_get(:@schema_mapper) || (raise Ree::Error.new("Dao schema mapper is not set. Use `schema` DSL to define it", :invalid_dsl_usage)),
+        mapper: get_schema_mapper,
         primary_key: self.class.instance_variable_get(:@primary_key),
         default_select_columns: self.class.instance_variable_get(:@default_select_columns),
       )
@@ -36,6 +36,18 @@ module ReeDao::DSL
       db.dataset_class = dataset_class
 
       dao
+    end
+
+    def get_schema_mapper
+      mapper = self
+        .class
+        .instance_variable_get(:@schema_mapper)
+
+      if mapper.nil?
+        raise Ree::Error.new("Dao schema mapper is not set. Use `schema` DSL to define it", :invalid_dsl_usage)
+      end
+
+      mapper
     end
   end
 
