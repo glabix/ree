@@ -1,22 +1,10 @@
 require "sequel/extensions/pg_array"
 
 class ReeDao::PgArray < ReeMapper::AbstractType
-  contract(
-    ReeEnum::Value,
-    Kwargs[
-      role: Nilor[Symbol, ArrayOf[Symbol]]
-    ] => String
-  )
   def serialize(value, role: nil)
     raise ArgumentError.new("not supported")
   end
 
-  contract(
-    Any,
-    Kwargs[
-      role: Nilor[Symbol, ArrayOf[Symbol]]
-    ] => ReeEnum::Value
-  ).throws(ReeMapper::CoercionError)
   def cast(value, role: nil)
     raise ArgumentError.new("not supported")
   end
