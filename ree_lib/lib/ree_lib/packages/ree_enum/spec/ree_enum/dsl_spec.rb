@@ -112,7 +112,7 @@ RSpec.describe ReeEnum::DSL do
         state: 'first',
         type: 'invalid',
       })
-      }.to raise_error(ReeMapper::CoercionError, 'should be one of ["account"]')
+      }.to raise_error(ReeMapper::CoercionError, '`type` should be one of ["account"]')
 
     expect(
       mapper.cast({

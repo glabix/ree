@@ -34,25 +34,27 @@ module ReeEnum
             contract(
               ReeEnum::Value,
               Kwargs[
+                name: String,
                 role: Nilor[Symbol, ArrayOf[Symbol]]
               ] => String
             )
-            def serialize(value, role: nil)
+            def serialize(value, name:, role: nil)
               value.to_s
             end
 
             contract(
               Any,
               Kwargs[
+                name: String,
                 role: Nilor[Symbol, ArrayOf[Symbol]]
               ] => ReeEnum::Value
             ).throws(ReeMapper::CoercionError)
-            def cast(value, role: nil)
+            def cast(value, name:, role: nil)
               if value.is_a?(String)
                 enum_val = @enum.values.all.detect { |v| v.to_s == value }
 
                 if !enum_val
-                  raise ReeMapper::CoercionError, "should be one of #{@enum.values.all.map(&:to_s).inspect}"
+                  raise ReeMapper::CoercionError, "`#{name}` should be one of #{@enum.values.all.map(&:to_s).inspect}"
                 end
 
                 enum_val
@@ -60,33 +62,35 @@ module ReeEnum
                 enum_val = @enum.values.all.detect { |v| v.to_i == value }
 
                 if !enum_val
-                  raise ReeMapper::CoercionError, "should be one of #{@enum.values.all.map(&:to_s).inspect}"
+                  raise ReeMapper::CoercionError, "`#{name}` should be one of #{@enum.values.all.map(&:to_s).inspect}"
                 end
 
                 enum_val
               else
-                raise ReeMapper::CoercionError, "should be one of #{@enum.values.all.map(&:to_s).inspect}"
+                raise ReeMapper::CoercionError, "`#{name}` should be one of #{@enum.values.all.map(&:to_s).inspect}"
               end
             end
 
             contract(
               ReeEnum::Value,
               Kwargs[
+                name: String,
                 role: Nilor[Symbol, ArrayOf[Symbol]]
               ] => Integer
             )
-            def db_dump(value, role: nil)
+            def db_dump(value, name:, role: nil)
               value.to_i
             end
 
             contract(
               Integer,
               Kwargs[
+                name: String,
                 role: Nilor[Symbol, ArrayOf[Symbol]]
               ] => ReeEnum::Value
             ).throws(ReeMapper::TypeError)
-            def db_load(value, role: nil)
-              cast(value, role: role)
+            def db_load(value, name:, role: nil)
+              cast(value, name: name, role: role)
             end
           end
 
