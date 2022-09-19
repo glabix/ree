@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe ReeMapper::Bool do
+RSpec.describe 'ReeMapper::Bool' do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
 
@@ -31,11 +31,11 @@ RSpec.describe ReeMapper::Bool do
     }
 
     it {
-      expect { mapper.serialize({ bool: 'true' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ bool: 'true' }) }.to raise_error(ReeMapper::TypeError, "`bool` should be a boolean")
     }
 
     it {
-      expect { mapper.serialize({ bool: 1 }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ bool: 1 }) }.to raise_error(ReeMapper::TypeError, "`bool` should be a boolean")
     }
   end
 
@@ -81,11 +81,11 @@ RSpec.describe ReeMapper::Bool do
     }
 
     it {
-      expect { mapper.cast({ 'bool' => 'right' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.cast({ 'bool' => 'right' }) }.to raise_error(ReeMapper::CoercionError, "`bool` is invalid boolean")
     }
 
     it {
-      expect { mapper.cast({ 'bool' => Object.new }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.cast({ 'bool' => Object.new }) }.to raise_error(ReeMapper::CoercionError, "`bool` is invalid boolean")
     }
   end
 
@@ -99,11 +99,11 @@ RSpec.describe ReeMapper::Bool do
     }
 
     it {
-      expect { mapper.db_dump(OpenStruct.new({ bool: 'true' })) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump(OpenStruct.new({ bool: 'true' })) }.to raise_error(ReeMapper::TypeError, "`bool` should be a boolean")
     }
 
     it {
-      expect { mapper.db_dump(OpenStruct.new({ bool: 1 })) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump(OpenStruct.new({ bool: 1 })) }.to raise_error(ReeMapper::TypeError, "`bool` should be a boolean")
     }
   end
 
@@ -149,11 +149,11 @@ RSpec.describe ReeMapper::Bool do
     }
 
     it {
-      expect { mapper.db_load({ 'bool' => 'right' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.db_load({ 'bool' => 'right' }) }.to raise_error(ReeMapper::CoercionError, "`bool` is invalid boolean")
     }
 
     it {
-      expect { mapper.db_load({ 'bool' => Object.new }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.db_load({ 'bool' => Object.new }) }.to raise_error(ReeMapper::CoercionError, "`bool` is invalid boolean")
     }
   end
 end

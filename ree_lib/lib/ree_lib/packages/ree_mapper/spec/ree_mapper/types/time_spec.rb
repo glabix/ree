@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe ReeMapper::Time do
+RSpec.describe 'ReeMapper::Time' do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
 
@@ -27,23 +27,23 @@ RSpec.describe ReeMapper::Time do
     }
 
     it {
-      expect { mapper.serialize({ time: DateTime.new(2020) }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ time: DateTime.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.serialize({ time: Date.new(2020) }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ time: Date.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.serialize({ time: DateTime.new(2020).to_s }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ time: DateTime.new(2020).to_s }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.serialize({ time: '2020-01-01' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ time: '2020-01-01' }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.serialize({ time: Object.new }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ time: Object.new }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
   end
 
@@ -65,15 +65,15 @@ RSpec.describe ReeMapper::Time do
     }
 
     it {
-      expect { mapper.cast({ time: Date.new(2020) }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.cast({ time: Date.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.cast({ time: Object.new }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.cast({ time: Object.new }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.cast({ time: 'no date time' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.cast({ time: 'no date time' }) }.to raise_error(ReeMapper::CoercionError, "`time` is invalid time")
     }
   end
 
@@ -83,23 +83,23 @@ RSpec.describe ReeMapper::Time do
     }
 
     it {
-      expect { mapper.serialize({ time: DateTime.new(2020) }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ time: DateTime.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.db_dump({ time: Date.new(2020) }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ time: Date.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.db_dump({ time: Time.new(2020).to_s }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ time: Time.new(2020).to_s }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.db_dump({ time: '2020-01-01' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ time: '2020-01-01' }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.db_dump({ time: Object.new }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ time: Object.new }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
   end
 
@@ -121,15 +121,15 @@ RSpec.describe ReeMapper::Time do
     }
 
     it {
-      expect { mapper.db_load({ time: Date.new(2020) }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_load({ time: Date.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.db_load({ time: Object.new }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_load({ time: Object.new }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time")
     }
 
     it {
-      expect { mapper.db_load({ time: 'no date time' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.db_load({ time: 'no date time' }) }.to raise_error(ReeMapper::CoercionError, "`time` is invalid time")
     }
   end
 end

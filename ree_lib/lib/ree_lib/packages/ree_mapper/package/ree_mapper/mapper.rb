@@ -19,32 +19,33 @@ class ReeMapper::Mapper
 
         if type
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, role: nil)
-              @type.#{method}(obj, role: role)
+            def #{method}(obj, name: nil, role: nil)
+              @type.#{method}(obj, name: name, role: role)
             end
           RUBY
         else
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, role: nil)
+            def #{method}(obj, name: nil, role: nil)
               @fields.each_with_object(@#{method}_strategy.build_object) do |(_, field), acc|
                 next unless field.has_role?(role)
+                nested_name = name ? "\#{name}[\#{field.name_as_str}]" : field.name_as_str
 
                 if @#{method}_strategy.has_value?(obj, field)
                   value = @#{method}_strategy.get_value(obj, field)
                   unless value.nil? && field.null
-                    value = field.type.#{method}(value, role: role)
+                    value = field.type.#{method}(value, name: nested_name, role: role)
                   end
                   @#{method}_strategy.assign_value(acc, field, value)
                 elsif field.optional || @#{method}_strategy.always_optional
                   if field.has_default?
                     value = field.default
                     unless value.nil? && field.null
-                      value = field.type.#{method}(value, role: role)
+                      value = field.type.#{method}(value, name: nested_name, role: role)
                     end
                     @#{method}_strategy.assign_value(acc, field, value)
                   end
                 else
-                  raise ReeMapper::TypeError, "Missing required field `\#{field.from}`"
+                  raise ReeMapper::TypeError, "Missing required field `\#{field.from_as_str}` for `\#{name || 'root'}`"
                 end
               end
             end

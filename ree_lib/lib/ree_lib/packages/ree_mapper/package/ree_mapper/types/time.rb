@@ -3,17 +3,17 @@
 require 'time'
 
 class ReeMapper::Time < ReeMapper::AbstractType
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::TypeError)
-  def serialize(value, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::TypeError)
+  def serialize(value, name:, role: nil)
     if value.class == Time
       value
     else
-      raise ReeMapper::TypeError, "should be a time"
+      raise ReeMapper::TypeError, "`#{name}` should be a time"
     end
   end
 
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::CoercionError, ReeMapper::TypeError)
-  def cast(value, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::CoercionError, ReeMapper::TypeError)
+  def cast(value, name:, role: nil)
     if value.class == Time
       value
     elsif value.class == DateTime
@@ -22,20 +22,20 @@ class ReeMapper::Time < ReeMapper::AbstractType
       begin
         Time.parse(value)
       rescue ArgumentError
-        raise ReeMapper::CoercionError, "is invalid time"
+        raise ReeMapper::CoercionError, "`#{name}` is invalid time"
       end
     else
-      raise ReeMapper::TypeError, "should be a time"
+      raise ReeMapper::TypeError, "`#{name}` should be a time"
     end
   end
 
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::TypeError)
-  def db_dump(value, role: nil)
-    serialize(value, role: role)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::TypeError)
+  def db_dump(value, name:, role: nil)
+    serialize(value, name: name, role: role)
   end
 
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::CoercionError, ReeMapper::TypeError)
-  def db_load(value, role: nil)
-    cast(value, role: role)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Time).throws(ReeMapper::CoercionError, ReeMapper::TypeError)
+  def db_load(value, name:, role: nil)
+    cast(value, name: name, role: role)
   end
 end

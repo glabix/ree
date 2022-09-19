@@ -8,63 +8,63 @@ class ReeMapper::Array < ReeMapper::AbstractType
     @of = of
   end
 
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
-  def serialize(value, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
+  def serialize(value, name:, role: nil)
     if value.is_a?(Array)
-      value.map {
+      value.map.with_index {
         if _1.nil? && of.null
           _1
         else
-          of.type.serialize(_1, role: role)
+          of.type.serialize(_1, name: "#{name}[#{_2}]", role: role)
         end
       }
     else
-      raise ReeMapper::TypeError, 'should be an array'
+      raise ReeMapper::TypeError, "`#{name}` should be an array"
     end
   end
 
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
-  def cast(value, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
+  def cast(value, name:, role: nil)
     if value.is_a?(Array)
-      value.map {
+      value.map.with_index {
         if _1.nil? && of.null
           _1
         else
-          of.type.cast(_1, role: role)
+          of.type.cast(_1, name: "#{name}[#{_2}]", role: role)
         end
       }
     else
-      raise ReeMapper::TypeError, "should be an array"
+      raise ReeMapper::TypeError, "`#{name}` should be an array"
     end
   end
 
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
-  def db_dump(value, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
+  def db_dump(value, name:, role: nil)
     if value.is_a?(Array)
-      value.map {
+      value.map.with_index {
         if _1.nil? && of.null
           _1
         else
-          of.type.db_dump(_1, role: role)
+          of.type.db_dump(_1, name: "#{name}[#{_2}]", role: role)
         end
       }
     else
-      raise ReeMapper::TypeError, 'should be an array'
+      raise ReeMapper::TypeError, "`#{name}` should be an array"
     end
   end
 
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
-  def db_load(value, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
+  def db_load(value, name:, role: nil)
     if value.is_a?(Array)
-      value.map {
+      value.map.with_index {
         if _1.nil? && of.null
           _1
         else
-          of.type.db_load(_1, role: role)
+          of.type.db_load(_1, name: "#{name}[#{_2}]", role: role)
         end
       }
     else
-      raise ReeMapper::TypeError, "should be an array"
+      raise ReeMapper::TypeError, "`#{name}` should be an array"
     end
   end
 end

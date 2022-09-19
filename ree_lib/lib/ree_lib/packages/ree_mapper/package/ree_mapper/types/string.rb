@@ -1,27 +1,27 @@
 # frozen_string_literal: true
 
 class ReeMapper::String < ReeMapper::AbstractType
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => String).throws(ReeMapper::TypeError)
-  def serialize(value, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => String).throws(ReeMapper::TypeError)
+  def serialize(value, name:, role: nil)
     if value.is_a? String
       value
     else
-      raise ReeMapper::TypeError, 'should be a string'
+      raise ReeMapper::TypeError, "`#{name}` should be a string"
     end
   end
 
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => String).throws(ReeMapper::TypeError)
-  def cast(value, role: nil)
-    serialize(value, role: role)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => String).throws(ReeMapper::TypeError)
+  def cast(value, name:, role: nil)
+    serialize(value, name: name, role: role)
   end
 
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => String).throws(ReeMapper::TypeError)
-  def db_dump(value, role: nil)
-    serialize(value, role: role)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => String).throws(ReeMapper::TypeError)
+  def db_dump(value, name:, role: nil)
+    serialize(value, name: name, role: role)
   end
 
-  contract(Any, Kwargs[role: Nilor[Symbol, ArrayOf[Symbol]]] => String).throws(ReeMapper::TypeError)
-  def db_load(value, role: nil)
-    serialize(value, role: role)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => String).throws(ReeMapper::TypeError)
+  def db_load(value, name:, role: nil)
+    serialize(value, name: name, role: role)
   end
 end

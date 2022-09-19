@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe ReeMapper::Array do
+RSpec.describe 'ReeMapper::Array' do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
 
@@ -18,16 +18,25 @@ RSpec.describe ReeMapper::Array do
   let(:mapper) {
     mapper_factory.call.use(:cast).use(:serialize).use(:db_dump).use(:db_load) {
       array :tags, each: integer
+      array? :ary_of_ary, each: array(each: integer)
     }
   }
 
   describe '#serialize' do
     it {
-      expect(mapper.serialize({ tags: [1, 2] })).to eq({ tags: [1, 2] })
+      expect(mapper.serialize({ tags: [1, 2], ary_of_ary: [[1]] })).to eq({ tags: [1, 2], ary_of_ary: [[1]] })
     }
 
     it {
-      expect { mapper.serialize({ tags: 1 }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ tags: 1 }) }.to raise_error(ReeMapper::TypeError, "`tags` should be an array")
+    }
+
+    it {
+      expect { mapper.serialize({tags: [1], ary_of_ary: ["1"] }) }.to raise_error(ReeMapper::TypeError, "`ary_of_ary[0]` should be an array")
+    }
+
+    it {
+      expect { mapper.serialize({tags: [1], ary_of_ary: [[1, "1"]] }) }.to raise_error(ReeMapper::TypeError, "`ary_of_ary[0][1]` should be an integer")
     }
   end
 
@@ -37,7 +46,7 @@ RSpec.describe ReeMapper::Array do
     }
 
     it {
-      expect { mapper.cast({ 'tags' => 1 }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.cast({ 'tags' => 1 }) }.to raise_error(ReeMapper::TypeError, "`tags` should be an array")
     }
   end
 
@@ -47,7 +56,7 @@ RSpec.describe ReeMapper::Array do
     }
 
     it {
-      expect { mapper.db_dump(OpenStruct.new({ tags: 1 })) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump(OpenStruct.new({ tags: 1 })) }.to raise_error(ReeMapper::TypeError, "`tags` should be an array")
     }
   end
 
@@ -57,7 +66,7 @@ RSpec.describe ReeMapper::Array do
     }
 
     it {
-      expect { mapper.db_load({ 'tags' => 1 }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_load({ 'tags' => 1 }) }.to raise_error(ReeMapper::TypeError, "`tags` should be an array")
     }
   end
 

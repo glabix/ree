@@ -1,17 +1,17 @@
 class ReeMapper::AbstractType
-  def serialize(value, role: nil)
+  def serialize(value, name:, role: nil)
     raise NotImplementedError
   end
 
-  def cast(value, role: nil)
+  def cast(value, name:, role: nil)
     raise NotImplementedError
   end
 
-  def db_dump(value, role: nil)
+  def db_dump(value, name:, role: nil)
     raise NotImplementedError
   end
 
-  def db_load(value, role: nil)
+  def db_load(value, name:, role: nil)
     raise NotImplementedError
   end
 end

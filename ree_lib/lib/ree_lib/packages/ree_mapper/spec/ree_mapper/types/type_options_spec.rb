@@ -170,7 +170,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
     }
 
     it {
-      expect { mapper.cast({ number: nil }) }.to raise_error(ReeMapper::TypeError, 'should be an integer')
+      expect { mapper.cast({ number: nil }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
 
     it {
@@ -183,7 +183,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
       let(:mapper) { mapper_factory.call.use(:cast) { integer? :number, default: :not_number } }
 
       it {
-        expect { mapper.cast({}) }.to raise_error(ReeMapper::TypeError, 'should be an integer')
+        expect { mapper.cast({}) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
       }
     end
   end
