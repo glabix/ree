@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe ReeMapper::Integer do
+RSpec.describe 'ReeMapper::Integer' do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
 
@@ -31,15 +31,15 @@ RSpec.describe ReeMapper::Integer do
     }
 
     it {
-      expect { mapper.cast({ number: 'b1' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.cast({ number: 'b1' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer')
     }
 
     it {
-      expect { mapper.cast({ number: '1b' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.cast({ number: '1b' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer')
     }
 
     it {
-      expect { mapper.cast({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.cast({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
   end
 
@@ -49,19 +49,19 @@ RSpec.describe ReeMapper::Integer do
     }
 
     it {
-      expect { mapper.serialize({ number: '1' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ number: '1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
 
     it {
-      expect { mapper.serialize({ number: 'b1' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ number: 'b1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
 
     it {
-      expect { mapper.serialize({ number: '1b' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ number: '1b' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
 
     it {
-      expect { mapper.serialize({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
   end
 
@@ -71,19 +71,19 @@ RSpec.describe ReeMapper::Integer do
     }
 
     it {
-      expect { mapper.db_dump({ number: '1' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ number: '1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
 
     it {
-      expect { mapper.db_dump({ number: 'b1' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ number: 'b1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
 
     it {
-      expect { mapper.db_dump({ number: '1b' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ number: '1b' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
 
     it {
-      expect { mapper.db_dump({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
   end
 
@@ -97,15 +97,15 @@ RSpec.describe ReeMapper::Integer do
     }
 
     it {
-      expect { mapper.db_load({ number: 'b1' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.db_load({ number: 'b1' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer')
     }
 
     it {
-      expect { mapper.db_load({ number: '1b' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.db_load({ number: '1b' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer')
     }
 
     it {
-      expect { mapper.db_load({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_load({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
     }
   end
 end

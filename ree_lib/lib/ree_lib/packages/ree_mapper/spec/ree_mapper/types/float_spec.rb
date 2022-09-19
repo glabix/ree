@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe ReeMapper::Float do
+RSpec.describe 'ReeMapper::Float' do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
 
@@ -31,15 +31,15 @@ RSpec.describe ReeMapper::Float do
     }
 
     it {
-      expect { mapper.cast({ float: 'a1.1' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.cast({ float: 'a1.1' }) }.to raise_error(ReeMapper::CoercionError, '`float` is invalid float')
     }
 
     it {
-      expect { mapper.db_load({ float: '1.1a' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.db_load({ float: '1.1a' }) }.to raise_error(ReeMapper::CoercionError, '`float` is invalid float')
     }
 
     it {
-      expect { mapper.cast({ float: Object.new }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.cast({ float: Object.new }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float")
     }
   end
 
@@ -49,15 +49,15 @@ RSpec.describe ReeMapper::Float do
     }
 
     it {
-      expect { mapper.serialize({ float: '1.1' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ float: '1.1' }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float")
     }
 
     it {
-      expect { mapper.serialize({ float: nil }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ float: nil }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float")
     }
 
     it {
-      expect { mapper.serialize({ float: Object.new }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.serialize({ float: Object.new }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float")
     }
   end
 
@@ -67,15 +67,15 @@ RSpec.describe ReeMapper::Float do
     }
 
     it {
-      expect { mapper.db_dump({ float: '1.1' }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ float: '1.1' }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float")
     }
 
     it {
-      expect { mapper.db_dump({ float: nil }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ float: nil }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float")
     }
 
     it {
-      expect { mapper.db_dump({ float: Object.new }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_dump({ float: Object.new }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float")
     }
   end
 
@@ -89,19 +89,19 @@ RSpec.describe ReeMapper::Float do
     }
 
     it {
-      expect { mapper.db_load({ float: 'a1.1' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.db_load({ float: 'a1.1' }) }.to raise_error(ReeMapper::CoercionError, '`float` is invalid float')
     }
 
     it {
-      expect { mapper.db_load({ float: '1.1a' }) }.to raise_error(ReeMapper::CoercionError)
+      expect { mapper.db_load({ float: '1.1a' }) }.to raise_error(ReeMapper::CoercionError, '`float` is invalid float')
     }
 
     it {
-      expect { mapper.db_load({ float: nil }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_load({ float: nil }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float")
     }
 
     it {
-      expect { mapper.db_load({ float: Object.new }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.db_load({ float: Object.new }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float")
     }
   end
 end
