@@ -1,0 +1,58 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.0",
+  "name": "one_to_many",
+  "path": "packages/ree_dao/package/ree_dao/functions/one_to_many.rb",
+  "mount_as": "fn",
+  "class": "ReeDao::OneToMany",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "list",
+          "type": "ArrayOf[Proc#call]"
+        },
+        {
+          "arg": "assoc_dao",
+          "type": "Sequel::Dataset"
+        },
+        {
+          "arg": "opts",
+          "type": "Ksplat[:foreign_key? => Symbol, :assoc_setter? => Symbol]"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "demodulize",
+      "package_name": "ree_string",
+      "as": "demodulize",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "group_by",
+      "package_name": "ree_array",
+      "as": "group_by",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "underscore",
+      "package_name": "ree_string",
+      "as": "underscore",
+      "imports": [
+
+      ]
+    }
+  ]
+}

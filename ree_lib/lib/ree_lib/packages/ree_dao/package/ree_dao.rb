@@ -6,6 +6,7 @@ module ReeDao
   include Ree::PackageDSL
 
   package do
+    depends_on :ree_array
     depends_on :ree_dto
     depends_on :ree_enum
     depends_on :ree_mapper

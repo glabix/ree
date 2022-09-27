@@ -8,6 +8,9 @@
   ],
   "depends_on": [
     {
+      "name": "ree_array"
+    },
+    {
       "name": "ree_dto"
     },
     {
@@ -43,6 +46,14 @@
     {
       "name": "connections",
       "schema": "packages/ree_dao/schemas/ree_dao/beans/connections.schema.json"
+    },
+    {
+      "name": "one_to_many",
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/one_to_many.schema.json"
+    },
+    {
+      "name": "one_to_one",
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/one_to_one.schema.json"
     },
     {
       "name": "persist_assoc",
