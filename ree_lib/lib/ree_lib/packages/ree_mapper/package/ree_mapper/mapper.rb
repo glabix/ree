@@ -30,23 +30,26 @@ class ReeMapper::Mapper
                 next unless field.has_role?(role)
                 nested_name = name ? "\#{name}[\#{field.name_as_str}]" : field.name_as_str
 
-                if @#{method}_strategy.has_value?(obj, field)
-                  value = @#{method}_strategy.get_value(obj, field)
-                  unless value.nil? && field.null
-                    value = field.type.#{method}(value, name: nested_name, role: role)
-                  end
-                  @#{method}_strategy.assign_value(acc, field, value)
-                elsif field.optional || @#{method}_strategy.always_optional
-                  if field.has_default?
-                    value = field.default
-                    unless value.nil? && field.null
-                      value = field.type.#{method}(value, name: nested_name, role: role)
-                    end
-                    @#{method}_strategy.assign_value(acc, field, value)
-                  end
-                else
+                is_with_value = @#{method}_strategy.has_value?(obj, field)
+                is_optional = field.optional || @#{method}_strategy.always_optional
+
+                if !is_with_value && !is_optional
                   raise ReeMapper::TypeError, "Missing required field `\#{field.from_as_str}` for `\#{name || 'root'}`"
                 end
+
+                next if !is_with_value && !field.has_default?
+
+                value = if is_with_value
+                  @#{method}_strategy.get_value(obj, field)
+                else
+                  field.default
+                end
+
+                unless value.nil? && field.null
+                  value = field.type.#{method}(value, name: nested_name, role: role)
+                end
+
+                @#{method}_strategy.assign_value(acc, field, value)
               end
             end
           RUBY
