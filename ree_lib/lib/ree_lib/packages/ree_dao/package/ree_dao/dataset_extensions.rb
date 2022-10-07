@@ -111,16 +111,20 @@ module ReeDao
       end
 
       def update(entity)
-        raw = opts[:schema_mapper].db_dump(entity)
-        raw = extract_changes(entity, raw)
+        if opts[:schema_mapper]
+          raw = opts[:schema_mapper].db_dump(entity)
+          raw = extract_changes(entity, raw)
 
-        unless raw.empty?
-          update_persistence_state(entity, raw)
-          key_condition = prepare_key_condition_from_entity(entity)
-          where(key_condition).__original_update(raw)
+          unless raw.empty?
+            update_persistence_state(entity, raw)
+            key_condition = prepare_key_condition_from_entity(entity)
+            where(key_condition).__original_update(raw)
+          end
+
+          entity
+        else
+          __original_update(entity)
         end
-
-        entity
       end
 
       def delete(entity = nil)
