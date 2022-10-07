@@ -2,7 +2,8 @@
 
 class ReeMapper::Field
   attr_reader :type, :name, :from, :doc, :optional, :null, :roles, :default,
-              :name_as_str, :name_as_instance_var_name, :from_as_str
+              :name_as_str, :name_as_instance_var_name, :from_as_str,
+              :fields_filter
 
   NO_DEFAULT = Object.new.freeze
 
@@ -15,10 +16,13 @@ class ReeMapper::Field
       optional: Bool,
       null:     Bool,
       role:     Nilor[ArrayOf[Symbol], Symbol],
-      default:  Any
+      default:  Any,
+      only:     Nilor[ReeMapper::FilterFieldsContract],
+      except:   Nilor[ReeMapper::FilterFieldsContract]
     ] => Any
   ).throws(ArgumentError)
-  def initialize(type, name = nil, from: nil, doc: nil, optional: false, null: false, role: nil, default: NO_DEFAULT)
+  def initialize(type, name = nil, from: nil, doc: nil, optional: false, null: false, role: nil, default: NO_DEFAULT, 
+                 only: nil, except: nil)
     @type     = type
     @name     = name
     @from     = from || name
@@ -27,6 +31,8 @@ class ReeMapper::Field
     @null     = null
     @roles    = Array(role)
     @default  = default
+
+    @fields_filter = ReeMapper::FieldsFilter.build(only: only, except: except)
 
     @name_as_str               = @name.to_s
     @name_as_instance_var_name = :"@#{@name}"

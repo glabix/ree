@@ -19,16 +19,32 @@ class ReeMapper::Mapper
 
         if type
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, name: nil, role: nil)
-              @type.#{method}(obj, name: name, role: role)
+            def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: [])
+              if @type.is_a?(ReeMapper::Array)
+                @type.#{method}(obj, name: name, role: role, fields_filters: fields_filters)
+              else
+                @type.#{method}(obj, name: name, role: role)
+              end
             end
           RUBY
         else
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, name: nil, role: nil)
+            def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: [])
+              if only && !ReeMapper::FilterFieldsContract.valid?(only)
+                raise ReeMapper::ArgumentError, "Invalid `only` format"
+              end
+
+              if except && !ReeMapper::FilterFieldsContract.valid?(except)
+                raise ReeMapper::ArgumentError, "Invalid `except` format"
+              end
+
+              user_fields_filter = ReeMapper::FieldsFilter.build(only: only, except: except)
+
               @fields.each_with_object(@#{method}_strategy.build_object) do |(_, field), acc|
+                field_fields_filters = fields_filters + [user_fields_filter]
+
+                next unless field_fields_filters.all? { _1.allow? field.name }
                 next unless field.has_role?(role)
-                nested_name = name ? "\#{name}[\#{field.name_as_str}]" : field.name_as_str
 
                 is_with_value = @#{method}_strategy.has_value?(obj, field)
                 is_optional = field.optional || @#{method}_strategy.always_optional
@@ -46,7 +62,12 @@ class ReeMapper::Mapper
                 end
 
                 unless value.nil? && field.null
-                  value = field.type.#{method}(value, name: nested_name, role: role)
+                  nested_name = name ? "\#{name}[\#{field.name_as_str}]" : field.name_as_str
+
+                  nested_fields_filters = field_fields_filters.map { _1.filter_for(field.name) }
+                  nested_fields_filters += [field.fields_filter]
+
+                  value = field.type.#{method}(value, name: nested_name, role: role, fields_filters: nested_fields_filters)
                 end
 
                 @#{method}_strategy.assign_value(acc, field, value)

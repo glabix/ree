@@ -8,14 +8,15 @@ class ReeMapper::Array < ReeMapper::AbstractType
     @of = of
   end
 
-  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
-  def serialize(value, name:, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]], fields_filters: ArrayOf[ReeMapper::FieldsFilter]] => Array)
+    .throws(ReeMapper::TypeError)
+  def serialize(value, name:, role: nil, fields_filters: [])
     if value.is_a?(Array)
       value.map.with_index {
         if _1.nil? && of.null
           _1
         else
-          of.type.serialize(_1, name: "#{name}[#{_2}]", role: role)
+          of.type.serialize(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [of.fields_filter])
         end
       }
     else
@@ -23,14 +24,15 @@ class ReeMapper::Array < ReeMapper::AbstractType
     end
   end
 
-  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
-  def cast(value, name:, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]], fields_filters: ArrayOf[ReeMapper::FieldsFilter]] => Array)
+    .throws(ReeMapper::TypeError)
+  def cast(value, name:, role: nil, fields_filters: [])
     if value.is_a?(Array)
       value.map.with_index {
         if _1.nil? && of.null
           _1
         else
-          of.type.cast(_1, name: "#{name}[#{_2}]", role: role)
+          of.type.cast(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [of.fields_filter])
         end
       }
     else
@@ -38,14 +40,15 @@ class ReeMapper::Array < ReeMapper::AbstractType
     end
   end
 
-  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
-  def db_dump(value, name:, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]], fields_filters: ArrayOf[ReeMapper::FieldsFilter]] => Array)
+    .throws(ReeMapper::TypeError)
+  def db_dump(value, name:, role: nil, fields_filters: [])
     if value.is_a?(Array)
       value.map.with_index {
         if _1.nil? && of.null
           _1
         else
-          of.type.db_dump(_1, name: "#{name}[#{_2}]", role: role)
+          of.type.db_dump(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [of.fields_filter])
         end
       }
     else
@@ -53,14 +56,15 @@ class ReeMapper::Array < ReeMapper::AbstractType
     end
   end
 
-  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Array).throws(ReeMapper::TypeError)
-  def db_load(value, name:, role: nil)
+  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]], fields_filters: ArrayOf[ReeMapper::FieldsFilter]] => Array)
+    .throws(ReeMapper::TypeError)
+  def db_load(value, name:, role: nil, fields_filters: [])
     if value.is_a?(Array)
       value.map.with_index {
         if _1.nil? && of.null
           _1
         else
-          of.type.db_load(_1, name: "#{name}[#{_2}]", role: role)
+          of.type.db_load(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [of.fields_filter])
         end
       }
     else

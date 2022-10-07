@@ -11,6 +11,9 @@
       "name": "ree_datetime"
     },
     {
+      "name": "ree_hash"
+    },
+    {
       "name": "ree_string"
     }
   ],
