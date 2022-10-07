@@ -15,6 +15,142 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
     )
   }
 
+  describe 'only and except' do
+    before {
+      mapper_factory.call(register_as: :point).use(:cast) {
+        integer :x
+        integer :y
+        integer :z
+      } 
+    }
+
+    context 'with only' do
+      let(:mapper) {
+        mapper_factory.call.use(:cast) {
+          integer :id
+          integer? :opt_id
+          point :point, only: [:x, :y]
+        }
+      }
+
+      it {
+        expect(mapper.cast({ id: 1, point: { x: 1, y: 1 } })).to eq({ id: 1, point: { x: 1, y: 1 } })
+      }
+
+      it {
+        expect(mapper.cast({ opt_id: 1, point: { x: 1 } }, only: [:opt_id, point: [:x]])).to eq({ opt_id: 1, point: { x: 1 } })
+      }
+    end
+
+    context 'with except' do
+      let(:mapper) {
+        mapper_factory.call.use(:cast) {
+          integer :id
+          point :point, except: [:z]
+        }
+      }
+
+      it {
+        expect(mapper.cast({ id: 1, point: { x: 1, y: 1 } })).to eq({ id: 1, point: { x: 1, y: 1 } })
+      }
+
+      it {
+        expect(mapper.cast({ id: 1, point: { x: 1 } }, except: [:id, point: [:y]])).to eq({ point: { x: 1 } })
+      }
+    end
+
+    context 'with only and except' do
+      let(:mapper) {
+        mapper_factory.call.use(:cast) {
+          integer :included
+          integer :excluded
+          point :point, only: [:x, :y], except: [:y]
+
+          hash :matrix do
+            point :x, only: [:x]
+            point :y, except: [:x, :z]
+          end
+
+          array :points, each: point(only: [:x, :y])
+        }
+      }
+
+      it {
+        expect(mapper.cast(
+          {
+            included: 1,
+            excluded: 1,
+            point: { x: 1 },
+            matrix: { x: { x: 1 }, y: { y: 1 } },
+            points: [{ x: 1, y: 1}]
+          }
+        )).to eq(
+          {
+            included: 1,
+            excluded: 1,
+            point: { x: 1 },
+            matrix: { x: { x: 1 }, y: { y: 1 } },
+            points: [{ x: 1, y: 1 }]
+          }
+        )
+      }
+
+      it {
+        expect(mapper.cast(
+          {
+            included: 1,
+            excluded: 1,
+            point: { x: 1 },
+            matrix: { x: { x: 1 }, y: { y: 1 } },
+            points: [{ x: 1, y: 1}]
+          },
+          only: [:included, point: [:x], matrix: [x: [:x]], points: [:x]]
+        )).to eq(
+          {
+            included: 1,
+            point: { x: 1 },
+            matrix: { x: { x: 1 } },
+            points: [{ x: 1 }]
+          }
+        )
+      }
+    end
+
+    context 'with invalid only' do
+      let(:mapper) {
+        mapper_factory.call.use(:cast) {
+          point :point
+        }
+      }
+
+      it {
+        expect {
+          mapper.cast({}, only: {})
+        }.to raise_error(
+          ReeMapper::ArgumentError,
+          "Invalid `only` format"
+        )
+      }
+    end
+
+    context 'with invalid except' do
+      let(:mapper) {
+        mapper_factory.call.use(:cast) {
+          point :point
+        }
+      }
+
+      it {
+        expect {
+          mapper.cast({}, except: {})
+        }.to raise_error(
+          ReeMapper::ArgumentError,
+          "Invalid `except` format"
+        )
+      }
+    end
+  end
+
   describe 'from:' do
     let(:mapper) {
       mapper_factory.call.use(:cast).use(:serialize).use(:db_dump).use(:db_load) {

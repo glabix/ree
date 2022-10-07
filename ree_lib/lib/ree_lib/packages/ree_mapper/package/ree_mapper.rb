@@ -16,7 +16,10 @@ module ReeMapper
   require_relative 'ree_mapper/errors/coercion_error'
   require_relative 'ree_mapper/errors/type_error'
   require_relative 'ree_mapper/errors/unsupported_type_error'
+  require_relative 'ree_mapper/errors/argument_error'
 
+  require_relative 'ree_mapper/filter_fields_contract'
+  require_relative 'ree_mapper/fields_filter'
   require_relative 'ree_mapper/field'
 
   require_relative 'ree_mapper/types/bool'

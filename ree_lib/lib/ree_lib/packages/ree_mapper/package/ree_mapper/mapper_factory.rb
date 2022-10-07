@@ -76,6 +76,7 @@ class ReeMapper::MapperFactory
     raise ArgumentError, "array item can't be optional" if field_name.nil? && optional
     raise ArgumentError, 'array type should use either :each or :block' if each && blk || !each && !blk
     raise ArgumentError, 'invalid :key option value' unless HASH_KEY_OPTION_VALUES.include?(key)
+    raise ArgumentError, 'array does not permit :only and :except keys' if opts.key?(:only) || opts.key?(:except)
 
     if blk
       each = ReeMapper::Field.new(
