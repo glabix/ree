@@ -6,7 +6,6 @@ module ReeMapper
   package do
     depends_on :ree_string
     depends_on :ree_datetime
-    depends_on :ree_hash
   end
 
   package_require('ree_string/functions/underscore')
