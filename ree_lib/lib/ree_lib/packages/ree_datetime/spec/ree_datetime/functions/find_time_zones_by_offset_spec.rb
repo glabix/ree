@@ -6,7 +6,6 @@ RSpec.describe :find_time_zones_by_offset do
   it {
     gmt_12 = find_time_zones_by_offset("+12:00")
 
-    expect(gmt_12.length).to eq(16)
     expect(gmt_12).to be_a(Array)
   }
 end
