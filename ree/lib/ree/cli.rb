@@ -5,6 +5,7 @@ module Ree
     autoload :Init, 'ree/cli/init'
     autoload :GeneratePackagesSchema, 'ree/cli/generate_packages_schema'
     autoload :GeneratePackageSchema, 'ree/cli/generate_package_schema'
+    autoload :GenerateObjectSchema, 'ree/cli/generate_object_schema'
     autoload :GeneratePackage, 'ree/cli/generate_package'
     autoload :GenerateTemplate, 'ree/cli/generate_template'
     autoload :SpecRunner, 'ree/cli/spec_runner'

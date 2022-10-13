@@ -117,7 +117,7 @@ class ReeCliRunner
       c.syntax      = 'ree gen.package_json PACKAGE_NAME'
       c.description = 'generates Package.schema.json for specific package'
       c.summary     = '> ' + c.description
-      c.example     'ree gen.packages_json PACKAGE_NAME', ''
+      c.example     'ree gen.package_json PACKAGE_NAME', ''
       c.option      '--skip_objects', String, 'Skip generation of object schemas'
       c.option      '--silence', String, 'Silence all logs'
       c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
@@ -137,6 +137,33 @@ class ReeCliRunner
         }
 
         Ree::CLI::GeneratePackageSchema.run(**default_options)
+      end
+    end
+
+    command :"gen.schema_json" do |c|
+      c.syntax      = 'ree gen.schema_json PACKAGE_NAME OBJECT_PATH'
+      c.description = 'generates Schema.json for specified object in specified package'
+      c.summary     = '> ' + c.description
+      c.example     'ree gen.schema_json accounts commands/create_account_cmd.rb', ''
+      c.option      '--silence', String, 'Silence all logs'
+      c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
+      c.action do |args, options|
+        package_name = args[0]&.to_sym
+        object_path = args[1]
+        options_hash = options.__hash__
+
+        if options_hash[:project_path]
+          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
+        end
+
+        default_options = {
+          package_name: package_name,
+          object_path: object_path,
+          project_path: options_hash[:project_path] || File.expand_path(Dir.pwd),
+          silence: options_hash.has_key?(:silence)
+        }
+
+        Ree::CLI::GenerateObjectSchema.run(**default_options)
       end
     end
 
