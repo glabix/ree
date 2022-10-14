@@ -16,6 +16,7 @@ import { onCreatePackageFile, onRenamePackageFile } from "./commands/documentTem
 import { isBundleGemsInstalled, isBundleGemsInstalledInDocker } from "./utils/reeUtils"
 import { getCurrentProjectDir } from './utils/fileUtils'
 import { generatePackagesSchema } from "./commands/generatePackagesSchema"
+import { genObjectSchemaCmd, generateObjectSchema } from "./commands/generateObjectSchema"
 import { generatePackage } from "./commands/generatePackage"
 import { updatePackageDeps } from './commands/updatePackageDeps'
 import { selectAndGeneratePackageSchema } from './commands/selectAndGeneratePackageSchema'
@@ -46,6 +47,11 @@ export function activate(context: vscode.ExtensionContext) {
   let generatePackagesSchemaCmd = vscode.commands.registerCommand(
     "ree.generatePackagesSchema",
     generatePackagesSchema
+  )
+
+  let generateObjectSchemaCmd = vscode.commands.registerCommand(
+    "ree.generateObjectSchema",
+    genObjectSchemaCmd
   )
 
   let generatePackageCmd = vscode.commands.registerCommand(
@@ -80,7 +86,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidSaveTextDocument(document => {
     if (document) {
-      generatePackageSchema(document, true) 
+      generateObjectSchema(document, true) 
     }
   })
 
@@ -100,6 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
     goToSpecCmd,
     generatePackageSchemaCmd,
     generatePackagesSchemaCmd,
+    generateObjectSchemaCmd,
     generatePackageCmd,
     updatePackageDepsCmd,
     onDidOpenTextDocument,

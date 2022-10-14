@@ -1,15 +1,17 @@
 import * as vscode from 'vscode'
 import { DiagnosticSeverity } from 'vscode-languageclient'
 import { PackageFacade } from '../utils/packageFacade'
-import { getPackageObjectFromCurrentPath } from '../utils/packageUtils'
+import { getPackageNameFromPath } from '../utils/packageUtils'
+import { loadPackagesSchema } from '../utils/packagesUtils'
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { 
   isReeInstalled,
   isBundleGemsInstalled,
   isBundleGemsInstalledInDocker,
   ExecCommand,
-  genPackageSchemaJsonCommandArgsArray
+  genObjectSchemaJsonCommandArgsArray
 } from '../utils/reeUtils'
+import { PACKAGES_SCHEMA_FILE } from '../core/constants'
 
 const path = require('path')
 const diagnosticCollection = vscode.languages.createDiagnosticCollection('ruby')
@@ -18,7 +20,40 @@ export function clearDocumentProblems(document: vscode.TextDocument) {
   diagnosticCollection.delete(document.uri)
 }
 
-export function generatePackageSchema(document: vscode.TextDocument, silent: boolean, packageName?: string) {
+export function genObjectSchemaCmd() {
+  if (!vscode.workspace.workspaceFolders) {
+    vscode.window.showInformationMessage("Error. Open workspace folder to use extension")
+    return
+  }
+
+  let currentFilePath = null
+  const activeEditor = vscode.window.activeTextEditor
+
+  if (!activeEditor) {
+    currentFilePath = vscode.workspace.workspaceFolders[0].uri.path
+  } else {
+    currentFilePath = activeEditor.document.uri.path
+  }
+
+  const projectPath = getCurrentProjectDir()
+  if (!projectPath) {
+    vscode.window.showErrorMessage(`Unable to find ${PACKAGES_SCHEMA_FILE}`)
+    return
+  }
+
+  const packagesSchema = loadPackagesSchema(projectPath)
+
+  if (!packagesSchema) {
+    vscode.window.showErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
+    return
+  }
+
+  const currentPackageName = getPackageNameFromPath(currentFilePath)
+
+  generateObjectSchema(activeEditor.document, false, currentPackageName)
+}
+
+export function generateObjectSchema(document: vscode.TextDocument, silent: boolean, packageName?: string) {
   if (!vscode.workspace.workspaceFolders) {
     vscode.window.showWarningMessage("Error. Open workspace folder to use extension")
     return
@@ -53,13 +88,13 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
   if (packageName || packageName !== undefined) {
     execPackageName = packageName
   } else {
-    const currentPackage = getCurrentPackage(fileName)
-    if (!currentPackage) { return }
+    const currentPackageName = getCurrentPackage(fileName)
+    if (!currentPackageName) { return }
 
-    execPackageName = currentPackage.name()
+    execPackageName = currentPackageName
   }
 
-  let result = execGeneratePackageSchema(rootProjectDir, execPackageName)
+  let result = execGenerateObjectSchema(rootProjectDir, execPackageName, fileName)
 
   if (!result) {
     vscode.window.showErrorMessage(`Can't generate Package.schema.json for ${execPackageName}`)
@@ -114,15 +149,12 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
   }
 }
 
-export function execGeneratePackageSchema(rootProjectDir: string, name: string): ExecCommand | undefined {
+export function execGenerateObjectSchema(rootProjectDir: string, name: string, objectPath: string): ExecCommand | undefined {
   try {
     let spawnSync = require('child_process').spawnSync
     const appDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
     const projectDir = appDirectory ? appDirectory : rootProjectDir
-    const fullArgsArr = buildReeCommandFullArgsArray(
-      projectDir,
-      genPackageSchemaJsonCommandArgsArray(projectDir, name)
-    )
+    const fullArgsArr = buildReeCommandFullArgsArray(projectDir, genObjectSchemaJsonCommandArgsArray(projectDir, name, objectPath))
     const child = spawnSync(...fullArgsArr)
 
     return {
@@ -135,7 +167,7 @@ export function execGeneratePackageSchema(rootProjectDir: string, name: string):
   }
 }
 
-function getCurrentPackage(fileName?: string): PackageFacade | null {
+function getCurrentPackage(fileName?: string): string | null {
   // check if active file/editor is accessible
 
   let currentFileName = fileName || vscode.window.activeTextEditor.document.fileName
@@ -146,7 +178,7 @@ function getCurrentPackage(fileName?: string): PackageFacade | null {
   }
 
   // finding package
-  let currentPackage = getPackageObjectFromCurrentPath(currentFileName)
+  let currentPackage = getPackageNameFromPath(currentFileName)
 
   if (!currentPackage) { return }
 

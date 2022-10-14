@@ -95,3 +95,13 @@ export function isBundleGemsInstalledInDocker(): ExecCommand | undefined {
     return
   }
 }
+
+export function genPackageSchemaJsonCommandArgsArray(projectDir: string, name?: string) {
+  if (name) { return ['gen.package_json', name.toString(), '--project_path', projectDir, '--trace'] }
+  
+  return  ['gen.package_json', '--project_path', projectDir, '--trace']
+}
+
+export function genObjectSchemaJsonCommandArgsArray(projectDir: string, packageName: string, objectPath: string) {
+  return  ['gen.schema_json', packageName, objectPath, '--project_path', projectDir, '--trace']
+}
