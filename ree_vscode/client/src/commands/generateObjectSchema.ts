@@ -66,24 +66,29 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
   if (!rootProjectDir) { return }
 
   // check if ree is installed
-  const checkReeIsInstalled = isReeInstalled(rootProjectDir)
-  
-  if (checkReeIsInstalled?.code === 1) {
-    vscode.window.showWarningMessage('Gem ree is not installed')
-    return
-  }
+  const checkIsReeInstalled = isReeInstalled(rootProjectDir).then((res) => {
+    if (res.code === 1) {
+      vscode.window.showWarningMessage(res.message)
+      return null
+    }
+  })
+  if (!checkIsReeInstalled) { return }
 
-  const checkIsBundleGemsInstalled = isBundleGemsInstalled(rootProjectDir)
-  if (checkIsBundleGemsInstalled?.code !== 0) {
-    vscode.window.showWarningMessage(checkIsBundleGemsInstalled.message)
-    return
-  }
+  const isBundleGemsInstalledResult = isBundleGemsInstalled(rootProjectDir).then((res) => {
+    if (res.code !== 0) {
+      vscode.window.showWarningMessage(res.message)
+      return null
+    }
+  })
+  if (!isBundleGemsInstalledResult) { return }
 
-  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()
-  if (checkIsBundleGemsInstalledInDocker && checkIsBundleGemsInstalledInDocker.code !== 0) {
-    vscode.window.showWarningMessage(checkIsBundleGemsInstalledInDocker.message)
-    return
-  }
+  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker().then((res) => {
+    if (res.code !== 0) {
+      vscode.window.showWarningMessage(res.message)
+      return null
+    }
+  })
+  if (!checkIsBundleGemsInstalledInDocker) { return }
 
   let execPackageName = null
 

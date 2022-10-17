@@ -2,6 +2,7 @@
 import * as vscode from 'vscode'
 import { PACKAGES_SCHEMA_FILE } from '../core/constants'
 import { getProjectRootDir } from './packageUtils'
+import { spawnCommand } from './reeUtils'
 
 const path = require('path')
 const fs = require('fs')
@@ -103,7 +104,9 @@ function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | 
     cachedGemPackages = groupBy(obj.gemPackages, 'gem')
     if (cachedGemPackages) {
       Object.keys(cachedGemPackages).map((gem: string) => {
-        cachedGems[gem] = execBundlerGetGemPath(gem, rootDir)?.message
+        execBundlerGetGemPath(gem, rootDir).then((res) => {
+          cachedGems[gem] = res.message
+        })
       })
     }
 
@@ -113,21 +116,15 @@ function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | 
   }
 }
 
-function execBundlerGetGemPath(gemName: string, rootDir: string): ExecCommand | undefined {
+function execBundlerGetGemPath(gemName: string, rootDir: string): Promise<ExecCommand> | undefined {
   try {
-    let spawnSync = require('child_process').spawnSync
-    const argsArr = ['show', gemName]
-
-    let child = spawnSync(
-      'bundle',
-      argsArr,
-      { cwd: rootDir }
+    return spawnCommand(
+      [
+        'bundle',
+        ['show', gemName],
+        { cwd: rootDir }
+      ]
     )
-
-    return {
-      message: child.status === 0 ? child.stdout.toString() : child.stderr.toString(),
-      code: child.status
-    }
   } catch(e) {
     return undefined
   }

@@ -111,14 +111,14 @@ function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | 
     cachedGemPackages = groupBy(obj.gemPackages, 'gem')
     if (cachedGemPackages) {
       Object.keys(cachedGemPackages).flatMap((gem: string) => {
-        let gemPathCommandResult = execBundlerGetGemPath(gem, rootDir)
-        if (!gemPathCommandResult) { return [] }
-
-        if (gemPathCommandResult.code === 0) {
-          cachedGems[gem] = gemPathCommandResult.message
-        } else {
-          throw new ExecCommandError(`BundlerError: ${gemPathCommandResult.message}`)
-        }
+        const res = execBundlerGetGemPath(gem, rootDir)?.then((res) => {
+          if (res.code === 0) {
+            cachedGems[gem] = res.message
+          } else {
+            throw new ExecCommandError(`BundlerError: ${res.message}`)
+          }
+        })
+        if (!res) { return []}
       })
     }
 
@@ -129,22 +129,44 @@ function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | 
   }
 }
 
-function execBundlerGetGemPath(gemName: string, rootDir: string): ExecCommand | undefined {
+function execBundlerGetGemPath(gemName: string, rootDir: string): Promise<ExecCommand> | undefined {
   try {
-    let spawnSync = require('child_process').spawnSync
     const argsArr = ['show', gemName]
 
-    let child = spawnSync(
+    let child = spawnCommand([
       'bundle',
       argsArr,
       { cwd: rootDir }
-    )
+    ])
+  } catch(e) {
+    return undefined
+  }
+}
+
+async function spawnCommand(args: Array<any>) {
+  try {
+    let spawn = require('child_process').spawn
+    const child = spawn(...args)
+    let message = ''
+
+    for await (const chunk of child.stdout) {
+      message += chunk
+    }
+
+    for await (const chunk of child.stderr) {
+      message += chunk
+    }
+
+    const code: number  = await new Promise( (resolve, reject) => {
+      child.on('close', resolve);
+    })
 
     return {
-      message: child.status === 0 ? child.stdout.toString() : child.stderr.toString(),
-      code: child.status
+      message: message,
+      code: code
     }
   } catch(e) {
+    console.error(`Error. ${e}`)
     return undefined
   }
 }

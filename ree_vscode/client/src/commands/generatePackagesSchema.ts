@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { getProjectRootDir } from '../utils/packageUtils'
-import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, ExecCommand } from '../utils/reeUtils'
-import { buildReeCommandFullArgsArray } from './generatePackageSchema'
+import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, ExecCommand, spawnCommand } from '../utils/reeUtils'
+import { buildReeCommandFullArgsArray } from '../utils/reeUtils'
 
 export function generatePackagesSchema(silent: boolean) {
   if (!vscode.workspace.workspaceFolders) {
@@ -12,53 +12,54 @@ export function generatePackagesSchema(silent: boolean) {
   const rootProjectDir = getProjectRootDir(vscode.workspace.workspaceFolders[0].uri.path)
   if (!rootProjectDir) { return }
 
-  const checkReeIsInstalled = isReeInstalled(rootProjectDir)
-  if (checkReeIsInstalled?.code === 1) {
-    vscode.window.showWarningMessage('Gem ree is not installed')
-    return
-  }
+  const checkIsReeInstalled = isReeInstalled(rootProjectDir).then((res) => {
+    if (res.code === 1) {
+      vscode.window.showWarningMessage('Gem ree is not installed')
+      return null
+    }
+  })
 
-  const checkIsBundleGemsInstalled = isBundleGemsInstalled(rootProjectDir)
-  if (checkIsBundleGemsInstalled?.code !== 0) {
-    vscode.window.showWarningMessage(checkIsBundleGemsInstalled.message)
-    return
-  }
+  if (!checkIsReeInstalled) { return }
 
-  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()
-  if (checkIsBundleGemsInstalledInDocker && checkIsBundleGemsInstalledInDocker.code !== 0) {
-    vscode.window.showWarningMessage(checkIsBundleGemsInstalledInDocker.message)
-    return
-  }
+  const checkIsBundleGemsInstalled = isBundleGemsInstalled(rootProjectDir).then((res) => {
+    if (res.code !== 0) {
+      vscode.window.showWarningMessage(res.message)
+      return
+    }
+  })
+  if (!checkIsBundleGemsInstalled) { return }
+
+  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker().then((res) => {
+    if (res.code !== 0) {
+      vscode.window.showWarningMessage(res.message)
+      return null
+    }
+  })
+  if (!checkIsBundleGemsInstalledInDocker) { return }
 
   let result = execGeneratePackagesSchema(rootProjectDir)
-
   if (!result) {
     vscode.window.showErrorMessage("Can't generate Packages.schema.json")
     return
   }
 
-  if (result.code === 1) {
-    vscode.window.showErrorMessage(result.message)
-    return
-  }
-  
-  if (!silent) {
-    vscode.window.showInformationMessage(result.message)
-  }
+  result.then((commandResult) => {
+    if (commandResult.code === 1) {
+      vscode.window.showErrorMessage(commandResult.message)
+      return
+    }
+    
+    if (!silent) {
+      vscode.window.showInformationMessage(commandResult.message)
+    }
+  })
 }
 
-function execGeneratePackagesSchema(rootProjectDir: string): ExecCommand | undefined {
+function execGeneratePackagesSchema(rootProjectDir: string): Promise<ExecCommand> | undefined {
   try {
-    let spawnSync = require('child_process').spawnSync
-
-    let child = spawnSync(
-      ...buildReeCommandFullArgsArray(rootProjectDir, ['gen.packages_json'])
+    return spawnCommand(
+      buildReeCommandFullArgsArray(rootProjectDir, ['gen.packages_json'])
     )
-
-    return {
-      message: child.status === 0 ? child.stdout.toString() : child.stderr.toString(),
-      code: child.status
-    }
   } catch(e) {
     vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
