@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 
 import { getCurrentProjectDir } from '../utils/fileUtils'
-import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, ExecCommand } from '../utils/reeUtils'
+import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, ExecCommand, spawnCommand } from '../utils/reeUtils'
 import { loadPackagesSchema } from '../utils/packagesUtils'
 import { PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
@@ -64,43 +64,40 @@ export function generatePackage() {
         vscode.window.showErrorMessage("Can't generate package")
         return
       }
-    
-      if (result.code === 1) {
-        vscode.window.showErrorMessage(result.message)
-        return
-      }
 
-      vscode.window.showInformationMessage(`Package ${name} was generated`)
-
-      const packagesSchema = loadPackagesSchema(rootProjectDir)
-      if (!packagesSchema) { return }
-
-      const packageSchema = packagesSchema.packages.find(p => p.name == name)
-      if (!packageSchema) { return }
-
-      const packageSchemaPath = path.join(rootProjectDir, packageSchema.schema)
-      const entryPath = packageSchemaPath.split(PACKAGE_SCHEMA_FILE)[0] + `package/${packageSchema.name}.rb`
-
-      if (!fs.existsSync(entryPath)) { return }
-      openDocument(entryPath)
+      result.then((commandResult) => {      
+        if (commandResult.code === 1) {
+          vscode.window.showErrorMessage(commandResult.message)
+          return
+        }
+  
+        vscode.window.showInformationMessage(`Package ${name} was generated`)
+  
+        const packagesSchema = loadPackagesSchema(rootProjectDir)
+        if (!packagesSchema) { return }
+  
+        const packageSchema = packagesSchema.packages.find(p => p.name == name)
+        if (!packageSchema) { return }
+  
+        const packageSchemaPath = path.join(rootProjectDir, packageSchema.schema)
+        const entryPath = packageSchemaPath.split(PACKAGE_SCHEMA_FILE)[0] + `package/${packageSchema.name}.rb`
+  
+        if (!fs.existsSync(entryPath)) { return }
+        openDocument(entryPath)
+      })
     })
   })
 }
 
-function execGeneratePackage(rootProjectDir: string, relativePath: string, name: string): ExecCommand | undefined {
+async function execGeneratePackage(rootProjectDir: string, relativePath: string, name: string): Promise<ExecCommand> | undefined {
   try {
-    let spawnSync = require('child_process').spawnSync
-
-    let child = spawnSync(
-      'ree',
-      ['gen.package', name.toString(), '--path', relativePath, '--project_path', rootProjectDir],
-      { cwd: rootProjectDir }
+    return spawnCommand(
+      [
+        'ree',
+        ['gen.package', name.toString(), '--path', relativePath, '--project_path', rootProjectDir],
+        { cwd: rootProjectDir }
+      ]
     )
-
-    return {
-      message: child.status === 0 ? child.stdout.toString() : child.stderr.toString(),
-      code: child.status
-    }
   } catch(e) {
     vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
