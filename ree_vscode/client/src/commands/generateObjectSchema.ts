@@ -9,7 +9,9 @@ import {
   isBundleGemsInstalled,
   isBundleGemsInstalledInDocker,
   ExecCommand,
-  genObjectSchemaJsonCommandArgsArray
+  genObjectSchemaJsonCommandArgsArray,
+  buildReeCommandFullArgsArray,
+  spawnCommand
 } from '../utils/reeUtils'
 import { PACKAGES_SCHEMA_FILE } from '../core/constants'
 
@@ -94,73 +96,70 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
     execPackageName = currentPackageName
   }
 
-  let result = execGenerateObjectSchema(rootProjectDir, execPackageName, fileName)
+  const result = execGenerateObjectSchema(rootProjectDir, execPackageName, fileName)
 
   if (!result) {
     vscode.window.showErrorMessage(`Can't generate Package.schema.json for ${execPackageName}`)
     return
   }
 
-  diagnosticCollection.delete(document.uri)
+  result.then((commandResult) => {
+    diagnosticCollection.delete(document.uri)
 
-  if (result.code === 1) {
-    const rPath = path.relative(
-      rootProjectDir, document.uri.path
-    )
+    if (commandResult.code === 1) {
+      const rPath = path.relative(
+        rootProjectDir, document.uri.path
+      )
 
-    const line = result.message.split("\n").find(s => s.includes(rPath + ":"))
-    let lineNumber = 0
+      const line = commandResult.message.split("\n").find(s => s.includes(rPath + ":"))
+      let lineNumber = 0
 
-    if (line) {
-      try {
-        lineNumber = parseInt(line.split(rPath)[1].split(":")[1])
-      } catch {}
+      if (line) {
+        try {
+          lineNumber = parseInt(line.split(rPath)[1].split(":")[1])
+        } catch {}
+      }
+
+      if (lineNumber > 0) {
+        lineNumber -= 1
+      }
+
+      if (document.getText().length < lineNumber ) {
+        lineNumber = 0
+      }
+
+      const character = document.getText().split("\n")[lineNumber].length - 1
+      let diagnostics: vscode.Diagnostic[] = []
+
+      let diagnostic: vscode.Diagnostic = {
+        severity: DiagnosticSeverity.Error,
+        range: new vscode.Range(
+          new vscode.Position(lineNumber, 0),
+          new vscode.Position(lineNumber, character)
+        ),
+        message: commandResult.message,
+        source: 'ree'
+      }
+
+      diagnostics.push(diagnostic)
+      diagnosticCollection.set(document.uri, diagnostics)
+
+      return
     }
-
-    if (lineNumber > 0) {
-      lineNumber -= 1
-    }
-
-    if (document.getText().length < lineNumber ) {
-      lineNumber = 0
-    }
-
-    const character = document.getText().split("\n")[lineNumber].length - 1
-    let diagnostics: vscode.Diagnostic[] = []
-
-    let diagnostic: vscode.Diagnostic = {
-      severity: DiagnosticSeverity.Error,
-      range: new vscode.Range(
-        new vscode.Position(lineNumber, 0),
-        new vscode.Position(lineNumber, character)
-      ),
-      message: result.message,
-      source: 'ree'
-    }
-
-    diagnostics.push(diagnostic)
-    diagnosticCollection.set(document.uri, diagnostics)
-
-    return
-  }
   
-  if (!silent) {
-    vscode.window.showInformationMessage(result.message)
-  }
+    if (!silent) {
+      vscode.window.showInformationMessage(commandResult.message)
+    }
+  })
 }
 
-export function execGenerateObjectSchema(rootProjectDir: string, name: string, objectPath: string): ExecCommand | undefined {
+export async function execGenerateObjectSchema(rootProjectDir: string, name: string, objectPath: string): Promise<ExecCommand> {
   try {
-    let spawnSync = require('child_process').spawnSync
     const appDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
     const projectDir = appDirectory ? appDirectory : rootProjectDir
     const fullArgsArr = buildReeCommandFullArgsArray(projectDir, genObjectSchemaJsonCommandArgsArray(projectDir, name, objectPath))
-    const child = spawnSync(...fullArgsArr)
 
-    return {
-      message: child.status === 0 ? child?.stdout?.toString() : child?.stderr?.toString(),
-      code: child.status
-    }
+    return spawnCommand(fullArgsArr)
   } catch(e) {
     vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
@@ -185,71 +184,5 @@ function getCurrentPackage(fileName?: string): string | null {
   return currentPackage
 }
 
-export function buildReeCommandFullArgsArray(rootProjectDir: string, argsArray: string[]): Array<any> {
-  let projectDir = rootProjectDir
-  const dockerPresented = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('presented') as boolean
-  const containerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
-  const appDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
 
-  if (dockerPresented) {
-    projectDir = appDirectory
-    return [
-      'docker', [
-        'exec',
-        '-i',
-        '-e',
-        'REE_SKIP_ENV_VARS_CHECK=true',
-        '-w',
-        projectDir,
-        containerName,
-        'bundle',
-        'exec',
-        'ree',
-        ...argsArray
-      ]
-    ]
-  } else {
-    return [
-      'env', [
-        'REE_SKIP_ENV_VARS_CHECK=true',
-        'ree',
-        ...argsArray,
-      ],
-      {
-        cwd: projectDir
-      }
-    ]
-  }
-}
-
-export function buildBundlerCommandFullArgsArray(rootProjectDir: string, argsArray: string[]): Array<any> {
-  let projectDir = rootProjectDir
-  const dockerPresented = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('presented') as boolean
-  const containerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
-  const appDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
-
-  if (dockerPresented) {
-    projectDir = appDirectory
-    return [
-      'docker', [
-        'exec',
-        '-i',
-        '-w',
-        projectDir,
-        containerName,
-        'bundle',
-        ...argsArray
-      ]
-    ]
-  } else {
-    return [
-      'bundle', [
-        ...argsArray,
-      ],
-      {
-        cwd: projectDir
-      }
-    ]
-  }
-}
 
