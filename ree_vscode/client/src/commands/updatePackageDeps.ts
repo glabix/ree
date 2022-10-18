@@ -1,7 +1,11 @@
 import * as vscode from 'vscode'
-import { getPackageEntryPath, getPackageObjectFromCurrentPath } from '../utils/packageUtils'
+import { getPackageEntryPath, getPackageObjectFromCurrentPath, getProjectRootDir } from '../utils/packageUtils'
+import { loadPackagesSchema } from '../utils/packagesUtils'
+import { PackageFacade } from '../utils/packageFacade'
+import { loadObjectSchema } from '../utils/objectUtils'
 
 const fs = require('fs')
+const path = require('path')
 const TAB_LENGTH = 2
 
 export function updatePackageDeps(
@@ -92,7 +96,16 @@ function updateObjectLinks(
   objectName: string,
   fromPackageName: string,
   toPackageName: string
-  ): Thenable<boolean> {
+  ): Thenable<boolean> | null {
+  const packagesSchema = loadPackagesSchema(currentFile.fileName)
+  const currentPackage = packagesSchema.packages.find(p => p.name === toPackageName)
+  const projectRootDir = getProjectRootDir(currentFile.fileName)
+  const packageFacade = new PackageFacade(path.join(projectRootDir, currentPackage.schema))
+  const currentObjName = currentFile.fileName.split('/').slice(-1)[0].split('.rb')[0]
+  const object = packageFacade.objects().find(o => o.name === currentObjName)
+  const currentObject = loadObjectSchema(path.join(projectRootDir, object.schema))
+  if (currentObject.links.find(l => l.target === objectName)) { return }
+
   let lineNumber = 0
   let startCharPos = 0
   let endCharPos = 0
