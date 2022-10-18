@@ -103,8 +103,6 @@ export function findLinkedObject(uri: string, token: string, position: Position)
     const constantLocation = findConstant(token, uri, position, doc, packagesSchema, projectRootDir)
     if (!constantLocation) { return ret }
 
-    // TODO: find enums or entities
-
     return constantLocation
   }
 

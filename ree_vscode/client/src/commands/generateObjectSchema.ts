@@ -102,6 +102,8 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
     execPackageName = currentPackageName
   }
 
+  checkAndSortLinks(fileName, execPackageName)
+
   const result = execGenerateObjectSchema(rootProjectDir, execPackageName, fileName)
 
   if (!result) {
@@ -157,8 +159,6 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
       vscode.window.showInformationMessage(commandResult.message)
     }
   })
-
-  checkAndSortLinks(fileName, execPackageName)
 }
 
 export async function execGenerateObjectSchema(rootProjectDir: string, name: string, objectPath: string): Promise<ExecCommand> {
