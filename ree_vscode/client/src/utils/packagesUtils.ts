@@ -36,6 +36,10 @@ export interface IGemPackageSchema {
   schema: string
 }
 
+export function cacheGemPaths(rootDir: string): Promise<ExecCommand | undefined> {
+  return execBundlerGetGemPaths(rootDir)
+}
+
 export function loadPackagesSchema(currentPath: string): IPackagesSchema | undefined {
   const root = getProjectRootDir(currentPath)
   if (!root) { return }
@@ -48,12 +52,22 @@ export function loadPackagesSchema(currentPath: string): IPackagesSchema | undef
   if (packagesCtime !== ctime || !cachedPackages) {
     packagesCtime = ctime
 
-    return cachedPackages = parsePackagesSchema(
-      fs.readFileSync(schemaPath, { encoding: 'utf8' }), root
-    )
-  } else {
-    return cachedPackages
+    cacheGemPaths(root).then((r) => {
+      const gemPathsArr = r?.message.split("\n")
+      gemPathsArr?.map((path) => {
+        let splitedPath = path.split("/")
+        let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
+
+        cachedGems[name] = path
+      })
+
+      cachedPackages = parsePackagesSchema(
+        fs.readFileSync(schemaPath, { encoding: 'utf8' }), root
+      )
+    })
   }
+
+  return cachedPackages
 }
 
 export function getGemPackageSchemaPath(gemPackageName: string): string | undefined {
@@ -102,13 +116,6 @@ function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | 
 
     // cache gemPackages by gem
     cachedGemPackages = groupBy(obj.gemPackages, 'gem')
-    if (cachedGemPackages) {
-      Object.keys(cachedGemPackages).map((gem: string) => {
-        execBundlerGetGemPath(gem, rootDir).then((res) => {
-          cachedGems[gem] = res.message
-        })
-      })
-    }
 
     return obj
   } catch (err) {
@@ -116,17 +123,18 @@ function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | 
   }
 }
 
-function execBundlerGetGemPath(gemName: string, rootDir: string): Promise<ExecCommand> | undefined {
+async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | undefined> {
   try {
-    return spawnCommand(
-      [
-        'bundle',
-        ['show', gemName],
-        { cwd: rootDir }
-      ]
-    )
+    const argsArr = ['show', '--paths']
+
+    return spawnCommand([
+      'bundle',
+      argsArr,
+      { cwd: rootDir }
+    ])
   } catch(e) {
-    return undefined
+    console.error(e)
+    return new Promise(() => undefined)
   }
 }
 

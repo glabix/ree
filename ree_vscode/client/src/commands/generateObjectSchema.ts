@@ -14,6 +14,7 @@ import {
   spawnCommand
 } from '../utils/reeUtils'
 import { PACKAGES_SCHEMA_FILE } from '../core/constants'
+import { checkAndSortLinks } from './checkAndSortLinks'
 
 const path = require('path')
 const diagnosticCollection = vscode.languages.createDiagnosticCollection('ruby')
@@ -156,6 +157,8 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
       vscode.window.showInformationMessage(commandResult.message)
     }
   })
+
+  checkAndSortLinks(fileName, execPackageName)
 }
 
 export async function execGenerateObjectSchema(rootProjectDir: string, name: string, objectPath: string): Promise<ExecCommand> {
