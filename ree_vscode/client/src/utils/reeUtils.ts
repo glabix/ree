@@ -75,7 +75,7 @@ export function isBundleGemsInstalledInDocker(): Promise<ExecCommand> | undefine
   }
 }
 
-export async function spawnCommand(args) {
+export async function spawnCommand(args): Promise<ExecCommand | undefined> {
   try {
     let spawn = require('child_process').spawn
     const child = spawn(...args)

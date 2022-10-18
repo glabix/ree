@@ -45,7 +45,7 @@ export function loadPackagesSchema(currentPath: string): IPackagesSchema | undef
 
   const ctime = fs.statSync(schemaPath).ctimeMs
 
-  if (packagesCtime != ctime || !cachedPackages) {
+  if (packagesCtime !== ctime || !cachedPackages) {
     packagesCtime = ctime
 
     return cachedPackages = parsePackagesSchema(
