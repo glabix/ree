@@ -11,7 +11,6 @@ module Ree
           dir = Pathname.new(path).dirname.to_s
 
           Ree.init(dir)
-          Ree.set_dev_mode
 
           package_name = package_name.to_sym
           object_name = object_path.split('/')[-1].split('.').first.to_sym
