@@ -19,14 +19,53 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
     lineNumber += 1
   })
 
+  const linkNameRegexp = /link\s(?<name>((\:?\w+)|(\"\w.+\")))/
+  const importRegexp = /(import\:\s)?(\-\>\s?\{(?<import>.+)\})/
+
   const linksWithFileName = links.filter(l => l.match(/link\s(\"|\')/))
   const linksWithSymbolName = links.filter(l => !linksWithFileName.includes(l))
   const sortedLinksWithFileName = linksWithFileName.sort()
   const sortedLinksWithSymbolName = linksWithSymbolName.sort()
-  const allSorted = [...sortedLinksWithSymbolName, ...sortedLinksWithFileName]
-  const linkNameRegexp = /link\s(?<name>((\:?\w+)|(\"\w.+\")))/
-  const importRegexp = /(import\:\s)?(\-\>\s?\{(?<import>.+)\})/
+  let allSorted = [...sortedLinksWithSymbolName, ...sortedLinksWithFileName]
+
+  // check uniq
+  let uniqLinks = {}
+  allSorted.map((link, index) => {
+    let linkNameMatch = link.match(linkNameRegexp)?.groups?.name
+    let linkName = linkNameMatch.replace(/\:|\"/, '').split("/").pop()
+    if (!uniqLinks[linkName]) {
+      uniqLinks[linkName] = {}
+      uniqLinks[linkName]['count'] = 1
+      uniqLinks[linkName]['indexes'] = [index]
+    } else {
+      uniqLinks[linkName]['count'] += 1
+      uniqLinks[linkName]['indexes'].push(index)
+    }
+  })
+
+  const duplicates = Object.keys(uniqLinks).filter(key => uniqLinks[key]['count'] > 1)
+  if (duplicates.length > 0) {
+    const duplicateIndexes = []
+    duplicates.forEach(key => {
+        // get value and index of duplicate without imports
+        let linkValues = uniqLinks[key]['indexes'].map(i => [allSorted[i], i])
+
+        let duplicateLinks = linkValues.filter(link => {
+            return !(!!link[0].match(importRegexp)?.groups?.import)
+        })
+        let indexes = duplicateLinks.map(el => el.pop())
+        if (indexes.length === linkValues.length) {
+          indexes = indexes.slice(1)
+        }
+        duplicateIndexes.push(...indexes)
+    })
+
+    duplicateIndexes.forEach(i => { allSorted[i] = null })
+    allSorted = allSorted.filter(el => el !== null)
+  }
+  
   const contentWithoutLinks = content.slice(firstLinkLineNumber + allSorted.length).join("\n")
+
   const sorted = allSorted.filter(link => {
     let linkName = link.match(linkNameRegexp)?.groups?.name
     let linkNameIsSymbol = linkName[0] === ":"
@@ -48,7 +87,8 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
   // return if all links is used and already sorted
   if (sorted.join("\n") === links.join("\n")) { return }
 
-  content.splice(firstLinkLineNumber, allSorted.length, ...sorted)  
+  content.splice(firstLinkLineNumber, links.length)
+  content.splice(firstLinkLineNumber, 0, ...sorted)
   const data = content.join("\n")
 
   fs.writeFileSync(filePath, data, {encoding: 'utf8'})
