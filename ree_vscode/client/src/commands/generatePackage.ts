@@ -73,26 +73,35 @@ export function generatePackage() {
         return
       }
 
-      result.then((commandResult) => {      
-        if (commandResult.code === 1) {
-          vscode.window.showErrorMessage(commandResult.message)
-          return
-        }
-  
-        vscode.window.showInformationMessage(`Package ${name} was generated`)
-  
-        const packagesSchema = loadPackagesSchema(rootProjectDir)
-        if (!packagesSchema) { return }
-  
-        const packageSchema = packagesSchema.packages.find(p => p.name == name)
-        if (!packageSchema) { return }
-  
-        const packageSchemaPath = path.join(rootProjectDir, packageSchema.schema)
-        const entryPath = packageSchemaPath.split(PACKAGE_SCHEMA_FILE)[0] + `package/${packageSchema.name}.rb`
-  
-        if (!fs.existsSync(entryPath)) { return }
-        openDocument(entryPath)
+      vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification
+      }, async (progress) => {
+        progress.report({
+          message: `Generating package ${name}...`
+        })
+
+        return result.then((commandResult) => {      
+          if (commandResult.code === 1) {
+            vscode.window.showErrorMessage(commandResult.message)
+            return
+          }
+    
+          vscode.window.showInformationMessage(`Package ${name} was generated`)
+    
+          const packagesSchema = loadPackagesSchema(rootProjectDir)
+          if (!packagesSchema) { return }
+    
+          const packageSchema = packagesSchema.packages.find(p => p.name == name)
+          if (!packageSchema) { return }
+    
+          const packageSchemaPath = path.join(rootProjectDir, packageSchema.schema)
+          const entryPath = packageSchemaPath.split(PACKAGE_SCHEMA_FILE)[0] + `package/${packageSchema.name}.rb`
+    
+          if (!fs.existsSync(entryPath)) { return }
+          openDocument(entryPath)
+        })
       })
+
     })
   })
 }

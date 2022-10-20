@@ -43,15 +43,23 @@ export function generatePackagesSchema(silent: boolean) {
     return
   }
 
-  result.then((commandResult) => {
-    if (commandResult.code === 1) {
-      vscode.window.showErrorMessage(commandResult.message)
-      return
-    }
-    
-    if (!silent) {
-      vscode.window.showInformationMessage(commandResult.message)
-    }
+  vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification
+  }, async (progress) => {
+    progress.report({
+      message: `Generating Packages.schema.json...`
+    })
+
+    return result.then((commandResult) => {
+      if (commandResult.code === 1) {
+        vscode.window.showErrorMessage(commandResult.message)
+        return
+      }
+      
+      if (!silent) {
+        vscode.window.showInformationMessage(commandResult.message)
+      }
+    })
   })
 }
 

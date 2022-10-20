@@ -74,53 +74,61 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
     return
   }
 
-  result.then((commandResult) => {
-    diagnosticCollection.delete(document.uri)
-  
-    if (commandResult.code === 1) {
-      const rPath = path.relative(
-        rootProjectDir, document.uri.path
-      )
-  
-      const line = commandResult.message.split("\n").find(s => s.includes(rPath + ":"))
-      let lineNumber = 0
-  
-      if (line) {
-        try {
-          lineNumber = parseInt(line.split(rPath)[1].split(":")[1])
-        } catch {}
-      }
-  
-      if (lineNumber > 0) {
-        lineNumber -= 1
-      }
-  
-      if (document.getText().length < lineNumber ) {
-        lineNumber = 0
-      }
-  
-      const character = document.getText().split("\n")[lineNumber].length - 1
-      let diagnostics: vscode.Diagnostic[] = []
-  
-      let diagnostic: vscode.Diagnostic = {
-        severity: DiagnosticSeverity.Error,
-        range: new vscode.Range(
-          new vscode.Position(lineNumber, 0),
-          new vscode.Position(lineNumber, character)
-        ),
-        message: commandResult.message,
-        source: 'ree'
-      }
-  
-      diagnostics.push(diagnostic)
-      diagnosticCollection.set(document.uri, diagnostics)
-  
-      return
-    }
+  vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification
+  }, async (progress) => {
+    progress.report({
+      message: `Generating "${execPackageName}" package schema...`
+    })
+
+    return result.then((commandResult) => {
+      diagnosticCollection.delete(document.uri)
     
-    if (!silent) {
-      vscode.window.showInformationMessage(commandResult.message)
-    }
+      if (commandResult.code === 1) {
+        const rPath = path.relative(
+          rootProjectDir, document.uri.path
+        )
+    
+        const line = commandResult.message.split("\n").find(s => s.includes(rPath + ":"))
+        let lineNumber = 0
+    
+        if (line) {
+          try {
+            lineNumber = parseInt(line.split(rPath)[1].split(":")[1])
+          } catch {}
+        }
+    
+        if (lineNumber > 0) {
+          lineNumber -= 1
+        }
+    
+        if (document.getText().length < lineNumber ) {
+          lineNumber = 0
+        }
+    
+        const character = document.getText().split("\n")[lineNumber].length - 1
+        let diagnostics: vscode.Diagnostic[] = []
+    
+        let diagnostic: vscode.Diagnostic = {
+          severity: DiagnosticSeverity.Error,
+          range: new vscode.Range(
+            new vscode.Position(lineNumber, 0),
+            new vscode.Position(lineNumber, character)
+          ),
+          message: commandResult.message,
+          source: 'ree'
+        }
+    
+        diagnostics.push(diagnostic)
+        diagnosticCollection.set(document.uri, diagnostics)
+    
+        return
+      }
+      
+      if (!silent) {
+        vscode.window.showInformationMessage(commandResult.message)
+      }
+    })
   })
 }
 
