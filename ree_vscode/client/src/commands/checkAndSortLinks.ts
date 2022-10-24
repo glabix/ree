@@ -19,27 +19,35 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
     lineNumber += 1
   })
 
+  const isMapper = !!content[firstLinkLineNumber-1].match(/mapper/)?.length
+  const isDao = !!content[firstLinkLineNumber-1].match(/dao/)?.length
+
   const linkNameRegexp = /link\s(?<name>((\:?\w+)|(\"\w.+\")))/
   const importRegexp = /(import\:\s)?(\-\>\s?\{(?<import>.+)\})/
+  const asRegexp = /as\:\s\:(\w+)/
 
   const linksWithFileName = links.filter(l => l.match(/link\s(\"|\')/))
   const linksWithSymbolName = links.filter(l => !linksWithFileName.includes(l))
   const sortedLinksWithFileName = linksWithFileName.sort()
   const sortedLinksWithSymbolName = linksWithSymbolName.sort()
   let allSorted = [...sortedLinksWithSymbolName, ...sortedLinksWithFileName]
+  let sortedWithoutUnused = []
 
   // check uniq
   let uniqLinks = {}
   allSorted.map((link, index) => {
     let linkNameMatch = link.match(linkNameRegexp)?.groups?.name
     let linkName = linkNameMatch.replace(/\:|\"/, '').split("/").pop()
-    if (!uniqLinks[linkName]) {
-      uniqLinks[linkName] = {}
-      uniqLinks[linkName]['count'] = 1
-      uniqLinks[linkName]['indexes'] = [index]
+    let asName = link.match(asRegexp)?.[1]
+
+    let name = !!asName ? asName : linkName
+    if (!uniqLinks[name]) {
+      uniqLinks[name] = {}
+      uniqLinks[name]['count'] = 1
+      uniqLinks[name]['indexes'] = [index]
     } else {
-      uniqLinks[linkName]['count'] += 1
-      uniqLinks[linkName]['indexes'].push(index)
+      uniqLinks[name]['count'] += 1
+      uniqLinks[name]['indexes'].push(index)
     }
   })
 
@@ -66,29 +74,36 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
   
   const contentWithoutLinks = content.slice(firstLinkLineNumber + allSorted.length).join("\n")
 
-  const sorted = allSorted.filter(link => {
-    let linkName = link.match(linkNameRegexp)?.groups?.name
-    let linkNameIsSymbol = linkName[0] === ":"
-    let imports = link.match(importRegexp)?.groups?.import
-
-    if (linkNameIsSymbol && contentWithoutLinks.match(RegExp(`${linkName.slice(1)}`))?.length > 0) { return link }
-    if (!imports) { return }
-
-    // check imports
-    let isImportsPresent = imports.split('&').map(e => e.trim()).some((el) => {
-      return contentWithoutLinks.match(RegExp(`${el}`))?.length > 0
+  if (!isMapper && !isDao) {
+    sortedWithoutUnused = allSorted.filter(link => {
+      let linkName = link.match(linkNameRegexp)?.groups?.name
+      let linkNameIsSymbol = linkName[0] === ":"
+      let imports = link.match(importRegexp)?.groups?.import
+      let as = link.match(asRegexp)?.[1]
+      let name = !!as ? as : linkName.slice(1)
+  
+      if (name.match(/db/)) { return link }
+      if (linkNameIsSymbol && contentWithoutLinks.match(RegExp(`${name}`))?.length > 0) { return link }
+      if (!imports) { return }
+  
+      // check imports
+      let isImportsPresent = imports.split('&').map(e => e.trim()).some((el) => {
+        return contentWithoutLinks.match(RegExp(`${el}`))?.length > 0
+      })
+  
+      if (isImportsPresent) { return link }
+  
+      return
     })
-
-    if (isImportsPresent) { return link }
-
-    return
-  })
+  } else {
+    sortedWithoutUnused = allSorted
+  } 
 
   // return if all links is used and already sorted
-  if (sorted.join("\n") === links.join("\n")) { return }
+  if (sortedWithoutUnused.join("\n") === links.join("\n")) { return }
 
   content.splice(firstLinkLineNumber, links.length)
-  content.splice(firstLinkLineNumber, 0, ...sorted)
+  content.splice(firstLinkLineNumber, 0, ...sortedWithoutUnused)
   const data = content.join("\n")
 
   fs.writeFileSync(filePath, data, {encoding: 'utf8'})
