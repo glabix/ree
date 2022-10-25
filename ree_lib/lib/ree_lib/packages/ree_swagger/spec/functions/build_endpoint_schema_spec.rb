@@ -156,6 +156,92 @@ RSpec.describe :build_endpoint_schema do
   }
 
   it {
+    serializer = mapper_factory.call.use(:serialize) do
+      integer :id
+    end
+
+    _tag_caster = mapper_factory.call(register_as: :tag).use(:cast) do
+      string :name
+      string :value
+      string :excluded
+    end
+
+    caster = mapper_factory.call.use(:cast) do
+      integer :id
+      string :name
+      tag    :tag, except: [:excluded]
+    end
+
+    schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
+      method:          :get,
+      respond_to:      :json,
+      authenticate:    false,
+      path:            '/versions/:id',
+      sections:        ["versions"],
+      caster:          caster,
+      serializer:      serializer,
+      response_status: 200,
+      description:     "description",
+      summary:         "summary",
+      errors:          []
+    ))
+
+    expect(schema).to eq(ReeSwagger::PathDto.new(
+      path: '/versions/{id}',
+      schema: {
+        get: {
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'integer' }
+            },
+            {
+              name: 'name',
+              in: 'query',
+              required: true,
+              schema: { type: 'string' }
+            },
+            {
+              name: 'tag',
+              in: 'query',
+              required: true,
+              style: 'deepObject',
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  value: { type: 'string' }
+                },
+                required: ['name', 'value']
+              }
+            }
+          ],
+          responses: {
+            200 => {
+              description: '',
+              content: {
+                :'application/json' => {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'integer' }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          summary: "summary",
+          description: "description",
+          tags: ["versions"]
+        }
+      }
+    ))
+  }
+
+  it {
     file_caster = mapper_factory.call.use(:cast) do
       integer :id
     end
