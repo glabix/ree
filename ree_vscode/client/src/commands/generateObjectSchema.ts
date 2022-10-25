@@ -65,7 +65,7 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
   const rootProjectDir = getCurrentProjectDir()
   if (!rootProjectDir) { return }
 
-  const fileName = path.relative(rootProjectDir, document.fileName)
+  const fileName = document.fileName
 
   // check if ree is installed
   const checkIsReeInstalled = isReeInstalled(rootProjectDir).then((res) => {
@@ -105,7 +105,7 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
 
   checkAndSortLinks(fileName, execPackageName)
 
-  const result = execGenerateObjectSchema(rootProjectDir, execPackageName, fileName)
+  const result = execGenerateObjectSchema(rootProjectDir, execPackageName, path.relative(rootProjectDir, document.fileName))
 
   if (!result) {
     vscode.window.showErrorMessage(`Can't generate Package.schema.json for ${execPackageName}`)
