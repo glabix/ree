@@ -21,6 +21,10 @@
         {
           "arg": "path_params",
           "type": "ArrayOf[Symbol]"
+        },
+        {
+          "arg": "fields_filters",
+          "type": "ArrayOf[ReeMapper::FieldsFilter]"
         }
       ]
     }
