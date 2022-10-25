@@ -5,14 +5,12 @@ module Ree::Contracts
     class RespondTo
       extend Ree::Contracts::ArgContracts::Squarable
 
-      attr_reader :method_names
-
       def initialize(*method_names)
         @method_names = method_names
       end
 
       def valid?(value)
-        get_unrespond_list(value, @method_names).empty?
+        get_unrespond_list(value).empty?
       end
 
       def to_s
@@ -20,13 +18,13 @@ module Ree::Contracts
       end
 
       def message(value, name, lvl = 1)
-        unrespond_list = get_unrespond_list(value, @method_names)
+        unrespond_list = get_unrespond_list(value)
         "expected to respond to #{unrespond_list.inspect}}"
       end
 
       private
-        def get_unrespond_list(obj, methods)
-          methods.reject do |method|
+        def get_unrespond_list(obj)
+          @method_names.reject do |method|
             obj.respond_to?(method)
           end
         end
