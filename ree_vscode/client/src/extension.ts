@@ -20,6 +20,7 @@ import { genObjectSchemaCmd, generateObjectSchema } from "./commands/generateObj
 import { generatePackage } from "./commands/generatePackage"
 import { updatePackageDeps } from './commands/updatePackageDeps'
 import { selectAndGeneratePackageSchema } from './commands/selectAndGeneratePackageSchema'
+import { onDeletePackageFile } from "./commands/deleteObjectSchema"
 
 let client: LanguageClient
 
@@ -81,12 +82,19 @@ export function activate(context: vscode.ExtensionContext) {
   const onDidRenameFiles = vscode.workspace.onDidRenameFiles(
     (e: vscode.FileRenameEvent) => {
       onRenamePackageFile(e.files[0].newUri.path)
+      onDeletePackageFile(e.files[0].oldUri.path)
+    } 
+  )
+
+  const onDidDeleteFiles = vscode.workspace.onDidDeleteFiles(
+    (e: vscode.FileDeleteEvent) => {
+      onDeletePackageFile(e.files[0].path)
     } 
   )
 
   vscode.workspace.onDidSaveTextDocument(document => {
     if (document) {
-      generateObjectSchema(document, true) 
+      generateObjectSchema(document, true)
     }
   })
 
@@ -113,6 +121,7 @@ export function activate(context: vscode.ExtensionContext) {
     onDidChangeActiveTextEditor,
     onDidCreateFiles,
     onDidRenameFiles,
+    onDidDeleteFiles,
   )
 
 

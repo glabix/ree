@@ -180,3 +180,7 @@ export function genPackageSchemaJsonCommandArgsArray(projectDir: string, name?: 
 export function genObjectSchemaJsonCommandArgsArray(projectDir: string, packageName: string, objectPath: string) {
   return  ['gen.schema_json', packageName, objectPath, '--project_path', projectDir, '--trace']
 }
+
+export function deleteObjectSchemaJsonCommandArgsArray(projectDir: string, objectPath: string) {
+  return  ['delete.schema_json', objectPath, '--project_path', projectDir, '--trace']
+}
