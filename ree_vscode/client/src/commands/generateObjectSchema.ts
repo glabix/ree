@@ -62,9 +62,10 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
     return
   }
 
-  const fileName = document.uri.path
   const rootProjectDir = getCurrentProjectDir()
   if (!rootProjectDir) { return }
+
+  const fileName = path.relative(rootProjectDir, document.fileName)
 
   // check if ree is installed
   const checkIsReeInstalled = isReeInstalled(rootProjectDir).then((res) => {

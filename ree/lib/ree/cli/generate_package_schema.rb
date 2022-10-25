@@ -23,11 +23,12 @@ module Ree
 
           package_name = package_name.to_sym
 
-          Ree.container.packages_facade.load_packages_schema
-          package = Ree.load_package(package_name)
-          Ree.container.packages_facade.write_package_schema(package_name)
+          facade = Ree.container.packages_facade
+          facade.load_packages_schema
+          Ree.load_package(package_name)
+          facade.write_package_schema(package_name)
 
-          package = Ree.container.packages_facade.get_package(package_name)
+          package = facade.get_package(package_name)
           schema_path = Ree::PathHelper.abs_package_schema_path(package)
 
           if include_objects

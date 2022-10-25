@@ -60,6 +60,36 @@ class Ree::PackagesFacade
     object
   end
 
+  def has_object?(package_name, object_name)
+    package = get_loaded_package(package_name)
+    object = package.get_object(object_name)
+
+    !object.nil?
+  end
+
+  # @param [Symbol] package_name
+  # @return nil
+  def dump_package_schema(package_name)
+    Ree.logger.debug("dump_package_schema(:#{package_name})")
+
+    read_package_schema_json(package_name)
+    package = get_package(package_name)
+
+    if package.dir
+      schema_path = Ree::PathHelper.abs_package_schema_path(package)
+
+      if !File.exists?(schema_path)
+        raise Ree::Error.new("File does not exist: #{schema_path}", :invalid_path)
+      end
+
+      schema = Ree::PackageSchemaBuilder.new.call(package)
+      json = JSON.pretty_generate(schema)
+      File.write(schema_path, json, mode: 'w')
+
+      json
+    end
+  end
+
   # @param [Symbol] package_name
   # @return nil
   def write_package_schema(package_name)
