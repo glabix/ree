@@ -51,12 +51,13 @@ RSpec.describe :build_endpoint_schema do
     _tag_caster = mapper_factory.call(register_as: :tag).use(:cast) do
       string :name
       string :value
+      string :excluded
     end
 
     caster = mapper_factory.call.use(:cast) do
       integer :id
       string :name
-      tag    :tag
+      tag    :tag, except: [:excluded]
       locales :locale
     end
 

@@ -9,9 +9,10 @@ class ReeSwagger::BuildRequestBodySchema
 
   contract(
     ReeMapper::Mapper,
-    ArrayOf[Symbol] => Nilor[Hash]
+    ArrayOf[Symbol],
+    ArrayOf[ReeMapper::FieldsFilter] => Nilor[Hash]
   )
-  def call(mapper, path_params = [])
+  def call(mapper, path_params = [], fields_filters = [])
     if mapper.type
       return get_caster_definition(mapper.type, method(:call).to_proc)
     end
@@ -19,13 +20,20 @@ class ReeSwagger::BuildRequestBodySchema
     required_fields = []
 
     properties = mapper.fields.each_with_object({}) do |(_name, field), acc|
+      next unless fields_filters.all? { _1.allow?(field.name) }
+
       next if path_params.include?(field.name)
 
       swagger_field = {}
 
       required_fields << field.name.to_s if !field.optional
       field_mapper = field.type
-      swagger_type = call(field_mapper)
+
+      nested_fields_filters = fields_filters.map { _1.filter_for(field.name) }
+      nested_fields_filters += [field.fields_filter]
+
+      swagger_type = call(field_mapper, [], nested_fields_filters)
+
       swagger_field.merge!(swagger_type) if swagger_type
 
       description = field.doc
