@@ -16,6 +16,7 @@ module Ree::Contracts
     autoload :Optblock, 'ree/contracts/arg_contracts/optblock'
     autoload :Or, 'ree/contracts/arg_contracts/or'
     autoload :RangeOf, 'ree/contracts/arg_contracts/range_of'
+    autoload :RespondTo, 'ree/contracts/arg_contracts/respond_to'
     autoload :SetOf, 'ree/contracts/arg_contracts/set_of'
     autoload :Splat, 'ree/contracts/arg_contracts/splat'
     autoload :SplatOf, 'ree/contracts/arg_contracts/splat_of'
