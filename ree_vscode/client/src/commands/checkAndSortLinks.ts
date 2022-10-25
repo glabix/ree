@@ -19,8 +19,10 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
     lineNumber += 1
   })
 
-  const isMapper = !!content[firstLinkLineNumber-1].match(/mapper/)?.length
-  const isDao = !!content[firstLinkLineNumber-1].match(/dao/)?.length
+  if (links.length === 0) { return }
+
+  const isMapper = !!content[firstLinkLineNumber-1]?.match(/mapper/)?.length
+  const isDao = !!content[firstLinkLineNumber-1]?.match(/dao/)?.length
 
   const linkNameRegexp = /link\s(?<name>((\:?\w+)|(\"\w.+\")))/
   const importRegexp = /(import\:\s)?(\-\>\s?\{(?<import>.+)\})/
