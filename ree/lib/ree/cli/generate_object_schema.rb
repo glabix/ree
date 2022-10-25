@@ -42,9 +42,6 @@ module Ree
             end
           end
 
-
-          puts(" #{object.name}: #{obj_path}") if !silence
-
           puts("done") if !silence
         end
       end
