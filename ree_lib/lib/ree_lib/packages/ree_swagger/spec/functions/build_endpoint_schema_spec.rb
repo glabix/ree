@@ -60,14 +60,6 @@ RSpec.describe :build_endpoint_schema do
       locales :locale
     end
 
-    file_caster = mapper_factory.call.use(:cast) do
-      integer :id
-    end
-
-    file_serializer = mapper_factory.call.use(:serialize) do
-      string :data
-    end
-
     schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
       method:          :post,
       respond_to:      :json,
@@ -93,20 +85,6 @@ RSpec.describe :build_endpoint_schema do
           description: "401 error"
         )
       ]
-    ))
-
-    csv_schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
-      method:          :get,
-      respond_to:      :csv,
-      authenticate:    false,
-      path:            '/files/:id',
-      sections:        ["files"],
-      caster:          file_caster,
-      serializer:      file_serializer,
-      response_status: 200,
-      description:     "file",
-      summary:         "file summary",
-      errors:          []
     ))
 
     expect(schema).to eq(ReeSwagger::PathDto.new(
@@ -173,6 +151,30 @@ RSpec.describe :build_endpoint_schema do
           tags: ["versions"]
         }
       }
+    ))
+  }
+
+  it {
+    file_caster = mapper_factory.call.use(:cast) do
+      integer :id
+    end
+
+    file_serializer = mapper_factory.call.use(:serialize) do
+      string :data
+    end
+
+    csv_schema = build_endpoint_schema(ReeSwagger::EndpointDto.new(
+      method:          :get,
+      respond_to:      :csv,
+      authenticate:    false,
+      path:            '/files/:id',
+      sections:        ["files"],
+      caster:          file_caster,
+      serializer:      file_serializer,
+      response_status: 200,
+      description:     "file",
+      summary:         "file summary",
+      errors:          []
     ))
 
     expect(csv_schema).to eq(ReeSwagger::PathDto.new(
