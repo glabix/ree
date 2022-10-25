@@ -83,6 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
     (e: vscode.FileRenameEvent) => {
       onRenamePackageFile(e.files[0].newUri.path)
       onDeletePackageFile(e.files[0].oldUri.path)
+      generateObjectSchema(e.files[0].newUri.path, true)
     } 
   )
 
@@ -94,7 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidSaveTextDocument(document => {
     if (document) {
-      generateObjectSchema(document, true)
+      generateObjectSchema(document.fileName, true)
     }
   })
 

@@ -17,6 +17,7 @@ import { PACKAGES_SCHEMA_FILE } from '../core/constants'
 import { checkAndSortLinks } from './checkAndSortLinks'
 
 const path = require('path')
+const fs = require('fs')
 const diagnosticCollection = vscode.languages.createDiagnosticCollection('ruby')
 
 export function clearDocumentProblems(document: vscode.TextDocument) {
@@ -53,10 +54,10 @@ export function genObjectSchemaCmd() {
 
   const currentPackageName = getPackageNameFromPath(currentFilePath)
 
-  generateObjectSchema(activeEditor.document, false, currentPackageName)
+  generateObjectSchema(activeEditor.document.fileName, false, currentPackageName)
 }
 
-export function generateObjectSchema(document: vscode.TextDocument, silent: boolean, packageName?: string) {
+export function generateObjectSchema(fileName: string, silent: boolean, packageName?: string) {
   if (!vscode.workspace.workspaceFolders) {
     vscode.window.showWarningMessage("Error. Open workspace folder to use extension")
     return
@@ -64,8 +65,6 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
 
   const rootProjectDir = getCurrentProjectDir()
   if (!rootProjectDir) { return }
-
-  const fileName = document.fileName
 
   // check if ree is installed
   const checkIsReeInstalled = isReeInstalled(rootProjectDir).then((res) => {
@@ -105,7 +104,7 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
 
   checkAndSortLinks(fileName, execPackageName)
 
-  const result = execGenerateObjectSchema(rootProjectDir, execPackageName, path.relative(rootProjectDir, document.fileName))
+  const result = execGenerateObjectSchema(rootProjectDir, execPackageName, path.relative(rootProjectDir, fileName))
 
   if (!result) {
     vscode.window.showErrorMessage(`Can't generate Package.schema.json for ${execPackageName}`)
@@ -120,11 +119,12 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
     })
 
     return result.then((commandResult) => {
-      diagnosticCollection.delete(document.uri)
+      const documentUri = vscode.Uri.parse(fileName)
+      diagnosticCollection.delete(documentUri)
   
       if (commandResult.code === 1) {
         const rPath = path.relative(
-          rootProjectDir, document.uri.path
+          rootProjectDir, documentUri.path
         )
   
         const line = commandResult.message.split("\n").find(s => s.includes(rPath + ":"))
@@ -140,11 +140,12 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
           lineNumber -= 1
         }
   
-        if (document.getText().length < lineNumber ) {
+        const file = fs.readFileSync(fileName, { encoding: 'utf8' })
+        if (file.length < lineNumber ) {
           lineNumber = 0
         }
   
-        const character = document.getText().split("\n")[lineNumber].length - 1
+        const character = fileName.split("\n")[lineNumber].length - 1
         let diagnostics: vscode.Diagnostic[] = []
   
         let diagnostic: vscode.Diagnostic = {
@@ -158,7 +159,7 @@ export function generateObjectSchema(document: vscode.TextDocument, silent: bool
         }
   
         diagnostics.push(diagnostic)
-        diagnosticCollection.set(document.uri, diagnostics)
+        diagnosticCollection.set(documentUri, diagnostics)
   
         return
       }
