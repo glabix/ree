@@ -20,6 +20,7 @@
     "onCommand:ree.goToPackageObject",
     "onCommand:ree.generatePackageSchema",
     "onCommand:ree.generatePackagesSchema",
+    "onCommand:ree.generateObjectSchema",
     "onCommand:ree.generatePackage"
   ],
   "main": "./client/out/extension.js",
@@ -44,6 +45,10 @@
       {
         "command": "ree.generatePackagesSchema",
         "title": "Ree: Generate Packages Schema (Packages.schema.json)"
+      },
+      {
+        "command": "ree.generateObjectSchema",
+        "title": "Ree: Generate Object Schema for current document (object.schema.json)"
       },
       {
         "command": "ree.generatePackage",

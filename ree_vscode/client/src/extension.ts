@@ -16,9 +16,11 @@ import { onCreatePackageFile, onRenamePackageFile } from "./commands/documentTem
 import { isBundleGemsInstalled, isBundleGemsInstalledInDocker } from "./utils/reeUtils"
 import { getCurrentProjectDir } from './utils/fileUtils'
 import { generatePackagesSchema } from "./commands/generatePackagesSchema"
+import { genObjectSchemaCmd, generateObjectSchema } from "./commands/generateObjectSchema"
 import { generatePackage } from "./commands/generatePackage"
 import { updatePackageDeps } from './commands/updatePackageDeps'
 import { selectAndGeneratePackageSchema } from './commands/selectAndGeneratePackageSchema'
+import { onDeletePackageFile } from "./commands/deleteObjectSchema"
 
 let client: LanguageClient
 
@@ -48,6 +50,11 @@ export function activate(context: vscode.ExtensionContext) {
     generatePackagesSchema
   )
 
+  let generateObjectSchemaCmd = vscode.commands.registerCommand(
+    "ree.generateObjectSchema",
+    genObjectSchemaCmd
+  )
+
   let generatePackageCmd = vscode.commands.registerCommand(
     "ree.generatePackage",
     generatePackage
@@ -75,12 +82,20 @@ export function activate(context: vscode.ExtensionContext) {
   const onDidRenameFiles = vscode.workspace.onDidRenameFiles(
     (e: vscode.FileRenameEvent) => {
       onRenamePackageFile(e.files[0].newUri.path)
+      onDeletePackageFile(e.files[0].oldUri.path)
+      generateObjectSchema(e.files[0].newUri.path, true)
+    } 
+  )
+
+  const onDidDeleteFiles = vscode.workspace.onDidDeleteFiles(
+    (e: vscode.FileDeleteEvent) => {
+      onDeletePackageFile(e.files[0].path)
     } 
   )
 
   vscode.workspace.onDidSaveTextDocument(document => {
     if (document) {
-      generatePackageSchema(document, true) 
+      generateObjectSchema(document.fileName, true)
     }
   })
 
@@ -100,25 +115,29 @@ export function activate(context: vscode.ExtensionContext) {
     goToSpecCmd,
     generatePackageSchemaCmd,
     generatePackagesSchemaCmd,
+    generateObjectSchemaCmd,
     generatePackageCmd,
     updatePackageDepsCmd,
     onDidOpenTextDocument,
     onDidChangeActiveTextEditor,
     onDidCreateFiles,
     onDidRenameFiles,
+    onDidDeleteFiles,
   )
 
 
   let curPath = getCurrentProjectDir()
-  const checkIsBundleGemsInstalled = isBundleGemsInstalled(curPath)
-  if (checkIsBundleGemsInstalled?.code !== 0) {
-    vscode.window.showWarningMessage(checkIsBundleGemsInstalled.message)
-  }
+  isBundleGemsInstalled(curPath).then((res) => {
+    if (res.code !== 0) {
+      vscode.window.showWarningMessage(res.message)
+    }
+  })
 
-  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()
-  if (checkIsBundleGemsInstalledInDocker && checkIsBundleGemsInstalledInDocker.code !== 0) {
-    vscode.window.showWarningMessage(checkIsBundleGemsInstalledInDocker.message)
-  }
+  isBundleGemsInstalledInDocker().then((res) => {
+    if (res && res.code !== 0) {
+      vscode.window.showWarningMessage(res.message)
+    }
+  })
 
   // Language Client
 

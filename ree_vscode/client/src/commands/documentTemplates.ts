@@ -5,6 +5,9 @@ import { snakeToCamelCase } from "../utils/stringUtils"
 const fs = require('fs')
 const path = require('path')
 
+const TEMPLATE_FILE_NAME = `template${RUBY_EXT}`
+const DEFAULT_TEMPLATE_FILE_NAME = `default${RUBY_EXT}`
+
 export function onCreatePackageFile(filePath: string) {
   const result = preconditions(filePath)
 
@@ -19,11 +22,23 @@ export function onCreatePackageFile(filePath: string) {
   const rDir = path.relative(result.workDir, path.dirname(filePath))
 
   const templatePath = path.join(
-    result.projectDir, '.vscode-ree', 'templates', rDir, 'template.rb'
+    result.projectDir, '.vscode-ree', 'templates', rDir, TEMPLATE_FILE_NAME
   )
 
-  if (!fs.existsSync(templatePath)) { return }
-  const templateContent = fs.readFileSync(templatePath, { encoding: 'utf8' })
+  const defaultTemplatePath = path.join(
+    result.projectDir, '.vscode-ree', 'templates', rDir.split("/")[0], DEFAULT_TEMPLATE_FILE_NAME
+  )
+
+  const templateExists = fs.existsSync(templatePath)
+  const defaultTemplateExists = fs.existsSync(defaultTemplatePath)
+  let resultPath = null
+
+  if (!templateExists && !defaultTemplateExists) { return }
+  if (templateExists && !defaultTemplateExists) { resultPath = templatePath }
+  if (!templateExists && defaultTemplateExists) { resultPath = defaultTemplatePath }
+  if (templateExists && defaultTemplateExists) { resultPath = templatePath }
+  
+  const templateContent = fs.readFileSync(resultPath, { encoding: 'utf8' })
 
   const actualTemplateContent = templateContent
     .replace(/PACKAGE_MODULE/g, variables.moduleName)

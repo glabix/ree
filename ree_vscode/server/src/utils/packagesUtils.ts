@@ -43,6 +43,10 @@ export interface IGemPackageSchema {
   schema: string
 }
 
+export function cacheGemPaths(rootDir: string): Promise<ExecCommand | undefined> {
+  return execBundlerGetGemPaths(rootDir)
+}
+
 export function loadPackagesSchema(currentPath: string): IPackagesSchema | undefined {
   const root = getProjectRootDir(currentPath)
   if (!root) { return }
@@ -55,12 +59,22 @@ export function loadPackagesSchema(currentPath: string): IPackagesSchema | undef
   if (packagesCtime != ctime || !cachedPackages) {
     packagesCtime = ctime
 
-    return cachedPackages = parsePackagesSchema(
-      fs.readFileSync(schemaPath, { encoding: 'utf8' }), root
-    )
-  } else {
-    return cachedPackages
+    cacheGemPaths(root).then((r) => {
+      const gemPathsArr = r?.message.split("\n")
+      gemPathsArr?.map((path) => {
+        let splitedPath = path.split("/")
+        let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
+
+        cachedGems[name] = path
+      })
+
+      cachedPackages = parsePackagesSchema(
+        fs.readFileSync(schemaPath, { encoding: 'utf8' }), root
+      )
+    })
   }
+
+  return cachedPackages
 }
 
 export function getGemPackageSchemaPath(gemPackageName: string): string | undefined {
@@ -109,18 +123,6 @@ function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | 
 
     // cache gemPackages by gem
     cachedGemPackages = groupBy(obj.gemPackages, 'gem')
-    if (cachedGemPackages) {
-      Object.keys(cachedGemPackages).flatMap((gem: string) => {
-        let gemPathCommandResult = execBundlerGetGemPath(gem, rootDir)
-        if (!gemPathCommandResult) { return [] }
-
-        if (gemPathCommandResult.code === 0) {
-          cachedGems[gem] = gemPathCommandResult.message
-        } else {
-          throw new ExecCommandError(`BundlerError: ${gemPathCommandResult.message}`)
-        }
-      })
-    }
 
     return obj
   } catch (err) {
@@ -129,22 +131,45 @@ function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | 
   }
 }
 
-function execBundlerGetGemPath(gemName: string, rootDir: string): ExecCommand | undefined {
+async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | undefined> {
   try {
-    let spawnSync = require('child_process').spawnSync
-    const argsArr = ['show', gemName]
+    const argsArr = ['show', '--paths']
 
-    let child = spawnSync(
+    return spawnCommand([
       'bundle',
       argsArr,
       { cwd: rootDir }
-    )
+    ])
+  } catch(e) {
+    console.error(e)
+    return new Promise(() => undefined)
+  }
+}
+
+async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> {
+  try {
+    let spawn = require('child_process').spawn
+    const child = spawn(...args)
+    let message = ''
+
+    for await (const chunk of child.stdout) {
+      message += chunk
+    }
+
+    for await (const chunk of child.stderr) {
+      message += chunk
+    }
+
+    const code: number  = await new Promise( (resolve, reject) => {
+      child.on('close', resolve);
+    })
 
     return {
-      message: child.status === 0 ? child.stdout.toString() : child.stderr.toString(),
-      code: child.status
+      message: message,
+      code: code
     }
   } catch(e) {
+    console.error(`Error. ${e}`)
     return undefined
   }
 }
