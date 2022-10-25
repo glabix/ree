@@ -17,6 +17,10 @@
         {
           "arg": "mapper",
           "type": "ReeMapper::Mapper"
+        },
+        {
+          "arg": "fields_filters",
+          "type": "ArrayOf[ReeMapper::FieldsFilter]"
         }
       ]
     }

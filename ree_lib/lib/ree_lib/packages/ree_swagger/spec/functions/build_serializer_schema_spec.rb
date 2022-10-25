@@ -25,6 +25,17 @@ RSpec.describe :build_serializer_schema do
   }
 
   let(:mapper) {
+    nested_partial_mapper = mapper_factory.call(register_as: :nested_partial).use(:serialize) do
+      string :included
+      string :excepted
+      string :nested_excepted
+    end
+
+    partial_mapper = mapper_factory.call(register_as: :partial).use(:serialize) do
+      string :excepted
+      nested_partial :nested_partial_value, except: [:excepted]
+    end
+
     setting_mapper = mapper_factory.call(register_as: :setting).use(:serialize) do
       string :name
       string :value
@@ -55,6 +66,8 @@ RSpec.describe :build_serializer_schema do
       integer :test_null, null: true
 
       unregistered_type :test_unregistered_type
+
+      partial :partial_value, except: [:excepted, nested_partial_value: [:nested_excepted]]
     end
   }
 
@@ -102,7 +115,18 @@ RSpec.describe :build_serializer_schema do
             type: 'integer',
             nullable: true
           },
-          test_unregistered_type: {}
+          test_unregistered_type: {},
+          partial_value: {
+            type: 'object',
+            properties: { 
+              nested_partial_value: {
+                type: 'object',
+                properties: { 
+                  included: { type: 'string' }
+                }
+              }
+            }
+          },
         }
       }
     )
