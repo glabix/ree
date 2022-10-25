@@ -33,7 +33,10 @@ module Ree
             if File.exists?(file_path)
               facade.load_file(file_path, package_name)
               facade.dump_package_schema(package_name)
-              Ree.write_object_schema(package_name, object_name)
+
+              if facade.has_object?(package_name, object_name)
+                Ree.write_object_schema(package_name, object_name)
+              end
             else
               raise Ree::Error.new("package file not found: #{file_path}")
             end
