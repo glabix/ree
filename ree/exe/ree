@@ -167,6 +167,31 @@ class ReeCliRunner
       end
     end
 
+    command :"delete.schema_json" do |c|
+      c.syntax      = 'ree delete.schema_json OBJECT_PATH'
+      c.description = 'removes Schema.json for specified object '
+      c.summary     = '> ' + c.description
+      c.example     'ree delete.schema_json commands/create_account_cmd.rb', ''
+      c.option      '--silence', String, 'Silence all logs'
+      c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
+      c.action do |args, options|
+        object_path = args[0]
+        options_hash = options.__hash__
+
+        if options_hash[:project_path]
+          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
+        end
+
+        default_options = {
+          object_path: object_path,
+          project_path: options_hash[:project_path] || File.expand_path(Dir.pwd),
+          silence: options_hash.has_key?(:silence)
+        }
+
+        Ree::CLI::DeleteObjectSchema.run(**default_options)
+      end
+    end
+
     command :"gen.template" do |c|
       c.syntax      = "ree gen.template TEMPLATE_NAME [options]"
       c.description = "generates template from ROOT/.ree/templates folder with specified variables"

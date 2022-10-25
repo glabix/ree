@@ -25,6 +25,10 @@ def ensure_exists(file)
   expect(File.exist?(file)).to be true
 end
 
+def ensure_not_exists(file)
+  expect(!File.exist?(file)).to be true
+end
+
 def with_captured_stdout
   original_stdout = $stdout
   $stdout = StringIO.new
