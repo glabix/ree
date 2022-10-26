@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { DiagnosticSeverity } from 'vscode-languageclient'
 import { PackageFacade } from '../utils/packageFacade'
-import { getPackageNameFromPath } from '../utils/packageUtils'
+import { getPackageEntryPath, getPackageNameFromPath } from '../utils/packageUtils'
 import { loadPackagesSchema } from '../utils/packagesUtils'
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { 
@@ -103,6 +103,9 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   }
 
   checkAndSortLinks(fileName, execPackageName)
+
+  // don't generate schema for specs
+  if (fileName.split("/").pop().match(/\_spec/)) { return }
 
   const result = execGenerateObjectSchema(rootProjectDir, execPackageName, path.relative(rootProjectDir, fileName))
 

@@ -171,8 +171,10 @@ export function buildBundlerCommandFullArgsArray(rootProjectDir: string, argsArr
   }
 }
 
-export function genPackageSchemaJsonCommandArgsArray(projectDir: string, name?: string) {
-  if (name) { return ['gen.package_json', name.toString(), '--project_path', projectDir, '--trace'] }
+export function genPackageSchemaJsonCommandArgsArray(projectDir: string, name?: string, skipObjects?: boolean) {
+  if (name && !skipObjects) { return ['gen.package_json', name.toString(), '--project_path', projectDir, '--trace'] }
+  if (name && skipObjects) { return ['gen.package_json', name.toString(), '--project_path', projectDir, '--skip_objects', '--trace'] }
+  if (!name && skipObjects) { return ['gen.package_json', '--project_path', projectDir, '--skip_objects', '--trace'] }
   
   return  ['gen.package_json', '--project_path', projectDir, '--trace']
 }
