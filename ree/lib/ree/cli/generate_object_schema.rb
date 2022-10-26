@@ -25,8 +25,6 @@ module Ree
           if facade.has_object?(package_name, object_name)
             object = facade.load_package_object(package_name, object_name)
             Ree.write_object_schema(package.name, object.name)
-
-            obj_path = Ree::PathHelper.abs_object_schema_path(object)
           else
             file_path = File.join(dir, object_path)
 
@@ -36,14 +34,12 @@ module Ree
 
               if facade.has_object?(package_name, object_name)
                 Ree.write_object_schema(package_name, object_name)
+                facade.write_package_schema(package_name)
               end
             else
               raise Ree::Error.new("package file not found: #{file_path}")
             end
           end
-
-
-          puts(" #{object.name}: #{obj_path}") if !silence
 
           puts("done") if !silence
         end
