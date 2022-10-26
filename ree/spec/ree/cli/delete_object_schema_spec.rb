@@ -7,6 +7,16 @@ RSpec.describe Ree::CLI::DeleteObjectSchema do
   let(:object_schema_dir) { File.join(project_dir, "bc", package_name, Ree::SCHEMAS, package_name, "commands") }
   let(:object_schema_filename) { "register_account_cmd.schema.json" }
 
+  after(:each) do
+    # make sure we regenerate schema
+    Ree::CLI::GenerateObjectSchema.run(
+      package_name: package_name,
+      object_path: object_path,
+      project_path: project_dir,
+      silence: true
+    )
+  end
+
   context "run" do
     it "deletes register_account_cmd.schema.json for specified package" do
       subject.run(
