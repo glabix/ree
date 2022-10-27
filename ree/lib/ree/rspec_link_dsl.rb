@@ -19,10 +19,7 @@ module Ree::RSpecLinkDSL
     elsif obj_name.is_a?(String)
       const_list = link_file(from, obj_name, import_proc)
       const_list.each do |const|
-        # TODO: trick with define_method is not working
-        define_method const.name do
-          self.class.const_get(const.name)
-        end
+        Object.const_set(const.name, self.const_get(const.name))
       end
     else
       raise Ree::Error.new("Invalid link DSL usage. Args should be Hash or String")
