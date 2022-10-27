@@ -25,7 +25,7 @@ module Ree
 
           facade = Ree.container.packages_facade
           facade.load_packages_schema
-          Ree.load_package(package_name)
+          facade.load_entire_package(package_name)
           facade.write_package_schema(package_name)
 
           package = facade.get_package(package_name)

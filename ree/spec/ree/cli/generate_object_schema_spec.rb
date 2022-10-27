@@ -22,30 +22,27 @@ RSpec.describe Ree::CLI::GenerateObjectSchema do
     end
 
     it "generates schema.json for new object" do
+      before_schema = File.open(File.join(project_dir, "bc/#{package_name}/Package.schema.json")).read
       new_object_file_rpath = "bc/accounts/package/accounts/commands/definitely_new_object.rb"
       new_object_file_abs_path = File.join(project_dir, new_object_file_rpath)
 
-      if File.exists?(new_object_file_abs_path)
-        FileUtils.rm(new_object_file_abs_path)
-      else
-        new_object_content = <<-NEW_OBJECT
-        class Accounts::DefinitelyNewObject
-          include Ree::FnDSL
-        
-          fn :definitely_new_object do
-          end
-        
-          contract(None => nil)
-          def call()
-          end
+      new_object_content = <<-NEW_OBJECT
+      class Accounts::DefinitelyNewObject
+        include Ree::FnDSL
+      
+        fn :definitely_new_object do
         end
-        NEW_OBJECT
-  
-        File.open(
-          new_object_file_abs_path,
-          'w+'
-        ) { |f| f.write new_object_content }
-      end 
+      
+        contract(None => nil)
+        def call()
+        end
+      end
+      NEW_OBJECT
+
+      File.open(
+        new_object_file_abs_path,
+        'w'
+      ) { |f| f.write new_object_content }
 
       subject.run(
         package_name: package_name,
@@ -65,12 +62,9 @@ RSpec.describe Ree::CLI::GenerateObjectSchema do
 
       FileUtils.rm(new_object_file_abs_path)
       FileUtils.rm(File.join(object_schema_dir, "definitely_new_object.schema.json"))
-      Ree::CLI::GeneratePackageSchema.run(
-        package_name: package_name,
-        project_path: project_dir,
-        include_objects: true,
-        silence: false
-      )
+      # TODO: package schema stays the same if we're working in same container
+      # do we need to implement some reload mechanism for objects_store?
+      File.open(File.join(project_dir, "bc/#{package_name}/Package.schema.json"), 'w') { |f| f.write before_schema }
     end
 
     it "show error for wrong object path" do
