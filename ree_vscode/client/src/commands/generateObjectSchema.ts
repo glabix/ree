@@ -63,7 +63,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
     return
   }
 
-  if (fileName.split("/").pop().match(/\.rb/)) { return }
+  if (!fileName.split("/").pop().match(/\.rb/)) { return }
 
   const rootProjectDir = getCurrentProjectDir()
   if (!rootProjectDir) { return }
