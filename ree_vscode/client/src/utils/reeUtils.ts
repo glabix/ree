@@ -68,6 +68,8 @@ export function isBundleGemsInstalledInDocker(): Promise<ExecCommand> | undefine
           'ree'
         ]
       ])
+    } else {
+      return undefined
     }
   } catch(e) {
     vscode.window.errorInformationMessage(`Error. ${e}`)

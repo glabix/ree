@@ -133,11 +133,13 @@ export function activate(context: vscode.ExtensionContext) {
     }
   })
 
-  isBundleGemsInstalledInDocker().then((res) => {
-    if (res && res.code !== 0) {
-      vscode.window.showWarningMessage(res.message)
-    }
-  })
+  if(isBundleGemsInstalledInDocker()) {
+    isBundleGemsInstalledInDocker().then((res) => {
+      if (res && res.code !== 0) {
+        vscode.window.showWarningMessage(res.message)
+      }
+    })
+  }
 
   // Language Client
 

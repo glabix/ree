@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import { getCurrentProjectDir } from '../utils/fileUtils'
+import { getPackageEntryPath } from '../utils/packageUtils'
 import {
   buildReeCommandFullArgsArray,
   deleteObjectSchemaJsonCommandArgsArray,
@@ -17,6 +18,12 @@ export function deleteObjectSchema(filePath: string, silent: boolean) {
   if (!vscode.workspace.workspaceFolders) {
     vscode.window.showWarningMessage("Error. Open workspace folder to use extension")
     return
+  }
+
+  if (!filePath.split("/").pop().match(/\.rb/)) {
+    return 
+  } else {
+    if (!getPackageEntryPath(filePath)) { return }
   }
 
   const rootProjectDir = getCurrentProjectDir()
