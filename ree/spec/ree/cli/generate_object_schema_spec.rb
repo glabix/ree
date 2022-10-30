@@ -21,19 +21,6 @@ RSpec.describe Ree::CLI::GenerateObjectSchema do
       end
     end
 
-    it "output path for package schema" do
-      output = with_captured_stdout {
-        subject.run(
-          package_name: package_name,
-          object_path: object_path,
-          project_path: project_dir,
-          silence: false
-        )
-      }
-
-      expect(output).to include(File.join(object_schema_dir, object_schema_filename))
-    end
-
     it "show error for wrong object path" do
       expect {
         subject.run(
