@@ -127,6 +127,22 @@ module ReeDao
         end
       end
 
+      def update_where(conditions)
+        __original_update(conditions)
+      end
+
+      def delete_where(conditions)
+        __original_delete(conditions)
+      end
+
+      def naked_first
+        __original_first
+      end
+
+      def naked_last
+        __original_last
+      end
+
       def delete(entity = nil)
         if entity
           key_condition = prepare_key_condition_from_entity(entity)
