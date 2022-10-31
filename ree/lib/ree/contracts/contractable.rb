@@ -6,16 +6,14 @@ require_relative 'engine_proxy'
 
 module Ree::Contracts
   module Contractable
-    if !Ree::Contracts.no_contracts?
-      def method_added(name)
-        MethodDecorator.new(name, false, self).call
-        super
-      end
+    def method_added(name)
+      MethodDecorator.new(name, false, self).call
+      super
+    end
 
-      def singleton_method_added(name)
-        MethodDecorator.new(name, true, self).call
-        super
-      end
+    def singleton_method_added(name)
+      MethodDecorator.new(name, true, self).call
+      super
     end
 
     def doc(str)
