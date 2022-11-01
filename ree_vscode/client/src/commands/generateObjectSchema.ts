@@ -154,7 +154,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
           lineNumber = 0
         }
   
-        const character = fileName.split("\n")[lineNumber].length - 1
+        const character = file.split("\n")[lineNumber].length - 1
         let diagnostics: vscode.Diagnostic[] = []
   
         let diagnostic: vscode.Diagnostic = {
