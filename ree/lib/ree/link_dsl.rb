@@ -107,10 +107,10 @@ module Ree::LinkDSL
         Ree::PACKAGE, path
       )
 
-      if !File.exists?(file_path)
+      if !File.exist?(file_path)
         file_path = "#{file_path}.rb"
 
-        if !File.exists?(file_path)
+        if !File.exist?(file_path)
           _raise_error("Unable to link '#{path}'. File not found #{file_path}")
         end
       end

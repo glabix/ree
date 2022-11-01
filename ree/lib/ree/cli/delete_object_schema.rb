@@ -19,7 +19,7 @@ module Ree
           schema_path = Ree::PathHelper.object_schema_rpath(object_path)
           abs_schema_path = File.join(dir, schema_path)
 
-          if File.exists?(abs_schema_path)
+          if File.exist?(abs_schema_path)
             FileUtils.rm(abs_schema_path)
 
             puts(" #{schema_path}: is deleted") if !silence

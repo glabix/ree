@@ -25,7 +25,7 @@ class Ree::PackagesSchemaLoader
   # @param Nilor[Ree::PackagesStore] packages_store Existing packages store
   # @return [Ree::PackagesStore]
   def call(abs_schema_path, packages_store = nil, gem_name = nil)
-    if !File.exists?(abs_schema_path)
+    if !File.exist?(abs_schema_path)
       raise Ree::Error.new("File not found: #{abs_schema_path}", :invalid_packages_schema)
     end
 

@@ -12,11 +12,11 @@ def package_require(path)
     Ree::PathHelper.abs_package_module_dir(package), list.join('/')
   )
 
-  if !File.exists?(path)
+  if !File.exist?(path)
     path = path + '.rb'
   end
 
-  if !File.exists?(path)
+  if !File.exist?(path)
     raise Ree::Error.new("file not found: #{path}")
   end
 
@@ -37,8 +37,8 @@ def package_file_exists?(path)
     Ree::PathHelper.abs_package_module_dir(package), list.join('/')
   )
 
-  return true if File.exists?(path)
+  return true if File.exist?(path)
 
   path = path + '.rb'
-  File.exists?(path)
+  File.exist?(path)
 end

@@ -165,10 +165,10 @@ class Ree::ObjectDsl
       Ree::PACKAGE, path
     )
 
-    if !File.exists?(file_path)
+    if !File.exist?(file_path)
       file_path = "#{file_path}.rb"
 
-      if !File.exists?(file_path)
+      if !File.exist?(file_path)
         raise_error("Unable to link '#{path}'. File not found #{file_path}")
       end
     end
@@ -223,7 +223,7 @@ class Ree::ObjectDsl
       raise Ree::Error.new("Mount as should be one of #{MOUNT_AS.inspect}", :invalid_dsl_usage)
     end
 
-    object_name_from_path = if File.exists?(path) && !Ree.irb_mode?
+    object_name_from_path = if File.exist?(path) && !Ree.irb_mode?
       File.basename(path, ".*").to_sym
     end
 
