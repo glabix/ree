@@ -3,6 +3,7 @@ import { getPackageEntryPath, getPackageObjectFromCurrentPath, getProjectRootDir
 import { loadPackagesSchema } from '../utils/packagesUtils'
 import { PackageFacade } from '../utils/packageFacade'
 import { loadObjectSchema } from '../utils/objectUtils'
+import { forest } from '../utils/forest'
 
 const fs = require('fs')
 const path = require('path')
@@ -25,10 +26,9 @@ export function updatePackageDeps(
     })
 }
 
-function getFileFromManager(filePath: string): Thenable<vscode.TextDocument> {
+export function getFileFromManager(filePath: string): Thenable<vscode.TextDocument> {
   const textDocs = vscode.workspace.textDocuments
 
-  
   if (textDocs.map(t => t.fileName).includes(filePath)) {
     return new Promise(resolve => resolve(textDocs.filter(t => t.fileName === filePath)[0]))
   } else {
@@ -97,7 +97,14 @@ function updateObjectLinks(
   fromPackageName: string,
   toPackageName: string
   ): Thenable<boolean> | null {
+  
+  // const uri = currentFile.uri  
+  // let tree = forest.getTree(uri.toString())
+  // if (!tree) {
+  //   tree = forest.createTree(uri.toString(), currentFile.getText())
+  // }
   const packagesSchema = loadPackagesSchema(currentFile.fileName)
+  if (!packagesSchema) { return }
   const currentPackage = packagesSchema.packages.find(p => p.name === toPackageName)
   const projectRootDir = getProjectRootDir(currentFile.fileName)
   const packageFacade = new PackageFacade(path.join(projectRootDir, currentPackage.schema))

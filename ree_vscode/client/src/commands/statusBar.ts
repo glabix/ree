@@ -1,6 +1,7 @@
 import * as vscode from "vscode"
 import { getPackageNameFromPath } from "../utils/packageUtils"
 import { getSpecFilePath } from "../utils/fileUtils"
+import { forest } from "../utils/forest"
 
 const path = require("path")
 const fs = require("fs")
@@ -12,6 +13,7 @@ const statusBarRspecItem = buildStatusBarItem(SPEC_COUNT_PRIORITY)
 export const statusBarCallbacks = {
   onDidOpenTextDocument: (e: vscode.TextDocument) => {
     updateStatusBar(e.fileName)
+    forest.createTree(e.uri.toString(), e.getText())
   },
   onDidChangeActiveTextEditor: (e: vscode.TextEditor | undefined) => {
     if (e) {
