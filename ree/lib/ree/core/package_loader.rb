@@ -38,16 +38,16 @@ class Ree::PackageLoader
     @loaded_packages[name] = true
     package = @packages_store.get(name)
 
-    if package.dir.nil?
-      package.set_schema_loaded
-      return package
-    end
-
     if !package
       raise Ree::Error.new(
         "Package :#{name} was not found. Did you mistype the name? Run `ree gen.packages_json` to update Packages.schema.json",
         :invalid_package_name
       )
+    end
+
+    if package.dir.nil?
+      package.set_schema_loaded
+      return package
     end
 
     not_loaded = Set.new(
