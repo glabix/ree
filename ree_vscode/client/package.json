@@ -6,7 +6,9 @@
 		"vscode": "^1.66.0"
 	},
 	"dependencies": {
-		"vscode-languageclient": "^8.0.1"
+		"vscode-languageclient": "^8.0.1",
+		"web-tree-sitter": "^0.20.5",
+		"web-tree-sitter-ruby": "file:lib/web-tree-sitter-ruby"
 	},
 	"devDependencies": {
 		"@types/vscode": "^1.63.0",
