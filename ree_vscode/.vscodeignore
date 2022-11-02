@@ -1,5 +1,6 @@
 client/**
 !client/out/extension.js
+!client/out/*.wasm
 server/**
 !server/out/index.js
 !server/out/*.wasm
