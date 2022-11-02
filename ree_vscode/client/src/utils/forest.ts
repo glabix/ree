@@ -11,12 +11,14 @@ export interface IForest {
 
 class Forest implements IForest {
   public parser: Parser
+  public language: Parser.Language
   private readonly trees: Map<string, Tree>
 
   constructor() {
     this.trees = new Map()
     TreeSitterFactory.build().then((p) => {
       this.parser = p
+      this.language = p.getLanguage()
     })
   }
 
