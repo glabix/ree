@@ -16,7 +16,7 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
     tree = forest.createTree(uri.toString(), file)
   }
 
-  const query = tree.getLanguage().query(
+  const query = forest.language.query(
     `(
       (link
          link_name: (_) @name) @link
@@ -29,16 +29,28 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
   const offset = ' '.repeat(queryMatches[0].captures[0].node.startPosition.column)
   const firstLinkLineNumber = queryMatches[0].captures[0].node.startPosition.row
   const links = queryMatches.map(qm => {
-    return { name: qm.captures[1].node.text, body: qm.captures[0].node.text }
+    let name = qm.captures[1].node.text
+    let body = qm.captures[0].node.text
+    let as = body.match(asRegexp)?.[1]
+    let importsString = body.match(importRegexp)?.groups?.import
+    let imports = []
+    if (importsString) {
+      imports = importsString.trim().split(' & ')
+    }
+    let isSymbol = name[0] === ":"
+    name = name.replace(/\"|\'|\:/, '') 
+
+    return { name: name, body: body, as: as, imports: imports, isSymbol: isSymbol }
   })
+
   const content = file.split("\n")
   if (links.length === 0) { return }
 
   const isMapper = !!content[firstLinkLineNumber-1]?.match(/mapper/)?.length
   const isDao = !!content[firstLinkLineNumber-1]?.match(/dao/)?.length
 
-  const linksWithFileName = links.filter(l => l.name[0] === "\"" || l.name[0] === "\'")
-  const linksWithSymbolName = links.filter(l => !linksWithFileName.includes(l))
+  const linksWithFileName = links.filter(l => !l.isSymbol)
+  const linksWithSymbolName = links.filter(l => l.isSymbol)
   const sortedLinksWithFileName = linksWithFileName.sort(sortLinksByNameAsc)
   const sortedLinksWithSymbolName = linksWithSymbolName.sort(sortLinksByNameAsc)
   let allSorted = [...sortedLinksWithSymbolName, ...sortedLinksWithFileName]
@@ -55,7 +67,7 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
         let linkValues = uniqLinks[key]['indexes'].map(i => [allSorted[i], i])
 
         let duplicateLinks = linkValues.filter(link => {
-            return !(!!link[0].match(importRegexp)?.groups?.import)
+            return !(!!link[0].body.match(importRegexp)?.groups?.import)
         })
         let indexes = duplicateLinks.map(el => el.pop())
         if (indexes.length === linkValues.length) {
@@ -69,54 +81,54 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
   }
 
   if (!isMapper && !isDao) {
-    sortedWithoutUnused = allSorted.filter(link => {
-      let linkName = link.name
-      let linkNameIsSymbol = linkName[0] === ":"
-      let imports = link.body.match(importRegexp)?.groups?.import
-      let as = link.body.match(asRegexp)?.[1]
-      let name = !!as ? as : linkName.slice(1)
-  
-      if (name.match(/db/)) { return link }
-
-      // TODO: need to benchmark if we need to query all symbols with imports in one query
-      // and then filter by results, rather than quering by one
-
-      if (linkNameIsSymbol) {
-        let nameUsage = tree.getLanguage().query(
-          `(
-            (call receiver: (identifier) @call)
-            (#match? @call "${name}$")
-          )
-          (
-            (call method: (identifier) @call)
-            (#match? @call "${name}$")
-          )
-          (
-            (identifier) @call
-            (#match? @call "${name}$")
-          )
-          `
-        ).matches(tree.rootNode)
-
-        if (nameUsage.length > 0) { return link }
-      }
-      if (!imports) { return }
-  
-      // check imports
-      let importUsage = tree.getLanguage().query(
-        `(
-          (constant) @call
-          (#match? @call "(${imports.trim().split(' & ').join("|")})$")
-        )`
-      ).matches(tree.rootNode)
-  
-      if (importUsage.length > 1) { return link }
-  
-      return
+    let importsStrings = []
+    let nameStrings = []
+    allSorted.forEach(el => {
+      if (el.isSymbol) { nameStrings.push(el.name) }
+      if (el.imports) { importsStrings.push(...el.imports) }
     })
-  } else {
-    sortedWithoutUnused = allSorted
-  } 
+
+    const linkUsageMatches = forest.language.query(
+      `
+        (
+          (call receiver: (identifier) @call)
+          (#match? @call "(${nameStrings.join('|')})$")
+        )
+        (
+          (call method: (identifier) @call)
+          (#match? @call "(${nameStrings.join('|')})$")
+        )
+        (
+          (identifier) @call
+          (#match? @call "(${nameStrings.join('|')})$")
+        )
+        (
+          (constant) @call
+          (#match? @call "(${importsStrings.join("|")})$")
+        )
+      `
+    ).matches(tree.rootNode)
+
+    linkUsageMatches.forEach(el => {
+      let nodeText = el.captures[0].node.text
+      if (nameStrings.includes(nodeText)){
+        nameStrings.splice(nameStrings.indexOf(nodeText), 1)
+      }
+
+      if (importsStrings.includes(nodeText)){
+        importsStrings.splice(importsStrings.indexOf(nodeText), 1)
+      }
+    })
+
+    if (nameStrings.length > 0) {
+      allSorted = allSorted.filter(l => !nameStrings.includes(l.name))
+    }
+
+    if (importsStrings.length > 0) {
+      allSorted = allSorted.filter(l => l.imports.every((i => v => i = importsStrings.indexOf(v, i) + 1)(0)))
+    }
+  }
+  sortedWithoutUnused = allSorted
 
   // return if all links is used and already sorted
   if (sortedWithoutUnused.map(l => l.body).join("\n") === links.map(l => l.body).join("\n")) { return }
