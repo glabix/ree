@@ -77,6 +77,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const onDidCreateFiles = vscode.workspace.onDidCreateFiles(
     (e: vscode.FileCreateEvent) => {
       onCreatePackageFile(e.files[0].path)
+      generateObjectSchema(e.files[0].path, true)
     } 
   )
 

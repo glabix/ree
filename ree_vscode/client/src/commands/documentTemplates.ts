@@ -36,7 +36,7 @@ export function onCreatePackageFile(filePath: string) {
   if (!templateExists && !defaultTemplateExists) { return }
   if (templateExists && !defaultTemplateExists) { resultPath = templatePath }
   if (!templateExists && defaultTemplateExists) { resultPath = defaultTemplatePath }
-  if (templateExists && defaultTemplateExists) { resultPath = templatePath }
+  if (templateExists && defaultTemplateExists) { resultPath = defaultTemplatePath }
   
   const templateContent = fs.readFileSync(resultPath, { encoding: 'utf8' })
 

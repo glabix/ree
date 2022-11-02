@@ -66,7 +66,16 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   if (!fileName.split("/").pop().match(/\.rb/)) {
     return 
   } else {
-    if (!getPackageEntryPath(fileName)) { return }
+    let packageEntry = getPackageEntryPath(fileName)
+    if (!packageEntry) { return }
+
+    let dateInFile = new Date(parseInt(fileName.split("/").pop().split("_")?.[0]))
+    if (
+      !!packageEntry.split("/").pop().match(/migrations/) ||
+      !isNaN(dateInFile?.getTime())
+      ) {
+      return
+    }
   }
 
   const rootProjectDir = getCurrentProjectDir()
