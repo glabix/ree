@@ -67,7 +67,7 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
     duplicateIndexes.forEach(i => { allSorted[i] = null })
     allSorted = allSorted.filter(el => el !== null)
   }
-  
+
   if (!isMapper && !isDao) {
     sortedWithoutUnused = allSorted.filter(link => {
       let linkName = link.name
@@ -81,33 +81,19 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
       // TODO: need to benchmark if we need to query all symbols with imports in one query
       // and then filter by results, rather than quering by one
 
-      // find if link is used using tree-sitter
-      // if symbol && !imports -> 
-      // name call query
-      // `(
-      //   (call receiver: (identifier) @call)
-      //   (#match? @call "^${name}")
-      // )`
-      //
-
-      //if symbol && imports
-      // first, try name call query
-      // if name call used, go on
-      // else, use import constant query
-      // (
-      //   (constant) @call
-      //   (#match? @call "^(${imports.join("|")})")
-      // )
-
       if (linkNameIsSymbol) {
         let nameUsage = tree.getLanguage().query(
           `(
             (call receiver: (identifier) @call)
-            (#match? @call "^${name}")
+            (#match? @call "${name}$")
           )
           (
             (call method: (identifier) @call)
-            (#match? @call "^${name}")
+            (#match? @call "${name}$")
+          )
+          (
+            (identifier) @call
+            (#match? @call "${name}$")
           )
           `
         ).matches(tree.rootNode)
@@ -120,7 +106,7 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
       let importUsage = tree.getLanguage().query(
         `(
           (constant) @call
-          (#match? @call "^(${imports.trim().split(' & ').join("|")})")
+          (#match? @call "(${imports.trim().split(' & ').join("|")})$")
         )`
       ).matches(tree.rootNode)
   
