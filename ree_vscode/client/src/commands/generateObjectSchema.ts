@@ -117,7 +117,15 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
     execPackageName = currentPackageName
   }
 
-  checkAndSortLinks(fileName, execPackageName)
+  vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification
+  }, async (progress) => {
+    progress.report({
+      message: `Checking links...`
+    })
+
+    return new Promise(resolve => resolve(checkAndSortLinks(fileName, execPackageName)))
+  })
 
   // don't generate schema for specs
   if (fileName.split("/").pop().match(/\_spec/)) { return }
