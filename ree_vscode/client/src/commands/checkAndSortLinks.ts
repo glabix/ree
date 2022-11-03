@@ -1,11 +1,7 @@
 import * as vscode from 'vscode'
-import { forest } from '../utils/forest';
+import { forest, asRegexp, importRegexp, mapLinkQueryMatches } from '../utils/forest';
 import { loadPackagesSchema } from "../utils/packagesUtils";
 const fs = require('fs')
-
-const linkNameRegexp = /link\s(?<name>((\:?\w+)|(\"\w.+\")))/
-const importRegexp = /(import\:\s)?(\-\>\s?\{(?<import>.+)\})/
-const asRegexp = /as\:\s\:(\w+)/
 
 export function checkAndSortLinks(filePath: string, packageName: string) {
   const file = fs.readFileSync(filePath, { encoding: 'utf8' })
@@ -25,24 +21,12 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
   )
 
   const queryMatches = query.matches(tree.rootNode)
+  if (queryMatches?.length === 0) { return }
 
   const offset = ' '.repeat(queryMatches[0].captures[0].node.startPosition.column)
   const firstLinkLineNumber = queryMatches[0].captures[0].node.startPosition.row
-  const links = queryMatches.map(qm => {
-    let name = qm.captures[1].node.text
-    let body = qm.captures[0].node.text
-    let as = body.match(asRegexp)?.[1]
-    let importsString = body.match(importRegexp)?.groups?.import
-    let imports = []
-    if (importsString) {
-      imports = importsString.trim().split(' & ')
-    }
-    let isSymbol = name[0] === ":"
-    name = name.replace(/\"|\'|\:/, '') 
-
-    return { name: name, body: body, as: as, imports: imports, isSymbol: isSymbol }
-  })
-
+  const links = mapLinkQueryMatches(queryMatches)
+  
   const content = file.split("\n")
   if (links.length === 0) { return }
 
@@ -143,6 +127,7 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
   const data = content.join("\n")
 
   fs.writeFileSync(filePath, data, {encoding: 'utf8'})
+  forest.updateTree(uri.toString(), data)
 }
 
 function createLinksHash(links: Array<{name: string, body: string}>) {

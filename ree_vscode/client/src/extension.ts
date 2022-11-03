@@ -85,8 +85,8 @@ export async function activate(context: vscode.ExtensionContext) {
     (e: vscode.FileRenameEvent) => {
       onRenamePackageFile(e.files[0].newUri.path)
       onDeletePackageFile(e.files[0].oldUri.path)
-      generateObjectSchema(e.files[0].newUri.path, true)
       forest.deleteTree(e.files[0].oldUri.toString())
+      generateObjectSchema(e.files[0].newUri.path, true)
       if (e.files[0].newUri.path.split("/").pop().match(/\.rb/)) {
         getFileFromManager(e.files[0].newUri.path).then(file => {
           forest.createTree(e.files[0].newUri.toString(), file.getText())
@@ -104,8 +104,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidSaveTextDocument(document => {
     if (document) {
-      generateObjectSchema(document.fileName, true)
       forest.updateTree(document.uri.toString(), document.getText())
+      generateObjectSchema(document.fileName, true)
     }
   })
 

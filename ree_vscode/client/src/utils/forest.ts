@@ -62,4 +62,32 @@ class Forest implements IForest {
   }
 }
  
- export const forest = new Forest()
+export const forest = new Forest()
+
+interface Link {
+  name: string,
+  body: string,
+  as: string,
+  imports: string[],
+  isSymbol: boolean
+}
+
+export const importRegexp = /(import\:\s)?(\-\>\s?\{(?<import>.+)\})/
+export const asRegexp = /as\:\s\:(\w+)/
+
+export function mapLinkQueryMatches(matches: Parser.QueryMatch[]): Array<Link> {
+  return matches.map(qm => {
+    let name = qm.captures[1].node.text
+    let body = qm.captures[0].node.text
+    let as = body.match(asRegexp)?.[1]
+    let importsString = body.match(importRegexp)?.groups?.import
+    let imports = []
+    if (importsString) {
+      imports = importsString.trim().split(' & ')
+    }
+    let isSymbol = name[0] === ":"
+    name = name.replace(/\"|\'|\:/, '') 
+
+    return { name: name, body: body, as: as, imports: imports, isSymbol: isSymbol }
+  })
+}

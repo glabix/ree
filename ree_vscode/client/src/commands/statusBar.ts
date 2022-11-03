@@ -13,7 +13,6 @@ const statusBarRspecItem = buildStatusBarItem(SPEC_COUNT_PRIORITY)
 export const statusBarCallbacks = {
   onDidOpenTextDocument: (e: vscode.TextDocument) => {
     updateStatusBar(e.fileName)
-    forest.createTree(e.uri.toString(), e.getText())
   },
   onDidChangeActiveTextEditor: (e: vscode.TextEditor | undefined) => {
     if (e) {
