@@ -26,12 +26,12 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
   const offset = ' '.repeat(queryMatches[0].captures[0].node.startPosition.column)
   const firstLinkLineNumber = queryMatches[0].captures[0].node.startPosition.row
   const links = mapLinkQueryMatches(queryMatches)
-  
+
   const content = file.split("\n")
   if (links.length === 0) { return }
 
-  const isMapper = !!content[firstLinkLineNumber-1]?.match(/mapper/)?.length
-  const isDao = !!content[firstLinkLineNumber-1]?.match(/dao/)?.length
+  const isMapper = !!content[firstLinkLineNumber - 1]?.match(/mapper/)?.length
+  const isDao = !!content[firstLinkLineNumber - 1]?.match(/dao/)?.length
 
   const linksWithFileName = links.filter(l => !l.isSymbol)
   const linksWithSymbolName = links.filter(l => l.isSymbol)
@@ -42,22 +42,22 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
 
   // check uniq
   const uniqLinks = createLinksHash(allSorted)
-  
+
   const duplicates = Object.keys(uniqLinks).filter(key => uniqLinks[key]['count'] > 1)
   if (duplicates.length > 0) {
     const duplicateIndexes = []
     duplicates.forEach(key => {
-        // get value and index of duplicate without imports
-        let linkValues = uniqLinks[key]['indexes'].map(i => [allSorted[i], i])
+      // get value and index of duplicate without imports
+      let linkValues = uniqLinks[key]['indexes'].map(i => [allSorted[i], i])
 
-        let duplicateLinks = linkValues.filter(link => {
-            return !(!!link[0].body.match(importRegexp)?.groups?.import)
-        })
-        let indexes = duplicateLinks.map(el => el.pop())
-        if (indexes.length === linkValues.length) {
-          indexes = indexes.slice(1)
-        }
-        duplicateIndexes.push(...indexes)
+      let duplicateLinks = linkValues.filter(link => {
+        return !(!!link[0].body.match(importRegexp)?.groups?.import)
+      })
+      let indexes = duplicateLinks.map(el => el.pop())
+      if (indexes.length === linkValues.length) {
+        indexes = indexes.slice(1)
+      }
+      duplicateIndexes.push(...indexes)
     })
 
     duplicateIndexes.forEach(i => { allSorted[i] = null })
@@ -95,17 +95,23 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
 
     linkUsageMatches.forEach(el => {
       let nodeText = el.captures[0].node.text
-      if (nameStrings.includes(nodeText)){
+      if (nameStrings.includes(nodeText)) {
         nameStrings.splice(nameStrings.indexOf(nodeText), 1)
       }
 
-      if (importsStrings.includes(nodeText)){
+      if (importsStrings.includes(nodeText)) {
         importsStrings.splice(importsStrings.indexOf(nodeText), 1)
       }
     })
 
     if (nameStrings.length > 0) {
-      allSorted = allSorted.filter(l => !nameStrings.includes(l.name))
+      allSorted = allSorted.filter(l => {
+        if (nameStrings.includes(l.name)) {
+          if (l.imports) { return true }
+        } else {
+          return true
+        }
+      })
     }
 
     if (importsStrings.length > 0) {
@@ -126,11 +132,11 @@ export function checkAndSortLinks(filePath: string, packageName: string) {
   content.splice(firstLinkLineNumber, 0, ...sortedWithOffset)
   const data = content.join("\n")
 
-  fs.writeFileSync(filePath, data, {encoding: 'utf8'})
+  fs.writeFileSync(filePath, data, { encoding: 'utf8' })
   forest.updateTree(uri.toString(), data)
 }
 
-function createLinksHash(links: Array<{name: string, body: string}>) {
+function createLinksHash(links: Array<{ name: string, body: string }>) {
   let uniqLinks = {}
   links.map((link, index) => {
     let linkName = link.name.replace(/\:|\"/, '').split("/").pop()
