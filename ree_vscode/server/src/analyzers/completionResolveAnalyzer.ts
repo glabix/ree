@@ -1,5 +1,4 @@
 import { CompletionItem, CompletionItemKind, MarkupContent, MarkupKind } from 'vscode-languageserver'
-import { forest } from '../forest'
 import { splitArgsType } from '../utils/tokenUtils'
 import { loadObjectSchema, IObjectMethod, IObject } from '../utils/objectUtils'
 

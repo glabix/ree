@@ -66,7 +66,16 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   if (!fileName.split("/").pop().match(/\.rb/)) {
     return 
   } else {
-    if (!getPackageEntryPath(fileName)) { return }
+    let packageEntry = getPackageEntryPath(fileName)
+    if (!packageEntry) { return }
+
+    let dateInFile = new Date(parseInt(fileName.split("/").pop().split("_")?.[0]))
+    if (
+      !!packageEntry.split("/").pop().match(/migrations/) ||
+      !isNaN(dateInFile?.getTime())
+      ) {
+      return
+    }
   }
 
   const rootProjectDir = getCurrentProjectDir()
@@ -108,7 +117,15 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
     execPackageName = currentPackageName
   }
 
-  checkAndSortLinks(fileName, execPackageName)
+  vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification
+  }, async (progress) => {
+    progress.report({
+      message: `Checking links...`
+    })
+
+    return new Promise(resolve => resolve(checkAndSortLinks(fileName, execPackageName)))
+  })
 
   // don't generate schema for specs
   if (fileName.split("/").pop().match(/\_spec/)) { return }
@@ -154,7 +171,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
           lineNumber = 0
         }
   
-        const character = fileName.split("\n")[lineNumber].length - 1
+        const character = file.split("\n")[lineNumber].length - 1
         let diagnostics: vscode.Diagnostic[] = []
   
         let diagnostic: vscode.Diagnostic = {

@@ -29,7 +29,7 @@ module Ree
           else
             file_path = File.join(dir, object_path)
 
-            if File.exists?(file_path)
+            if File.exist?(file_path)
               facade.load_file(file_path, package_name)
               facade.dump_package_schema(package_name)
 

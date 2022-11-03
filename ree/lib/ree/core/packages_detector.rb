@@ -6,7 +6,7 @@ class Ree::PackagesDetector
   # @param [String] dir Packages root dir
   # @return [ArrayOf[{name: String, entry_path: String, package_schema_path: String, gem_name: Nilor[String]}]]
   def call(dir, gem_name = nil)
-    if !Dir.exists?(dir)
+    if !Dir.exist?(dir)
       raise Ree::Error.new("dir does not exist: #{dir}", :invalid_dir)
     end
 
@@ -22,7 +22,7 @@ class Ree::PackagesDetector
       name = package_schema_path.split('/')[-2]
       entry_path = Ree::PathHelper.package_entry_path(package_schema_path)
 
-      if !File.exists?(File.join(dir, entry_path))
+      if !File.exist?(File.join(dir, entry_path))
         Ree.logger.error("Entry file does not exist for '#{name}' package: #{entry_path}")
       end
 

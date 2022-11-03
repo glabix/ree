@@ -144,7 +144,7 @@ module Ree
     def init(dir, irb: false)
       check_arg(dir, :dir, String)
 
-      if !Dir.exists?(dir)
+      if !Dir.exist?(dir)
         raise Ree::Error.new("Dir does not exist: #{dir}", :invalid_root_dir)
       end
 
@@ -153,7 +153,7 @@ module Ree
 
       ree_setup_path = File.join(@root_dir, REE_SETUP)
 
-      if File.exists?(ree_setup_path)
+      if File.exist?(ree_setup_path)
         require(ree_setup_path)
       end
 
@@ -192,7 +192,7 @@ module Ree
         raise Ree::Error.new("Ree already registered gem `#{name}`", :duplicate_gem)
       end
 
-      if !Dir.exists?(dir)
+      if !Dir.exist?(dir)
         raise Ree::Error.new("Dir does not exist: #{dir}", :invalid_gem_dir)
       end
 
@@ -201,7 +201,7 @@ module Ree
       gem_dir = Pathname.new(packages_schema_path).dirname.to_s
       ree_setup_path = File.join(gem_dir, REE_SETUP)
 
-      if File.exists?(ree_setup_path)
+      if File.exist?(ree_setup_path)
         require(ree_setup_path)
       end
 

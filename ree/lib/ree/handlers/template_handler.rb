@@ -80,7 +80,7 @@ class Ree::TemplateHandler
       rendered_abs_path = Ree::TemplateRenderer.handle(get_destination_path(path), @locals)
       rendered_rel_path = Pathname.new(rendered_abs_path).relative_path_from Pathname.new(project_path)
 
-      if File.file?(rendered_abs_path) && File.exists?(rendered_abs_path)
+      if File.file?(rendered_abs_path) && File.exist?(rendered_abs_path)
         @stdout.puts "Warning! #{rendered_rel_path} already exists. Skipping file creation..."
         next
       end

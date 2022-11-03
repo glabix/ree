@@ -18,13 +18,14 @@ import { getCurrentProjectDir } from './utils/fileUtils'
 import { generatePackagesSchema } from "./commands/generatePackagesSchema"
 import { genObjectSchemaCmd, generateObjectSchema } from "./commands/generateObjectSchema"
 import { generatePackage } from "./commands/generatePackage"
-import { updatePackageDeps } from './commands/updatePackageDeps'
+import { getFileFromManager, updatePackageDeps } from './commands/updatePackageDeps'
 import { selectAndGeneratePackageSchema } from './commands/selectAndGeneratePackageSchema'
 import { onDeletePackageFile } from "./commands/deleteObjectSchema"
+import { forest } from './utils/forest'
 
 let client: LanguageClient
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   let gotoPackageCmd = vscode.commands.registerCommand(
     "ree.goToPackage",
     goToPackage
@@ -76,6 +77,7 @@ export function activate(context: vscode.ExtensionContext) {
   const onDidCreateFiles = vscode.workspace.onDidCreateFiles(
     (e: vscode.FileCreateEvent) => {
       onCreatePackageFile(e.files[0].path)
+      generateObjectSchema(e.files[0].path, true)
     } 
   )
 
@@ -83,25 +85,34 @@ export function activate(context: vscode.ExtensionContext) {
     (e: vscode.FileRenameEvent) => {
       onRenamePackageFile(e.files[0].newUri.path)
       onDeletePackageFile(e.files[0].oldUri.path)
+      forest.deleteTree(e.files[0].oldUri.toString())
       generateObjectSchema(e.files[0].newUri.path, true)
+      if (e.files[0].newUri.path.split("/").pop().match(/\.rb/)) {
+        getFileFromManager(e.files[0].newUri.path).then(file => {
+          forest.createTree(e.files[0].newUri.toString(), file.getText())
+        })
+      }
     } 
   )
 
   const onDidDeleteFiles = vscode.workspace.onDidDeleteFiles(
     (e: vscode.FileDeleteEvent) => {
       onDeletePackageFile(e.files[0].path)
+      forest.deleteTree(e.files[0].toString())
     } 
   )
 
   vscode.workspace.onDidSaveTextDocument(document => {
     if (document) {
+      forest.updateTree(document.uri.toString(), document.getText())
       generateObjectSchema(document.fileName, true)
     }
   })
 
   vscode.workspace.onDidCloseTextDocument(document => {
     if (document) {
-      clearDocumentProblems(document) 
+      clearDocumentProblems(document)
+      forest.deleteTree(document.uri.toString())
     }
   })
 
@@ -124,7 +135,6 @@ export function activate(context: vscode.ExtensionContext) {
     onDidRenameFiles,
     onDidDeleteFiles,
   )
-
 
   let curPath = getCurrentProjectDir()
   isBundleGemsInstalled(curPath).then((res) => {
@@ -184,5 +194,6 @@ export function deactivate(): Thenable<void> | undefined {
   if (!client) {
 		return undefined
 	}
+  forest.release()
 	return client.stop()
 }

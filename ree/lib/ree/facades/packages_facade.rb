@@ -78,7 +78,7 @@ class Ree::PackagesFacade
     if package.dir
       schema_path = Ree::PathHelper.abs_package_schema_path(package)
 
-      if !File.exists?(schema_path)
+      if !File.exist?(schema_path)
         raise Ree::Error.new("File does not exist: #{schema_path}", :invalid_path)
       end
 
@@ -101,7 +101,7 @@ class Ree::PackagesFacade
     if package.dir
       schema_path = Ree::PathHelper.abs_package_schema_path(package)
 
-      if !File.exists?(schema_path)
+      if !File.exist?(schema_path)
         raise Ree::Error.new("File does not exist: #{schema_path}", :invalid_path)
       end
 
@@ -126,7 +126,7 @@ class Ree::PackagesFacade
 
     schema_path = Ree::PathHelper.abs_object_schema_path(object)
 
-    if !File.exists?(schema_path)
+    if !File.exist?(schema_path)
       only_dir_path = schema_path.split('/')[0..-2]
       FileUtils.mkdir_p(File.join(only_dir_path))
     end

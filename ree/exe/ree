@@ -251,7 +251,7 @@ class ReeCliRunner
         package_abs_path = Ree::PathHelper.abs_package_dir(package)
         exec_abs_path    = Pathname.new(package_abs_path).join(Pathname.new(executable_path)).to_s
 
-        raise Ree::Error.new("File #{exec_abs_path} not found") unless File.exists?(exec_abs_path)
+        raise Ree::Error.new("File #{exec_abs_path} not found") unless File.exist?(exec_abs_path)
 
         system("chmod +x #{exec_abs_path}") if run_chmod_x
         system(exec_abs_path)
