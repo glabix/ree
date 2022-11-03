@@ -234,40 +234,6 @@ function updateObjectLinks(
   }
 
   return editDocument(currentFile, lineNumber, endCharPos, linkText)
-
-
-  
-  // if (links.length === 0) {
-    
-
-  //   
-
-  //   if (!isLinkDslPresent) {
-      
-  //   } else {
-      
-  //   }
-
-
-  //   return editDocument(currentFile, lineNumber, endCharPos, linkText)
-  // }
-
-  // // add link, if we have any
-  // if (links.find(l => l.name === objectName)) { return }
-
-  // lineNumber = queryMatches[0].captures[0].node.startPosition.row
-  // startCharPos = queryMatches[0].captures[0].node.startPosition.column
-  // endCharPos = queryMatches[0].captures[0].node.startPosition.column
-
-  // offset = ' '.repeat(startCharPos) 
-
-  // linkText = `link :${objectName}`
-  // if (currentPackage.name !== fromPackageName) {
-  //   linkText += `, from: :${fromPackageName}`
-  // }
-
-  // linkText = `${linkText}\n${offset}`
-  // return editDocument(currentFile, lineNumber, endCharPos, linkText)
 }
 
 function editDocument(currentFile: vscode.TextDocument, line: number, character: number, insertString: string): Thenable<boolean> {
