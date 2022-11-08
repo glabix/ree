@@ -66,6 +66,8 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   if (!fileName.split("/").pop().match(/\.rb/)) {
     return 
   } else {
+    if (!fileName.split("/").includes("package")) { return }
+
     let packageEntry = getPackageEntryPath(fileName)
     if (!packageEntry) { return }
 
