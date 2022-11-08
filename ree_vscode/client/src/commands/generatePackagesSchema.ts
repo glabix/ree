@@ -12,7 +12,7 @@ export function generatePackagesSchema(silent: boolean) {
   const rootProjectDir = getProjectRootDir(vscode.workspace.workspaceFolders[0].uri.path)
   if (!rootProjectDir) { return }
 
-  const checkIsReeInstalled = isReeInstalled(rootProjectDir).then((res) => {
+  const checkIsReeInstalled = isReeInstalled(rootProjectDir)?.then((res) => {
     if (res.code === 1) {
       vscode.window.showWarningMessage('Gem ree is not installed')
       return null
@@ -21,7 +21,7 @@ export function generatePackagesSchema(silent: boolean) {
 
   if (!checkIsReeInstalled) { return }
 
-  const checkIsBundleGemsInstalled = isBundleGemsInstalled(rootProjectDir).then((res) => {
+  const checkIsBundleGemsInstalled = isBundleGemsInstalled(rootProjectDir)?.then((res) => {
     if (res.code !== 0) {
       vscode.window.showWarningMessage(res.message)
       return
@@ -29,13 +29,20 @@ export function generatePackagesSchema(silent: boolean) {
   })
   if (!checkIsBundleGemsInstalled) { return }
 
-  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker().then((res) => {
-    if (res.code !== 0) {
-      vscode.window.showWarningMessage(res.message)
-      return null
+  const dockerPresented = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('presented') as boolean
+  if (dockerPresented) {
+    const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()?.then((res) => {
+      if (res.code !== 0) {
+        vscode.window.showWarningMessage(res.message)
+        return null
+      }
+    })
+
+    if (!checkIsBundleGemsInstalledInDocker) {
+      vscode.window.showWarningMessage("Docker option is enabled, but bundle gems not found in Docker container")
+      return
     }
-  })
-  if (!checkIsBundleGemsInstalledInDocker) { return }
+  }
 
   let result = execGeneratePackagesSchema(rootProjectDir)
   if (!result) {

@@ -137,13 +137,15 @@ export async function activate(context: vscode.ExtensionContext) {
   )
 
   let curPath = getCurrentProjectDir()
-  isBundleGemsInstalled(curPath).then((res) => {
-    if (res.code !== 0) {
-      vscode.window.showWarningMessage(res.message)
-    }
-  })
+  if (isBundleGemsInstalled(curPath)) {
+    isBundleGemsInstalled(curPath).then((res) => {
+      if (res.code !== 0) {
+        vscode.window.showWarningMessage(res.message)
+      }
+    })
+  }
 
-  if(isBundleGemsInstalledInDocker()) {
+  if (isBundleGemsInstalledInDocker()) {
     isBundleGemsInstalledInDocker().then((res) => {
       if (res && res.code !== 0) {
         vscode.window.showWarningMessage(res.message)
