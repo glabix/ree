@@ -7,10 +7,18 @@ import { spawnCommand } from './reeUtils'
 const path = require('path')
 const fs = require('fs')
 
-let cachedPackages: IPackagesSchema | undefined = undefined
+export let cachedPackages: IPackagesSchema | undefined = undefined
+export function setCachedPackages(packagesSchema: IPackagesSchema) {
+  cachedPackages = packagesSchema
+}
+
 let packagesCtime: number | null = null
 let cachedGemPackages: Object | null = null
-let cachedGems: ICachedGems = {}
+
+export let cachedGems: ICachedGems = {}
+export function setCachedGems(gemName: string, gemPath: string) {
+  cachedGems[gemName] = gemPath
+}
 
 interface ExecCommand {
   message: string
@@ -58,11 +66,13 @@ export function loadPackagesSchema(currentPath: string): IPackagesSchema | undef
         let splitedPath = path.split("/")
         let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
 
-        cachedGems[name] = path
+        setCachedGems(name, path)
       })
 
-      cachedPackages = parsePackagesSchema(
-        fs.readFileSync(schemaPath, { encoding: 'utf8' }), root
+      setCachedPackages(
+        parsePackagesSchema(
+          fs.readFileSync(schemaPath, { encoding: 'utf8' }), root
+        )
       )
     })
   }
@@ -101,7 +111,7 @@ export function getGemDir(gemPackageName: string): string | undefined {
   return path.join(gemDir.trim(), 'lib', gemPackage.gem)
 }
 
-function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | undefined {
+export function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | undefined {
   try {
     const schema = JSON.parse(data) as any;
     const obj = {} as IPackagesSchema
