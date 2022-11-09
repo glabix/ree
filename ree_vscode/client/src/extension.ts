@@ -22,7 +22,10 @@ import { getFileFromManager, updatePackageDeps } from './commands/updatePackageD
 import { selectAndGeneratePackageSchema } from './commands/selectAndGeneratePackageSchema'
 import { onDeletePackageFile } from "./commands/deleteObjectSchema"
 import { forest } from './utils/forest'
+import { cacheGemPaths, setCachedPackages, parsePackagesSchema, setCachedGems } from "./utils/packagesUtils"
+import { PACKAGES_SCHEMA_FILE } from "./core/constants"
 
+const fs = require('fs')
 let client: LanguageClient
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -137,13 +140,32 @@ export async function activate(context: vscode.ExtensionContext) {
   )
 
   let curPath = getCurrentProjectDir()
-  isBundleGemsInstalled(curPath).then((res) => {
-    if (res.code !== 0) {
-      vscode.window.showWarningMessage(res.message)
-    }
+  cacheGemPaths(curPath).then((r) => {
+    const gemPathsArr = r?.message.split("\n")
+      gemPathsArr?.map((path) => {
+        let splitedPath = path.split("/")
+        let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
+
+        setCachedGems(name, path)
+      })
+
+      setCachedPackages(
+        parsePackagesSchema(
+          fs.readFileSync(path.join(curPath, PACKAGES_SCHEMA_FILE),{ encoding: 'utf8' }),
+          path.join(curPath, PACKAGES_SCHEMA_FILE)
+        )
+      )
   })
 
-  if(isBundleGemsInstalledInDocker()) {
+  if (isBundleGemsInstalled(curPath)) {
+    isBundleGemsInstalled(curPath).then((res) => {
+      if (res.code !== 0) {
+        vscode.window.showWarningMessage(res.message)
+      }
+    })
+  }
+
+  if (isBundleGemsInstalledInDocker()) {
     isBundleGemsInstalledInDocker().then((res) => {
       if (res && res.code !== 0) {
         vscode.window.showWarningMessage(res.message)
