@@ -112,3 +112,15 @@ export function getWorkingPackageDirPath(filePath: string) : string | null {
 
   return null
 }
+
+export enum Locale {
+  en = 'en',
+  ru = 'ru'
+}
+export function getLocalePath(filePath: string, locale: Locale): string {
+  let packageEntry = getPackageEntryPath(filePath)
+  let packageName = packageEntry.split('/').slice(-1)[0].split('.')[0]
+  let packageDir = packageEntry.split('/').slice(0, -1)
+  packageDir.push(packageName, 'locales', `${locale}.yml`)
+  return packageDir.join('/')
+}
