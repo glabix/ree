@@ -63,6 +63,8 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   if (!fileName.split("/").pop().match(/\.rb/)) {
     return 
   } else {
+    if (!fileName.split("/").includes("package")) { return }
+
     let packageEntry = getPackageEntryPath(fileName)
     if (!packageEntry) { return }
 
@@ -79,7 +81,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   if (!rootProjectDir) { return }
 
   // check if ree is installed
-  const checkIsReeInstalled = isReeInstalled(rootProjectDir).then((res) => {
+  const checkIsReeInstalled = isReeInstalled(rootProjectDir)?.then((res) => {
     if (res.code === 1) {
       vscode.window.showWarningMessage(res.message)
       return null
@@ -87,7 +89,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   })
   if (!checkIsReeInstalled) { return }
 
-  const isBundleGemsInstalledResult = isBundleGemsInstalled(rootProjectDir).then((res) => {
+  const isBundleGemsInstalledResult = isBundleGemsInstalled(rootProjectDir)?.then((res) => {
     if (res.code !== 0) {
       vscode.window.showWarningMessage(res.message)
       return null
@@ -95,13 +97,20 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   })
   if (!isBundleGemsInstalledResult) { return }
 
-  const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker().then((res) => {
-    if (res.code !== 0) {
-      vscode.window.showWarningMessage(res.message)
-      return null
+  const dockerPresented = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('presented') as boolean
+  if (dockerPresented) {
+    const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()?.then((res) => {
+      if (res.code !== 0) {
+        vscode.window.showWarningMessage(res.message)
+        return null
+      }
+    })
+
+    if (!checkIsBundleGemsInstalledInDocker) {
+      vscode.window.showWarningMessage("Docker option is enabled, but bundle gems not found in Docker container")
+      return
     }
-  })
-  if (!checkIsBundleGemsInstalledInDocker) { return }
+  }
 
   let execPackageName = null
 

@@ -99,8 +99,11 @@ export function findLinkedObject(uri: string, token: string, position: Position)
 
   const object = packageFacade.objects().find(o => o.name === objectName)
   if (!object) {
+    // maybe we inside object that don't have entry in package.schema, like entity
+    let obj = packageFacade.objects().find(o => o.name.match(RegExp(`${token.replace(/\'|\"|\:/, '')}`)))
+    
     // maybe it's a constant
-    const constantLocation = findConstant(token, uri, position, doc, packagesSchema, projectRootDir)
+    const constantLocation = findConstant(token, uri, position, doc, packagesSchema, projectRootDir, packageName)
     if (!constantLocation) { return ret }
 
     return constantLocation
@@ -115,7 +118,7 @@ export function findLinkedObject(uri: string, token: string, position: Position)
 
   if (!link) { 
     // maybe it's a constant
-    const constantLocation = findConstant(token, uri, position, doc, packagesSchema, projectRootDir)
+    const constantLocation = findConstant(token, uri, position, doc, packagesSchema, projectRootDir, packageName)
     if (!constantLocation) { return ret }
 
     return constantLocation
@@ -213,7 +216,15 @@ export interface ILocalMethod {
   methodDef?: string
 }
 
-export function findConstant(token: string, uri: string, position: Position, doc: TextDocument, packagesSchema: IPackagesSchema, projectRootDir: string): ILinkedObject | undefined {
+export function findConstant(
+    token: string,
+    uri: string,
+    position: Position,
+    doc: TextDocument,
+    packagesSchema: IPackagesSchema,
+    projectRootDir: string,
+    currentPackageName?: string
+  ): ILinkedObject | undefined {
   const ret = {} as ILinkedObject
   let constantTokenLine = findTokenInFile(token, uri)
   if (!constantTokenLine) { return ret }
@@ -248,9 +259,20 @@ export function findConstant(token: string, uri: string, position: Position, doc
   const importText = linkText.match(importRegexp)?.groups?.import
   let constLocation = null
 
+  const isSymbol = linkName.includes(":")
+  let linkPackage = null
+  if (isSymbol) {
+    if (fromName) {
+      linkPackage = packagesSchema.packages.find(p => p.name === fromName.slice(1))   
+    } else {
+      linkPackage = packagesSchema.packages.find(p => p.name === currentPackageName)
+    }
+  }
   const splittedLinkName = linkName.replace(/\'|\:|\"/g,'').split('/')
   const packageName = splittedLinkName[0]
-  const linkPackage = packagesSchema.packages.find(p => p.name === packageName)
+
+  linkPackage ??= packagesSchema.packages.find(p => p.name === packageName)
+
   let linkedFilePath = null
   if (!linkPackage) {
     // maybe it's a gem
@@ -264,9 +286,16 @@ export function findConstant(token: string, uri: string, position: Position, doc
     const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage?.schema))
     if (!linkPackageFacade) { return ret }
 
-    const packageRootPath = linkPackageFacade.entryPath().split('/').slice(0, -1).join('/')
-    const importLinkRelativePath = packageRootPath + '/' + linkName.replace(/\'|\:|\"/g,'') + '.rb'
-    const importLinkPath = path.join(projectRootDir, importLinkRelativePath)
+    let importLinkPath = null
+    let obj = linkPackageFacade.objects().find(o => o.name === linkName.slice(1))
+    if (obj) {
+      const currentObject = loadObjectSchema(path.join(projectRootDir, obj.schema))
+      importLinkPath = path.join(projectRootDir, currentObject?.path) 
+    } else {
+      const packageRootPath = linkPackageFacade.entryPath().split('/').slice(0, -1).join('/')
+      const importLinkRelativePath = packageRootPath + '/' + linkName.replace(/\'|\:|\"/g,'') + '.rb'
+      importLinkPath = path.join(projectRootDir, importLinkRelativePath)
+    }
 
     linkedFilePath = url.pathToFileURL(importLinkPath).toString()
   }
