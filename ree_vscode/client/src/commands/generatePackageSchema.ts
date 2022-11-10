@@ -12,13 +12,10 @@ import {
   buildReeCommandFullArgsArray,
   spawnCommand
 } from '../utils/reeUtils'
+import { diagnosticCollection } from '../extension'
+import { addDocumentProblems, ReeDiagnosticCode, removeDocumentProblems } from '../utils/documentUtils'
 
 const path = require('path')
-const diagnosticCollection = vscode.languages.createDiagnosticCollection('ruby')
-
-export function clearDocumentProblems(document: vscode.TextDocument) {
-  diagnosticCollection.delete(document.uri)
-}
 
 export function generatePackageSchema(document: vscode.TextDocument, silent: boolean, packageName?: string) {
   if (!vscode.workspace.workspaceFolders) {
@@ -82,7 +79,7 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
     })
 
     return result.then((commandResult) => {
-      diagnosticCollection.delete(document.uri)
+      removeDocumentProblems(document.uri, ReeDiagnosticCode.reeDiagnostic)
     
       if (commandResult.code === 1) {
         const rPath = path.relative(
@@ -116,11 +113,12 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
             new vscode.Position(lineNumber, character)
           ),
           message: commandResult.message,
+          code: ReeDiagnosticCode.reeDiagnostic,
           source: 'ree'
         }
     
         diagnostics.push(diagnostic)
-        diagnosticCollection.set(document.uri, diagnostics)
+        addDocumentProblems(document.uri, diagnostics)
     
         return
       }
