@@ -172,10 +172,13 @@ export function checkExceptions(filePath: string): void {
     }
 
     // check that locales is exists
+    if (exceptionBuildMatches.length === 0) { return }
+
     let locales = []
     exceptionBuildMatches.forEach(e => {
       locales.push(e.captures.find(c => c.name === 'locale').node.text.replace(/\"|\'/g, ''))
     })
+    if (locales.length === 0) { return }
 
     // find locale file
     let ruLocaleFilePath = getLocalePath(filePath, Locale.ru)
@@ -191,64 +194,8 @@ export function checkExceptions(filePath: string): void {
       return
     }
 
-    let ruLocales = null
-    let enLocales = null
-
-    // TODO: refactor try-catch to promises
-
-    try {
-      ruLocales = yaml.load(ruLocaleFile)
-      let missingRuValues = []
-      locales.forEach(locale => {
-        let value = resolveObject(`${Locale.ru}.${locale}`, ruLocales)
-        if (!value) { missingRuValues.push(locale) }
-      })
-
-      if (missingRuValues.length > 0) {
-        vscode.window.showErrorMessage(`${Locale.ru}.yml is missing ${missingRuValues.join(', ')} values`, ...[`Add missing values to ${Locale.ru}.yml`, 'Dismiss']).then(selection => {
-          if (selection === 'Dismiss') { return }
-
-          missingRuValues.forEach(l => {
-            eval(`ruLocales['${Locale.ru}']${l.split(".").map(e => `['${e}']`).join('')} = 'MISSING VALUE'`)
-          })
-
-          let data = yaml.dump(ruLocales, {'quotingType': '"', 'sortKeys': true})
-          fs.writeFileSync(ruLocaleFilePath, data, { encoding: 'utf-8' })
-          vscode.workspace.openTextDocument(ruLocaleFilePath).then(doc => {
-            vscode.window.showTextDocument(doc)
-          })
-        })
-      }
-    } catch (error) {
-      vscode.window.showErrorMessage(`Locale Parsing Error ${ruLocaleFilePath} - ${error}`)
-    }
-
-    try {
-      enLocales = yaml.load(enLocaleFile)
-      let missingEnValues = []
-      locales.forEach(locale => {
-        let value = resolveObject(`${Locale.en}.${locale}`, enLocales)
-        if (!value) { missingEnValues.push(locale) }
-      })
-
-      if (missingEnValues.length > 0) {
-        vscode.window.showErrorMessage(`${Locale.en}.yml is missing ${missingEnValues.join(', ')} values`, ...[`Add missing values to ${Locale.en}.yml`, 'Dismiss']).then(selection => {
-          if (selection === 'Dismiss') { return }
-
-          missingEnValues.forEach(l => {
-            eval(`enLocales['${Locale.en}']${l.split(".").map(e => `['${e}']`).join('')} = 'MISSING VALUE'`)
-          })
-
-          let data = yaml.dump(enLocales, {'quotingType': '"', 'sortKeys': true})
-          fs.writeFileSync(enLocaleFilePath, data, { encoding: 'utf-8' })
-          vscode.workspace.openTextDocument(enLocaleFilePath).then(doc => {
-            vscode.window.showTextDocument(doc)
-          })
-        })
-      }
-    } catch (error) {
-      vscode.window.showErrorMessage(`En Locale Parsing Error ${enLocaleFilePath} - ${error}`)
-    }
+    checkLocale(ruLocaleFile, ruLocaleFilePath, Locale.ru, locales)
+    checkLocale(enLocaleFile, enLocaleFilePath, Locale.en, locales)
   }
 }
 
@@ -271,6 +218,41 @@ function collectDocumentDiagnostics(filePath: string, nodes: SyntaxNode[], messa
   })
 
   return diagnostics
+}
+
+async function checkLocale(localeFile: string, localeFilePath: string, locale: Locale, allLocales: string[]) {
+  try {
+    console.log('In Check Locale', locale)
+    const langLocales = yaml.load(localeFile)
+    let missingValues = []
+    allLocales.forEach(l => {
+      let value = resolveObject(`${locale}.${l}`, langLocales)
+      if (!value) { missingValues.push(l) }
+    })
+
+    if (missingValues.length > 0) {
+      vscode.window.showErrorMessage(
+        `${locale}.yml is missing ${missingValues.join(', ')} values`,
+        { modal: true } as vscode.MessageOptions,
+        ...[`Add missing values to ${locale}.yml`, 'Dismiss']
+      ).then(selection => {
+        if (selection === 'Dismiss') { return }
+
+        missingValues.forEach(l => {
+          eval(`langLocales['${locale}']${l.split(".").map(e => `['${e}']`).join('')} = 'MISSING VALUE'`)
+        })
+
+        let data = yaml.dump(langLocales, { 'quotingType': '"', 'sortKeys': true })
+        fs.writeFileSync(localeFilePath, data, { encoding: 'utf-8' })
+        vscode.workspace.openTextDocument(localeFilePath).then(doc => {
+          vscode.window.showTextDocument(doc)
+        })
+      })
+    }
+  } catch (error) {
+    console.log('In show error', locale)
+    vscode.window.showErrorMessage(`${locale}.yml locales parsing error ${localeFilePath} - ${error}`)
+  }
 }
 
 function checkOccurrence(array, element) {
