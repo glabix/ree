@@ -89,13 +89,22 @@ export function checkExceptions(filePath: string): void {
   if (throwsMatches && raiseMatches.length === 0) {
     // return if throws is empty
     if (throwsConstants.length === 0) { return }
+    // check if we use constants without raise
+    const isThrowsConstIsUsed = forest.language.query(
+      `(
+        (constant) @call
+        (#match? @call "(${throwsConstants.join("|")})$")
+      )`
+    ).matches(tree.rootNode).length > 1 // more than one, because one use is in throws already
 
-    // else, add diagnostic about unused constants in throws
-    let throwsCallNode = throwsMatches.captures.find(e => e.name === 'throws_call').node
-    diagnostics.push(
-      ...collectDocumentDiagnostics(filePath, [throwsCallNode], `You added exceptions to throws method, but didn't used them in code.`)
-    )
-    addDocumentProblems(uri, diagnostics)
+    if (!isThrowsConstIsUsed) {
+      // else, add diagnostic about unused constants in throws
+      let throwsCallNode = throwsMatches.captures.find(e => e.name === 'throws_call').node
+      diagnostics.push(
+        ...collectDocumentDiagnostics(filePath, [throwsCallNode], `You added exceptions to throws method, but didn't used them in code.`)
+      )
+      addDocumentProblems(uri, diagnostics)
+    }
   }
 
   if (throwsMatches && raiseMatches.length > 0) {
@@ -222,7 +231,6 @@ function collectDocumentDiagnostics(filePath: string, nodes: SyntaxNode[], messa
 
 async function checkLocale(localeFile: string, localeFilePath: string, locale: Locale, allLocales: string[]) {
   try {
-    console.log('In Check Locale', locale)
     const langLocales = yaml.load(localeFile)
     let missingValues = []
     allLocales.forEach(l => {
@@ -250,7 +258,6 @@ async function checkLocale(localeFile: string, localeFilePath: string, locale: L
       })
     }
   } catch (error) {
-    console.log('In show error', locale)
     vscode.window.showErrorMessage(`${locale}.yml locales parsing error ${localeFilePath} - ${error}`)
   }
 }
