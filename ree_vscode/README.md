@@ -47,3 +47,6 @@ Initial release of Ree extension
 ### 0.0.10
 * Added hints for method args
 * Added Go to definition support for linked constants
+
+### 0.0.15
+* Integration with ree_errors: automatic locales creation, locale names check, check if errors are added to throws etc

@@ -4,6 +4,7 @@ import { addDocumentProblems, ReeDiagnosticCode, removeDocumentProblems } from '
 import { forest } from '../utils/forest'
 import { getLocalePath, Locale } from '../utils/packageUtils'
 import { toSnakeCase } from '../utils/stringUtils'
+
 const fs = require('fs')
 const yaml = require('js-yaml')
 
@@ -21,7 +22,7 @@ export function checkExceptions(filePath: string): void {
     (throws (argument_list)* @throws_args) @throws_call
     (
       (call
-        (identifier) @raise 
+        (identifier) @raise
         (argument_list
           (call
             (constant) @const
@@ -34,24 +35,25 @@ export function checkExceptions(filePath: string): void {
     )
     (
       (assignment (constant)@const (call (constant) (identifier) (argument_list (simple_symbol) @code (string) @locale)))
-    ) @exception_build    
+    ) @exception_build
     `
   )
 
   removeDocumentProblems(uri, ReeDiagnosticCode.exceptionDiagnostic)
 
   let diagnostics = []
-
   const queryMatches = query.matches(tree.rootNode)
-
   let throwsConstants = []
   let raiseConstants = []
+
   const throwsMatches = queryMatches.find(e => {
     return !!e.captures.find(e => e.name === 'throws_call')
   })
+
   const raiseMatches = queryMatches.filter(e => {
     return e.captures.filter(e => e.name === 'raise_call').length > 0
   })
+
   const exceptionBuildMatches = queryMatches.filter(e => {
     return !!e.captures.find(e => e.name === 'exception_build')
   })
@@ -76,11 +78,10 @@ export function checkExceptions(filePath: string): void {
   if (!throwsMatches && raiseMatches.length > 0) {
     let raiseConstNodes = raiseMatches.map(m => m.captures.find(e => e.name === 'raise_call').node)
 
-    // TODO: maybe add message with exception name for each diagnostic
     diagnostics.push(...collectDocumentDiagnostics(
       filePath,
       raiseConstNodes,
-      `You raised exceptions in code, but didn't add them to throws method for contract.`
+      `Raised exception is not added to fn throws(...) declaration`
     ))
 
     addDocumentProblems(uri, diagnostics)
@@ -100,9 +101,11 @@ export function checkExceptions(filePath: string): void {
     if (!isThrowsConstIsUsed) {
       // else, add diagnostic about unused constants in throws
       let throwsCallNode = throwsMatches.captures.find(e => e.name === 'throws_call').node
+
       diagnostics.push(
-        ...collectDocumentDiagnostics(filePath, [throwsCallNode], `You added exceptions to throws method, but didn't used them in code.`)
+        ...collectDocumentDiagnostics(filePath, [throwsCallNode], `Fn throws(...) declares Exception that is not raised anywhere in the code`)
       )
+
       addDocumentProblems(uri, diagnostics)
     }
   }
@@ -120,8 +123,9 @@ export function checkExceptions(filePath: string): void {
       let throwsConstNodes = throwsMatches.captures.find(c => c.name === 'throws_args').node.children.filter(n => n.text.match(RegExp(`${diffThrows.join("|")}`)))
 
       diagnostics.push(
-        ...collectDocumentDiagnostics(filePath, throwsConstNodes, `You added exceptions to throws method, but didn't used them in code.`)
+        ...collectDocumentDiagnostics(filePath, throwsConstNodes, `Fn throws(...) declares Exception that is not raised anywhere in the code`)
       )
+
       addDocumentProblems(uri, diagnostics)
     }
 
@@ -129,10 +133,13 @@ export function checkExceptions(filePath: string): void {
       let raiseConstMatches = raiseMatches.filter(m => {
         return m.captures.find(c => c.name === 'const').node.text.match(RegExp(`${diffRaise.join("|")}`))
       })
+
       let raiseConstNodes = raiseConstMatches.map(c => c.captures.find(e => e.name === 'raise_call').node)
+
       diagnostics.push(
-        ...collectDocumentDiagnostics(filePath, raiseConstNodes, "You raised exceptions in code, but didn't add them to throws method for contract.")
+        ...collectDocumentDiagnostics(filePath, raiseConstNodes, "Raised exception is not added to fn throws(...) declaration")
       )
+
       addDocumentProblems(uri, diagnostics)
     }
   }
@@ -144,7 +151,6 @@ export function checkExceptions(filePath: string): void {
       let constCapture = m.captures.find(c => c.name === 'const')
       let codeCapture = m.captures.find(c => c.name === 'code')
       let localeCapture = m.captures.find(c => c.name === 'locale')
-
       let snakeConstName = toSnakeCase(constCapture.node.text).split("_").slice(0, -1).join("_")
       let codeName = codeCapture.node.text.replace(/\:/g, '')
       let localeName = localeCapture.node.text.replace(/\"|\'/g, '').split(".").slice(-1)?.[0]
@@ -158,14 +164,12 @@ export function checkExceptions(filePath: string): void {
         let codeCapture = m.captures.find(c => c.name === 'code')
         let localeCapture = m.captures.find(c => c.name === 'locale')
         let captureArr = [constCapture, codeCapture, localeCapture]
-
         let snakeConstName = toSnakeCase(constCapture.node.text).split("_").slice(0, -1).join("_")
         let codeName = codeCapture.node.text.replace(/\:/g, '')
         let localeName = localeCapture.node.text.replace(/\"|\'/g, '').split(".").slice(-1)?.[0]
-
         let nameArr = [snakeConstName, codeName, localeName]
-
         let uniqNames = [...new Set(nameArr)]
+
         uniqNames.filter(e => checkOccurrence(nameArr, e) === 1).forEach(e => {
           let node = captureArr[nameArr.indexOf(e)].node
           diagnostics.push(
@@ -184,9 +188,11 @@ export function checkExceptions(filePath: string): void {
     if (exceptionBuildMatches.length === 0) { return }
 
     let locales = []
+
     exceptionBuildMatches.forEach(e => {
       locales.push(e.captures.find(c => c.name === 'locale').node.text.replace(/\"|\'/g, ''))
     })
+
     if (locales.length === 0) { return }
 
     // find locale file
@@ -215,6 +221,7 @@ function collectDocumentDiagnostics(filePath: string, nodes: SyntaxNode[], messa
       new vscode.Position(node.startPosition.row, node.startPosition.column),
       new vscode.Position(node.endPosition.row, node.endPosition.column),
     )
+
     let diagnostic = {
       severity: vscode.DiagnosticSeverity.Warning,
       message: message,
@@ -233,6 +240,7 @@ async function checkLocale(localeFile: string, localeFilePath: string, locale: L
   try {
     const langLocales = yaml.load(localeFile)
     let missingValues = []
+
     allLocales.forEach(l => {
       let value = resolveObject(`${locale}.${l}`, langLocales)
       if (!value) { missingValues.push(l) }
@@ -251,7 +259,9 @@ async function checkLocale(localeFile: string, localeFilePath: string, locale: L
         })
 
         let data = yaml.dump(langLocales, { 'quotingType': '"', 'sortKeys': true })
+
         fs.writeFileSync(localeFilePath, data, { encoding: 'utf-8' })
+
         vscode.workspace.openTextDocument(localeFilePath).then(doc => {
           vscode.window.showTextDocument(doc)
         })
@@ -264,13 +274,14 @@ async function checkLocale(localeFile: string, localeFilePath: string, locale: L
 
 function checkOccurrence(array, element) {
   let counter = 0;
+
   array.flat().forEach(item =>
     {
       if (item == element) {
           counter++
       }
     }
-  ) 
+  )
   return counter
 }
 
