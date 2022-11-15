@@ -15,14 +15,11 @@ import {
 } from '../utils/reeUtils'
 import { PACKAGES_SCHEMA_FILE } from '../core/constants'
 import { checkAndSortLinks } from './checkAndSortLinks'
+import { checkExceptions } from './checkExceptions'
+import { addDocumentProblems, ReeDiagnosticCode, removeDocumentProblems } from '../utils/documentUtils'
 
 const path = require('path')
 const fs = require('fs')
-const diagnosticCollection = vscode.languages.createDiagnosticCollection('ruby')
-
-export function clearDocumentProblems(document: vscode.TextDocument) {
-  diagnosticCollection.delete(document.uri)
-}
 
 export function genObjectSchemaCmd() {
   if (!vscode.workspace.workspaceFolders) {
@@ -133,7 +130,17 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
       message: `Checking links...`
     })
 
-    return new Promise(resolve => resolve(checkAndSortLinks(fileName, execPackageName)))
+    return new Promise(resolve => resolve(checkAndSortLinks(fileName)))
+  })
+
+  vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification
+  }, async (progress) => {
+    progress.report({
+      message: `Checking exceptions...`
+    })
+
+    return new Promise(resolve => resolve(checkExceptions(fileName)))
   })
 
   // don't generate schema for specs
@@ -155,7 +162,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
 
     return result.then((commandResult) => {
       const documentUri = vscode.Uri.parse(fileName)
-      diagnosticCollection.delete(documentUri)
+      removeDocumentProblems(documentUri, ReeDiagnosticCode.reeDiagnostic)
   
       if (commandResult.code === 1) {
         const rPath = path.relative(
@@ -190,11 +197,12 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
             new vscode.Position(lineNumber, character)
           ),
           message: commandResult.message,
+          code: ReeDiagnosticCode.reeDiagnostic,
           source: 'ree'
         }
   
         diagnostics.push(diagnostic)
-        diagnosticCollection.set(documentUri, diagnostics)
+        addDocumentProblems(documentUri, diagnostics)
   
         return
       }

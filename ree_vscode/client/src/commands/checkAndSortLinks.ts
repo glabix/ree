@@ -1,9 +1,8 @@
 import * as vscode from 'vscode'
-import { forest, asRegexp, importRegexp, mapLinkQueryMatches } from '../utils/forest';
-import { loadPackagesSchema } from "../utils/packagesUtils";
+import { forest, asRegexp, importRegexp, mapLinkQueryMatches } from '../utils/forest'
 const fs = require('fs')
 
-export function checkAndSortLinks(filePath: string, packageName: string) {
+export function checkAndSortLinks(filePath: string) {
   const file = fs.readFileSync(filePath, { encoding: 'utf8' })
   const uri = vscode.Uri.parse(filePath)
 

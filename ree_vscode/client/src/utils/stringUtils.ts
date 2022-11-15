@@ -9,3 +9,11 @@ export function snakeToCamelCase(string: string): string {
     .map((word) => capitilizeString(word))
     .join("")
 }
+
+export function toSnakeCase(string: string): string {
+  return string.match(/([A-Z])/g).reduce(
+    (str, c) => str.replace(new RegExp(c), '_' + c.toLowerCase()),
+    string
+  )
+  .substring((string.slice(0, 1).match(/([A-Z])/g)) ? 1 : 0)
+}

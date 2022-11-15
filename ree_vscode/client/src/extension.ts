@@ -9,7 +9,7 @@ import {
 } from 'vscode-languageclient/node'
 import { goToPackage } from "./commands/goToPackage"
 import { goToPackageObject } from "./commands/goToPackageObject"
-import { clearDocumentProblems, generatePackageSchema } from './commands/generatePackageSchema'
+import { generatePackageSchema } from './commands/generatePackageSchema'
 import { updateStatusBar, statusBarCallbacks } from "./commands/statusBar"
 import { goToSpec } from "./commands/goToSpec"
 import { onCreatePackageFile, onRenamePackageFile } from "./commands/documentTemplates"
@@ -22,11 +22,13 @@ import { getFileFromManager, updatePackageDeps } from './commands/updatePackageD
 import { selectAndGeneratePackageSchema } from './commands/selectAndGeneratePackageSchema'
 import { onDeletePackageFile } from "./commands/deleteObjectSchema"
 import { forest } from './utils/forest'
+import { clearDocumentProblems } from "./utils/documentUtils"
 import { cacheGemPaths, setCachedPackages, parsePackagesSchema, setCachedGems } from "./utils/packagesUtils"
 import { PACKAGES_SCHEMA_FILE } from "./core/constants"
 
 const fs = require('fs')
 let client: LanguageClient
+export const diagnosticCollection = vscode.languages.createDiagnosticCollection('ruby')
 
 export async function activate(context: vscode.ExtensionContext) {
   let gotoPackageCmd = vscode.commands.registerCommand(
@@ -114,7 +116,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.workspace.onDidCloseTextDocument(document => {
     if (document) {
-      clearDocumentProblems(document)
+      clearDocumentProblems(document.uri)
       forest.deleteTree(document.uri.toString())
     }
   })
