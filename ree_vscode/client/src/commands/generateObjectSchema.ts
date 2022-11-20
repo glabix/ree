@@ -60,21 +60,23 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
     return
   }
 
-  if (!fileName.split("/").pop().match(/\.rb/)) {
-    return 
-  } else {
-    if (!fileName.split("/").includes("package")) { return }
+  const isSpecFile = !!fileName.split("/").pop().match(/\_spec/)
+  const isRubyFile = !!fileName.split("/").pop().match(/\.rb/)
+  if (!isRubyFile) { return }
 
-    let packageEntry = getPackageEntryPath(fileName)
-    if (!packageEntry) { return }
+  let packageEntryFilePath = getPackageEntryPath(fileName)
+  if (!packageEntryFilePath) { return }
 
-    let dateInFile = new Date(parseInt(fileName.split("/").pop().split("_")?.[0]))
-    if (
-      !!packageEntry.split("/").pop().match(/migrations/) ||
-      !isNaN(dateInFile?.getTime())
-      ) {
-      return
-    }
+  // check that we're inside a package
+  let relativePackagePathToCurrentFilePath = path.relative(
+    packageEntryFilePath.split("/").slice(0, -1).join("/"),
+    fileName
+  )
+  if (relativePackagePathToCurrentFilePath.split('/').slice(0) === '..' && !isSpecFile) { return }
+
+  let dateInFile = new Date(parseInt(fileName.split("/").pop().split("_")?.[0]))
+  if (!isNaN(dateInFile?.getTime())) {
+    return
   }
 
   const rootProjectDir = getCurrentProjectDir()
@@ -144,7 +146,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   })
 
   // don't generate schema for specs
-  if (fileName.split("/").pop().match(/\_spec/)) { return }
+  if (isSpecFile) { return }
 
   const result = execGenerateObjectSchema(rootProjectDir, execPackageName, path.relative(rootProjectDir, fileName))
 
