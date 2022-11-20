@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import { Query } from 'web-tree-sitter'
 import { forest, asRegexp, importRegexp, mapLinkQueryMatches } from '../utils/forest'
 const fs = require('fs')
 
@@ -17,7 +18,7 @@ export function checkAndSortLinks(filePath: string) {
          link_name: (_) @name) @link
       (#select-adjacent! @link)
     ) `
-  )
+  ) as Query
 
   const queryMatches = query.matches(tree.rootNode)
   if (queryMatches?.length === 0) { return }
@@ -74,14 +75,6 @@ export function checkAndSortLinks(filePath: string) {
     const linkUsageMatches = forest.language.query(
       `
         (
-          (call receiver: (identifier) @call)
-          (#match? @call "(${nameStrings.join('|')})$")
-        )
-        (
-          (call method: (identifier) @call)
-          (#match? @call "(${nameStrings.join('|')})$")
-        )
-        (
           (identifier) @call
           (#match? @call "(${nameStrings.join('|')})$")
         )
@@ -99,6 +92,8 @@ export function checkAndSortLinks(filePath: string) {
       }
 
       if (importsStrings.includes(nodeText)) {
+        if (el.captures[0].node.parent.type === 'block') { return }
+
         importsStrings.splice(importsStrings.indexOf(nodeText), 1)
       }
     })
@@ -106,7 +101,8 @@ export function checkAndSortLinks(filePath: string) {
     if (nameStrings.length > 0) {
       allSorted = allSorted.filter(l => {
         if (nameStrings.includes(l.name)) {
-          if (l.imports) { return true }
+          if (l.imports.length > 0) { return true }
+          return false
         } else {
           return true
         }
@@ -114,7 +110,12 @@ export function checkAndSortLinks(filePath: string) {
     }
 
     if (importsStrings.length > 0) {
-      allSorted = allSorted.filter(l => l.imports.every((i => v => i = importsStrings.indexOf(v, i) + 1)(0)))
+      let sortedImportsStrings = importsStrings.sort().join('')
+      allSorted = allSorted.filter(l => {
+        if (l.imports.length === 0) { return true }
+        
+        return !sortedImportsStrings.includes(l.imports.sort().join(''))
+      })
     }
   }
   sortedWithoutUnused = allSorted
