@@ -4,6 +4,7 @@ import { loadPackagesSchema } from '../utils/packagesUtils'
 import { PackageFacade } from '../utils/packageFacade'
 import { loadObjectSchema } from '../utils/objectUtils'
 import { forest, mapLinkQueryMatches } from '../utils/forest'
+import { Query } from 'web-tree-sitter'
 
 const fs = require('fs')
 const path = require('path')
@@ -112,7 +113,7 @@ function updateObjectLinks(
         (#select-adjacent! @link)
       ) 
     `
-  )
+  ) as Query
 
   const queryMatches = query.matches(tree.rootNode)
   const links = mapLinkQueryMatches(queryMatches)

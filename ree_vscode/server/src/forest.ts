@@ -4,9 +4,6 @@
 
  import { Tree } from 'web-tree-sitter'
  import { TextDocument } from 'vscode-languageserver-textdocument'
- import { of } from 'rxjs'
- import { switchMap } from 'rxjs/operators'
- import { documents, DocumentEvent, DocumentEventKind } from './documentManager'
  import TreeSitterFactory from './utils/treeSitterFactory'
 
  const Parser = require('web-tree-sitter')

@@ -1,6 +1,7 @@
 import { Range } from 'vscode'
 import { Location, Hover, MarkupKind } from 'vscode-languageserver'
 import { Position, TextDocument } from 'vscode-languageserver-textdocument'
+import { Query } from 'web-tree-sitter'
 import { documents } from '../documentManager'
 import { forest } from '../forest'
 import { loadPackagesSchema, getGemPackageSchemaPath, getGemDir, IPackagesSchema } from '../utils/packagesUtils'
@@ -236,7 +237,7 @@ export function findConstant(
 
   const query = tree.getLanguage().query(
     `((link) @link)`
-  )
+  ) as Query
 
   const queryMatches = query.matches(tree.rootNode)
 
@@ -374,7 +375,7 @@ export function findMethodArgument(token: string, uri: string, position: Positio
       ]
       (#select-adjacent! @contract @method)
     ) @contractWithMethod`
-  )
+  ) as Query
 
   const queryMatches = query.matches(tree.rootNode)
   if (queryMatches.length === 0) { return }

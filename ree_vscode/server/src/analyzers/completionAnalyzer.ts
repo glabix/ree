@@ -2,6 +2,7 @@ import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
 import { Position } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { forest } from '../forest'
+import { QueryMatch, Query } from 'web-tree-sitter'
 import { getGemDir, loadPackagesSchema } from '../utils/packagesUtils'
 import { getPackageNameFromPath, getProjectRootDir, getObjectNameFromPath } from '../utils/packageUtils'
 import { PackageFacade } from '../utils/packageFacade'
@@ -110,9 +111,9 @@ export default class CompletionAnalyzer {
            link_name: (_) @name) @link
         (#select-adjacent! @link)
       ) `
-    )
+    ) as Query
 
-    const queryMatches = query.matches(tree.rootNode)
+    const queryMatches: QueryMatch[] = query.matches(tree.rootNode)
     const linkedDependencies = queryMatches.map(
       c => c.captures.filter(e => e.name === 'name')
       ).flat()
