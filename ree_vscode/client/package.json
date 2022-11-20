@@ -7,7 +7,7 @@
 	},
 	"dependencies": {
 		"vscode-languageclient": "^8.0.1",
-		"web-tree-sitter": "^0.20.5",
+		"web-tree-sitter": "^0.20.7",
 		"web-tree-sitter-ruby": "file:lib/web-tree-sitter-ruby",
 		"js-yaml": "^4.1.0"
 	},

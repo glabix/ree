@@ -2,10 +2,9 @@
   "dependencies": {
     "loglevel": "^1.8.0",
     "rxjs": "^7.5.5",
-    "tree-sitter-ruby": "^0.19.0",
     "vscode-languageserver": "^8.0.1",
     "vscode-languageserver-textdocument": "^1.0.4",
-    "web-tree-sitter": "^0.20.5",
+    "web-tree-sitter": "^0.20.7",
     "web-tree-sitter-ruby": "file:lib/web-tree-sitter-ruby"
   }
 }
