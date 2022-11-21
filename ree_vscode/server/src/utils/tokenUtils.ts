@@ -323,8 +323,8 @@ export function findConstant(
 }
 
 export function findMethod(doc: string, token: string): ILocalMethod {
-  const methodRegexp = RegExp(`def\\s+${token}(\\s|\\n|\\;)`)
-  const classMethodRegexp = RegExp(`def\\s+self.${token}(\\s|\\n|\\;)`)
+  const methodRegexp = RegExp(`def\\s+${token}(\\s|\\n|\\;|\\()`)
+  const classMethodRegexp = RegExp(`def\\s+self.${token}(\\s|\\n|\\;|\\()`)
   
   let lineNumber = null
   let index = 0
