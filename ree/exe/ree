@@ -309,6 +309,27 @@ class ReeCliRunner
       end
     end
 
+    command :"gen.index" do |c|
+      c.syntax      = 'ree gen.index'
+      c.description = 'generate index schema of methods'
+      c.summary     = '> ' + c.description
+      c.example     'ree gen.index --project_path=/project_dir/', ''
+      c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
+      c.action do |args, options|
+        options_hash = options.__hash__
+
+        if options_hash[:project_path]
+          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
+        end
+
+        default_options = {
+          project_path: options_hash[:project_path] || File.expand_path(Dir.pwd)
+        }
+
+        puts Ree::CLI::IndexProject.run(**default_options)
+      end
+    end
+
     run!
   end
 end
