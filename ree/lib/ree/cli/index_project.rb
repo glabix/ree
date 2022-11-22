@@ -11,7 +11,7 @@ module Ree
           Ree.init(dir)
 
           index_hash = {}
-          index_hash[:uniq_tokens] = {}
+          index_hash[:classes] = {}
 
           facade = Ree.container.packages_facade
 
@@ -30,12 +30,25 @@ module Ree
                 const_string_with_module = "#{package.module}::#{file_name_const_string}"
                 next if objects_class_names.include?(const_string_with_module) # skip objects
 
-                index_hash[:uniq_tokens][file_name_const_string] ||= []
-                index_hash[:uniq_tokens][file_name_const_string] << file_name
-                klass = Object.const_get(const_string_with_module)
                 
-                index_hash[:methods] ||= {}
-                index_hash[:methods][file_name_const_string] = klass.public_instance_methods(false).map(&:to_s)
+                klass = Object.const_get(const_string_with_module)
+                methods = klass.public_instance_methods(false)
+                                .reject { _1.match?(/original/) }
+                                .map {
+                                  { 
+                                    name: _1,
+                                    location: klass.method(_1).source_location&.last,
+                                  }
+                                }
+
+                hsh = {
+                  path: file_name,
+                  package: package.name,
+                  methods: methods
+                }
+                                
+                index_hash[:classes][file_name_const_string] ||= []
+                index_hash[:classes][file_name_const_string] << hsh
               rescue NameError
                 next
               end
