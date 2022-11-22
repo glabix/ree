@@ -30,14 +30,13 @@ module Ree
                 const_string_with_module = "#{package.module}::#{file_name_const_string}"
                 next if objects_class_names.include?(const_string_with_module) # skip objects
 
-                
                 klass = Object.const_get(const_string_with_module)
                 methods = klass.public_instance_methods(false)
                                 .reject { _1.match?(/original/) }
                                 .map {
                                   { 
                                     name: _1,
-                                    location: klass.method(_1).source_location&.last,
+                                    location: klass.public_instance_method(_1).source_location&.last,
                                   }
                                 }
 
