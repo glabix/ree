@@ -1,5 +1,6 @@
 import { PACKAGES_SCHEMA_FILE } from './constants'
 import { getProjectRootDir } from './packageUtils'
+import { getReeVscodeSettings } from './reeUtils'
 
 const path = require('path')
 const fs = require('fs')
@@ -8,6 +9,11 @@ let cachedPackages: IPackagesSchema | undefined = undefined
 let packagesCtime: number | null = null
 let cachedGemPackages: Object | null = null
 let cachedGems: ICachedGems = {}
+let cachedIndex: ICachedIndex
+
+export function getCachedIndex(): ICachedIndex {
+  return cachedIndex
+}
 
 interface ExecCommand {
   message: string
@@ -27,6 +33,22 @@ interface ICachedGems {
   [key: string]: string | undefined
 }
 
+interface ICachedIndex {
+  classes: {
+    [key: string]: [
+      {
+        path: string,
+        package: string,
+        methods: [
+          {
+            name: string,
+            location: number
+          }
+        ]
+      }
+    ]
+  }
+}
 
 export interface IPackagesSchema {
   packages: IPackageSchema[]
@@ -47,10 +69,21 @@ export function cacheGemPaths(rootDir: string): Promise<ExecCommand | undefined>
   return execBundlerGetGemPaths(rootDir)
 }
 
+export function cacheIndex(rootDir: string): Promise<ExecCommand | undefined> {
+  return execGetReeIndex(rootDir)
+}
+
 export function loadPackagesSchema(currentPath: string): IPackagesSchema | undefined {
   const root = getProjectRootDir(currentPath)
   if (!root) { return }
 
+  // TODO: move it to some place, where we can run it earlier
+  cacheIndex(root).then(r => {
+    if (r && r.message) {
+      cachedIndex = JSON.parse(r.message)
+    }
+  })
+  
   const schemaPath = path.join(root, PACKAGES_SCHEMA_FILE)
   if (!fs.existsSync(schemaPath)) { return }
 
@@ -140,6 +173,42 @@ async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | un
       argsArr,
       { cwd: rootDir }
     ])
+  } catch(e) {
+    console.error(e)
+    return new Promise(() => undefined)
+  }
+}
+
+async function execGetReeIndex(rootDir: string): Promise<ExecCommand | undefined> {
+  try {
+    const {dockerAppDirectory, dockerContainerName, dockerPresented} = getReeVscodeSettings(rootDir)
+
+    if (dockerPresented) { 
+      return spawnCommand([
+        'docker', [
+          'exec',
+          '-i',
+          '-e',
+          'REE_SKIP_ENV_VARS_CHECK=true',
+          '-w',
+          dockerAppDirectory,
+          dockerContainerName,
+          'bundle',
+          'exec',
+          'ree',
+          'gen.index'
+        ]
+      ])
+    } else {
+      return spawnCommand([
+        'bundle', [
+          'exec',
+          'ree',
+          'gen.index'
+        ],
+        { cwd: rootDir }
+      ])
+    }
   } catch(e) {
     console.error(e)
     return new Promise(() => undefined)

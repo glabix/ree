@@ -3,7 +3,7 @@ import { Position } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { forest } from '../forest'
 import { QueryMatch, Query } from 'web-tree-sitter'
-import { getGemDir, loadPackagesSchema } from '../utils/packagesUtils'
+import { getCachedIndex, getGemDir, loadPackagesSchema } from '../utils/packagesUtils'
 import { getPackageNameFromPath, getProjectRootDir, getObjectNameFromPath } from '../utils/packageUtils'
 import { PackageFacade } from '../utils/packageFacade'
 
@@ -52,9 +52,10 @@ export default class CompletionAnalyzer {
               fromPackageName: pckg.name,
               toPackageName: currentPackage,
               currentFilePath: filePath,
+              type: CompletionItemKind.Method,
               projectRootDir: projectRootDir
             }
-          }
+          } as CompletionItem
         )
       )
 
@@ -85,6 +86,7 @@ export default class CompletionAnalyzer {
               fromPackageName: pckg.name,
               toPackageName: currentPackage,
               currentFilePath: filePath,
+              type: CompletionItemKind.Method,
               projectRootDir: gemPath || projectRootDir
             }
           }
@@ -120,6 +122,35 @@ export default class CompletionAnalyzer {
        .map(e => e.node)
        .map(e => e.text)
        .map(e => e.replace(':', ''))
+
+    // add constants
+
+    if (getCachedIndex()) {
+      const index = getCachedIndex()
+      Object.keys(index.classes).map((k: string) => {
+        index['classes'][k].map(c => {
+          let konstant = {
+            label: k,
+            labelDetails: {
+              description: `from: :${c.package}`
+            },
+            kind: CompletionItemKind.Class,
+            data: {
+              objectName: k,
+              fromPackageName: c.package,
+              toPackageName: currentPackage,
+              projectRootDir: projectRootDir,
+              currentFilePath: filePath,
+              type: CompletionItemKind.Class,
+              linkPath: c.path
+            }
+          }
+          objectsFromAllPackages.push(
+            konstant
+          )
+        })
+      })
+    }
 
     return objectsFromAllPackages.filter(obj => !linkedDependencies.includes(obj.label) || obj.label !== objectName)
   }
