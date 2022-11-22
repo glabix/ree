@@ -13,6 +13,8 @@ import CompletionResolveProvider from './providers/completionResolveProvider'
 
 import { documents } from './documentManager'
 import { forest } from './forest'
+import { cacheIndex, setCachedIndex } from './utils/packagesUtils'
+const url = require('url')
 
 export interface ILanguageServer {
 	readonly capabilities: InitializeResult
@@ -51,6 +53,22 @@ export class Server implements ILanguageServer {
 	 */
 	public setup(): void {
 		this.registerInitializedProviders()
+		
+		this.connection.workspace.getWorkspaceFolders().then(v => {
+			return v?.map(folder => folder)
+		}).then(v => {
+			v?.forEach(folder => {
+				cacheIndex(url.fileURLToPath(folder.uri)).then(r => {
+					try {
+						if (r && r.message) {
+							setCachedIndex(JSON.parse(r.message))
+						}
+					}	catch (e: any) {
+						this.connection.window.showInformationMessage(e.toString())
+					}				
+				})
+			})
+		})
 	}
 
 	public shutdown(): void {

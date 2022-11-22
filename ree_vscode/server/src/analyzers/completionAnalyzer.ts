@@ -2,10 +2,12 @@ import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
 import { Position } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { forest } from '../forest'
-import { QueryMatch, Query } from 'web-tree-sitter'
+import { QueryMatch, Query, SyntaxNode } from 'web-tree-sitter'
 import { getCachedIndex, getGemDir, loadPackagesSchema } from '../utils/packagesUtils'
 import { getPackageNameFromPath, getProjectRootDir, getObjectNameFromPath } from '../utils/packageUtils'
 import { PackageFacade } from '../utils/packageFacade'
+import { extractToken } from '../utils/tokenUtils'
+import { snakeToCamelCase } from '../utils/stringUtils'
 
 const fs = require('fs')
 const url = require('node:url')
@@ -13,10 +15,10 @@ const path = require('path')
 
 export default class CompletionAnalyzer {
   public static analyze(uri: string, position: Position): CompletionItem[] {
-    return this.getFilteredCompletionList(uri)
+    return this.getFilteredCompletionList(uri, position)
   }
 
-  private static getFilteredCompletionList(uri: string, token?: string): CompletionItem[] {
+  private static getFilteredCompletionList(uri: string, position: Position): CompletionItem[] {
     const defaultCompletion : CompletionItem[] = []
     let filePath = ''
     
@@ -25,6 +27,8 @@ export default class CompletionAnalyzer {
     } catch {
       return defaultCompletion
     }
+
+    const token = extractToken(uri, position)
 
     const packagesSchema = loadPackagesSchema(filePath)
     if (!packagesSchema) { return defaultCompletion }
@@ -35,6 +39,47 @@ export default class CompletionAnalyzer {
 
     const objectName = getObjectNameFromPath(filePath)
     if (!objectName) { return defaultCompletion }
+
+    const doc = documents.get(uri)
+    let tree = forest.getTree(uri)
+    if (!tree) {
+      tree = forest.createTree(uri, doc.getText())
+    }
+
+    let index = getCachedIndex()
+
+    let constantNode: any
+    const cursor = tree.walk()
+    const walk = (depth: number): void => {
+      if (cursor.currentNode().text.match(`^${token}$`)) {
+        constantNode = cursor.currentNode()
+      }
+      if (cursor.gotoFirstChild()) {
+        do {
+          walk(depth + 1)
+        } while (cursor.gotoNextSibling());
+        cursor.gotoParent()
+      }
+    }
+    walk(0)
+    cursor.delete()
+
+    if (constantNode) {
+      if (index) {
+        let constantNodeText = constantNode?.parent?.parent?.children?.[0]?.text
+        if (Object.keys(index.classes).includes(constantNodeText)) {
+          return index.classes[constantNodeText].map(c => {
+            return c.methods.map(m => {
+              return {
+                label: m.name,
+                details: `${snakeToCamelCase(c.package)}`,
+                kind: CompletionItemKind.Field,
+              } as CompletionItem
+            })
+          }).flat()
+        }
+      }
+    }
   
     const currentProjectPackages = packagesSchema.packages.map((pckg) => {
       let packageFacade = new PackageFacade(path.join(projectRootDir, pckg.schema))
@@ -58,10 +103,6 @@ export default class CompletionAnalyzer {
           } as CompletionItem
         )
       )
-
-      if (token) {
-        objects = objects.filter(e => e.label.match(RegExp(`^${token}`)))
-      }
 
       return objects
     }).flat()
@@ -93,10 +134,6 @@ export default class CompletionAnalyzer {
         )
       )
 
-      if (token) {
-        objects = objects.filter(e => e.label.match(RegExp(`^${token}`)))
-      }
-
       return objects
     }).flat()
 
@@ -105,8 +142,6 @@ export default class CompletionAnalyzer {
     if (objectsFromAllPackages.length === 0) { return defaultCompletion }
 
     // filter that already using
-    const doc = documents.get(uri)
-    const tree = forest.createTree(uri, doc.getText())
     const query = tree.getLanguage().query(
       `(
         (link
@@ -125,8 +160,7 @@ export default class CompletionAnalyzer {
 
     // add constants
 
-    if (getCachedIndex()) {
-      const index = getCachedIndex()
+    if (index) {
       Object.keys(index.classes).map((k: string) => {
         index['classes'][k].map(c => {
           let konstant = {

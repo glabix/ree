@@ -15,6 +15,10 @@ export function getCachedIndex(): ICachedIndex {
   return cachedIndex
 }
 
+export function setCachedIndex(value: ICachedIndex) {
+  cachedIndex = value
+}
+
 interface ExecCommand {
   message: string
   code: number
@@ -77,12 +81,6 @@ export function loadPackagesSchema(currentPath: string): IPackagesSchema | undef
   const root = getProjectRootDir(currentPath)
   if (!root) { return }
 
-  // TODO: move it to some place, where we can run it earlier
-  cacheIndex(root).then(r => {
-    if (r && r.message) {
-      cachedIndex = JSON.parse(r.message)
-    }
-  })
   
   const schemaPath = path.join(root, PACKAGES_SCHEMA_FILE)
   if (!fs.existsSync(schemaPath)) { return }
@@ -92,6 +90,7 @@ export function loadPackagesSchema(currentPath: string): IPackagesSchema | undef
   if (packagesCtime !== ctime || !cachedPackages) {
     packagesCtime = ctime
 
+    // TODO: move to server setup after initialization
     cacheGemPaths(root).then((r) => {
       const gemPathsArr = r?.message.split("\n")
       gemPathsArr?.map((path) => {
