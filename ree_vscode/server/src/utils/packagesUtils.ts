@@ -195,7 +195,7 @@ async function execGetReeIndex(rootDir: string): Promise<ExecCommand | undefined
           'bundle',
           'exec',
           'ree',
-          'gen.index'
+          'gen.index_project'
         ]
       ])
     } else {
@@ -203,7 +203,7 @@ async function execGetReeIndex(rootDir: string): Promise<ExecCommand | undefined
         'bundle', [
           'exec',
           'ree',
-          'gen.index'
+          'gen.index_project'
         ],
         { cwd: rootDir }
       ])
