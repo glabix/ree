@@ -310,10 +310,10 @@ class ReeCliRunner
     end
 
     command :"gen.index_project" do |c|
-      c.syntax      = 'ree gen.index'
+      c.syntax      = 'ree gen.index_project'
       c.description = 'generate index schema of methods'
       c.summary     = '> ' + c.description
-      c.example     'ree gen.index --project_path=/project_dir/', ''
+      c.example     'ree gen.index_project --project_path=/project_dir/', ''
       c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
       c.action do |args, options|
         options_hash = options.__hash__
