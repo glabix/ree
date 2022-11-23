@@ -113,8 +113,14 @@ export function checkAndSortLinks(filePath: string) {
       let sortedImportsStrings = importsStrings.sort().join('')
       allSorted = allSorted.filter(l => {
         if (l.imports.length === 0) { return true }
-        
-        return !sortedImportsStrings.includes(l.imports.sort().join(''))
+
+        if (sortedImportsStrings.includes(l.imports.sort().join(''))) {
+          if (!nameStrings.includes(l.name)) { return true }
+
+          return false
+        } else {
+          return true
+        }
       })
     }
   }
