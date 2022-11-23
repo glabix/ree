@@ -1,3 +1,5 @@
+require 'json'
+
 module Ree
   module CLI
     class IndexFile
