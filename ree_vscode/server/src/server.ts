@@ -60,11 +60,16 @@ export class Server implements ILanguageServer {
 			v?.forEach(folder => {
 				cacheIndex(url.fileURLToPath(folder.uri)).then(r => {
 					try {
-						if (r && r.message) {
-							setCachedIndex(JSON.parse(r.message))
+						if (r) {
+							if (r.code === 0) {
+								setCachedIndex(JSON.parse(r.message))
+							} else {
+								this.connection.window.showErrorMessage(r.message.toString())
+							}
 						}
 					}	catch (e: any) {
-						this.connection.window.showInformationMessage(e.toString())
+						setCachedIndex({})
+						this.connection.window.showErrorMessage(e.toString())
 					}				
 				})
 			})

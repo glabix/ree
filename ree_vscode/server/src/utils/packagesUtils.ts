@@ -1,3 +1,4 @@
+import { connection } from '..'
 import { PACKAGES_SCHEMA_FILE } from './constants'
 import { getProjectRootDir } from './packageUtils'
 import { getReeVscodeSettings } from './reeUtils'
@@ -9,7 +10,7 @@ let cachedPackages: IPackagesSchema | undefined = undefined
 let packagesCtime: number | null = null
 let cachedGemPackages: Object | null = null
 let cachedGems: ICachedGems = {}
-let cachedIndex: ICachedIndex
+let cachedIndex: ICachedIndex = {}
 
 export function getCachedIndex(): ICachedIndex {
   return cachedIndex
@@ -38,7 +39,7 @@ interface ICachedGems {
 }
 
 interface ICachedIndex {
-  classes: {
+  [classes: string]: {
     [key: string]: [
       {
         path: string,
@@ -89,6 +90,24 @@ export function loadPackagesSchema(currentPath: string): IPackagesSchema | undef
 
   if (packagesCtime !== ctime || !cachedPackages) {
     packagesCtime = ctime
+
+    if (!cachedIndex || (cachedIndex && Object.keys(cachedIndex).length === 0)) {
+      cacheIndex(root).then(r => {
+        try {
+          if (r) {
+            if (r.code === 0) {
+              cachedIndex = JSON.parse(r.message)
+            } else {
+              cachedIndex = {}
+              connection.window.showErrorMessage(r.message)
+            }
+          }
+        } catch(e: any) {
+          cachedIndex = {}
+          connection.window.showErrorMessage(e.toString())
+        }
+      })
+    }
 
     // TODO: move to server setup after initialization
     cacheGemPaths(root).then((r) => {
