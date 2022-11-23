@@ -13,7 +13,7 @@ import CompletionResolveProvider from './providers/completionResolveProvider'
 
 import { documents } from './documentManager'
 import { forest } from './forest'
-import { cacheIndex, setCachedIndex } from './utils/packagesUtils'
+import { cacheProjectIndex, setCachedIndex } from './utils/packagesUtils'
 const url = require('url')
 
 export interface ILanguageServer {
@@ -58,7 +58,7 @@ export class Server implements ILanguageServer {
 			return v?.map(folder => folder)
 		}).then(v => {
 			v?.forEach(folder => {
-				cacheIndex(url.fileURLToPath(folder.uri)).then(r => {
+				cacheProjectIndex(url.fileURLToPath(folder.uri)).then(r => {
 					try {
 						if (r) {
 							if (r.code === 0) {

@@ -74,15 +74,36 @@ export function cacheGemPaths(rootDir: string): Promise<ExecCommand | undefined>
   return execBundlerGetGemPaths(rootDir)
 }
 
-export function cacheIndex(rootDir: string): Promise<ExecCommand | undefined> {
-  return execGetReeIndex(rootDir)
+export function cacheProjectIndex(rootDir: string): Promise<ExecCommand | undefined> {
+  return execGetReeProjectIndex(rootDir)
+}
+
+export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecCommand | undefined> {
+  return execGetReeFileIndex(rootDir, filePath)
 }
 
 export function loadPackagesSchema(currentPath: string): IPackagesSchema | undefined {
   const root = getProjectRootDir(currentPath)
   if (!root) { return }
 
-  
+  if (!cachedIndex || (cachedIndex && Object.keys(cachedIndex).length === 0)) {
+    cacheProjectIndex(root).then(r => {
+      try {
+        if (r) {
+          if (r.code === 0) {
+            cachedIndex = JSON.parse(r.message)
+          } else {
+            cachedIndex = {}
+            connection.window.showErrorMessage(r.message)
+          }
+        }
+      } catch(e: any) {
+        cachedIndex = {}
+        connection.window.showErrorMessage(e.toString())
+      }
+    })
+  }
+
   const schemaPath = path.join(root, PACKAGES_SCHEMA_FILE)
   if (!fs.existsSync(schemaPath)) { return }
 
@@ -91,25 +112,6 @@ export function loadPackagesSchema(currentPath: string): IPackagesSchema | undef
   if (packagesCtime !== ctime || !cachedPackages) {
     packagesCtime = ctime
 
-    if (!cachedIndex || (cachedIndex && Object.keys(cachedIndex).length === 0)) {
-      cacheIndex(root).then(r => {
-        try {
-          if (r) {
-            if (r.code === 0) {
-              cachedIndex = JSON.parse(r.message)
-            } else {
-              cachedIndex = {}
-              connection.window.showErrorMessage(r.message)
-            }
-          }
-        } catch(e: any) {
-          cachedIndex = {}
-          connection.window.showErrorMessage(e.toString())
-        }
-      })
-    }
-
-    // TODO: move to server setup after initialization
     cacheGemPaths(root).then((r) => {
       const gemPathsArr = r?.message.split("\n")
       gemPathsArr?.map((path) => {
@@ -197,7 +199,7 @@ async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | un
   }
 }
 
-async function execGetReeIndex(rootDir: string): Promise<ExecCommand | undefined> {
+async function execGetReeProjectIndex(rootDir: string): Promise<ExecCommand | undefined> {
   try {
     const {dockerAppDirectory, dockerContainerName, dockerPresented} = getReeVscodeSettings(rootDir)
 
@@ -223,6 +225,44 @@ async function execGetReeIndex(rootDir: string): Promise<ExecCommand | undefined
           'exec',
           'ree',
           'gen.index_project'
+        ],
+        { cwd: rootDir }
+      ])
+    }
+  } catch(e) {
+    console.error(e)
+    return new Promise(() => undefined)
+  }
+}
+
+async function execGetReeFileIndex(rootDir: string, filePath: string): Promise<ExecCommand | undefined> {
+  try {
+    const {dockerAppDirectory, dockerContainerName, dockerPresented} = getReeVscodeSettings(rootDir)
+
+    if (dockerPresented) { 
+      return spawnCommand([
+        'docker', [
+          'exec',
+          '-i',
+          '-e',
+          'REE_SKIP_ENV_VARS_CHECK=true',
+          '-w',
+          dockerAppDirectory,
+          dockerContainerName,
+          'bundle',
+          'exec',
+          'ree',
+          'gen.index_file',
+          filePath
+        ]
+      ])
+    } else {
+      return spawnCommand([
+        'bundle', [
+          'exec',
+          'ree',
+          'gen.index_file',
+          filePath
         ],
         { cwd: rootDir }
       ])

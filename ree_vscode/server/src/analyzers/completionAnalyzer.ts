@@ -65,7 +65,7 @@ export default class CompletionAnalyzer {
     cursor.delete()
 
     if (constantNode) {
-      if (index) {
+      if (index && index?.classes) {
         let constantNodeText = constantNode?.parent?.parent?.children?.[0]?.text
         if (Object.keys(index.classes).includes(constantNodeText)) {
           return index.classes[constantNodeText].map(c => {
@@ -160,7 +160,7 @@ export default class CompletionAnalyzer {
 
     // add constants
 
-    if (index) {
+    if (index && index?.classes) {
       Object.keys(index.classes).map((k: string) => {
         index['classes'][k].map(c => {
           let konstant = {
