@@ -10,11 +10,13 @@ module Ree
 
           Ree.init(dir)
 
+          file_path = File.join(dir, file_path)
+
           current_package_schema = self.find_package(File.dirname(file_path))
 
           return {} unless current_package_schema
 
-          package_schema = JSON.load(File.open(current_package_schema))
+          package_schema = JSON.load_file(current_package_schema)
           current_package_name = package_schema["name"].to_sym
 
           facade = Ree.container.packages_facade
