@@ -1,4 +1,4 @@
-import { CompletionItem, CompletionParams, Connection, TextDocumentPositionParams } from 'vscode-languageserver';
+import { CompletionItem, CompletionParams, Connection } from 'vscode-languageserver';
 import Provider from './provider';
 import CompletionAnalyzer from '../analyzers/completionAnalyzer';
 

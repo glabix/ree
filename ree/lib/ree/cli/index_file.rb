@@ -23,23 +23,25 @@ module Ree
 
           facade = Ree.container.packages_facade
           Ree.load_package(current_package_name)
-          package = facade.get_package(current_package_name)
-          
-          objects_class_names = package.objects.map(&:class_name)
 
+          package = facade.get_package(current_package_name)
+          objects_class_names = package.objects.map(&:class_name)
           file_name_const_string = Ree::StringUtils.camelize(file_path.split('/')[-1].split('.rb')[0])
           const_string_with_module = "#{package.module}::#{file_name_const_string}"
+
           return {} if objects_class_names.include?(const_string_with_module) # skip objects
 
           klass = Object.const_get(const_string_with_module)
-          methods = klass.public_instance_methods(false)
-                          .reject { _1.match?(/original/) }
-                          .map {
-                            { 
-                              name: _1,
-                              location: klass.public_instance_method(_1).source_location&.last,
-                            }
-                          }
+
+          methods = klass
+            .public_instance_methods(false)
+            .reject { _1.match?(/original/) } # remove aliases defined by contracts
+            .map {
+              {
+                name: _1,
+                location: klass.public_instance_method(_1).source_location&.last,
+              }
+            }
 
           hsh = {
             path: file_path,

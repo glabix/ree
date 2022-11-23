@@ -1,19 +1,17 @@
 import {
-	ConfigurationItem,
 	Connection,
 	InitializeParams,
 	InitializeResult,
 } from 'vscode-languageserver'
-
 import { CapabilityCalculator } from './capabilityCalculator'
 import DefinitionProvider from './providers/definitionProvider'
 import HoverProvider from './providers/hoverProvider'
 import CompletionProvider from './providers/completionProvider'
 import CompletionResolveProvider from './providers/completionResolveProvider'
-
 import { documents } from './documentManager'
 import { forest } from './forest'
 import { cacheProjectIndex, setCachedIndex } from './utils/packagesUtils'
+
 const url = require('url')
 
 export interface ILanguageServer {
@@ -53,7 +51,7 @@ export class Server implements ILanguageServer {
 	 */
 	public setup(): void {
 		this.registerInitializedProviders()
-		
+
 		this.connection.workspace.getWorkspaceFolders().then(v => {
 			return v?.map(folder => folder)
 		}).then(v => {
@@ -70,7 +68,7 @@ export class Server implements ILanguageServer {
 					}	catch (e: any) {
 						setCachedIndex({})
 						this.connection.window.showErrorMessage(e.toString())
-					}				
+					}
 				})
 			})
 		})

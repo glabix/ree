@@ -1,11 +1,10 @@
 import { TextDocuments, Connection, TextDocumentIdentifier } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Subject } from 'rxjs'
 import { forest } from './forest'
 import { cacheFileIndex, getCachedIndex, setCachedIndex } from './utils/packagesUtils'
 import { getProjectRootDir } from './utils/packageUtils'
-import { Server } from 'http'
 import { connection } from '.'
+
 const url = require('url')
 const path = require('path')
 
@@ -48,7 +47,7 @@ export default class DocumentManager {
 								let index = getCachedIndex()
 								let newIndexForFile = JSON.parse(r.message)
 								if (Object.keys(newIndexForFile).length === 0) { return }
-	
+
 								let classConst = Object.keys(newIndexForFile)?.[0]
 								const oldIndex = index.classes[classConst].findIndex(v => v.path.match(RegExp(`${rFilePath}`)))
 								if (oldIndex !== -1) {
@@ -57,10 +56,10 @@ export default class DocumentManager {
 								} else {
 									index.classes[classConst].push(newIndexForFile)
 								}
-		
+
 								setCachedIndex(index)
 							} catch (e: any) {
-								connection.window.showErrorMessage(e)	
+								connection.window.showErrorMessage(e)
 							}
 						} else {
 							connection.window.showErrorMessage(r.message)

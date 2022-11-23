@@ -1,4 +1,4 @@
-import { CompletionItem, CompletionRequest, Connection } from 'vscode-languageserver';
+import { CompletionItem, Connection } from 'vscode-languageserver';
 import Provider from './provider';
 import CompletionResolveAnalyzer from '../analyzers/completionResolveAnalyzer';
 
@@ -15,7 +15,7 @@ export default class CompletionResolveProvider extends Provider {
 	private handleCompletionResolve = async (
 		params: CompletionItem
 	): Promise<CompletionItem> => {
-		
+
     return CompletionResolveAnalyzer.analyze(params)
 	};
 }

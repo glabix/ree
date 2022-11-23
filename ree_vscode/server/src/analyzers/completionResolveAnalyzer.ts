@@ -1,6 +1,6 @@
 import { CompletionItem, CompletionItemKind, MarkupContent, MarkupKind } from 'vscode-languageserver'
 import { splitArgsType } from '../utils/tokenUtils'
-import { loadObjectSchema, IObjectMethod, IObject } from '../utils/objectUtils'
+import { loadObjectSchema, IObject } from '../utils/objectUtils'
 
 const path = require('path')
 
@@ -22,7 +22,7 @@ export default class CompletionResolveAnalyzer {
             type: item.kind
           }]
         }
-  
+
         const schema = loadObjectSchema(
           path.join(item.data.projectRootDir, item.data.objectSchema)
         )
@@ -46,7 +46,7 @@ export default class CompletionResolveAnalyzer {
           }]
         }
       }
-    
+
     }
     return item
   }
