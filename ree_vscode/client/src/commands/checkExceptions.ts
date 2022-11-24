@@ -84,19 +84,27 @@ export function checkExceptions(filePath: string): void {
     // return if throws is empty
     if (throwsConstants.length === 0) { return }
     // check if we use constants without raise
-    const isThrowsConstIsUsed = forest.language.query(
-      `(
-        (constant) @call
-        (#match? @call "(${throwsConstants.join("|")})$")
-      )`
-    ).matches(tree.rootNode).length > 1 // more than one, because one use is in throws already
+    let unusedThrows = []
+    throwsConstants.forEach(c => {
+      const isThrowsConstIsUsed = forest.language.query(
+        `(
+          (constant) @call
+          (#match? @call "(${c})$")
+        )`
+      ).matches(tree.rootNode).length > 1 // more than one, because one use is in throws already
 
-    if (!isThrowsConstIsUsed) {
+      if (isThrowsConstIsUsed) { return }
+
+      unusedThrows.push(c)
+    })
+
+    if (unusedThrows.length > 0) {
+      // throwsMatches.captures.find(e => e.name === 'throws_args').node
       // else, add diagnostic about unused constants in throws
-      let throwsCallNode = throwsMatches.captures.find(e => e.name === 'throws_call').node
+      let throwsConstNodes = throwsMatches.captures.find(e => e.name === 'throws_args').node.children.filter(n => n.type === 'constant').filter(n => unusedThrows.includes(n.text))
 
       diagnostics.push(
-        ...collectDocumentDiagnostics(filePath, [throwsCallNode], `Fn throws(...) declares Exception that is not raised anywhere in the code`)
+        ...collectDocumentDiagnostics(filePath, throwsConstNodes, `Fn throws(...) declares Exception that is not raised anywhere in the code`)
       )
 
       addDocumentProblems(uri, diagnostics)
@@ -304,7 +312,7 @@ async function checkLocale(localeFile: string, localeFilePath: string, locale: L
 }
 
 function checkOccurrence(array, element) {
-  let counter = 0;
+  let counter = 0
 
   array.flat().forEach(item =>
     {
