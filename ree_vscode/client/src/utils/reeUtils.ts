@@ -92,7 +92,7 @@ export async function spawnCommand(args): Promise<ExecCommand | undefined> {
     }
 
     const code: number  = await new Promise( (resolve, reject) => {
-      child.on('close', resolve);
+      child.on('close', resolve)
     })
 
     return {

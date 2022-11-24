@@ -1,15 +1,15 @@
-import { CompletionItem, CompletionParams, Connection } from 'vscode-languageserver';
-import Provider from './provider';
-import CompletionAnalyzer from '../analyzers/completionAnalyzer';
+import { CompletionItem, CompletionParams, Connection } from 'vscode-languageserver'
+import Provider from './provider'
+import CompletionAnalyzer from '../analyzers/completionAnalyzer'
 
 export default class CompletionProvider extends Provider {
 	static register(connection: Connection): CompletionProvider {
-		return new CompletionProvider(connection);
+		return new CompletionProvider(connection)
 	}
 
 	constructor(connection: Connection) {
-		super(connection);
-		this.connection.onCompletion(this.handleCompletion);
+		super(connection)
+		this.connection.onCompletion(this.handleCompletion)
 	}
 
 	private handleCompletion = async (
@@ -21,5 +21,5 @@ export default class CompletionProvider extends Provider {
     } = params
 
     return CompletionAnalyzer.analyze(uri, position)
-	};
+	}
 }

@@ -1,15 +1,15 @@
-import { CompletionItem, Connection } from 'vscode-languageserver';
-import Provider from './provider';
-import CompletionResolveAnalyzer from '../analyzers/completionResolveAnalyzer';
+import { CompletionItem, Connection } from 'vscode-languageserver'
+import Provider from './provider'
+import CompletionResolveAnalyzer from '../analyzers/completionResolveAnalyzer'
 
 export default class CompletionResolveProvider extends Provider {
 	static register(connection: Connection): CompletionResolveProvider {
-		return new CompletionResolveProvider(connection);
+		return new CompletionResolveProvider(connection)
 	}
 
 	constructor(connection: Connection) {
 		super(connection)
-		this.connection.onCompletionResolve(this.handleCompletionResolve);
+		this.connection.onCompletionResolve(this.handleCompletionResolve)
 	}
 
 	private handleCompletionResolve = async (
@@ -17,5 +17,5 @@ export default class CompletionResolveProvider extends Provider {
 	): Promise<CompletionItem> => {
 
     return CompletionResolveAnalyzer.analyze(params)
-	};
+	}
 }

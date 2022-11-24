@@ -57,7 +57,7 @@ export default class CompletionAnalyzer {
       if (cursor.gotoFirstChild()) {
         do {
           walk(depth + 1)
-        } while (cursor.gotoNextSibling());
+        } while (cursor.gotoNextSibling())
         cursor.gotoParent()
       }
     }
