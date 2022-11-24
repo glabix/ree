@@ -114,12 +114,20 @@ export function checkExceptions(filePath: string): void {
     if (diffThrows.length > diffRaise.length) {
       // find constant positions
       let throwsConstNodes = throwsMatches.captures.find(c => c.name === 'throws_args').node.children.filter(n => n.text.match(RegExp(`${diffThrows.join("|")}`)))
+      const checkIfDiffConstIsUsed = forest.language.query(
+        `(
+          (constant) @call
+          (#match? @call "(${diffThrows.join("|")})$")
+        )`
+      ).matches(tree.rootNode).length > 1 // more than one, because one use is in throws already
 
-      diagnostics.push(
-        ...collectDocumentDiagnostics(filePath, throwsConstNodes, `Fn throws(...) declares Exception that is not raised anywhere in the code`)
-      )
-
-      addDocumentProblems(uri, diagnostics)
+      if (!checkIfDiffConstIsUsed) {
+        diagnostics.push(
+          ...collectDocumentDiagnostics(filePath, throwsConstNodes, `Fn throws(...) declares Exception that is not raised anywhere in the code`)
+        )
+  
+        addDocumentProblems(uri, diagnostics)
+      }
     }
 
     if (diffRaise.length > diffThrows.length) {
