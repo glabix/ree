@@ -9,7 +9,7 @@ import { ObjectFacade } from '../utils/objectFacade'
 var fs = require('fs')
 var path = require("path")
 
-type SelectPackageCb = (selected: string | undefined) => void;
+type SelectPackageCb = (selected: string | undefined) => void
 
 export function goToPackageObject() {
   if (!vscode.workspace.workspaceFolders) {

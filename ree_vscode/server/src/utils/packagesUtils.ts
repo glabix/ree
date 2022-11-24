@@ -5,6 +5,7 @@ import { getReeVscodeSettings } from './reeUtils'
 
 const path = require('path')
 const fs = require('fs')
+const url = require('url')
 
 let cachedPackages: IPackagesSchema | undefined = undefined
 let packagesCtime: number | null = null
@@ -163,7 +164,7 @@ export function getGemDir(gemPackageName: string): string | undefined {
 
 function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | undefined {
   try {
-    const schema = JSON.parse(data) as any;
+    const schema = JSON.parse(data) as any
     const obj = {} as IPackagesSchema
 
     obj.packages = schema.packages.map((p: any) => {
@@ -273,6 +274,44 @@ async function execGetReeFileIndex(rootDir: string, filePath: string): Promise<E
   }
 }
 
+export function updateFileIndex(uri: string) {
+  let filePath = url.fileURLToPath(uri)
+  const isSpecFile = !!filePath.split("/").pop().match(/\_spec/)
+  if (isSpecFile) { return }
+
+  let root = getProjectRootDir(filePath)
+
+  let rFilePath = path.relative(root, filePath)
+  if (root) {
+    cacheFileIndex(root,rFilePath).then(r => {
+      if (r) {
+        if (r.code === 0) {
+          try {
+            let index = getCachedIndex()
+            let newIndexForFile = JSON.parse(r.message)
+            if (Object.keys(newIndexForFile).length === 0) { return }
+
+            let classConst = Object.keys(newIndexForFile)?.[0]
+            const oldIndex = index.classes[classConst].findIndex(v => v.path.match(RegExp(`${rFilePath}`)))
+            if (oldIndex !== -1) {
+              index.classes[classConst][oldIndex].methods = newIndexForFile[classConst].methods
+              index.classes[classConst][oldIndex].package = newIndexForFile[classConst].package
+            } else {
+              index.classes[classConst].push(newIndexForFile)
+            }
+
+            setCachedIndex(index)
+          } catch (e: any) {
+            connection.window.showErrorMessage(e)
+          }
+        } else {
+          connection.window.showErrorMessage(r.message)
+        }
+      }
+    })
+  }
+}
+
 async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> {
   try {
     let spawn = require('child_process').spawn
@@ -288,7 +327,7 @@ async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> 
     }
 
     const code: number  = await new Promise( (resolve, reject) => {
-      child.on('close', resolve);
+      child.on('close', resolve)
     })
 
     return {
