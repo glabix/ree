@@ -81,7 +81,7 @@ module Ree
                 methods: []
               }
 
-              index_hash[:classes][file_name_const_string] ||= []
+              index_hash[:classes][const_name] ||= []
               index_hash[:classes][const_name] << hsh
             end
           end
