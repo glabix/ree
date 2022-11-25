@@ -33,10 +33,12 @@ module Ree
               begin
                 file_name_const_string = Ree::StringUtils.camelize(file_name.split('/')[-1].split('.rb')[0])
                 const_string_with_module = "#{package.module}::#{file_name_const_string}"
-
-                next if objects_class_names.include?(const_string_with_module) # skip objects
-
                 klass = Object.const_get(const_string_with_module)
+
+                if objects_class_names.include?(const_string_with_module) &&
+                  !klass.include?(ReeEnum::DSL)
+                  next
+                end
 
                 methods = klass
                   .public_instance_methods(false)
@@ -59,6 +61,27 @@ module Ree
               rescue NameError
                 next
               end
+            end
+          end
+
+          if facade.get_package(:ree_errors, false)
+            # add error constants
+            package = facade.get_package(:ree_errors)
+
+            package.objects.each do |obj|
+              const_name = obj.class_name.split("::")[-1]
+              file_name = File.join(
+                Ree::PathHelper.abs_package_module_dir(package),
+                obj.name.to_s + ".rb"
+              )
+
+              hsh = {
+                path: file_name,
+                package: package.name,
+                methods: []
+              }
+
+              index_hash[:classes][const_name] << hsh
             end
           end
 
