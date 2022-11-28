@@ -41,6 +41,10 @@ export function checkAndSortLinks(filePath: string) {
   let sortedWithoutUnused = []
 
   // check uniq
+  // get all uniq strings, then if we have any duplicates by name, check for imports
+  allSorted = [...new Map(allSorted.map(item =>
+    [item['body'], item])).values()]
+
   const uniqLinks = createLinksHash(allSorted)
 
   const duplicates = Object.keys(uniqLinks).filter(key => uniqLinks[key]['count'] > 1)
@@ -51,8 +55,9 @@ export function checkAndSortLinks(filePath: string) {
       let linkValues = uniqLinks[key]['indexes'].map(i => [allSorted[i], i])
 
       let duplicateLinks = linkValues.filter(link => {
-        return !(!!link[0].body.match(importRegexp)?.groups?.import)
+        return (link[0].imports.length === 0) // get links that don't have imports
       })
+
       let indexes = duplicateLinks.map(el => el.pop())
       if (indexes.length === linkValues.length) {
         indexes = indexes.slice(1)
