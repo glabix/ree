@@ -50,8 +50,9 @@ module Ree
                     }
                   }
 
+                rpath_from_root_file_path = Pathname.new(file_name).relative_path_from(Pathname.new(dir)).to_s
                 hsh = {
-                  path: file_name,
+                  path: rpath_from_root_file_path,
                   package: package.name,
                   methods: methods
                 }
