@@ -40,7 +40,10 @@ export default class DefinitionAnalyzer {
     const tokenNode = findTokenNodeInTree(token, tree)
     if (tokenNode) {
       if (index && index?.classes) {
-        
+        const constantMethodDefinitions = this.getConstantMethodsFromIndex(tree, tokenNode, token, index, projectRoot)
+        if (constantMethodDefinitions.length > 0) {
+          return constantMethodDefinitions
+        }
       }
     }
 
@@ -112,19 +115,28 @@ export default class DefinitionAnalyzer {
       )`
     ) as Query
 
+    const findParentNodeWithType = (node: SyntaxNode | null, type: string, returnParent: boolean = false): SyntaxNode | null => {
+      if (node === null) { return node }
+      if (!node.parent) { return node }
+      if (node.parent.type === type) { return returnParent ? node.parent : node}
+
+      return findParentNodeWithType(node.parent, type, returnParent)
+    }
+
     // trying to match call-nodes (ex SomeClass.new().some_method_call)
     let constantCallQueryMatches = constantsQuery.captures(tree.rootNode).filter(e => e.node?.parent?.type === 'call')
     let constantsFromIndexNodes = constantCallQueryMatches.filter(e => classes.includes(e.node.text)).map(e => e.node)
     let matchedNodes = constantsFromIndexNodes.filter(node => {
       // if tokenNode inside constantNode parent
       // ex: SomeClass.new(id: 1).*tokenNode* or SomeClass.new(id: 1).build.*tokenNode*
-      let nodeHaveTokenNode = !!node?.parent?.parent?.children.find(c => c.equals(tokenNode))
+      let nodeHaveTokenNode = !!findParentNodeWithType(node, 'assignment', false)?.children.find(c => c.equals(tokenNode))
       if (nodeHaveTokenNode) {
         return true
       } else {
         // check if we have assignment node, then check if assignment lhs is same as tokenNode
-        if (node?.parent?.parent?.type === 'assignment') {
-          return !!tokenNode?.parent?.text.match(RegExp(`^${node?.parent?.parent?.firstChild?.text}\.`))
+        const assignmentNode = findParentNodeWithType(node, 'assignment', true)
+        if (assignmentNode) {
+          return !!tokenNode?.parent?.text.match(RegExp(`^${assignmentNode?.firstChild?.text}\.`))
         }
       }
     })
