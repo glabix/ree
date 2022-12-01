@@ -49,6 +49,10 @@ export function deleteObjectSchema(filePath: string, silent: boolean) {
       if (!silent) {
         vscode.window.showInformationMessage(commandResult.message)
       }
+
+      if (commandResult && commandResult.code !== 0) {
+        vscode.window.showErrorMessage(`DeleteObjectSchemaError: ${commandResult.message}`)
+      }
     })
   })
 }

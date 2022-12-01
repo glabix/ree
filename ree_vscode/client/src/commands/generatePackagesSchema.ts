@@ -13,8 +13,8 @@ export function generatePackagesSchema(silent: boolean) {
   if (!rootProjectDir) { return }
 
   const checkIsReeInstalled = isReeInstalled(rootProjectDir)?.then((res) => {
-    if (res.code === 1) {
-      vscode.window.showWarningMessage('Gem ree is not installed')
+    if (res.code !== 0) {
+      vscode.window.showWarningMessage(`CheckIsReeInstalledError: ${res.message}`)
       return null
     }
   })
@@ -23,7 +23,7 @@ export function generatePackagesSchema(silent: boolean) {
 
   const checkIsBundleGemsInstalled = isBundleGemsInstalled(rootProjectDir)?.then((res) => {
     if (res.code !== 0) {
-      vscode.window.showWarningMessage(res.message)
+      vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledError: ${res.message}`)
       return
     }
   })
@@ -33,7 +33,7 @@ export function generatePackagesSchema(silent: boolean) {
   if (dockerPresented) {
     const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()?.then((res) => {
       if (res.code !== 0) {
-        vscode.window.showWarningMessage(res.message)
+        vscode.window.showWarningMessage(`CheckIsBundleGemInstalledInDockerError: ${res.message}`)
         return null
       }
     })
@@ -58,8 +58,8 @@ export function generatePackagesSchema(silent: boolean) {
     })
 
     return result.then((commandResult) => {
-      if (commandResult.code === 1) {
-        vscode.window.showErrorMessage(commandResult.message)
+      if (commandResult.code !== 0) {
+        vscode.window.showErrorMessage(`GeneratePackagesSchemaError: ${commandResult.message}`)
         return
       }
       
