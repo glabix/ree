@@ -227,7 +227,8 @@ export default class CompletionAnalyzer {
     let matchedNodes = constantsFromIndexNodes.filter(node => {
       // if tokenNode inside constantNode parent
       // ex: SomeClass.new(id: 1).*tokenNode* or SomeClass.new(id: 1).build.*tokenNode*
-      let nodeHaveTokenNode = !!findParentNodeWithType(node, 'assignment', false)?.children.find(c => c.equals(tokenNode))
+      let nodeHaveTokenNode = !!findParentNodeWithType(node, 'assignment', false)?.children.find(c => c.equals(tokenNode)) ||
+                              !!findParentNodeWithType(node, 'method', false)?.children.find(c => c.equals(tokenNode))
       if (nodeHaveTokenNode) {
         return true
       } else {
