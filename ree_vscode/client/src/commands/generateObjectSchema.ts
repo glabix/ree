@@ -84,8 +84,8 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
 
   // check if ree is installed
   const checkIsReeInstalled = isReeInstalled(rootProjectDir)?.then((res) => {
-    if (res.code === 1) {
-      vscode.window.showWarningMessage(res.message)
+    if (res.code !== 0) {
+      vscode.window.showWarningMessage(`CheckIsReeInstalledError: ${res.message}`)
       return null
     }
   })
@@ -93,7 +93,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
 
   const isBundleGemsInstalledResult = isBundleGemsInstalled(rootProjectDir)?.then((res) => {
     if (res.code !== 0) {
-      vscode.window.showWarningMessage(res.message)
+      vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledError: ${res.message}`)
       return null
     }
   })
@@ -103,7 +103,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   if (dockerPresented) {
     const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()?.then((res) => {
       if (res.code !== 0) {
-        vscode.window.showWarningMessage(res.message)
+        vscode.window.showWarningMessage(`CheckIsBundleGemInstalledInDockerError: ${res.message}`)
         return null
       }
     })

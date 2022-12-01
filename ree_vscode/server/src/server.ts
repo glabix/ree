@@ -62,7 +62,7 @@ export class Server implements ILanguageServer {
 							if (r.code === 0) {
 								setCachedIndex(JSON.parse(r.message))
 							} else {
-								this.connection.window.showErrorMessage(r.message.toString())
+								this.connection.window.showErrorMessage(`GetProjectIndexError: ${r.message.toString()}`)
 							}
 						}
 					}	catch (e: any) {

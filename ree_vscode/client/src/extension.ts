@@ -162,7 +162,7 @@ export async function activate(context: vscode.ExtensionContext) {
   if (isBundleGemsInstalled(curPath)) {
     isBundleGemsInstalled(curPath).then((res) => {
       if (res.code !== 0) {
-        vscode.window.showWarningMessage(res.message)
+        vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledError: ${res.message}`)
       }
     })
   }
@@ -170,7 +170,7 @@ export async function activate(context: vscode.ExtensionContext) {
   if (isBundleGemsInstalledInDocker()) {
     isBundleGemsInstalledInDocker().then((res) => {
       if (res && res.code !== 0) {
-        vscode.window.showWarningMessage(res.message)
+        vscode.window.showWarningMessage(`CheckIsBundleGemInstalledInDockerError: ${res.message}`)
       }
     })
   }

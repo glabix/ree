@@ -95,7 +95,7 @@ export function loadPackagesSchema(currentPath: string): IPackagesSchema | undef
             cachedIndex = JSON.parse(r.message)
           } else {
             cachedIndex = {}
-            connection.window.showErrorMessage(r.message)
+            connection.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
           }
         }
       } catch(e: any) {
