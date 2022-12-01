@@ -69,7 +69,8 @@ interface Link {
   body: string,
   as: string,
   imports: string[],
-  isSymbol: boolean
+  isSymbol: boolean,
+  queryMatch: Parser.QueryMatch
 }
 
 export const importRegexp = /(import\:\s)?(\-\>\s?\{(?<import>.+)\})/
@@ -88,6 +89,6 @@ export function mapLinkQueryMatches(matches: Parser.QueryMatch[]): Array<Link> {
     let isSymbol = name[0] === ":"
     name = name.replace(/\"|\'|\:/, '') 
 
-    return { name: name, body: body, as: as, imports: imports, isSymbol: isSymbol }
+    return { name: name, body: body, as: as, imports: imports, isSymbol: isSymbol, queryMatch: qm }
   })
 }

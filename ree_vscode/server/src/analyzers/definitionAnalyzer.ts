@@ -1,6 +1,10 @@
 import { Location } from 'vscode-languageserver'
 import { Position } from 'vscode-languageserver-textdocument'
+import { Query, SyntaxNode, Tree } from 'web-tree-sitter'
 import { documents } from '../documentManager'
+import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
+import { getCachedIndex, ICachedIndex } from '../utils/packagesUtils'
+import { getProjectRootDir } from '../utils/packageUtils'
 import { extractToken, findTokenInFile, findLinkedObject, findMethod } from '../utils/tokenUtils'
 
 const url = require('node:url')
@@ -8,7 +12,7 @@ const path = require('node:path')
 const fs = require('node:fs')
 
 export default class DefinitionAnalyzer {
-	public static analyze(uri: string, position: Position): Location {
+	public static analyze(uri: string, position: Position): Location[] {
     let defaultLocation : Location = {
       uri: uri,
       range: {
@@ -17,40 +21,131 @@ export default class DefinitionAnalyzer {
       } 
     }
 
+    const projectRoot = getProjectRootDir(url.fileURLToPath(uri))
+    if (!projectRoot) { return [defaultLocation] }
+
     const doc = documents.get(uri)
-    if (!doc) { return defaultLocation }
+    if (!doc) { return [defaultLocation] }
 
     const token = extractToken(uri, position)
-    if (!token) { return defaultLocation }
+    if (!token) { return [defaultLocation] }
+
+    let tree = forest.getTree(uri)
+    if (!tree) {
+      tree = forest.createTree(uri, doc.getText())
+    }
+
+    const index = getCachedIndex()
+
+    const tokenNode = findTokenNodeInTree(token, tree)
+    if (tokenNode) {
+      if (index && index?.classes) {
+        
+      }
+    }
 
     const method = findMethod(documents.get(uri).getText(), token)
 
     if (method.position) {
-      return {
+      return [{
         uri: uri,
         range: {
           start: method.position,
           end: method.position
         } 
-      } as Location
+      }] as Location[]
     }
 
     const linkedObject = findLinkedObject(uri, token, position)
 
     if (linkedObject.location) {
-      return {
+      return [{
         uri: linkedObject.location.uri,
         range: {
           start: linkedObject.location.range.start,
           end: linkedObject.location.range.end
         } 
-      } as Location
+      }] as Location[]
     }
 
     // search in file
-    let findInFileLocation = findTokenInFile(token, uri)
-    if (!findInFileLocation) { return defaultLocation }
+    let locationInFile = findTokenInFile(token, uri)
+    if (!locationInFile) { return [defaultLocation] }
 
-    return findInFileLocation
+    return [locationInFile]
 	}
+
+  private static getConstantMethodsFromIndex(tree: Tree, tokenNode: SyntaxNode, token: string, index: ICachedIndex, projectRoot: string): Location[] {
+    // check if we inside constant instantiation
+    let constantNodeText = tokenNode?.parent?.parent?.firstChild?.text
+    let classes = Object.keys(index.classes)
+    if (constantNodeText && classes.includes(constantNodeText)) {
+      return index.classes[constantNodeText].map(c => {
+        let targetMethods = c.methods.filter(m => m.name === token)
+        
+        return targetMethods.map(m => {
+          return {
+            uri: url.pathToFileURL(path.join(projectRoot, c.path)),
+            range: {
+              start: { line: m.location + 1, character: 0 },
+              end: { line: m.location + 1, character: 0 }
+            }
+          } as Location
+        })
+      }).flat()
+    }
+
+    const query = tree.getLanguage().query(
+      `(
+        (link
+            link_name: (_) @name) @link
+        (#select-adjacent! @link)
+      ) `
+    ) as Query
+
+    const links = mapLinkQueryMatches(query.matches(tree.rootNode))
+
+    const constantsQuery = tree.getLanguage().query(
+      `(
+        (constant) @call
+        (#match? @call "(${links.filter(l => l.imports.length > 0).map(l => l.imports).flat().join("|")})$")
+      )`
+    ) as Query
+
+    // trying to match call-nodes (ex SomeClass.new().some_method_call)
+    let constantCallQueryMatches = constantsQuery.captures(tree.rootNode).filter(e => e.node?.parent?.type === 'call')
+    let constantsFromIndexNodes = constantCallQueryMatches.filter(e => classes.includes(e.node.text)).map(e => e.node)
+    let matchedNodes = constantsFromIndexNodes.filter(node => {
+      // if tokenNode inside constantNode parent
+      // ex: SomeClass.new(id: 1).*tokenNode* or SomeClass.new(id: 1).build.*tokenNode*
+      let nodeHaveTokenNode = !!node?.parent?.parent?.children.find(c => c.equals(tokenNode))
+      if (nodeHaveTokenNode) {
+        return true
+      } else {
+        // check if we have assignment node, then check if assignment lhs is same as tokenNode
+        if (node?.parent?.parent?.type === 'assignment') {
+          return !!tokenNode?.parent?.text.match(RegExp(`^${node?.parent?.parent?.firstChild?.text}\.`))
+        }
+      }
+    })
+    if (matchedNodes.length > 0) {
+      return matchedNodes.map(n => {
+        return index.classes[n.text].map(c => {
+          let targetMethods = c.methods.filter(m => m.name === token)
+        
+          return targetMethods.map(m => {
+            return {
+              uri: url.pathToFileURL(path.join(projectRoot, c.path)),
+              range: {
+                start: { line: m.location + 1, character: 0 },
+                end: { line: m.location + 1, character: 0 }
+              }
+            } as Location
+          })
+        }).flat()
+      }).flat()
+    }
+
+    return []
+  }
 }

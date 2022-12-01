@@ -39,7 +39,7 @@ interface ICachedGems {
   [key: string]: string | undefined
 }
 
-interface ICachedIndex {
+export interface ICachedIndex {
   [classes: string]: {
     [key: string]: [
       {

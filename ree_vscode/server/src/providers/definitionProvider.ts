@@ -14,7 +14,7 @@ export default class DefinitionProvider extends Provider {
 
 	private handleDefinition = async (
 		params: DefinitionParams
-	): Promise<Location> => {
+	): Promise<Location[]> => {
 		const { 
       textDocument: { uri },
       position

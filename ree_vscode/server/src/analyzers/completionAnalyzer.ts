@@ -1,9 +1,9 @@
 import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
 import { Position } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
-import { forest } from '../forest'
-import { QueryMatch, Query, SyntaxNode } from 'web-tree-sitter'
-import { getCachedIndex, getGemDir, loadPackagesSchema } from '../utils/packagesUtils'
+import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
+import { QueryMatch, Query, SyntaxNode, Tree, QueryCapture } from 'web-tree-sitter'
+import { getCachedIndex, getGemDir, IPackagesSchema, ICachedIndex, loadPackagesSchema } from '../utils/packagesUtils'
 import { getPackageNameFromPath, getProjectRootDir, getObjectNameFromPath } from '../utils/packageUtils'
 import { PackageFacade } from '../utils/packageFacade'
 import { extractToken } from '../utils/tokenUtils'
@@ -33,12 +33,16 @@ export default class CompletionAnalyzer {
     const packagesSchema = loadPackagesSchema(filePath)
     if (!packagesSchema) { return defaultCompletion }
 
-    const currentPackage = getPackageNameFromPath(filePath)
+    const currentPackageName = getPackageNameFromPath(filePath)
+    if (!currentPackageName) { return defaultCompletion }
+
     const projectRootDir = getProjectRootDir(filePath)
     if (!projectRootDir) { return defaultCompletion }
 
     const objectName = getObjectNameFromPath(filePath)
     if (!objectName) { return defaultCompletion }
+
+    const index = getCachedIndex()
 
     const doc = documents.get(uri)
     let tree = forest.getTree(uri)
@@ -46,42 +50,59 @@ export default class CompletionAnalyzer {
       tree = forest.createTree(uri, doc.getText())
     }
 
-    let index = getCachedIndex()
+    // filter that already using
+    const query = tree.getLanguage().query(
+      `(
+        (link
+           link_name: (_) @name) @link
+        (#select-adjacent! @link)
+      ) `
+    ) as Query
 
-    let constantNode: any
-    const cursor = tree.walk()
-    const walk = (depth: number): void => {
-      if (cursor.currentNode().text.match(`^${token}$`)) {
-        constantNode = cursor.currentNode()
-      }
-      if (cursor.gotoFirstChild()) {
-        do {
-          walk(depth + 1)
-        } while (cursor.gotoNextSibling())
-        cursor.gotoParent()
-      }
-    }
-    walk(0)
-    cursor.delete()
+    const links = mapLinkQueryMatches(query.matches(tree.rootNode))
 
-    if (constantNode) {
+    const constantsQueryCaptures = tree.getLanguage().query(
+      `(
+        (constant) @call
+        (#match? @call "(${links.filter(l => l.imports.length > 0).map(l => l.imports).flat().join("|")})$")
+      )`
+    ).captures(tree.rootNode)
+
+    const tokenNode = findTokenNodeInTree(token, tree)
+
+    // first we check if we have any matching nodes
+    if (tokenNode) {
       if (index && index?.classes) {
-        let constantNodeText = constantNode?.parent?.parent?.children?.[0]?.text
-        if (Object.keys(index.classes).includes(constantNodeText)) {
-          return index.classes[constantNodeText].map(c => {
-            return c.methods.map(m => {
-              return {
-                label: m.name,
-                details: `${snakeToCamelCase(c.package)}`,
-                kind: CompletionItemKind.Field,
-              } as CompletionItem
-            })
-          }).flat()
+        const constantMethods = this.getConstantMethodsFromIndex(tokenNode, index, constantsQueryCaptures)
+        if (constantMethods.length > 0) {
+          return constantMethods
         }
       }
     }
   
-    const currentProjectPackages = packagesSchema.packages.map((pckg) => {
+    // if there are no matching nodes, show package objects and constants
+    const currentProjectPackages = this.getCurrentProjectPackages(packagesSchema, projectRootDir, currentPackageName, filePath)
+    const gemPackageObjects = this.getGemPackageObjects(packagesSchema, projectRootDir, currentPackageName, filePath)
+    let allItems = currentProjectPackages.concat(...gemPackageObjects)
+
+    // add constants
+    if (index && index?.classes) {
+      const constantsItems = this.getConstantsFromIndex(index, projectRootDir, currentPackageName, filePath)
+      allItems = allItems.concat(...constantsItems)
+    }
+
+    if (allItems.length === 0) { return defaultCompletion }
+
+    let linkNames = links.map(l => l.name)
+    return allItems.filter(obj => !linkNames.includes(obj.label) || obj.label !== objectName)
+  }
+
+  private static getCurrentProjectPackages(
+    packagesSchema: IPackagesSchema,
+    projectRootDir: string,
+    currentPackage: string,
+    filePath: string): CompletionItem[] {
+    return packagesSchema.packages.map((pckg) => {
       let packageFacade = new PackageFacade(path.join(projectRootDir, pckg.schema))
       
       let objects = packageFacade.objects().map(obj => (
@@ -106,9 +127,15 @@ export default class CompletionAnalyzer {
 
       return objects
     }).flat()
+  }
 
-    // get gemPackages
-    const gemPackageObjects = packagesSchema.gemPackages.map((pckg) => {
+  private static getGemPackageObjects(
+    packagesSchema: IPackagesSchema,
+    projectRootDir: string,
+    currentPackageName: string,
+    filePath: string
+    ): CompletionItem[] {
+    return packagesSchema.gemPackages.map((pckg) => {
       let gemPath = getGemDir(pckg.name)
       if (!gemPath) { return [] }
 
@@ -125,7 +152,7 @@ export default class CompletionAnalyzer {
             data: {
               objectSchema: obj.schema,
               fromPackageName: pckg.name,
-              toPackageName: currentPackage,
+              toPackageName: currentPackageName,
               currentFilePath: filePath,
               type: CompletionItemKind.Method,
               projectRootDir: gemPath || projectRootDir
@@ -136,57 +163,87 @@ export default class CompletionAnalyzer {
 
       return objects
     }).flat()
+  }
 
-    const objectsFromAllPackages = currentProjectPackages.concat(...gemPackageObjects)
-
-    if (objectsFromAllPackages.length === 0) { return defaultCompletion }
-
-    // filter that already using
-    const query = tree.getLanguage().query(
-      `(
-        (link
-           link_name: (_) @name) @link
-        (#select-adjacent! @link)
-      ) `
-    ) as Query
-
-    const queryMatches: QueryMatch[] = query.matches(tree.rootNode)
-    const linkedDependencies = queryMatches.map(
-      c => c.captures.filter(e => e.name === 'name')
-      ).flat()
-       .map(e => e.node)
-       .map(e => e.text)
-       .map(e => e.replace(':', ''))
-
-    // add constants
-
-    if (index && index?.classes) {
-      Object.keys(index.classes).map((k: string) => {
-        index['classes'][k].map(c => {
-          let konstant = {
-            label: k,
-            labelDetails: {
-              description: `from: :${c.package}`
-            },
-            kind: CompletionItemKind.Class,
-            data: {
-              objectName: k,
-              fromPackageName: c.package,
-              toPackageName: currentPackage,
-              projectRootDir: projectRootDir,
-              currentFilePath: filePath,
-              type: CompletionItemKind.Class,
-              linkPath: c.path
-            }
+  private static getConstantsFromIndex(
+    index: ICachedIndex,
+    projectRootDir: string,
+    currentPackageName: string,
+    filePath: string
+    ): CompletionItem[] {
+    return Object.keys(index.classes).map((k: string) => {
+      return index['classes'][k].map(c => {
+        return {
+          label: k,
+          labelDetails: {
+            description: `from: :${c.package}`
+          },
+          kind: CompletionItemKind.Class,
+          data: {
+            objectName: k,
+            fromPackageName: c.package,
+            toPackageName: currentPackageName,
+            projectRootDir: projectRootDir,
+            currentFilePath: filePath,
+            type: CompletionItemKind.Class,
+            linkPath: c.path
           }
-          objectsFromAllPackages.push(
-            konstant
-          )
-        })
+        } as CompletionItem
       })
+    }).flat()
+  }
+
+  private static getConstantMethodsFromIndex(
+    tokenNode: SyntaxNode,
+    index: ICachedIndex,
+    constantsQueryCaptures: QueryCapture[]
+    ): CompletionItem[] {
+    // check if we inside constant instantiation
+    let constantNodeText = tokenNode?.parent?.parent?.firstChild?.text
+    let classes = Object.keys(index.classes)
+    if (constantNodeText && classes.includes(constantNodeText)) {
+      return index.classes[constantNodeText].map(c => {
+        return c.methods.map(m => {
+          return {
+            label: m.name,
+            details: `${snakeToCamelCase(c.package)}`,
+            kind: CompletionItemKind.Field,
+          } as CompletionItem
+        })
+      }).flat()
     }
 
-    return objectsFromAllPackages.filter(obj => !linkedDependencies.includes(obj.label) || obj.label !== objectName)
+    // trying to match call-nodes (ex SomeClass.new().some_method_call)
+    let constantCallQueryMatches = constantsQueryCaptures.filter(e => e.node?.parent?.type === 'call')
+    let constantsFromIndexNodes = constantCallQueryMatches.filter(e => classes.includes(e.node.text)).map(e => e.node)
+    let matchedNodes = constantsFromIndexNodes.filter(node => {
+      // if tokenNode inside constantNode parent
+      // ex: SomeClass.new(id: 1).*tokenNode* or SomeClass.new(id: 1).build.*tokenNode*
+      let nodeHaveTokenNode = !!node?.parent?.parent?.children.find(c => c.equals(tokenNode))
+      if (nodeHaveTokenNode) {
+        return true
+      } else {
+        // check if we have assignment node, then check if assignment lhs is same as tokenNode
+        if (node?.parent?.parent?.type === 'assignment') {
+          return !!tokenNode?.parent?.text.match(RegExp(`^${node?.parent?.parent?.firstChild?.text}\.`))
+        }
+      }
+    })
+    if (matchedNodes.length > 0) {
+      return matchedNodes.map(n => {
+        return index.classes[n.text].map(c => {
+          return c.methods.map(m => {
+            return {
+              label: m.name,
+              details: `${snakeToCamelCase(c.package)}`,
+              kind: CompletionItemKind.Field,
+            } as CompletionItem
+          })
+        }).flat()
+      }).flat()
+    }
+
+    return [] as CompletionItem[]
   }
 }
 
