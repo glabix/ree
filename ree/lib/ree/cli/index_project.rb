@@ -132,7 +132,7 @@ module Ree
 
             hsh = {
               path: file_name,
-              package: package.name,
+              package: errors_package.name,
               methods: []
             }
 
