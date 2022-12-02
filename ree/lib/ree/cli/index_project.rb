@@ -111,9 +111,10 @@ module Ree
             }
 
           obj_name_key = Ree::StringUtils.underscore(hash_key)
+          rpath_from_root_file_path = Pathname.new(file_name).relative_path_from(Pathname.new(root_dir)).to_s
 
           hsh = {
-            path: file_name,
+            path: rpath_from_root_file_path,
             package: package_name,
             methods: filters
           }
