@@ -11,7 +11,7 @@ let cachedPackages: IPackagesSchema | undefined = undefined
 let packagesCtime: number | null = null
 let cachedGemPackages: Object | null = null
 let cachedGems: ICachedGems = {}
-let cachedIndex: ICachedIndex = {}
+let cachedIndex: ICachedIndex
 
 export function getCachedIndex(): ICachedIndex {
   return cachedIndex
@@ -40,7 +40,7 @@ interface ICachedGems {
 }
 
 export interface ICachedIndex {
-  [classes: string]: {
+  classes: {
     [key: string]: [
       {
         path: string,
@@ -48,6 +48,21 @@ export interface ICachedIndex {
         methods: [
           {
             name: string,
+            location: number
+          }
+        ]
+      }
+    ]
+  },
+  objects: {
+    [key: string]: [
+      {
+        path: string,
+        package: string,
+        methods: [
+          {
+            name: string,
+            parameters: { name: number, required: string }[]
             location: number
           }
         ]
@@ -94,12 +109,12 @@ export function loadPackagesSchema(currentPath: string): IPackagesSchema | undef
           if (r.code === 0) {
             cachedIndex = JSON.parse(r.message)
           } else {
-            cachedIndex = {}
+            cachedIndex = <ICachedIndex>{}
             connection.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
           }
         }
       } catch(e: any) {
-        cachedIndex = {}
+        cachedIndex = <ICachedIndex>{}
         connection.window.showErrorMessage(e.toString())
       }
     })
@@ -292,12 +307,15 @@ export function updateFileIndex(uri: string) {
             if (Object.keys(newIndexForFile).length === 0) { return }
 
             let classConst = Object.keys(newIndexForFile)?.[0]
-            const oldIndex = index.classes[classConst].findIndex(v => v.path.match(RegExp(`${rFilePath}`)))
-            if (oldIndex !== -1) {
-              index.classes[classConst][oldIndex].methods = newIndexForFile[classConst].methods
-              index.classes[classConst][oldIndex].package = newIndexForFile[classConst].package
-            } else {
-              index.classes[classConst].push(newIndexForFile)
+            // TODO: update index for objects/mappers
+            if (index.classes) {
+              const oldIndex = index.classes[classConst].findIndex(v => v.path.match(RegExp(`${rFilePath}`)))
+              if (oldIndex !== -1) {
+                index.classes[classConst][oldIndex].methods = newIndexForFile[classConst].methods
+                index.classes[classConst][oldIndex].package = newIndexForFile[classConst].package
+              } else {
+                index.classes[classConst].push(newIndexForFile)
+              }
             }
 
             setCachedIndex(index)

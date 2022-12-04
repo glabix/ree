@@ -90,7 +90,7 @@ export function findLinkedObject(uri: string, token: string, position: Position)
   const packageName = getPackageNameFromPath(filePath)
   if (!packageName) { return ret }
 
-  const pckg = packagesSchema.packages.find(p => p.name == packageName)
+  const pckg = packagesSchema.packages.find(p => p.name === packageName)
   if (!pckg) { return ret }
 
   const projectRootDir = getProjectRootDir(filePath)
@@ -168,7 +168,7 @@ export function findLinkedObject(uri: string, token: string, position: Position)
 
     const linkedPackageFacade = new PackageFacade(linkedPackageSchemaPath)
 
-    const linkedObjectSchema = linkedPackageFacade.objects().find(o => o.name == link.target)
+    const linkedObjectSchema = linkedPackageFacade.objects().find(o => o.name === link.target)
     if (!linkedObjectSchema) { return ret }
 
     const linkedObjectRoot = linkedPackage ? projectRootDir : getGemDir(linkedPackageName)

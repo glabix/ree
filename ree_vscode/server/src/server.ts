@@ -10,7 +10,7 @@ import CompletionProvider from './providers/completionProvider'
 import CompletionResolveProvider from './providers/completionResolveProvider'
 import { documents } from './documentManager'
 import { forest } from './forest'
-import { cacheProjectIndex, setCachedIndex } from './utils/packagesUtils'
+import { cacheProjectIndex, ICachedIndex, setCachedIndex } from './utils/packagesUtils'
 
 const url = require('url')
 
@@ -66,7 +66,7 @@ export class Server implements ILanguageServer {
 							}
 						}
 					}	catch (e: any) {
-						setCachedIndex({})
+						setCachedIndex(<ICachedIndex>{})
 						this.connection.window.showErrorMessage(e.toString())
 					}
 				})
