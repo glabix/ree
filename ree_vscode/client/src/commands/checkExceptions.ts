@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { SyntaxNode } from 'web-tree-sitter'
+import { Query, SyntaxNode } from 'web-tree-sitter'
 import { addDocumentProblems, ReeDiagnosticCode, removeDocumentProblems } from '../utils/documentUtils'
 import { forest } from '../utils/forest'
 import { getLocalePath, Locale } from '../utils/packageUtils'
@@ -20,25 +20,16 @@ export function checkExceptions(filePath: string): void {
   const query = forest.language.query(
     `
     (throws (argument_list)* @throws_args) @throws_call
+    (raise) @raise_call
     (
-      (call
-        (identifier) @raise
-        (argument_list
-          (call
-            (constant) @const
-            (identifier)
-            (argument_list)*
-          )
-        ) @raise_args
-      ) @raise_call
-      (#match? @raise "^raise")
-    )
-    (
-      (assignment (constant)@const (call (constant) (identifier) (argument_list (simple_symbol) @code (string) @locale)))
+      (assignment 
+        left: (constant) @exception_constant
+        right: (call) @exception_build_call
+      ) 
     ) @exception_build
     `
-  )
-
+  ) as Query
+ 
   removeDocumentProblems(uri, ReeDiagnosticCode.exceptionDiagnostic)
 
   let diagnostics = []
@@ -66,13 +57,15 @@ export function checkExceptions(filePath: string): void {
   if (raiseMatches) {
     raiseConstants = raiseMatches.map(
       e => {
-        let constNode = e.captures.find(e => e.name === 'const')
-        return constNode ? constNode.node.text : null
+        let constNode = e.captures.find(e => e.name === 'raise_call')?.node?.children
+                        ?.find(c => c.type === 'call')?.children
+                        ?.find(c => c.type === 'constant')
+        return constNode ? constNode.text : null
       }
     ).filter(e => e !== null).sort()
   }
 
-  if (!throwsMatches && !raiseMatches) { return }
+  if (!throwsMatches && raiseMatches.length === 0) { return }
 
   // If there are any raise error calls, but none for throws
   if (!throwsMatches && raiseMatches.length > 0) {
@@ -91,19 +84,27 @@ export function checkExceptions(filePath: string): void {
     // return if throws is empty
     if (throwsConstants.length === 0) { return }
     // check if we use constants without raise
-    const isThrowsConstIsUsed = forest.language.query(
-      `(
-        (constant) @call
-        (#match? @call "(${throwsConstants.join("|")})$")
-      )`
-    ).matches(tree.rootNode).length > 1 // more than one, because one use is in throws already
+    let unusedThrows = []
+    throwsConstants.forEach(c => {
+      const isThrowsConstIsUsed = forest.language.query(
+        `(
+          (constant) @call
+          (#match? @call "(${c})$")
+        )`
+      ).matches(tree.rootNode).length > 1 // more than one, because one use is in throws already
 
-    if (!isThrowsConstIsUsed) {
+      if (isThrowsConstIsUsed) { return }
+
+      unusedThrows.push(c)
+    })
+
+    if (unusedThrows.length > 0) {
+      // throwsMatches.captures.find(e => e.name === 'throws_args').node
       // else, add diagnostic about unused constants in throws
-      let throwsCallNode = throwsMatches.captures.find(e => e.name === 'throws_call').node
+      let throwsConstNodes = throwsMatches.captures.find(e => e.name === 'throws_args').node.children.filter(n => n.type === 'constant').filter(n => unusedThrows.includes(n.text))
 
       diagnostics.push(
-        ...collectDocumentDiagnostics(filePath, [throwsCallNode], `Fn throws(...) declares Exception that is not raised anywhere in the code`)
+        ...collectDocumentDiagnostics(filePath, throwsConstNodes, `Fn throws(...) declares Exception that is not raised anywhere in the code`)
       )
 
       addDocumentProblems(uri, diagnostics)
@@ -121,17 +122,27 @@ export function checkExceptions(filePath: string): void {
     if (diffThrows.length > diffRaise.length) {
       // find constant positions
       let throwsConstNodes = throwsMatches.captures.find(c => c.name === 'throws_args').node.children.filter(n => n.text.match(RegExp(`${diffThrows.join("|")}`)))
+      const checkIfDiffConstIsUsed = forest.language.query(
+        `(
+          (constant) @call
+          (#match? @call "(${diffThrows.join("|")})$")
+        )`
+      ).matches(tree.rootNode).length > 1 // more than one, because one use is in throws already
 
-      diagnostics.push(
-        ...collectDocumentDiagnostics(filePath, throwsConstNodes, `Fn throws(...) declares Exception that is not raised anywhere in the code`)
-      )
-
-      addDocumentProblems(uri, diagnostics)
+      if (!checkIfDiffConstIsUsed) {
+        diagnostics.push(
+          ...collectDocumentDiagnostics(filePath, throwsConstNodes, `Fn throws(...) declares Exception that is not raised anywhere in the code`)
+        )
+  
+        addDocumentProblems(uri, diagnostics)
+      }
     }
 
     if (diffRaise.length > diffThrows.length) {
       let raiseConstMatches = raiseMatches.filter(m => {
-        return m.captures.find(c => c.name === 'const').node.text.match(RegExp(`${diffRaise.join("|")}`))
+        return m.captures.find(e => e.name === 'raise_call')?.node?.children
+                        ?.find(c => c.type === 'call')?.children
+                        ?.find(c => c.type === 'constant').text.match(RegExp(`${diffRaise.join("|")}`))
       })
 
       let raiseConstNodes = raiseConstMatches.map(c => c.captures.find(e => e.name === 'raise_call').node)
@@ -142,36 +153,61 @@ export function checkExceptions(filePath: string): void {
 
       addDocumentProblems(uri, diagnostics)
     }
+
+    if (diffRaise.length === diffThrows.length && diffRaise.join('') !== diffThrows.join('')) {
+      let throwsNodes = throwsMatches.captures.find(c => c.name === 'throws_args').node.children.filter(n => n.text.match(RegExp(`${diffThrows.join("|")}`)))
+      diagnostics.push(
+        ...collectDocumentDiagnostics(filePath, throwsNodes, "Fn throws(...) declares Exception that is not raised anywhere in the code")
+      )
+
+      let raiseConstMatches = raiseMatches.filter(m => {
+        return m.captures.find(e => e.name === 'raise_call')?.node?.children
+                        ?.find(c => c.type === 'call')?.children
+                        ?.find(c => c.type === 'constant').text.match(RegExp(`${diffRaise.join("|")}`))
+      })
+      let raiseNodes = raiseConstMatches.map(c => c.captures.find(e => e.name === 'raise_call').node)
+      diagnostics.push(
+        ...collectDocumentDiagnostics(filePath, raiseNodes, "Raised exception is not added to fn throws(...) declaration")
+      )
+
+      addDocumentProblems(uri, diagnostics)
+    }
   }
 
 
   // if everything ok with usage, let's check the naming and locales
   if (exceptionBuildMatches.length > 0) {
-    let wrongNamingExceptions = exceptionBuildMatches.filter(m => {
-      let constCapture = m.captures.find(c => c.name === 'const')
-      let codeCapture = m.captures.find(c => c.name === 'code')
-      let localeCapture = m.captures.find(c => c.name === 'locale')
+    const getExceptionLocaleAndCode = (m) => {
+      let constCapture = m.captures.find(c => c.name === 'exception_constant')
+      let callCapture = m.captures.find(c => c.name === 'exception_build_call')
+      let argsCallNode = callCapture.node.children.find(e => e.type === 'argument_list')
+      let codeNode = argsCallNode.children.find(c => c.type === 'simple_symbol')
+      let localeNode = argsCallNode.children.find(c => c.type === 'string')
       let snakeConstName = toSnakeCase(constCapture.node.text).split("_").slice(0, -1).join("_")
-      let codeName = codeCapture.node.text.replace(/\:/g, '')
-      let localeName = localeCapture.node.text.replace(/\"|\'/g, '').split(".").slice(-1)?.[0]
+      let codeName = codeNode.text.replace(/\:/g, '')
+      let localeName = localeNode.text.replace(/\"|\'/g, '').split(".").slice(-1)?.[0]
 
-      return (snakeConstName !== codeName) || (snakeConstName !== localeName) || (codeName !== localeName)
+      return [snakeConstName, codeName, localeName]
+    }
+    let wrongNamingExceptions = exceptionBuildMatches.filter(m => {
+      let [constName, codeName, localeName] = getExceptionLocaleAndCode(m)
+
+      return (constName !== codeName) || (constName !== localeName) || (codeName !== localeName)
     })
 
     if (wrongNamingExceptions.length > 0) {
       wrongNamingExceptions.forEach(m => {
-        let constCapture = m.captures.find(c => c.name === 'const')
-        let codeCapture = m.captures.find(c => c.name === 'code')
-        let localeCapture = m.captures.find(c => c.name === 'locale')
-        let captureArr = [constCapture, codeCapture, localeCapture]
-        let snakeConstName = toSnakeCase(constCapture.node.text).split("_").slice(0, -1).join("_")
-        let codeName = codeCapture.node.text.replace(/\:/g, '')
-        let localeName = localeCapture.node.text.replace(/\"|\'/g, '').split(".").slice(-1)?.[0]
-        let nameArr = [snakeConstName, codeName, localeName]
+        let constCapture = m.captures.find(c => c.name === 'exception_constant')
+        let callCapture = m.captures.find(c => c.name === 'exception_build_call')
+        let argsCallNode = callCapture.node.children.find(e => e.type === 'argument_list')
+        let codeNode = argsCallNode.children.find(c => c.type === 'simple_symbol')
+        let localeNode = argsCallNode.children.find(c => c.type === 'string')
+        let nodeArr = [constCapture.node, codeNode, localeNode]
+        let nameArr = getExceptionLocaleAndCode(m)
         let uniqNames = [...new Set(nameArr)]
 
         uniqNames.filter(e => checkOccurrence(nameArr, e) === 1).forEach(e => {
-          let node = captureArr[nameArr.indexOf(e)].node
+          let node = nodeArr[nameArr.indexOf(e)]
           diagnostics.push(
             ...collectDocumentDiagnostics(
               filePath,
@@ -189,8 +225,11 @@ export function checkExceptions(filePath: string): void {
 
     let locales = []
 
-    exceptionBuildMatches.forEach(e => {
-      locales.push(e.captures.find(c => c.name === 'locale').node.text.replace(/\"|\'/g, ''))
+    exceptionBuildMatches.forEach(m => {
+      let callCapture = m.captures.find(c => c.name === 'exception_build_call')
+      let argsCallNode = callCapture.node.children.find(e => e.type === 'argument_list')
+      let localeNode = argsCallNode.children.find(c => c.type === 'string')
+      locales.push(localeNode.text.replace(/\"|\'/g, ''))
     })
 
     if (locales.length === 0) { return }
@@ -273,7 +312,7 @@ async function checkLocale(localeFile: string, localeFilePath: string, locale: L
 }
 
 function checkOccurrence(array, element) {
-  let counter = 0;
+  let counter = 0
 
   array.flat().forEach(item =>
     {

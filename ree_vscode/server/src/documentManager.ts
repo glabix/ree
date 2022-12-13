@@ -1,7 +1,7 @@
 import { TextDocuments, Connection, TextDocumentIdentifier } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Subject } from 'rxjs'
 import { forest } from './forest'
+import { updateFileIndex } from './utils/packagesUtils'
 
 export enum DocumentEventKind {
 	OPEN,
@@ -26,6 +26,10 @@ export default class DocumentManager {
 
 		this.documents.onDidChangeContent((e) => {
 			forest.updateTree(e.document.uri, e.document.getText())
+		})
+
+		this.documents.onDidSave((e) => {
+			updateFileIndex(e.document.uri)
 		})
 
 		this.documents.onDidClose((e) => {

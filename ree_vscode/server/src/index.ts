@@ -13,7 +13,7 @@ import log from 'loglevel'
 import { ILanguageServer } from './server'
 import TreeSitterFactory from './utils/treeSitterFactory'
 
-const connection: Connection = createConnection(ProposedFeatures.all)
+export const connection: Connection = createConnection(ProposedFeatures.all)
 let server: ILanguageServer
 
 connection.onInitialize(async (params: InitializeParams) => {

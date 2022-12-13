@@ -4,6 +4,8 @@ import { loadPackagesSchema } from '../utils/packagesUtils'
 import { PackageFacade } from '../utils/packageFacade'
 import { loadObjectSchema } from '../utils/objectUtils'
 import { forest, mapLinkQueryMatches } from '../utils/forest'
+import { Query } from 'web-tree-sitter'
+import { CompletionItemKind } from 'vscode-languageclient'
 
 const fs = require('fs')
 const path = require('path')
@@ -13,16 +15,20 @@ export function updatePackageDeps(
   { objectName,
     toPackageName,
     fromPackageName,
-    currentFilePath
+    currentFilePath,
+    type,
+    linkPath
    } : {
       objectName: string,
       fromPackageName: string
       toPackageName: string
-      currentFilePath: string
+      currentFilePath: string,
+      type: CompletionItemKind,
+      linkPath?: string
     }
   ) { 
     getFileFromManager(currentFilePath).then(currentFile => {
-      updateObjectLinks(currentFile, objectName, fromPackageName, toPackageName)
+      updateObjectLinks(currentFile, objectName, fromPackageName, toPackageName, type, linkPath)
     })
 }
 
@@ -95,7 +101,9 @@ function updateObjectLinks(
   currentFile: vscode.TextDocument,
   objectName: string,
   fromPackageName: string,
-  toPackageName: string
+  toPackageName: string,
+  type: CompletionItemKind,
+  linkPath?: string
   ): Thenable<boolean> | null {
   
   const uri = currentFile.uri  
@@ -112,7 +120,7 @@ function updateObjectLinks(
         (#select-adjacent! @link)
       ) 
     `
-  )
+  ) as Query
 
   const queryMatches = query.matches(tree.rootNode)
   const links = mapLinkQueryMatches(queryMatches)
@@ -129,7 +137,8 @@ function updateObjectLinks(
   let endCharPos = 0
 
   if (isSpecFile) {
-    linkText = `link :${objectName}, from: :${fromPackageName}`
+    linkText = buildLinkText(objectName, fromPackageName, toPackageName, type, isSpecFile, linkPath)
+
     if (links.length === 0) {
       const rspecDescribePresent = text.split("\n").some((line, index) => {
         if (line.match(/RSpec\.describe/)) {
@@ -171,10 +180,7 @@ function updateObjectLinks(
     }
   })
 
-  linkText = `link :${objectName}`
-  if (currentPackage.name !== fromPackageName) {
-    linkText += `, from: :${fromPackageName}`
-  }
+  linkText = buildLinkText(objectName, fromPackageName, toPackageName, type, isSpecFile, linkPath)
 
   if (isLinkDslPresent) {
     if (links.length === 0) {
@@ -191,10 +197,7 @@ function updateObjectLinks(
 
       offset = ' '.repeat(startCharPos) 
 
-      linkText = `link :${objectName}`
-      if (currentPackage.name !== fromPackageName) {
-        linkText += `, from: :${fromPackageName}`
-      }
+      linkText = buildLinkText(objectName, fromPackageName, toPackageName, type, isSpecFile, linkPath)
 
       linkText = `\n${offset}${linkText}`
     }
@@ -234,6 +237,31 @@ function updateObjectLinks(
   }
 
   return editDocument(currentFile, lineNumber, endCharPos, linkText)
+}
+
+function buildLinkText(
+  objectName: string,
+  fromPackageName: string,
+  toPackageName: string,
+  type: CompletionItemKind,
+  isSpecFile: boolean,
+  linkPath?: string
+): string {
+  let link = ''
+  if (type === CompletionItemKind.Method) {
+    link = `link :${objectName}`
+
+    if (fromPackageName !== toPackageName || isSpecFile) {
+      link += `, from: :${fromPackageName}`
+    }
+  }
+
+  if (type === CompletionItemKind.Class) {
+    let pathToFile = linkPath.split('package/').pop().replace(/\.rb/, '')
+    link = `link "${pathToFile}", -> { ${objectName} }`
+  }
+
+  return link
 }
 
 function editDocument(currentFile: vscode.TextDocument, line: number, character: number, insertString: string): Thenable<boolean> {

@@ -113,7 +113,7 @@ export function getGemDir(gemPackageName: string): string | undefined {
 
 export function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | undefined {
   try {
-    const schema = JSON.parse(data) as any;
+    const schema = JSON.parse(data) as any
     const obj = {} as IPackagesSchema
 
     obj.packages = schema.packages.map((p: any) => {

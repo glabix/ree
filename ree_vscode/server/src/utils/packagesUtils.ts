@@ -1,13 +1,25 @@
+import { connection } from '..'
 import { PACKAGES_SCHEMA_FILE } from './constants'
 import { getProjectRootDir } from './packageUtils'
+import { getReeVscodeSettings } from './reeUtils'
 
 const path = require('path')
 const fs = require('fs')
+const url = require('url')
 
 let cachedPackages: IPackagesSchema | undefined = undefined
 let packagesCtime: number | null = null
 let cachedGemPackages: Object | null = null
 let cachedGems: ICachedGems = {}
+let cachedIndex: ICachedIndex
+
+export function getCachedIndex(): ICachedIndex {
+  return cachedIndex
+}
+
+export function setCachedIndex(value: ICachedIndex) {
+  cachedIndex = value
+}
 
 interface ExecCommand {
   message: string
@@ -27,6 +39,37 @@ interface ICachedGems {
   [key: string]: string | undefined
 }
 
+export interface ICachedIndex {
+  classes: {
+    [key: string]: [
+      {
+        path: string,
+        package: string,
+        methods: [
+          {
+            name: string,
+            location: number
+          }
+        ]
+      }
+    ]
+  },
+  objects: {
+    [key: string]: [
+      {
+        path: string,
+        package: string,
+        methods: [
+          {
+            name: string,
+            parameters: { name: number, required: string }[]
+            location: number
+          }
+        ]
+      }
+    ]
+  }
+}
 
 export interface IPackagesSchema {
   packages: IPackageSchema[]
@@ -47,9 +90,35 @@ export function cacheGemPaths(rootDir: string): Promise<ExecCommand | undefined>
   return execBundlerGetGemPaths(rootDir)
 }
 
+export function cacheProjectIndex(rootDir: string): Promise<ExecCommand | undefined> {
+  return execGetReeProjectIndex(rootDir)
+}
+
+export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecCommand | undefined> {
+  return execGetReeFileIndex(rootDir, filePath)
+}
+
 export function loadPackagesSchema(currentPath: string): IPackagesSchema | undefined {
   const root = getProjectRootDir(currentPath)
   if (!root) { return }
+
+  if (!cachedIndex || (cachedIndex && Object.keys(cachedIndex).length === 0)) {
+    cacheProjectIndex(root).then(r => {
+      try {
+        if (r) {
+          if (r.code === 0) {
+            cachedIndex = JSON.parse(r.message)
+          } else {
+            cachedIndex = <ICachedIndex>{}
+            connection.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
+          }
+        }
+      } catch(e: any) {
+        cachedIndex = <ICachedIndex>{}
+        connection.window.showErrorMessage(e.toString())
+      }
+    })
+  }
 
   const schemaPath = path.join(root, PACKAGES_SCHEMA_FILE)
   if (!fs.existsSync(schemaPath)) { return }
@@ -110,7 +179,7 @@ export function getGemDir(gemPackageName: string): string | undefined {
 
 function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | undefined {
   try {
-    const schema = JSON.parse(data) as any;
+    const schema = JSON.parse(data) as any
     const obj = {} as IPackagesSchema
 
     obj.packages = schema.packages.map((p: any) => {
@@ -146,6 +215,121 @@ async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | un
   }
 }
 
+async function execGetReeProjectIndex(rootDir: string): Promise<ExecCommand | undefined> {
+  try {
+    const {dockerAppDirectory, dockerContainerName, dockerPresented} = getReeVscodeSettings(rootDir)
+
+    if (dockerPresented) { 
+      return spawnCommand([
+        'docker', [
+          'exec',
+          '-i',
+          '-e',
+          'REE_SKIP_ENV_VARS_CHECK=true',
+          '-w',
+          dockerAppDirectory,
+          dockerContainerName,
+          'bundle',
+          'exec',
+          'ree',
+          'gen.index_project'
+        ]
+      ])
+    } else {
+      return spawnCommand([
+        'bundle', [
+          'exec',
+          'ree',
+          'gen.index_project'
+        ],
+        { cwd: rootDir }
+      ])
+    }
+  } catch(e) {
+    console.error(e)
+    return new Promise(() => undefined)
+  }
+}
+
+async function execGetReeFileIndex(rootDir: string, filePath: string): Promise<ExecCommand | undefined> {
+  try {
+    const {dockerAppDirectory, dockerContainerName, dockerPresented} = getReeVscodeSettings(rootDir)
+
+    if (dockerPresented) { 
+      return spawnCommand([
+        'docker', [
+          'exec',
+          '-i',
+          '-e',
+          'REE_SKIP_ENV_VARS_CHECK=true',
+          '-w',
+          dockerAppDirectory,
+          dockerContainerName,
+          'bundle',
+          'exec',
+          'ree',
+          'gen.index_file',
+          filePath
+        ]
+      ])
+    } else {
+      return spawnCommand([
+        'bundle', [
+          'exec',
+          'ree',
+          'gen.index_file',
+          filePath
+        ],
+        { cwd: rootDir }
+      ])
+    }
+  } catch(e) {
+    console.error(e)
+    return new Promise(() => undefined)
+  }
+}
+
+export function updateFileIndex(uri: string) {
+  let filePath = url.fileURLToPath(uri)
+  const isSpecFile = !!filePath.split("/").pop().match(/\_spec/)
+  if (isSpecFile) { return }
+
+  let root = getProjectRootDir(filePath)
+
+  let rFilePath = path.relative(root, filePath)
+  if (root) {
+    cacheFileIndex(root,rFilePath).then(r => {
+      if (r) {
+        if (r.code === 0) {
+          try {
+            let index = getCachedIndex()
+            let newIndexForFile = JSON.parse(r.message)
+            if (Object.keys(newIndexForFile).length === 0) { return }
+
+            let classConst = Object.keys(newIndexForFile)?.[0]
+            // TODO: update index for objects/mappers
+            if (index.classes) {
+              const oldIndex = index.classes[classConst].findIndex(v => v.path.match(RegExp(`${rFilePath}`)))
+              if (oldIndex !== -1) {
+                index.classes[classConst][oldIndex].methods = newIndexForFile[classConst].methods
+                index.classes[classConst][oldIndex].package = newIndexForFile[classConst].package
+              } else {
+                index.classes[classConst].push(newIndexForFile)
+              }
+            }
+
+            setCachedIndex(index)
+          } catch (e: any) {
+            connection.window.showErrorMessage(e)
+          }
+        } else {
+          connection.window.showErrorMessage(r.message)
+        }
+      }
+    })
+  }
+}
+
 async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> {
   try {
     let spawn = require('child_process').spawn
@@ -161,7 +345,7 @@ async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> 
     }
 
     const code: number  = await new Promise( (resolve, reject) => {
-      child.on('close', resolve);
+      child.on('close', resolve)
     })
 
     return {

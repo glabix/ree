@@ -7,7 +7,7 @@ import { getCurrentProjectDir } from '../utils/fileUtils'
 var fs = require('fs')
 var path = require("path")
 
-type SelectPackageCb = (selected: string | undefined) => void;
+type SelectPackageCb = (selected: string | undefined) => void
 
 export function goToPackage() {
   if (!vscode.workspace.workspaceFolders) {

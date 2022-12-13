@@ -1,18 +1,18 @@
 import {
-	ConfigurationItem,
 	Connection,
 	InitializeParams,
 	InitializeResult,
 } from 'vscode-languageserver'
-
 import { CapabilityCalculator } from './capabilityCalculator'
 import DefinitionProvider from './providers/definitionProvider'
 import HoverProvider from './providers/hoverProvider'
 import CompletionProvider from './providers/completionProvider'
 import CompletionResolveProvider from './providers/completionResolveProvider'
-
 import { documents } from './documentManager'
 import { forest } from './forest'
+import { cacheProjectIndex, ICachedIndex, setCachedIndex } from './utils/packagesUtils'
+
+const url = require('url')
 
 export interface ILanguageServer {
 	readonly capabilities: InitializeResult
@@ -51,6 +51,27 @@ export class Server implements ILanguageServer {
 	 */
 	public setup(): void {
 		this.registerInitializedProviders()
+
+		this.connection.workspace.getWorkspaceFolders().then(v => {
+			return v?.map(folder => folder)
+		}).then(v => {
+			v?.forEach(folder => {
+				cacheProjectIndex(url.fileURLToPath(folder.uri)).then(r => {
+					try {
+						if (r) {
+							if (r.code === 0) {
+								setCachedIndex(JSON.parse(r.message))
+							} else {
+								this.connection.window.showErrorMessage(`GetProjectIndexError: ${r.message.toString()}`)
+							}
+						}
+					}	catch (e: any) {
+						setCachedIndex(<ICachedIndex>{})
+						this.connection.window.showErrorMessage(e.toString())
+					}
+				})
+			})
+		})
 	}
 
 	public shutdown(): void {

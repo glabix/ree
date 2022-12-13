@@ -5,7 +5,7 @@ import { getCurrentProjectDir } from '../utils/fileUtils'
 import { getPackageNameFromPath } from '../utils/packageUtils'
 import { generatePackageSchema } from './generatePackageSchema'
 
-type SelectPackageCb = (selected: string | undefined) => void;
+type SelectPackageCb = (selected: string | undefined) => void
 
 export function selectAndGeneratePackageSchema() {
   if (!vscode.workspace.workspaceFolders) {

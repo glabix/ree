@@ -1,7 +1,4 @@
-import { getProjectRootDir } from "./packageUtils"
-
 const fs = require('fs')
-const path = require('path')
 
 export interface IMethodArg {
   arg: string
@@ -44,6 +41,6 @@ export function loadObjectSchema(objectSchemaPath: string): IObject | null {
     console.log('failed to load Object schema', err, objectSchemaPath)
     return null
   }
-  
+
   return schema
 }

@@ -60,21 +60,23 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
     return
   }
 
-  if (!fileName.split("/").pop().match(/\.rb/)) {
-    return 
-  } else {
-    if (!fileName.split("/").includes("package")) { return }
+  const isSpecFile = !!fileName.split("/").pop().match(/\_spec/)
+  const isRubyFile = !!fileName.split("/").pop().match(/\.rb/)
+  if (!isRubyFile) { return }
 
-    let packageEntry = getPackageEntryPath(fileName)
-    if (!packageEntry) { return }
+  let packageEntryFilePath = getPackageEntryPath(fileName)
+  if (!packageEntryFilePath) { return }
 
-    let dateInFile = new Date(parseInt(fileName.split("/").pop().split("_")?.[0]))
-    if (
-      !!packageEntry.split("/").pop().match(/migrations/) ||
-      !isNaN(dateInFile?.getTime())
-      ) {
-      return
-    }
+  // check that we're inside a package
+  let relativePackagePathToCurrentFilePath = path.relative(
+    packageEntryFilePath.split("/").slice(0, -1).join("/"),
+    fileName
+  )
+  if (relativePackagePathToCurrentFilePath.split('/').slice(0) === '..' && !isSpecFile) { return }
+
+  let dateInFile = new Date(parseInt(fileName.split("/").pop().split("_")?.[0]))
+  if (!isNaN(dateInFile?.getTime())) {
+    return
   }
 
   const rootProjectDir = getCurrentProjectDir()
@@ -82,8 +84,8 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
 
   // check if ree is installed
   const checkIsReeInstalled = isReeInstalled(rootProjectDir)?.then((res) => {
-    if (res.code === 1) {
-      vscode.window.showWarningMessage(res.message)
+    if (res.code !== 0) {
+      vscode.window.showWarningMessage(`CheckIsReeInstalledError: ${res.message}`)
       return null
     }
   })
@@ -91,7 +93,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
 
   const isBundleGemsInstalledResult = isBundleGemsInstalled(rootProjectDir)?.then((res) => {
     if (res.code !== 0) {
-      vscode.window.showWarningMessage(res.message)
+      vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledError: ${res.message}`)
       return null
     }
   })
@@ -101,7 +103,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   if (dockerPresented) {
     const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()?.then((res) => {
       if (res.code !== 0) {
-        vscode.window.showWarningMessage(res.message)
+        vscode.window.showWarningMessage(`CheckIsBundleGemInstalledInDockerError: ${res.message}`)
         return null
       }
     })
@@ -144,7 +146,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   })
 
   // don't generate schema for specs
-  if (fileName.split("/").pop().match(/\_spec/)) { return }
+  if (isSpecFile) { return }
 
   const result = execGenerateObjectSchema(rootProjectDir, execPackageName, path.relative(rootProjectDir, fileName))
 

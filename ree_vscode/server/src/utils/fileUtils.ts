@@ -1,7 +1,6 @@
-import { PACKAGES_SCHEMA_FILE, PACKAGE_DIR, RUBY_EXT, SPEC_EXT, SPEC_FOLDER } from './constants'
+import { PACKAGE_DIR, RUBY_EXT, SPEC_EXT, SPEC_FOLDER } from './constants'
 import { getPackageSchemaPath } from "./packageUtils"
 
-const fs = require('fs')
 const path = require("path")
 
 // Extracts package root dir from any package file. Ex: bc/accounts
@@ -9,7 +8,7 @@ export function getPackageDir(filePath: string): string | null {
   const packageSchemaPath = getPackageSchemaPath(filePath)
 
   if (!packageSchemaPath) { return null }
-  
+
   return path.dirname(packageSchemaPath)
 }
 
@@ -47,7 +46,7 @@ export function getSpecFilePath(filePath: string) : string | null {
   const relativeFilePath = getRelativePackageFilePath(filePath)
 
   if (!relativeFilePath) { return null }
-  
+
   let specFilePath = path.join(specDir, relativeFilePath)
   const specName = path.parse(specFilePath).name + SPEC_EXT
 

@@ -1,6 +1,7 @@
 import { Range } from 'vscode'
 import { Location, Hover, MarkupKind } from 'vscode-languageserver'
 import { Position, TextDocument } from 'vscode-languageserver-textdocument'
+import { Query } from 'web-tree-sitter'
 import { documents } from '../documentManager'
 import { forest } from '../forest'
 import { loadPackagesSchema, getGemPackageSchemaPath, getGemDir, IPackagesSchema } from '../utils/packagesUtils'
@@ -89,7 +90,7 @@ export function findLinkedObject(uri: string, token: string, position: Position)
   const packageName = getPackageNameFromPath(filePath)
   if (!packageName) { return ret }
 
-  const pckg = packagesSchema.packages.find(p => p.name == packageName)
+  const pckg = packagesSchema.packages.find(p => p.name === packageName)
   if (!pckg) { return ret }
 
   const projectRootDir = getProjectRootDir(filePath)
@@ -167,7 +168,7 @@ export function findLinkedObject(uri: string, token: string, position: Position)
 
     const linkedPackageFacade = new PackageFacade(linkedPackageSchemaPath)
 
-    const linkedObjectSchema = linkedPackageFacade.objects().find(o => o.name == link.target)
+    const linkedObjectSchema = linkedPackageFacade.objects().find(o => o.name === link.target)
     if (!linkedObjectSchema) { return ret }
 
     const linkedObjectRoot = linkedPackage ? projectRootDir : getGemDir(linkedPackageName)
@@ -236,7 +237,7 @@ export function findConstant(
 
   const query = tree.getLanguage().query(
     `((link) @link)`
-  )
+  ) as Query
 
   const queryMatches = query.matches(tree.rootNode)
 
@@ -322,8 +323,8 @@ export function findConstant(
 }
 
 export function findMethod(doc: string, token: string): ILocalMethod {
-  const methodRegexp = RegExp(`def\\s+${token}(\\s|\\n|\\;)`)
-  const classMethodRegexp = RegExp(`def\\s+self.${token}(\\s|\\n|\\;)`)
+  const methodRegexp = RegExp(`def\\s+${token}(\\s|\\n|\\|\\()`)
+  const classMethodRegexp = RegExp(`def\\s+self.${token}(\\s|\\n|\\|\\()`)
   
   let lineNumber = null
   let index = 0
@@ -374,7 +375,7 @@ export function findMethodArgument(token: string, uri: string, position: Positio
       ]
       (#select-adjacent! @contract @method)
     ) @contractWithMethod`
-  )
+  ) as Query
 
   const queryMatches = query.matches(tree.rootNode)
   if (queryMatches.length === 0) { return }

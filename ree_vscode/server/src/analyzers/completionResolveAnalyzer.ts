@@ -1,35 +1,53 @@
 import { CompletionItem, CompletionItemKind, MarkupContent, MarkupKind } from 'vscode-languageserver'
 import { splitArgsType } from '../utils/tokenUtils'
-import { loadObjectSchema, IObjectMethod, IObject } from '../utils/objectUtils'
+import { loadObjectSchema, IObject } from '../utils/objectUtils'
 
 const path = require('path')
 
 export default class CompletionResolveAnalyzer {
 	public static analyze(item: CompletionItem): CompletionItem {
     if (item.data) {
-      item.labelDetails = {
-        description: `from: ${item.data.fromPackageName}`
-      }
-      item.command = {
-        title: 'ree.updatePackageDeps',
-        command: 'ree.updatePackageDeps',
-        arguments: [{
-          objectName: item.label,
-          toPackageName: item.data.toPackageName,
-          fromPackageName: item.data.fromPackageName,
-          currentFilePath: item.data.currentFilePath
-        }]
+      if (item.kind == CompletionItemKind.Method) {
+        item.labelDetails = {
+          description: `from: ${item.data.fromPackageName}`
+        }
+        item.command = {
+          title: 'ree.updatePackageDeps',
+          command: 'ree.updatePackageDeps',
+          arguments: [{
+            objectName: item.label,
+            toPackageName: item.data.toPackageName,
+            fromPackageName: item.data.fromPackageName,
+            currentFilePath: item.data.currentFilePath,
+            type: item.kind
+          }]
+        }
+
+        const schema = loadObjectSchema(
+          path.join(item.data.projectRootDir, item.data.objectSchema)
+        )
+        if (schema) {
+          item.detail = `mount_as: ${schema.mount_as}`
+          item.documentation = this.buildMethodsDocumentation(schema)
+        }
       }
 
-      const schema = loadObjectSchema(
-        path.join(item.data.projectRootDir, item.data.objectSchema)
-      )
-      if (schema) {
-        item.detail = `mount_as: ${schema.mount_as}`
-        item.documentation = this.buildMethodsDocumentation(schema)
+      if (item.kind === CompletionItemKind.Class) {
+        item.command = {
+          title: 'ree.updatePackageDeps',
+          command: 'ree.updatePackageDeps',
+          arguments: [{
+            objectName: item.label,
+            toPackageName: item.data.toPackageName,
+            fromPackageName: item.data.fromPackageName,
+            currentFilePath: item.data.currentFilePath,
+            type: item.kind,
+            linkPath: item.data.linkPath
+          }]
+        }
       }
+
     }
-
     return item
   }
 
