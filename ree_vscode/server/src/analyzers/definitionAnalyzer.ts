@@ -37,12 +37,17 @@ export default class DefinitionAnalyzer {
 
     const index = getCachedIndex()
 
-    const tokenNode = findTokenNodeInTree(token, tree)
+    const tokenNode = findTokenNodeInTree(token, tree, position)
     if (tokenNode) {
-      if (index && index?.classes) {
+      if (index && index?.classes && index?.objects) {
         const constantMethodDefinitions = this.getConstantMethodsFromIndex(tree, tokenNode, token, index, projectRoot)
         if (constantMethodDefinitions.length > 0) {
           return constantMethodDefinitions
+        }
+
+        const objectsMethodDefinitions = this.getObjectMethodsFromIndex(tree, tokenNode, token, index, projectRoot)
+        if (objectsMethodDefinitions.length > 0) {
+          return objectsMethodDefinitions
         }
       }
     }
@@ -82,7 +87,6 @@ export default class DefinitionAnalyzer {
     // check if we inside constant instantiation
     let constantNodeText = tokenNode?.parent?.parent?.firstChild?.text
     let classes = Object.keys(index.classes)
-    let objects = Object.keys(index.objects)
     if (constantNodeText && classes.includes(constantNodeText)) {
       return index.classes[constantNodeText].map(c => {
         let targetMethods = c.methods.filter(m => m.name === token)
@@ -115,12 +119,6 @@ export default class DefinitionAnalyzer {
         (#match? @call "(${links.filter(l => l.imports.length > 0).map(l => l.imports).flat().join("|")})$")
       )`
     ) as Query
-    const linksQuery = tree.getLanguage().query(
-      `(
-        (identifier) @call
-        (#match? @call "(${links.filter(l => l.isSymbol).map(l => l.name).flat().join("|")})$")
-      )`
-    ) as Query
 
     const findParentNodeWithType = (node: SyntaxNode | null, type: string, returnParent: boolean = false): SyntaxNode | null => {
       if (node === null) { return null }
@@ -130,16 +128,7 @@ export default class DefinitionAnalyzer {
       return findParentNodeWithType(node.parent, type, returnParent)
     }
 
-    const findSiblingNode = (node: SyntaxNode | null, targetNode: SyntaxNode): SyntaxNode | null => {
-      if (node === null) { return null }
-      if (node.equals(targetNode)) { return node }
-
-      return findSiblingNode(node.previousSibling, targetNode)
-    }
-
     // trying to match call-nodes (ex SomeClass.new().some_method_call)
-    let identifiersCallQueryMatches = linksQuery.captures(tree.rootNode).filter(e => e.node?.parent?.type === 'call')
-    let objectsFromIndexNodes = identifiersCallQueryMatches.filter(e => objects.includes(e.node.text)).map(e => e.node)
     let constantCallQueryMatches = constantsQuery.captures(tree.rootNode).filter(e => e.node?.parent?.type === 'call')
     let constantsFromIndexNodes = constantCallQueryMatches.filter(e => classes.includes(e.node.text)).map(e => e.node)
     let constantMatchedNodes = constantsFromIndexNodes.filter(node => {
@@ -158,23 +147,6 @@ export default class DefinitionAnalyzer {
       }
     })
 
-    // TODO: fix finding of targetNode in objectNodes
-    // let objectMatchedNodes = objectsFromIndexNodes.filter(node => {
-    //   // if tokenNode inside constantNode parent
-    //   // ex: SomeClass.new(id: 1).*tokenNode* or SomeClass.new(id: 1).build.*tokenNode*
-    //   let nodeHaveTokenNode = !!findParentNodeWithType(node, 'assignment', false)?.children.find(c => c.equals(tokenNode)) ||
-    //                           !!findParentNodeWithType(node, 'method', false)?.children.find(c => c.equals(tokenNode)) ||
-    //                           !!findSiblingNode(tokenNode, node)
-    //   if (nodeHaveTokenNode) {
-    //     return true
-    //   } else {
-    //     // check if we have assignment node, then check if assignment lhs is same as tokenNode
-    //     const assignmentNode = findParentNodeWithType(node, 'assignment', true)
-    //     if (assignmentNode) {
-    //       return !!tokenNode?.parent?.text.match(RegExp(`^${assignmentNode?.firstChild?.text}\.`))
-    //     }
-    //   }
-    // })
     if (constantMatchedNodes.length > 0) {
       return constantMatchedNodes.map(n => {
         return index.classes[n.text].map(c => {
@@ -193,23 +165,67 @@ export default class DefinitionAnalyzer {
       }).flat()
     }
 
-    // if (objectMatchedNodes.length > 0) {
-    //   return objectMatchedNodes.map(n => {
-    //     return index.objects[n.text].map(c => {
-    //       let targetMethods = c.methods.filter(m => m.name === token)
+    return []
+  }
+
+  private static getObjectMethodsFromIndex(tree: Tree, tokenNode: SyntaxNode, token: string, index: ICachedIndex, projectRoot: string): Location[] {
+    let objects = Object.keys(index.objects)
+
+    const query = tree.getLanguage().query(
+      `(
+        (link
+            link_name: (_) @name) @link
+        (#select-adjacent! @link)
+      ) `
+    ) as Query
+
+    const links = mapLinkQueryMatches(query.matches(tree.rootNode))
+    const linksQuery = tree.getLanguage().query(
+      `(
+        (identifier) @call
+        (#match? @call "(${links.filter(l => l.isSymbol).map(l => l.name).flat().join("|")})$")
+      )`
+    ) as Query
+
+    const checkParent = (node: SyntaxNode, targetNode: SyntaxNode): SyntaxNode | null => {
+      if (node === null) { return null }
+      if (node.children.find(c => c.equals(targetNode))) { return node }
+      if (!node.parent) { return null }
+      
+      return checkParent(node.parent, targetNode)
+    }
+
+    let identifiersCallQueryMatches = linksQuery.captures(tree.rootNode).filter(e => e.node?.parent?.type === 'call')
+    let objectsFromIndexNodes = identifiersCallQueryMatches.filter(e => objects.includes(e.node.text)).map(e => e.node)
+
+    let objectMatchedNodes = objectsFromIndexNodes.filter(node => {
+      // if tokenNode inside parent children
+      // ex: someDao.active.*tokenNode*
+      let nodeHaveTokenNode = !!checkParent(node, tokenNode)
+      if (nodeHaveTokenNode) {
+        return true
+      }
+
+      return false
+    })
+
+    if (objectMatchedNodes.length > 0) {
+      return objectMatchedNodes.map(n => {
+        return index.objects[n.text].map(c => {
+          let targetMethods = c.methods.filter(m => m.name === token)
         
-    //       return targetMethods.map(m => {
-    //         return {
-    //           uri: url.pathToFileURL(path.join(projectRoot, c.path)),
-    //           range: {
-    //             start: { line: m.location + 1, character: 0 },
-    //             end: { line: m.location + 1, character: 0 }
-    //           }
-    //         } as Location
-    //       })
-    //     }).flat()
-    //   }).flat()
-    // }
+          return targetMethods.map(m => {
+            return {
+              uri: url.pathToFileURL(path.join(projectRoot, c.path)),
+              range: {
+                start: { line: m.location - 1, character: 0 },
+                end: { line: m.location - 1, character: 0 }
+              }
+            } as Location
+          })
+        }).flat()
+      }).flat()
+    }
 
     return []
   }

@@ -29,6 +29,7 @@ export default class CompletionAnalyzer {
     }
 
     const token = extractToken(uri, position)
+    if (!token) { return defaultCompletion }
 
     const packagesSchema = loadPackagesSchema(filePath)
     if (!packagesSchema) { return defaultCompletion }
@@ -68,7 +69,7 @@ export default class CompletionAnalyzer {
       )`
     ).captures(tree.rootNode)
 
-    const tokenNode = findTokenNodeInTree(token, tree)
+    const tokenNode = findTokenNodeInTree(token, tree, position)
 
     // first we check if we have any matching nodes
     if (tokenNode) {
@@ -76,6 +77,11 @@ export default class CompletionAnalyzer {
         const constantMethods = this.getConstantMethodsFromIndex(tokenNode, index, constantsQueryCaptures)
         if (constantMethods.length > 0) {
           return constantMethods
+        }
+
+        const objectMethods = this.getObjectMethodsFromIndex(tree, tokenNode, index)
+        if (objectMethods.length > 0) {
+          return objectMethods
         }
       }
     }
@@ -255,5 +261,79 @@ export default class CompletionAnalyzer {
 
     return [] as CompletionItem[]
   }
+
+  private static getObjectMethodsFromIndex(
+    tree: Tree,
+    tokenNode: SyntaxNode,
+    index: ICachedIndex
+  ): CompletionItem[] {
+    let objects = Object.keys(index.objects)
+
+    const query = tree.getLanguage().query(
+      `(
+        (link
+            link_name: (_) @name) @link
+        (#select-adjacent! @link)
+      ) `
+    ) as Query
+
+    const links = mapLinkQueryMatches(query.matches(tree.rootNode))
+    const linksQuery = tree.getLanguage().query(
+      `(
+        (identifier) @call
+        (#match? @call "(${links.filter(l => l.isSymbol).map(l => l.name).flat().join("|")})$")
+      )`
+    ) as Query
+
+    const checkParent = (node: SyntaxNode, targetNode: SyntaxNode): SyntaxNode | null => {
+      if (node === null) { return null }
+      if (node.children.find(c => c.equals(targetNode))) { return node }
+      if (!node.parent) { return null }
+      
+      return checkParent(node.parent, targetNode)
+    }
+
+    const buildMethodInsertString = (method: any): string => {
+      const params = method.parameters
+      if (method.parameters.length > 0) {
+        return `${method.name}(${params.map((p: any) => p.name).join(', ')})`
+      }
+      return method.name
+    }
+
+    let identifiersCallQueryMatches = linksQuery.captures(tree.rootNode).filter(e => e.node?.parent?.type === 'call')
+    let objectsFromIndexNodes = identifiersCallQueryMatches.filter(e => objects.includes(e.node.text)).map(e => e.node)
+
+    let objectMatchedNodes = objectsFromIndexNodes.filter(node => {
+      // if tokenNode inside parent children
+      // ex: someDao.active.*tokenNode*
+      let nodeHaveTokenNode = !!checkParent(node, tokenNode)
+      if (nodeHaveTokenNode) {
+        return true
+      }
+
+      return false
+    })
+
+    if (objectMatchedNodes.length > 0) {
+      const objMethods = objectMatchedNodes.map(n => {
+        return index.objects[n.text].map(c => {
+          return c.methods.map(m => {
+            return {
+              label: m.name,
+              details: `${snakeToCamelCase(c.package)}`,
+              kind: CompletionItemKind.Method,
+              insertText: buildMethodInsertString(m)
+            } as CompletionItem
+          })
+        }).flat()
+      }).flat() as CompletionItem[]
+
+      return objMethods
+    }
+
+    return []
+  }
 }
+
 
