@@ -16,18 +16,6 @@ import { Position } from 'vscode-languageserver'
    deleteTree(uri: string): boolean
  }
  
- export enum ForestEventKind {
-   OPEN,
-   UPDATE,
-   DELETE,
- }
- 
- export interface ForestEvent {
-   kind: ForestEventKind
-   document: TextDocument
-   tree?: Tree
- }
- 
  class Forest implements IForest {
    public parser: typeof Parser
    private readonly trees: Map<string, Tree>
