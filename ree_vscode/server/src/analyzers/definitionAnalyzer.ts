@@ -49,6 +49,16 @@ export default class DefinitionAnalyzer {
         if (objectsMethodDefinitions.length > 0) {
           return objectsMethodDefinitions
         }
+
+        const filteredClassMethodsForToken = this.findFilteredMethodsFromIndex(token, index, projectRoot, 'classes')
+        if (filteredClassMethodsForToken.length > 0) {
+          return filteredClassMethodsForToken
+        }
+
+        const filteredObjectMethodsForToken = this.findFilteredMethodsFromIndex(token, index, projectRoot, 'objects')
+        if (filteredObjectMethodsForToken.length > 0) {
+          return filteredObjectMethodsForToken
+        }
       }
     }
 
@@ -229,4 +239,24 @@ export default class DefinitionAnalyzer {
 
     return []
   }
+
+  private static findFilteredMethodsFromIndex(token: string, index: ICachedIndex, projectRoot: string, type: keyof ICachedIndex): Location[] {
+    const keys = Object.keys(index[type])
+    const allMethods = keys.map(k => {
+      return index[type][k].map(c => {
+        let filteredMethods = c.methods.filter(m => m.name === token)
+        return filteredMethods.map(m => {
+          return {
+            uri: url.pathToFileURL(path.join(projectRoot, c.path)),
+            range: {
+              start: { line: m.location + 1, character: 0},
+              end: { line: m.location + 1, character: 0 }
+            }
+          }
+        })
+      })
+    }).flat(3)
+    return allMethods
+  }
+  
 }
