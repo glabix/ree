@@ -241,7 +241,7 @@ export default class CompletionAnalyzer {
         // check if we have assignment node, then check if assignment lhs is same as tokenNode
         const assignmentNode = findParentNodeWithType(node, 'assignment', true)
         if (assignmentNode) {
-          return !!tokenNode?.parent?.text.match(RegExp(`^${assignmentNode?.firstChild?.text}\.`))
+          return !!tokenNode?.parent?.text.match(RegExp(`^${assignmentNode?.firstChild?.text}\\.`))
         }
       }
     })
