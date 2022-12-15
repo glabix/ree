@@ -73,7 +73,9 @@ export function checkAndSortLinks(filePath: string) {
     let importsStrings = []
     let nameStrings = []
     allSorted.forEach(el => {
-      if (el.isSymbol) { nameStrings.push(el.name) }
+      if (el.isSymbol) { 
+        !!el.as ? nameStrings.push(el.as) : nameStrings.push(el.name)
+      }
       if (el.imports) { importsStrings.push(...el.imports) }
     })
 
@@ -105,7 +107,7 @@ export function checkAndSortLinks(filePath: string) {
 
     if (nameStrings.length > 0) {
       allSorted = allSorted.filter(l => {
-        if (nameStrings.includes(l.name)) {
+        if (nameStrings.includes(l.name) || nameStrings.includes(l.as)) {
           if (l.imports.length > 0) { return true }
           return false
         } else {
