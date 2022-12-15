@@ -262,7 +262,7 @@ function collectDocumentDiagnostics(filePath: string, nodes: SyntaxNode[], messa
     )
 
     let diagnostic = {
-      severity: vscode.DiagnosticSeverity.Warning,
+      severity: vscode.DiagnosticSeverity.Error,
       message: message,
       range: range,
       code: ReeDiagnosticCode.exceptionDiagnostic,

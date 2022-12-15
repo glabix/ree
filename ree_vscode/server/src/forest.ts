@@ -5,6 +5,7 @@
  import { Tree, QueryMatch, SyntaxNode } from 'web-tree-sitter'
  import { TextDocument } from 'vscode-languageserver-textdocument'
  import TreeSitterFactory from './utils/treeSitterFactory'
+import { Position } from 'vscode-languageserver'
 
  const Parser = require('web-tree-sitter')
  
@@ -13,18 +14,6 @@
    createTree(uri: string, content: string): Tree
    updateTree(uri: string, content: string): Tree
    deleteTree(uri: string): boolean
- }
- 
- export enum ForestEventKind {
-   OPEN,
-   UPDATE,
-   DELETE,
- }
- 
- export interface ForestEvent {
-   kind: ForestEventKind
-   document: TextDocument
-   tree?: Tree
  }
  
  class Forest implements IForest {
@@ -107,13 +96,13 @@ export function mapLinkQueryMatches(matches: QueryMatch[]): Array<Link> {
   })
 }
 
-export function findTokenNodeInTree(token: string | undefined, tree: Tree): SyntaxNode | null {
+export function findTokenNodeInTree(token: string | undefined, tree: Tree, position: Position): SyntaxNode | null {
   let tokenNode: SyntaxNode | null = null
   if (!token) { return tokenNode }
  
   const cursor = tree.walk()
   const walk = (depth: number): void => {
-    if (cursor.currentNode().text.match(`^${token}$`)) {
+    if (cursor.currentNode().text.match(`^${token}$`) && isPositionInsideNode(position, cursor.currentNode())) {
       tokenNode = cursor.currentNode()
     }
     if (cursor.gotoFirstChild()) {
@@ -127,4 +116,13 @@ export function findTokenNodeInTree(token: string | undefined, tree: Tree): Synt
   cursor.delete()
 
   return tokenNode
+}
+
+export function isPositionInsideNode(position: Position, node: SyntaxNode) {
+  if (
+    node.startPosition.row <= position.line && node.endPosition.row >= position.line &&
+    node.startPosition.column <= position.character && node.endPosition.column >= position.character
+  ) { return true }
+
+  return false
 }
