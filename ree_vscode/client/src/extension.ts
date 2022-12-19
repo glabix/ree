@@ -196,7 +196,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // Options to control the language client
   let clientOptions: LanguageClientOptions = {
     // Register the server for ruby documents
-    documentSelector: [{ language: 'ruby' }],
+    documentSelector: [{ language: 'ruby' }, { language: 'slim' }],
     synchronize: {
       fileEvents: vscode.workspace.createFileSystemWatcher('**.rb')
     }

@@ -316,7 +316,7 @@ function checkOccurrence(array, element) {
 
   array.flat().forEach(item =>
     {
-      if (item == element) {
+      if (item === element) {
           counter++
       }
     }
