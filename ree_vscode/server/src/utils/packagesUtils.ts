@@ -1,6 +1,6 @@
 import { connection } from '..'
 import { PACKAGES_SCHEMA_FILE } from './constants'
-import { getProjectRootDir } from './packageUtils'
+import { getPackageEntryPath, getProjectRootDir } from './packageUtils'
 import { getReeVscodeSettings } from './reeUtils'
 
 const path = require('path')
@@ -298,6 +298,19 @@ export function updateFileIndex(uri: string) {
 
   let rFilePath = path.relative(root, filePath)
   if (root) {
+    let packageEntryFilePath = getPackageEntryPath(filePath)
+    if (!packageEntryFilePath) { return }
+
+    // check that we're inside a package
+    let relativePackagePathToCurrentFilePath = path.relative(
+      packageEntryFilePath.split("/").slice(0, -1).join("/"),
+      filePath
+    )
+    if (relativePackagePathToCurrentFilePath.split('/').slice(0) === '..' && !isSpecFile) { return }
+
+    let dateInFile = new Date(parseInt(filePath.split("/").pop().split("_")?.[0]))
+    if (!isNaN(dateInFile?.getTime())) { return }
+
     cacheFileIndex(root,rFilePath).then(r => {
       if (r) {
         if (r.code === 0) {
