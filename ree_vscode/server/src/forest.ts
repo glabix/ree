@@ -7,6 +7,7 @@
  import TreeSitterFactory from './utils/treeSitterFactory'
 import { Position } from 'vscode-languageserver'
 
+ // eslint-disable-next-line @typescript-eslint/naming-convention
  const Parser = require('web-tree-sitter')
  
  export interface IForest {
@@ -102,7 +103,7 @@ export function findTokenNodeInTree(token: string | undefined, tree: Tree, posit
  
   const cursor = tree.walk()
   const walk = (depth: number): void => {
-    if (cursor.currentNode().text.match(`^${token}$`) && isPositionInsideNode(position, cursor.currentNode())) {
+    if (cursor.currentNode().text.match(`${token}`) && isPositionInsideNode(position, cursor.currentNode())) {
       tokenNode = cursor.currentNode()
     }
     if (cursor.gotoFirstChild()) {

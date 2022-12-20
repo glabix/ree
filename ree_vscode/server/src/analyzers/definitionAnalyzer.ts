@@ -1,15 +1,17 @@
 import { Location } from 'vscode-languageserver'
 import { Position } from 'vscode-languageserver-textdocument'
 import { Query, SyntaxNode, Tree } from 'web-tree-sitter'
+import { connection } from '..'
 import { documents } from '../documentManager'
 import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
 import { getCachedIndex, ICachedIndex } from '../utils/packagesUtils'
-import { getProjectRootDir } from '../utils/packageUtils'
+import { getLocalePath, getProjectRootDir, Locale, resolveObject } from '../utils/packageUtils'
 import { extractToken, findTokenInFile, findLinkedObject, findMethod } from '../utils/tokenUtils'
 
 const url = require('node:url')
 const path = require('node:path')
 const fs = require('node:fs')
+const yaml = require('js-yaml')
 
 export default class DefinitionAnalyzer {
 	public static analyze(uri: string, position: Position): Location[] {
@@ -39,6 +41,17 @@ export default class DefinitionAnalyzer {
 
     const tokenNode = findTokenNodeInTree(token, tree, position)
     if (tokenNode) {
+
+      const localeKeyLocation = this.findLocaleKey(tokenNode, uri)
+      if (localeKeyLocation.length > 0) {
+        return localeKeyLocation
+      }
+
+      const fileLocation = this.findFile(tokenNode, token, uri, projectRoot)
+      if (fileLocation.length > 0) {
+        return fileLocation
+      }
+
       if (index && index?.classes && index?.objects) {
         const constantMethodDefinitions = this.getConstantMethodsFromIndex(tree, tokenNode, token, index, projectRoot)
         if (constantMethodDefinitions.length > 0) {
@@ -258,5 +271,135 @@ export default class DefinitionAnalyzer {
     }).flat(3)
     return allMethods
   }
+
+  private static findLocaleKey(tokenNode: SyntaxNode, uri: string): Location[] {
+    const filePath = url.fileURLToPath(uri)
+    const localesLocations = []
+    const ruLocalePath = getLocalePath(filePath, Locale.ru)
+    const enLocalePath = getLocalePath(filePath, Locale.en)
+    // TODO: refactor this when moving to new index
+    let ruLocales = null
+    let enLocales = null
+    let ruValue = null
+    let enValue = null
+    let ruLocaleFile = null
+    let enLocaleFile = null
+    let ruFullKey = ''
+    let enFullKey = ''
+    
+    if (fs.existsSync(ruLocalePath)) {
+      // TODO: move locale files to index
+      ruLocaleFile = fs.readFileSync(ruLocalePath, 'utf8')
+      ruFullKey = `${Locale.ru}.${tokenNode.text}`
+
+      try {
+        ruLocales = yaml.load(ruLocaleFile)
+      } catch (e: any) {
+        ruLocales = {}
+        connection.window.showErrorMessage(`LocaleParsingError: ${ruLocalePath} - ${e.toString()}`)
+      }
+      ruValue = resolveObject(ruFullKey, ruLocales)
+    }
+
+    if (fs.existsSync(enLocalePath)) {
+      // TODO: move locale files to index
+      enLocaleFile = fs.readFileSync(enLocalePath, 'utf8')    
+      enFullKey = `${Locale.en}.${tokenNode.text}`
+
+      try {
+        enLocales = yaml.load(enLocaleFile)
+      } catch (e: any) {
+        enLocales = {}
+        connection.window.showErrorMessage(`LocaleParsingError: ${enLocalePath} - ${e.toString()}`)
+      }
+      enValue = resolveObject(enFullKey, enLocales)
+    }
+    
+
+    if (ruValue || enValue) {
+      if (ruValue) {
+        let ruKeyAnchors = ruFullKey.split('.').map((v, i) => `${'  '.repeat(i)}${v}:`)
+        let ruLocationLine = 0
+        const ruLocationCharacter = (ruKeyAnchors.length - 1) * 2
+        ruLocaleFile.split("\n").some((line: string, i: number) => {
+          if (ruKeyAnchors.length === 0) { return false }
+          if (line.match(RegExp(`^${ruKeyAnchors[0]}`))) {
+            ruKeyAnchors = ruKeyAnchors.slice(1)
+            ruLocationLine = i
+          }
+        })
   
+        if (ruLocationLine !== 0) {
+          localesLocations.push(
+            {
+              uri: url.pathToFileURL(ruLocalePath),
+              range: {
+                start: { line: ruLocationLine, character: ruLocationCharacter },
+                end: { line: ruLocationLine, character: ruLocationCharacter }
+              }
+            } as Location
+          )
+        }
+      }
+  
+      if (enValue) {
+        let enKeyAnchors = enFullKey.split('.').map((v, i) => `${'  '.repeat(i)}${v}:`)
+        let enLocationLine = 0
+        const enLocationCharacter = (enKeyAnchors.length - 1) * 2
+        enLocaleFile.split("\n").some((line: string, i: number) => {
+          if (enKeyAnchors.length === 0) { return false }
+          if (line.match(RegExp(`^${enKeyAnchors[0]}`))) {
+            enKeyAnchors = enKeyAnchors.slice(1)
+            enLocationLine = i
+          }
+        })
+  
+        if (enLocationLine !== 0) {
+          localesLocations.push(
+            {
+              uri: url.pathToFileURL(enLocalePath),
+              range: {
+                start: { line: enLocationLine, character: enLocationCharacter },
+                end: { line: enLocationLine, character: enLocationCharacter }
+              }
+            } as Location
+          )
+        }
+      }
+    }
+
+    if (localesLocations.length > 0) { return localesLocations }
+
+    return []
+  }
+
+  private static findFile(tokenNode: SyntaxNode, token: string, uri: string, projectRoot: string): Location[] {
+    const filePath = url.fileURLToPath(uri)
+    const rPath = tokenNode.text
+
+    // check if root + rpath exists
+    if (fs.existsSync(path.join(projectRoot, rPath))) {
+      return [{
+        uri: url.pathToFileURL(path.join(projectRoot, rPath)),
+        range: {
+          start: {line: 0, character: 0},
+          end: {line: 0, character: 0}
+        }
+      }]
+    }
+
+    // check if filepathDir + rPath exists
+    if (fs.existsSync(path.join(path.parse(filePath).dir, rPath))) {
+      return [{
+        uri: url.pathToFileURL(path.join(path.parse(filePath).dir, rPath)),
+        range: {
+          start: {line: 0, character: 0},
+          end: {line: 0, character: 0}
+        }
+      }]
+    }
+        
+    return []
+  }
 }
+

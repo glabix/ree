@@ -125,6 +125,10 @@ function updateObjectLinks(
   const queryMatches = query.matches(tree.rootNode)
   const links = mapLinkQueryMatches(queryMatches)
 
+  if (links.find(l => ((l.name === objectName && l?.from === fromPackageName) || l.imports.includes(objectName)))) {
+    return null
+  }
+
   let text = currentFile.getText()
 
   const isSpecFile = !!currentFile.uri.path.split('/').pop().match(/\_spec/)
@@ -153,8 +157,6 @@ function updateObjectLinks(
       offset = startCharPos == 0 ? (' '.repeat(TAB_LENGTH)) : (' '.repeat(startCharPos + TAB_LENGTH)) 
       linkText = `\n${offset}${linkText}\n`
     } else {
-      if (links.find(l => l.name === objectName)) { return }
-
       let firstLink = queryMatches[0].captures[0].node
       lineNumber = firstLink.startPosition.row
       endCharPos = firstLink.startPosition.column
@@ -189,8 +191,6 @@ function updateObjectLinks(
       linkText = `\n${offset}${linkText}\n`
     } else {
       // LinkDSL, have links
-      if (links.find(l => l.name === objectName)) { return }
-
       lineNumber = queryMatches[0].captures[0].node.startPosition.row - 1
       startCharPos = queryMatches[0].captures[0].node.startPosition.column
       endCharPos = queryMatches[0].captures[0].node.startPosition.column
@@ -226,8 +226,6 @@ function updateObjectLinks(
     linkText = `\n${offset}${linkText}`
   } else {
     // block, have links
-    if (links.find(l => l.name === objectName)) { return }
-
     lineNumber = queryMatches[0].captures[0].node.startPosition.row
     startCharPos = queryMatches[0].captures[0].node.startPosition.column
     endCharPos = queryMatches[0].captures[0].node.startPosition.column

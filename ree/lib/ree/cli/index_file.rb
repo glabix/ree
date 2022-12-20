@@ -25,6 +25,15 @@ module Ree
           Ree.load_package(current_package_name)
 
           package = facade.get_package(current_package_name)
+
+          files = Dir[
+            File.join(
+              Ree::PathHelper.abs_package_module_dir(package), '**/*.rb'
+            )
+          ]
+
+          return {} if !files.include?(file_path)
+
           objects_class_names = package.objects.map(&:class_name)
           file_name_const_string = Ree::StringUtils.camelize(file_path.split('/')[-1].split('.rb')[0])
           const_string_with_module = "#{package.module}::#{file_name_const_string}"

@@ -4,6 +4,11 @@ import { getPackageDir } from './fileUtils'
 const path = require("path")
 const fs = require("fs")
 
+export enum Locale {
+  en = 'en',
+  ru = 'ru'
+}
+
 export function getPackageNameFromPath(pathToFile: string): string | null {
   const packageSchemaPath = getPackageSchemaPath(
     path.dirname(pathToFile)
@@ -99,4 +104,20 @@ export function getWorkingPackageDirPath(filePath: string) : string | null {
   }
 
   return null
+}
+
+export function getLocalePath(filePath: string, locale: Locale): string | null {
+  let packageEntry = getPackageEntryPath(filePath)
+  if (!packageEntry) { return null }
+
+  let packageName = packageEntry.split('/').slice(-1)[0].split('.')[0]
+  let packageDir = packageEntry.split('/').slice(0, -1)
+  packageDir.push(packageName, 'locales', `${locale}.yml`)
+  return packageDir.join('/')
+}
+
+export function resolveObject(path: string, obj: Object, separator: string='.'): any {
+  const properties = path.split(separator) as string[]
+  const value = properties.reduce((prev: any, curr: any) => prev?.[curr], obj)
+  return value
 }

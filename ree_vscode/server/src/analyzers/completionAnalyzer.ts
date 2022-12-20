@@ -289,6 +289,7 @@ export default class CompletionAnalyzer {
       if (node === null) { return null }
       if (node.children.find(c => c.equals(targetNode))) { return node }
       if (!node.parent) { return null }
+      if (node.parent && node.parent?.firstChild?.type === 'def') { return null }
       
       return checkParent(node.parent, targetNode)
     }
