@@ -69,18 +69,21 @@ interface Link {
   body: string,
   as: string,
   imports: string[],
+  from: string,
   isSymbol: boolean,
   queryMatch: Parser.QueryMatch
 }
 
 export const importRegexp = /(import\:\s)?(\-\>\s?\{(?<import>.+)\})/
 export const asRegexp = /as\:\s\:(\w+)/
+const fromRegexp = /from\:\s\:(?<from>\w+)/
 
 export function mapLinkQueryMatches(matches: Parser.QueryMatch[]): Array<Link> {
   return matches.map(qm => {
     let name = qm.captures[1].node.text
     let body = qm.captures[0].node.text
     let as = body.match(asRegexp)?.[1]
+    let from = body.match(fromRegexp)?.groups?.from
     let importsString = body.match(importRegexp)?.groups?.import
     let imports = []
     if (importsString) {
@@ -89,6 +92,6 @@ export function mapLinkQueryMatches(matches: Parser.QueryMatch[]): Array<Link> {
     let isSymbol = name[0] === ":"
     name = name.replace(/\"|\'|\:/, '') 
 
-    return { name: name, body: body, as: as, imports: imports, isSymbol: isSymbol, queryMatch: qm }
+    return { name: name, body: body, as: as, imports: imports, isSymbol: isSymbol, from: from, queryMatch: qm }
   })
 }
