@@ -34,7 +34,7 @@ class ReeLogger::FileAppender < ReeLogger::Appender
 
     opts = DEFAULTS.merge(opts)
 
-    unless File.exists?(file_path)
+    unless File.exist?(file_path)
       FileUtils.mkdir_p(Pathname.new(file_path).parent.to_s)
       FileUtils.touch(file_path)
     end
