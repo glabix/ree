@@ -1,10 +1,10 @@
 class ReeLogger::MultiLogger < Logger
   include Ree::LinkDSL
 
-  link 'ree_logger/rate_limiter', -> { RateLimiter }
-  link 'ree_logger/log_event', -> { LogEvent }
-  link :transform_values, from: :ree_hash
   link :as_json, from: :ree_object
+  link :transform_values, from: :ree_hash
+  link 'ree_logger/log_event', -> { LogEvent }
+  link 'ree_logger/rate_limiter', -> { RateLimiter }
 
   undef level=
   undef datetime_format
@@ -57,34 +57,58 @@ class ReeLogger::MultiLogger < Logger
     @silenced = false
   end
 
-  contract(String, Hash, Nilor[Exception], Bool => nil)
-  def debug(message, parameters = {}, exception = nil, log_args = false)
-    log(:debug, message, parameters, nil, false)
+  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
+  def debug(message, parameters = {}, exception = nil, log_args = false, &block)
+    if block_given?
+      log(:debug, yield, parameters, nil, false)
+    else
+      log(:debug, message, parameters, nil, false)
+    end
   end
 
-  contract(String, Hash, Nilor[Exception], Bool => nil)
-  def info(message, parameters = {}, exception = nil, log_args = false)
-    log(:info, message, parameters, nil)
+  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
+  def info(message, parameters = {}, exception = nil, log_args = false, &block)
+    if block_given?
+      log(:info, yield, parameters, nil)
+    else
+      log(:info, message, parameters, nil)
+    end
   end
 
-  contract(String, Hash, Nilor[Exception], Bool => nil)
-  def warn(message, parameters = {}, exception = nil, log_args = false)
-    log(:warn, message, parameters, nil)
+  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
+  def warn(message, parameters = {}, exception = nil, log_args = false, &block)
+    if block_given?
+      log(:warn, yield, parameters, nil)
+    else
+      log(:warn, message, parameters, nil)
+    end
   end
 
-  contract(String, Hash, Nilor[Exception], Bool => nil)
-  def error(message, parameters = {}, exception = nil, log_args = true)
-    log(:error, message, parameters, exception, log_args)
+  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
+  def error(message, parameters = {}, exception = nil, log_args = true, &block)
+    if block_given?
+      log(:error, yield, parameters, exception, log_args)
+    else
+      log(:error, message, parameters, exception, log_args)
+    end
   end
 
-  contract(String, Hash, Nilor[Exception], Bool => nil)
-  def fatal(message, parameters = {}, exception = nil, log_args = true)
-    log(:error, message, parameters, exception, true)
+  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
+  def fatal(message, parameters = {}, exception = nil, log_args = true, &block)
+    if block_given?
+      log(:error, yield, parameters, exception, true)
+    else
+      log(:error, message, parameters, exception, true)
+    end
   end
 
-  contract(String, Hash, Nilor[Exception], Bool => nil)
-  def unknown(message, parameters = {}, exception = nil, log_args = true)
-    log(:unknown, message, parameters, exception, true)
+  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
+  def unknown(message, parameters = {}, exception = nil, log_args = true, &block)
+    if block_given?
+      log(:unknown, yield, parameters, exception, true)
+    else
+      log(:unknown, message, parameters, exception, true)
+    end
   end
 
   contract(Symbol, String, Hash, Nilor[Exception], Bool => nil)
