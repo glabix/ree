@@ -26,7 +26,7 @@ class ReeLogger::MultiLogger < Logger
     Nilor[String],
     Nilor[RateLimiter],
     Nilor[ArrayOf[String]] => Any
-  )
+  ).throws(ArgumentError)
   def initialize(progname, rate_limiter, filter_words)
     @progname = progname
     @rate_limiter = rate_limiter
@@ -57,57 +57,63 @@ class ReeLogger::MultiLogger < Logger
     @silenced = false
   end
 
-  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
-  def debug(message, parameters = {}, exception = nil, log_args = false, &block)
+  contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
+  def debug(message = nil, parameters = {}, exception = nil, log_args = false, progname = nil, &block)
     if block_given?
-      log(:debug, yield, parameters, nil, false)
+      log(:debug, yield, parameters, nil, log_args)
     else
-      log(:debug, message, parameters, nil, false)
+      msg = get_message(message)
+      log(:debug, msg, parameters, nil, log_args)
     end
   end
 
-  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
-  def info(message, parameters = {}, exception = nil, log_args = false, &block)
+  contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
+  def info(message = nil, parameters = {}, exception = nil, log_args = false, progname = nil,  &block)
     if block_given?
-      log(:info, yield, parameters, nil)
+      log(:info, yield, parameters, nil, log_args)
     else
-      log(:info, message, parameters, nil)
+      msg = get_message(message)
+      log(:info, msg, parameters, nil)
     end
   end
 
-  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
-  def warn(message, parameters = {}, exception = nil, log_args = false, &block)
+  contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
+  def warn(message = nil, parameters = {}, exception = nil, log_args = false, progname = nil,  &block)
     if block_given?
-      log(:warn, yield, parameters, nil)
+      log(:warn, yield, parameters, nil, log_args)
     else
-      log(:warn, message, parameters, nil)
+      msg = get_message(message)
+      log(:warn, msg, parameters, nil)
     end
   end
 
-  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
-  def error(message, parameters = {}, exception = nil, log_args = true, &block)
+  contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
+  def error(message = nil, parameters = {}, exception = nil, log_args = true, progname = nil,  &block)
     if block_given?
       log(:error, yield, parameters, exception, log_args)
     else
-      log(:error, message, parameters, exception, log_args)
+      msg = get_message(message)
+      log(:error, msg, parameters, exception, log_args)
     end
   end
 
-  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
-  def fatal(message, parameters = {}, exception = nil, log_args = true, &block)
+  contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
+  def fatal(message = nil, parameters = {}, exception = nil, log_args = true, progname = nil,  &block)
     if block_given?
-      log(:error, yield, parameters, exception, true)
+      log(:error, yield, parameters, exception, log_args)
     else
-      log(:error, message, parameters, exception, true)
+      msg = get_message(message)
+      log(:error, msg, parameters, exception, log_args)
     end
   end
 
-  contract(String, Hash, Nilor[Exception], Bool, Optblock => nil)
-  def unknown(message, parameters = {}, exception = nil, log_args = true, &block)
+  contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
+  def unknown(message = nil, parameters = {}, exception = nil, log_args = true, progname = nil,  &block)
     if block_given?
-      log(:unknown, yield, parameters, exception, true)
+      log(:unknown, yield, parameters, exception, log_args)
     else
-      log(:unknown, message, parameters, exception, true)
+      msg = get_message(message)
+      log(:unknown, msg, parameters, exception, log_args)
     end
   end
 
@@ -181,5 +187,9 @@ class ReeLogger::MultiLogger < Logger
 
   def higher_or_equal_level?(message_level, appender_level)
     LEVEL_MAPPING[message_level] >= LEVEL_MAPPING[appender_level]
+  end
+
+  def get_message(message)
+    message || (raise ArgumentError.new("message should be given"))
   end
 end

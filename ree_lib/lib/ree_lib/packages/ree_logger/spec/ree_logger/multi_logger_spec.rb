@@ -82,7 +82,7 @@ RSpec.describe ReeLogger::MultiLogger do
   }
 
   it {
-    expect { logger_with_appenders.info('hello world') {'block message'} }.to output(/block message/).to_stdout
+    expect { logger_with_appenders.info {'block message'} }.to output(/block message/).to_stdout
     expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("block message")
   }
