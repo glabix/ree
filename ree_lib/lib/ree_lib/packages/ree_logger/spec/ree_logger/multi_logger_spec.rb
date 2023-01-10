@@ -82,6 +82,12 @@ RSpec.describe ReeLogger::MultiLogger do
   }
 
   it {
+    expect { logger_with_appenders.info {'block message'} }.to output(/block message/).to_stdout
+    expect(Rollbar).to have_received(:log)
+    expect(File.read(log_file_path)).to match("block message")
+  }
+
+  it {
     expect { logger_with_appenders.info('hello world', { param: 1, another_param: { name: 'John'}, password: 'password01' }) }.to output(/John/).to_stdout
     expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("John")
@@ -136,6 +142,4 @@ RSpec.describe ReeLogger::MultiLogger do
       end
     }.to_not output.to_stdout
   }
-
-
 end
