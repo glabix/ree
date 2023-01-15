@@ -10,7 +10,7 @@ import CompletionProvider from './providers/completionProvider'
 import CompletionResolveProvider from './providers/completionResolveProvider'
 import { documents } from './documentManager'
 import { forest } from './forest'
-import { cacheProjectIndex, ICachedIndex, setCachedIndex } from './utils/packagesUtils'
+import { cacheProjectIndex, ICachedIndex, setCachedIndex, cacheGemPaths, getCachedIndex } from './utils/packagesUtils'
 
 const url = require('url')
 
@@ -55,8 +55,11 @@ export class Server implements ILanguageServer {
 		this.connection.workspace.getWorkspaceFolders().then(v => {
 			return v?.map(folder => folder)
 		}).then(v => {
-			v?.forEach(folder => {
-				cacheProjectIndex(url.fileURLToPath(folder.uri)).then(r => {
+			if (v) { 
+				const folder = v[0]
+				const root = url.fileURLToPath(folder.uri) 
+
+				cacheProjectIndex(root).then(r => {
 					try {
 						if (r) {
 							if (r.code === 0) {
@@ -69,8 +72,23 @@ export class Server implements ILanguageServer {
 						setCachedIndex(<ICachedIndex>{})
 						this.connection.window.showErrorMessage(e.toString())
 					}
+				}).then(() => {
+					cacheGemPaths(root.toString()).then((r) => {
+						const gemPathsArr = r?.message.split("\n")
+						const index = getCachedIndex()
+						index.gem_paths ??= {}
+
+						gemPathsArr?.map((path) => {
+							let splitedPath = path.split("/")
+							let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
+			
+							index.gem_paths[name] = path
+						})
+
+						setCachedIndex(index)
+					})
 				})
-			})
+			}
 		})
 	}
 
