@@ -3,9 +3,8 @@ import { Position } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
 import { QueryMatch, Query, SyntaxNode, Tree, QueryCapture } from 'web-tree-sitter'
-import { getCachedIndex, getGemDir, IPackagesSchema, ICachedIndex, loadPackagesSchema } from '../utils/packagesUtils'
+import { getCachedIndex, getGemDir, IPackagesSchema, ICachedIndex, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getPackageNameFromPath, getProjectRootDir, getObjectNameFromPath } from '../utils/packageUtils'
-import { PackageFacade } from '../utils/packageFacade'
 import { extractToken } from '../utils/tokenUtils'
 import { snakeToCamelCase } from '../utils/stringUtils'
 
@@ -28,10 +27,13 @@ export default class CompletionAnalyzer {
       return defaultCompletion
     }
 
+    const index = getCachedIndex()
+    if (isCachedIndexIsEmpty()) { return defaultCompletion } 
+
     const token = extractToken(uri, position)
     if (!token) { return defaultCompletion }
 
-    const packagesSchema = loadPackagesSchema(filePath)
+    const packagesSchema = index.packages_schema
     if (!packagesSchema) { return defaultCompletion }
 
     const currentPackageName = getPackageNameFromPath(filePath)
@@ -42,8 +44,6 @@ export default class CompletionAnalyzer {
 
     const objectName = getObjectNameFromPath(filePath)
     if (!objectName) { return defaultCompletion }
-
-    const index = getCachedIndex()
 
     const doc = documents.get(uri)
     let tree = forest.getTree(uri)
@@ -109,10 +109,7 @@ export default class CompletionAnalyzer {
     currentPackage: string,
     filePath: string): CompletionItem[] {
     return packagesSchema.packages.map((pckg) => {
-      let packageFacade = new PackageFacade(path.join(projectRootDir, pckg.schema))
-      
-      let objects = packageFacade.objects().map(obj => (
-          
+      let objects = pckg.objects.map(obj => (
           {
             label: obj.name,
             labelDetails: {
@@ -120,7 +117,8 @@ export default class CompletionAnalyzer {
             },
             kind: CompletionItemKind.Method,
             data: {
-              objectSchema: obj.schema,
+              objectSchema: obj.schema_rpath,
+              isGem: false,
               fromPackageName: pckg.name,
               toPackageName: currentPackage,
               currentFilePath: filePath,
@@ -141,14 +139,11 @@ export default class CompletionAnalyzer {
     currentPackageName: string,
     filePath: string
     ): CompletionItem[] {
-    return packagesSchema.gemPackages.map((pckg) => {
+    return packagesSchema.gem_packages.map((pckg) => {
       let gemPath = getGemDir(pckg.name)
       if (!gemPath) { return [] }
 
-      let packageFacade = new PackageFacade(path.join(gemPath, pckg.schema))
-      
-      let objects = packageFacade.objects().map(obj => (
-          
+      let objects = pckg.objects.map(obj => (
           {
             label: obj.name,
             labelDetails: {
@@ -156,8 +151,9 @@ export default class CompletionAnalyzer {
             },
             kind: CompletionItemKind.Method,
             data: {
-              objectSchema: obj.schema,
+              objectSchema: obj.schema_rpath,
               fromPackageName: pckg.name,
+              isGem: true,
               toPackageName: currentPackageName,
               currentFilePath: filePath,
               type: CompletionItemKind.Method,

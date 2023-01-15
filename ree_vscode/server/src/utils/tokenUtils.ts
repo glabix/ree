@@ -3,10 +3,8 @@ import { Location, Hover, MarkupKind } from 'vscode-languageserver'
 import { Position, TextDocument } from 'vscode-languageserver-textdocument'
 import { Query } from 'web-tree-sitter'
 import { documents } from '../documentManager'
-import { forest } from '../forest'
-import { loadPackagesSchema, getGemPackageSchemaPath, getGemDir, IPackagesSchema } from '../utils/packagesUtils'
-import { IObjectMethod, loadObjectSchema } from './objectUtils'
-import { PackageFacade } from './packageFacade'
+import { forest, mapLinkQueryMatches } from '../forest'
+import { getGemPackageSchemaPath, getGemDir, getCachedIndex, IPackagesSchema, IPackageSchema, IGemPackageSchema, IObjectMethod, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getObjectNameFromPath, getPackageNameFromPath, getProjectRootDir } from './packageUtils'
 
 const url = require('node:url')
@@ -79,12 +77,31 @@ export function findLinkedObject(uri: string, token: string, position: Position)
     return ret
   }
 
+  const index = getCachedIndex()
+  if (isCachedIndexIsEmpty()) { return ret }
+
   const doc = documents.get(uri)
+  let tree = forest.getTree(uri)
+  if (!tree) {
+    tree = forest.createTree(uri, doc.getText())
+  }
+
+  // filter that already using
+  const query = tree.getLanguage().query(
+    `(
+      (link
+         link_name: (_) @name) @link
+      (#select-adjacent! @link)
+    ) `
+  ) as Query
+
+  const links = mapLinkQueryMatches(query.matches(tree.rootNode))
 
   const objectName = getObjectNameFromPath(filePath)
   if (!objectName) { return ret }
 
-  const packagesSchema = loadPackagesSchema(filePath)
+  // const packagesSchema = loadPackagesSchema(filePath)
+  const packagesSchema = index.packages_schema
   if (!packagesSchema) { return ret }
 
   const packageName = getPackageNameFromPath(filePath)
@@ -96,12 +113,10 @@ export function findLinkedObject(uri: string, token: string, position: Position)
   const projectRootDir = getProjectRootDir(filePath)
   if (!projectRootDir) { return ret }
 
-  const packageFacade = new PackageFacade(path.join(projectRootDir, pckg.schema))
-
-  const object = packageFacade.objects().find(o => o.name === objectName)
-  if (!object) {
+  const currentObject = pckg.objects.find(o => o.name === objectName)
+  if (!currentObject) {
     // maybe we inside object that don't have entry in package.schema, like entity
-    let obj = packageFacade.objects().find(o => o.name.match(RegExp(`${token.replace(/\'|\"|\:/, '')}`)))
+    // let obj = packageFacade.objects().find(o => o.name.match(RegExp(`${token.replace(/\'|\"|\:/, '')}`)))
     
     // maybe it's a constant
     const constantLocation = findConstant(token, uri, position, doc, packagesSchema, projectRootDir, packageName)
@@ -110,9 +125,7 @@ export function findLinkedObject(uri: string, token: string, position: Position)
     return constantLocation
   }
 
-  const currentObject = loadObjectSchema(path.join(projectRootDir, object.schema))
-  if (!currentObject) { return ret }
-
+  // TODO: use links from tree-sitter
   const link = currentObject.links.find((l) => {
     return l.target === token || l.as === token || l.imports.includes(token)
   })
@@ -151,31 +164,20 @@ export function findLinkedObject(uri: string, token: string, position: Position)
     }
 
     const linkedPackageName = link.package_name
-    const linkedPackage = packagesSchema.packages.find(p => p.name === linkedPackageName)
+    let linkedPackage: IPackageSchema | IGemPackageSchema | undefined
+    linkedPackage = packagesSchema.packages.find(p => p.name === linkedPackageName)
 
-    let linkedPackageSchemaPath = null
     if (!linkedPackage) {
       // check gemPackages
-      const linkedGemPackage = packagesSchema.gemPackages.find(p => p.name === linkedPackageName)
-      if (!linkedGemPackage) { return ret }
-
-      const gemPackageDir = getGemPackageSchemaPath(linkedPackageName)
-      linkedPackageSchemaPath = gemPackageDir
-
-    } else {
-      linkedPackageSchemaPath = path.join(projectRootDir, linkedPackage.schema)
+      linkedPackage = packagesSchema.gem_packages.find(p => p.name === linkedPackageName)
+      if (!linkedPackage) { return ret }
     }
 
-    const linkedPackageFacade = new PackageFacade(linkedPackageSchemaPath)
-
-    const linkedObjectSchema = linkedPackageFacade.objects().find(o => o.name === link.target)
-    if (!linkedObjectSchema) { return ret }
-
-    const linkedObjectRoot = linkedPackage ? projectRootDir : getGemDir(linkedPackageName)
-    if (!linkedObjectRoot) { return ret }
-
-    const linkedObject = loadObjectSchema(path.join(linkedObjectRoot, linkedObjectSchema.schema))
+    const linkedObject = linkedPackage.objects.find(o => o.name === link.target)
     if (!linkedObject) { return ret }
+
+    const linkedObjectRoot = ('gem' in linkedPackage) ? getGemDir(linkedPackageName) : projectRootDir
+    if (!linkedObjectRoot) { return ret }
 
     return {
       linkDef: linkDef,
@@ -194,7 +196,7 @@ export function findLinkedObject(uri: string, token: string, position: Position)
         } as Range
       },
       location: {
-        uri: path.join(linkedObjectRoot, linkedObject.path),
+        uri: path.join(linkedObjectRoot, linkedObject.file_rpath),
         range: {
           start: {
             line: 0,
@@ -234,6 +236,9 @@ export function findConstant(
   if (!tree) {
     tree = forest.createTree(uri, doc.getText())
   }
+
+  // TODO: refactor using links from linksHash
+  // TODO: find links one time in the beginning and pass them here
 
   const query = tree.getLanguage().query(
     `((link) @link)`
@@ -277,23 +282,19 @@ export function findConstant(
   let linkedFilePath = null
   if (!linkPackage) {
     // maybe it's a gem
-    const gemPackage = packagesSchema.gemPackages.find(p => p.name === packageName)
+    const gemPackage = packagesSchema.gem_packages.find(p => p.name === packageName)
     if (!gemPackage) { return ret }
 
     const gemDir = getGemDir(gemPackage.name)
     const gemPackageFilePath = `${gemDir}/packages/${gemPackage.name}/package/${gemPackage.name}/${splittedLinkName.slice(1).join('/')}.rb`
     linkedFilePath = url.pathToFileURL(gemPackageFilePath).toString()
   } else {
-    const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage?.schema))
-    if (!linkPackageFacade) { return ret }
-
     let importLinkPath = null
-    let obj = linkPackageFacade.objects().find(o => o.name === linkName.slice(1))
+    let obj = linkPackage.objects.find(o => o.name === linkName.slice(1))
     if (obj) {
-      const currentObject = loadObjectSchema(path.join(projectRootDir, obj.schema))
-      importLinkPath = path.join(projectRootDir, currentObject?.path) 
+      importLinkPath = path.join(projectRootDir, obj?.file_rpath) 
     } else {
-      const packageRootPath = linkPackageFacade.entryPath().split('/').slice(0, -1).join('/')
+      const packageRootPath = linkPackage.entry_rpath.split('/').slice(0, -1).join('/')
       const importLinkRelativePath = packageRootPath + '/' + linkName.replace(/\'|\:|\"/g,'') + '.rb'
       importLinkPath = path.join(projectRootDir, importLinkRelativePath)
     }

@@ -7,18 +7,47 @@ const path = require('path')
 const fs = require('fs')
 const url = require('url')
 
-let cachedPackages: IPackagesSchema | undefined = undefined
-let packagesCtime: number | null = null
-let cachedGemPackages: Object | null = null
-let cachedGems: ICachedGems = {}
 let cachedIndex: ICachedIndex
 
 export function getCachedIndex(): ICachedIndex {
+  if (!cachedIndex || (cachedIndex && isCachedIndexIsEmpty())) {
+    connection.workspace.getWorkspaceFolders().then(v => {
+			return v?.map(folder => folder)
+		}).then(v => {
+			if (v) { 
+				const folder = v[0]
+				const root = url.fileURLToPath(folder.uri)
+
+        cacheProjectIndex(root).then(r => {
+            try {
+              if (r) {
+                if (r.code === 0) {
+                  cachedIndex = JSON.parse(r.message)
+                } else {
+                  cachedIndex = <ICachedIndex>{}
+                  connection.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
+                }
+              }
+            } catch(e: any) {
+              cachedIndex = <ICachedIndex>{}
+              connection.window.showErrorMessage(e.toString())
+            }
+          })
+      }
+    })
+  }
+
   return cachedIndex
 }
 
 export function setCachedIndex(value: ICachedIndex) {
   cachedIndex = value
+}
+
+export function isCachedIndexIsEmpty(): boolean {
+  if (Object.keys(cachedIndex).length > 0) { return false }
+
+  return true
 }
 
 interface ExecCommand {
@@ -35,56 +64,83 @@ class ExecCommandError extends Error {
   }
 }
 
-interface ICachedGems {
+/* eslint-disable @typescript-eslint/naming-convention */
+interface GemPath {
   [key: string]: string | undefined
 }
 
 export interface ICachedIndex {
   classes: {
-    [key: string]: [
-      {
-        path: string,
-        package: string,
-        methods: [
-          {
-            name: string,
-            location: number
-          }
-        ]
-      }
-    ]
+    [key: string]: IIndexedElement[]
   },
   objects: {
-    [key: string]: [
-      {
-        path: string,
-        package: string,
-        methods: [
-          {
-            name: string,
-            parameters: { name: number, required: string }[]
-            location: number
-          }
-        ]
-      }
-    ]
-  }
+    [key: string]: IIndexedElement[]
+  },
+  packages_schema: IPackagesSchema,
+  gem_paths: GemPath
+}
+
+export interface IIndexedElement {
+  path: string,
+  package: string,
+  methods: [
+    {
+      name: string,
+      parameters?: { name: number, required: string }[]
+      location: number
+    }
+  ]
 }
 
 export interface IPackagesSchema {
   packages: IPackageSchema[]
-  gemPackages: IGemPackageSchema[]
+  gem_packages: IGemPackageSchema[]
 }
 
 export interface IPackageSchema {
   name: string
-  schema: string
+  schema_rpath: string
+  entry_rpath: string
+  tags: string[]
+  objects: IObject[]
 }
 export interface IGemPackageSchema {
   gem: string
   name: string
-  schema: string
+  schema_rpath: string
+  entry_path: string
+  objects: IObject[]
 }
+
+export interface IObject {
+  name: string
+  schema_rpath: string
+  file_rpath: string
+  mount_as: string
+  factory: string | null
+  methods: IObjectMethod[]
+  links: IObjectLink[]
+}
+
+export interface IMethodArg {
+  arg: string
+  type: string
+}
+
+export interface IObjectMethod {
+  doc: string
+  throws: string[]
+  return: String | null
+  args: IMethodArg[]
+}
+
+export interface IObjectLink {
+  target: string,
+  package_name: string,
+  as: string,
+  imports: string[]
+}
+/* eslint-enable @typescript-eslint/naming-convention */
 
 export function cacheGemPaths(rootDir: string): Promise<ExecCommand | undefined> {
   return execBundlerGetGemPaths(rootDir)
@@ -98,54 +154,6 @@ export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecC
   return execGetReeFileIndex(rootDir, filePath)
 }
 
-export function loadPackagesSchema(currentPath: string): IPackagesSchema | undefined {
-  const root = getProjectRootDir(currentPath)
-  if (!root) { return }
-
-  if (!cachedIndex || (cachedIndex && Object.keys(cachedIndex).length === 0)) {
-    cacheProjectIndex(root).then(r => {
-      try {
-        if (r) {
-          if (r.code === 0) {
-            cachedIndex = JSON.parse(r.message)
-          } else {
-            cachedIndex = <ICachedIndex>{}
-            connection.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
-          }
-        }
-      } catch(e: any) {
-        cachedIndex = <ICachedIndex>{}
-        connection.window.showErrorMessage(e.toString())
-      }
-    })
-  }
-
-  const schemaPath = path.join(root, PACKAGES_SCHEMA_FILE)
-  if (!fs.existsSync(schemaPath)) { return }
-
-  const ctime = fs.statSync(schemaPath).ctimeMs
-
-  if (packagesCtime !== ctime || !cachedPackages) {
-    packagesCtime = ctime
-
-    cacheGemPaths(root).then((r) => {
-      const gemPathsArr = r?.message.split("\n")
-      gemPathsArr?.map((path) => {
-        let splitedPath = path.split("/")
-        let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
-
-        cachedGems[name] = path
-      })
-
-      cachedPackages = parsePackagesSchema(
-        fs.readFileSync(schemaPath, { encoding: 'utf8' }), root
-      )
-    })
-  }
-
-  return cachedPackages
-}
-
 export function getGemPackageSchemaPath(gemPackageName: string): string | undefined {
   const gemPath = getGemDir(gemPackageName)
   if (!gemPath) { return }
@@ -153,51 +161,28 @@ export function getGemPackageSchemaPath(gemPackageName: string): string | undefi
   const gemPackage = getCachedGemPackage(gemPackageName)
   if (!gemPackage) { return }
 
-  return path.join(gemPath, gemPackage.schema)
+  return path.join(gemPath, gemPackage.schema_rpath)
 }
 
 export function getCachedGemPackage(gemPackageName: string): IGemPackageSchema | undefined {
-  if (!cachedPackages) { return }
+  if (!cachedIndex) { return }
 
-  const gemPackage = cachedPackages?.gemPackages.find(p => p.name === gemPackageName)
+  const gemPackage = cachedIndex?.packages_schema.gem_packages.find(p => p.name === gemPackageName)
   if (!gemPackage) { return }
 
   return gemPackage
 }
 
 export function getGemDir(gemPackageName: string): string | undefined {
-  if (!cachedPackages) { return }
+  if (!cachedIndex) { return }
 
-  const gemPackage = cachedPackages?.gemPackages.find(p => p.name === gemPackageName)
+  const gemPackage = cachedIndex?.packages_schema.gem_packages.find(p => p.name === gemPackageName)
   if (!gemPackage) { return }
 
-  const gemDir = cachedGems[gemPackage.gem]
+  const gemDir = cachedIndex.gem_paths[gemPackage.gem]
   if (!gemDir) { return }
 
   return path.join(gemDir.trim(), 'lib', gemPackage.gem)
-}
-
-function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | undefined {
-  try {
-    const schema = JSON.parse(data) as any
-    const obj = {} as IPackagesSchema
-
-    obj.packages = schema.packages.map((p: any) => {
-      return {name: p.name, schema: p.schema} as IPackageSchema
-    })
-
-    obj.gemPackages = schema.gem_packages.map((p: any) => {
-      return {gem: p.gem, name: p.name, schema: p.schema} as IGemPackageSchema
-    })
-
-    // cache gemPackages by gem
-    cachedGemPackages = groupBy(obj.gemPackages, 'gem')
-
-    return obj
-  } catch (err) {
-    console.error(err)
-    return undefined
-  }
 }
 
 async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | undefined> {

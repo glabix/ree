@@ -4,7 +4,7 @@ import { Query, SyntaxNode, Tree } from 'web-tree-sitter'
 import { connection } from '..'
 import { documents } from '../documentManager'
 import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
-import { getCachedIndex, ICachedIndex } from '../utils/packagesUtils'
+import { getCachedIndex, ICachedIndex, IGemPackageSchema, IIndexedElement, IPackagesSchema, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getLocalePath, getProjectRootDir, Locale, resolveObject } from '../utils/packageUtils'
 import { extractToken, findTokenInFile, findLinkedObject, findMethod } from '../utils/tokenUtils'
 
@@ -38,6 +38,7 @@ export default class DefinitionAnalyzer {
     }
 
     const index = getCachedIndex()
+    if (isCachedIndexIsEmpty()) { return [defaultLocation] } 
 
     const tokenNode = findTokenNodeInTree(token, tree, position)
     if (tokenNode) {
@@ -253,10 +254,11 @@ export default class DefinitionAnalyzer {
     return []
   }
 
-  private static findFilteredMethodsFromIndex(token: string, index: ICachedIndex, projectRoot: string, type: keyof ICachedIndex): Location[] {
+  private static findFilteredMethodsFromIndex(token: string, index: ICachedIndex, projectRoot: string, type: ('objects' | 'classes')): Location[] {
     const keys = Object.keys(index[type])
     const allMethods = keys.map(k => {
-      return index[type][k].map(c => {
+      let val: ICachedIndex['objects'] | ICachedIndex['classes'] = index[type]  
+      return val[k].map((c) => {
         let filteredMethods = c.methods.filter(m => m.name === token)
         return filteredMethods.map(m => {
           return {
