@@ -390,6 +390,15 @@ async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> 
   }
 }
 
+export function buildObjectArguments(obj: IObject): string {
+  if (obj.methods[0]) {
+    const method = obj.methods[0]
+    return `${obj.name}(${method.args.map(arg => `${arg.arg}: ${arg.type}`).join(',\n')})`
+  } else {
+    return `${obj.name}()`
+  }
+}
+
 function groupBy(data: Array<any>, key: string) {
   return data.reduce((storage, item) => {
       let group = item[key]

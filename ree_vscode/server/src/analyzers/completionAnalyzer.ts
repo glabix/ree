@@ -3,7 +3,7 @@ import { Position } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
 import { QueryMatch, Query, SyntaxNode, Tree, QueryCapture } from 'web-tree-sitter'
-import { getCachedIndex, getGemDir, IPackagesSchema, ICachedIndex, isCachedIndexIsEmpty } from '../utils/packagesUtils'
+import { getCachedIndex, getGemDir, IPackagesSchema, ICachedIndex, isCachedIndexIsEmpty, IObject, buildObjectArguments } from '../utils/packagesUtils'
 import { getPackageNameFromPath, getProjectRootDir, getObjectNameFromPath } from '../utils/packageUtils'
 import { extractToken } from '../utils/tokenUtils'
 import { snakeToCamelCase } from '../utils/stringUtils'
@@ -116,6 +116,7 @@ export default class CompletionAnalyzer {
               description: `from: ${pckg.name}`
             },
             kind: CompletionItemKind.Method,
+            insertText: buildObjectArguments(obj),
             data: {
               objectSchema: obj.schema_rpath,
               isGem: false,
@@ -139,32 +140,33 @@ export default class CompletionAnalyzer {
     currentPackageName: string,
     filePath: string
     ): CompletionItem[] {
-    return packagesSchema.gem_packages.map((pckg) => {
-      let gemPath = getGemDir(pckg.name)
-      if (!gemPath) { return [] }
+      return packagesSchema.gem_packages.map((pckg) => {
+        let gemPath = getGemDir(pckg.name)
+        if (!gemPath) { return [] }
 
-      let objects = pckg.objects.map(obj => (
-          {
-            label: obj.name,
-            labelDetails: {
-              description: `from: ${pckg.name}`
-            },
-            kind: CompletionItemKind.Method,
-            data: {
-              objectSchema: obj.schema_rpath,
-              fromPackageName: pckg.name,
-              isGem: true,
-              toPackageName: currentPackageName,
-              currentFilePath: filePath,
-              type: CompletionItemKind.Method,
-              projectRootDir: gemPath || projectRootDir
+        let objects = pckg.objects.map(obj => (
+            {
+              label: obj.name,
+              labelDetails: {
+                description: `from: ${pckg.name}`
+              },
+              kind: CompletionItemKind.Method,
+              insertText: buildObjectArguments(obj),
+              data: {
+                objectSchema: obj.schema_rpath,
+                fromPackageName: pckg.name,
+                isGem: true,
+                toPackageName: currentPackageName,
+                currentFilePath: filePath,
+                type: CompletionItemKind.Method,
+                projectRootDir: gemPath || projectRootDir
+              }
             }
-          }
+          )
         )
-      )
 
-      return objects
-    }).flat()
+        return objects
+      }).flat()
   }
 
   private static getConstantsFromIndex(
