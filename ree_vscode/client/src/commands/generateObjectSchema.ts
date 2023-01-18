@@ -1,8 +1,5 @@
 import * as vscode from 'vscode'
-import { DiagnosticSeverity } from 'vscode-languageclient'
-import { PackageFacade } from '../utils/packageFacade'
 import { getPackageEntryPath, getPackageNameFromPath } from '../utils/packageUtils'
-import { loadPackagesSchema } from '../utils/packagesUtils'
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { 
   isReeInstalled,
@@ -39,13 +36,6 @@ export function genObjectSchemaCmd() {
   const projectPath = getCurrentProjectDir()
   if (!projectPath) {
     vscode.window.showErrorMessage(`Unable to find ${PACKAGES_SCHEMA_FILE}`)
-    return
-  }
-
-  const packagesSchema = loadPackagesSchema(projectPath)
-
-  if (!packagesSchema) {
-    vscode.window.showErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
     return
   }
 
@@ -103,7 +93,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   if (dockerPresented) {
     const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()?.then((res) => {
       if (res.code !== 0) {
-        vscode.window.showWarningMessage(`CheckIsBundleGemInstalledInDockerError: ${res.message}`)
+        vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledInDockerError: ${res.message}`)
         return null
       }
     })
@@ -204,7 +194,7 @@ export async function execGenerateObjectSchema(rootProjectDir: string, name: str
   }
 }
 
-function getCurrentPackage(fileName?: string): string | null {
+export function getCurrentPackage(fileName?: string): string | null {
   // check if active file/editor is accessible
 
   let currentFileName = fileName || vscode.window.activeTextEditor.document.fileName

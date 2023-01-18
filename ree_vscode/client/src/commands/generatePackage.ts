@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, ExecCommand, spawnCommand } from '../utils/reeUtils'
-import { loadPackagesSchema } from '../utils/packagesUtils'
+import { getCachedIndex, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
 
@@ -17,6 +17,9 @@ export function generatePackage() {
 
   const rootProjectDir = getCurrentProjectDir()
   if (!rootProjectDir) { return }
+
+  const index = getCachedIndex()
+  if (isCachedIndexIsEmpty()) { return }
 
   const checkReeIsInstalled = isReeInstalled(rootProjectDir)?.then((res) => {
     if (res.code !== 0) {
@@ -40,7 +43,7 @@ export function generatePackage() {
   if (dockerPresented) {
     const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()?.then((res) => {
       if (res.code !== 0) {
-        vscode.window.showWarningMessage(`CheckIsBundleGemInstalledInDockerError: ${res.message}`)
+        vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledInDockerError: ${res.message}`)
         return null
       }
     })
@@ -95,13 +98,13 @@ export function generatePackage() {
     
           vscode.window.showInformationMessage(`Package ${name} was generated`)
     
-          const packagesSchema = loadPackagesSchema(rootProjectDir)
+          const packagesSchema = index.packages_schema
           if (!packagesSchema) { return }
     
-          const packageSchema = packagesSchema.packages.find(p => p.name == name)
+          const packageSchema = packagesSchema.packages.find(p => p.name === name)
           if (!packageSchema) { return }
     
-          const packageSchemaPath = path.join(rootProjectDir, packageSchema.schema)
+          const packageSchemaPath = path.join(rootProjectDir, packageSchema.schema_rpath)
           const entryPath = packageSchemaPath.split(PACKAGE_SCHEMA_FILE)[0] + `package/${packageSchema.name}.rb`
     
           if (!fs.existsSync(entryPath)) { return }

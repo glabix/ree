@@ -1,7 +1,5 @@
 import * as vscode from 'vscode'
 import { DiagnosticSeverity } from 'vscode-languageclient'
-import { PackageFacade } from '../utils/packageFacade'
-import { getPackageObjectFromCurrentPath } from '../utils/packageUtils'
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { 
   isReeInstalled,
@@ -12,8 +10,8 @@ import {
   buildReeCommandFullArgsArray,
   spawnCommand
 } from '../utils/reeUtils'
-import { diagnosticCollection } from '../extension'
 import { addDocumentProblems, ReeDiagnosticCode, removeDocumentProblems } from '../utils/documentUtils'
+import { getCurrentPackage } from './generateObjectSchema'
 
 const path = require('path')
 
@@ -50,7 +48,7 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
   if (dockerPresented) {
     const checkIsBundleGemsInstalledInDocker = isBundleGemsInstalledInDocker()?.then((res) => {
       if (res.code !== 0) {
-        vscode.window.showWarningMessage(`CheckIsBundleGemInstalledInDockerError: ${res.message}`)
+        vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledInDockerError: ${res.message}`)
         return null
       }
     })
@@ -69,7 +67,7 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
     const currentPackage = getCurrentPackage(fileName)
     if (!currentPackage) { return }
 
-    execPackageName = currentPackage.name()
+    execPackageName = currentPackage
   }
 
   let result = execGeneratePackageSchema(rootProjectDir, execPackageName)
@@ -151,24 +149,6 @@ export function execGeneratePackageSchema(rootProjectDir: string, name: string):
     vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
   }
-}
-
-function getCurrentPackage(fileName?: string): PackageFacade | null {
-  // check if active file/editor is accessible
-
-  let currentFileName = fileName || vscode.window.activeTextEditor.document.fileName
-
-  if (!currentFileName) {
-    vscode.window.showErrorMessage("Open any package file")
-    return
-  }
-
-  // finding package
-  let currentPackage = getPackageObjectFromCurrentPath(currentFileName)
-
-  if (!currentPackage) { return }
-
-  return currentPackage
 }
 
 

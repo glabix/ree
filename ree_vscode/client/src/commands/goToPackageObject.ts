@@ -1,10 +1,8 @@
 import * as vscode from 'vscode'
 import { PACKAGES_SCHEMA_FILE, PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
-import { IPackageSchema, IGemPackageSchema, loadPackagesSchema, getGemDir } from '../utils/packagesUtils'
-import { IObject, PackageFacade } from '../utils/packageFacade'
+import { IPackageSchema, IGemPackageSchema, getGemDir, getCachedIndex, isCachedIndexIsEmpty, IObject } from '../utils/packagesUtils'
 import { getCurrentProjectDir } from '../utils/fileUtils'
-import { ObjectFacade } from '../utils/objectFacade'
 
 var fs = require('fs')
 var path = require("path")
@@ -23,21 +21,26 @@ export function goToPackageObject() {
     return
   }
 
-  const packagesSchema = loadPackagesSchema(projectPath)
+  const index = getCachedIndex()
+  if (isCachedIndexIsEmpty()) { return }
+
+  const packagesSchema = index.packages_schema
 
   if (!packagesSchema) {
     vscode.window.showErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
     return
   }
 
-  const allPackages = [...packagesSchema.packages, ...packagesSchema.gemPackages] as Array<IPackageSchema | IGemPackageSchema>
+  const allPackages = [...packagesSchema.packages, ...packagesSchema.gem_packages] as Array<IPackageSchema | IGemPackageSchema>
   let packageSchemaPath = null
   let projectRoot = null
+  let selectedPackageName
 
   selectPackage(allPackages, (selected: string | undefined) => {
     if (selected === undefined) { return }
 
     const cleanedSelected = selected.replace(/\s\(.*\)/, '')
+    selectedPackageName = cleanedSelected
     const p = allPackages.find(p => p.name === cleanedSelected)
     if (!p) { return }
 
@@ -45,7 +48,7 @@ export function goToPackageObject() {
     if ('gem' in p) {
       projectRoot = getGemDir(p.name)
     }
-    packageSchemaPath = path.join(projectRoot, p?.schema)
+    packageSchemaPath = path.join(projectRoot, p?.schema_rpath)
     const entryPath = packageSchemaPath.split(PACKAGE_SCHEMA_FILE)[0] + `package/${p?.name}.rb`
 
     if (!fs.existsSync(entryPath)) {
@@ -53,22 +56,22 @@ export function goToPackageObject() {
       return
     }
   }).then(() => {
-    const pkgFacade = new PackageFacade(packageSchemaPath)
+    const selectedPackage: IPackageSchema | IGemPackageSchema = packagesSchema.packages.find(p => p.name === selectedPackageName) || 
+                            packagesSchema.gem_packages.find(p => p.name === selectedPackageName)
   
-    selectObject(pkgFacade.objects(), (selectedObj: string | undefined) => {
+    selectObject(selectedPackage.objects, (selectedObj: string | undefined) => {
       if (selectedObj === undefined) { return }
   
-      const obj = pkgFacade.objects().find(o => o.name === selectedObj)
-      const objSchemaPath = path.join(projectRoot, obj.schema)
+      const obj = selectedPackage.objects.find(o => o.name === selectedObj)
+      const objSchemaPath = path.join(projectRoot, obj.schema_rpath)
   
       if (!fs.existsSync(objSchemaPath)) {
         vscode.window.showErrorMessage(
-          `Error. Object schema file not found: ${objSchemaPath}. Re-generate schema for :${pkgFacade.name()} package`
+          `Error. Object schema file not found: ${objSchemaPath}. Re-generate schema for :${selectPackage.name} package`
         )
         return
       }
-      const objFacade = new ObjectFacade(path.join(projectRoot, obj.schema))
-      const objectPath = path.join(projectRoot, objFacade.path())
+      const objectPath = path.join(projectRoot, obj.file_rpath)
   
       if (!fs.existsSync(objectPath)) {
         vscode.window.showErrorMessage(`Error. File not found: ${objectPath}`)

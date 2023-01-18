@@ -9,7 +9,6 @@ import {
 } from 'vscode-languageclient/node'
 import { goToPackage } from "./commands/goToPackage"
 import { goToPackageObject } from "./commands/goToPackageObject"
-import { generatePackageSchema } from './commands/generatePackageSchema'
 import { updateStatusBar, statusBarCallbacks } from "./commands/statusBar"
 import { goToSpec } from "./commands/goToSpec"
 import { onCreatePackageFile, onRenamePackageFile } from "./commands/documentTemplates"
@@ -23,8 +22,7 @@ import { selectAndGeneratePackageSchema } from './commands/selectAndGeneratePack
 import { onDeletePackageFile } from "./commands/deleteObjectSchema"
 import { forest } from './utils/forest'
 import { clearDocumentProblems } from "./utils/documentUtils"
-import { cacheGemPaths, setCachedPackages, parsePackagesSchema, setCachedGems } from "./utils/packagesUtils"
-import { PACKAGES_SCHEMA_FILE } from "./core/constants"
+import { getNewProjectIndex } from "./utils/packagesUtils"
 
 const fs = require('fs')
 let client: LanguageClient
@@ -142,22 +140,9 @@ export async function activate(context: vscode.ExtensionContext) {
   )
 
   let curPath = getCurrentProjectDir()
-  cacheGemPaths(curPath).then((r) => {
-    const gemPathsArr = r?.message.split("\n")
-      gemPathsArr?.map((path) => {
-        let splitedPath = path.split("/")
-        let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
-
-        setCachedGems(name, path)
-      })
-
-      setCachedPackages(
-        parsePackagesSchema(
-          fs.readFileSync(path.join(curPath, PACKAGES_SCHEMA_FILE),{ encoding: 'utf8' }),
-          path.join(curPath, PACKAGES_SCHEMA_FILE)
-        )
-      )
-  })
+  if (curPath) {  
+    getNewProjectIndex()
+  }
 
   if (isBundleGemsInstalled(curPath)) {
     isBundleGemsInstalled(curPath).then((res) => {
@@ -170,7 +155,7 @@ export async function activate(context: vscode.ExtensionContext) {
   if (isBundleGemsInstalledInDocker()) {
     isBundleGemsInstalledInDocker().then((res) => {
       if (res && res.code !== 0) {
-        vscode.window.showWarningMessage(`CheckIsBundleGemInstalledInDockerError: ${res.message}`)
+        vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledInDockerError: ${res.message}`)
       }
     })
   }

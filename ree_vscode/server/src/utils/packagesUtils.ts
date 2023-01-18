@@ -13,7 +13,7 @@ const MAX_GET_INDEX_RETRY_COUNT = 5
 
 export function getCachedIndex(): ICachedIndex {
   if (!cachedIndex || (isCachedIndexIsEmpty())) {
-    getNewIndex()
+    getNewProjectIndex()
   }
 
   return cachedIndex
@@ -30,7 +30,7 @@ export function isCachedIndexIsEmpty(): boolean {
   return true
 }
 
-export function getNewIndex() {
+export function getNewProjectIndex() {
   if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT) { return }
 
   connection.workspace.getWorkspaceFolders().then(v => {
