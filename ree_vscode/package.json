@@ -53,6 +53,10 @@
       {
         "command": "ree.generatePackage",
         "title": "Ree: Generate Package"
+      },
+      {
+        "command": "ree.reindexProject",
+        "title": "Ree: Manually reindex project"
       }
     ],
     "keybindings": [
