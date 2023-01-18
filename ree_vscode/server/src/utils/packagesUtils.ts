@@ -8,33 +8,12 @@ const fs = require('fs')
 const url = require('url')
 
 let cachedIndex: ICachedIndex
+let getNewIndexRetryCount: number = 0
+const MAX_GET_INDEX_RETRY_COUNT = 5
 
 export function getCachedIndex(): ICachedIndex {
-  if (!cachedIndex || (cachedIndex && isCachedIndexIsEmpty())) {
-    connection.workspace.getWorkspaceFolders().then(v => {
-			return v?.map(folder => folder)
-		}).then(v => {
-			if (v) { 
-				const folder = v[0]
-				const root = url.fileURLToPath(folder.uri)
-
-        cacheProjectIndex(root).then(r => {
-            try {
-              if (r) {
-                if (r.code === 0) {
-                  cachedIndex = JSON.parse(r.message)
-                } else {
-                  cachedIndex = <ICachedIndex>{}
-                  connection.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
-                }
-              }
-            } catch(e: any) {
-              cachedIndex = <ICachedIndex>{}
-              connection.window.showErrorMessage(e.toString())
-            }
-          })
-      }
-    })
+  if (!cachedIndex || (isCachedIndexIsEmpty())) {
+    getNewIndex()
   }
 
   return cachedIndex
@@ -45,9 +24,64 @@ export function setCachedIndex(value: ICachedIndex) {
 }
 
 export function isCachedIndexIsEmpty(): boolean {
-  if (Object.keys(cachedIndex).length > 0) { return false }
+  if (!cachedIndex) { return true }
+  if (cachedIndex && Object.keys(cachedIndex).length > 0) { return false }
 
   return true
+}
+
+export function getNewIndex() {
+  if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT) { return }
+
+  connection.workspace.getWorkspaceFolders().then(v => {
+    return v?.map(folder => folder)
+  }).then(v => {
+    if (v) { 
+      const folder = v[0]
+      const root = url.fileURLToPath(folder.uri)
+
+      cacheProjectIndex(root).then(r => {
+        try {
+          if (r) {
+            if (r.code === 0) {
+              cachedIndex = JSON.parse(r.message)
+              getNewIndexRetryCount = 0
+            } else {
+              cachedIndex = <ICachedIndex>{}
+              getNewIndexRetryCount += 1
+              connection.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
+            }
+          }
+        } catch(e: any) {
+          cachedIndex = <ICachedIndex>{}
+          getNewIndexRetryCount += 1
+          connection.window.showErrorMessage(e.toString())
+        }
+      }).then(() => {
+        cacheGemPaths(root.toString()).then((r) => {
+          if (r) {
+            if (r.code === 0) {
+              const gemPathsArr = r?.message.split("\n")
+              let index = getCachedIndex()
+              if (isCachedIndexIsEmpty()) { index ??= <ICachedIndex>{} }
+              index.gem_paths ??= {}
+    
+              gemPathsArr?.map((path) => {
+                let splitedPath = path.split("/")
+                let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
+        
+                index.gem_paths[name] = path
+              })
+    
+              setCachedIndex(index)
+            } else {
+              connection.window.showErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
+            }
+          }
+        })
+      })
+    }
+  })
 }
 
 interface ExecCommand {
@@ -108,7 +142,7 @@ export interface IGemPackageSchema {
   gem: string
   name: string
   schema_rpath: string
-  entry_path: string
+  entry_rpath: string
   objects: IObject[]
 }
 

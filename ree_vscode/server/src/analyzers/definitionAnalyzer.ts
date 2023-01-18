@@ -38,7 +38,36 @@ export default class DefinitionAnalyzer {
     }
 
     const index = getCachedIndex()
-    if (isCachedIndexIsEmpty()) { return [defaultLocation] } 
+    if (isCachedIndexIsEmpty()) { 
+      const method = findMethod(documents.get(uri).getText(), token)
+
+      if (method.position) {
+        return [{
+          uri: uri,
+          range: {
+            start: method.position,
+            end: method.position
+          } 
+        }] as Location[]
+      }
+
+      // search in file
+      let locationInFile = findTokenInFile(token, uri)
+      if (!locationInFile) { return [defaultLocation] }
+
+      return [locationInFile]
+    }
+
+    const linkedObject = findLinkedObject(uri, token, position)
+    if (linkedObject.location) {
+      return [{
+        uri: linkedObject.location.uri,
+        range: {
+          start: linkedObject.location.range.start,
+          end: linkedObject.location.range.end
+        } 
+      }] as Location[]
+    }
 
     const tokenNode = findTokenNodeInTree(token, tree, position)
     if (tokenNode) {
@@ -77,25 +106,12 @@ export default class DefinitionAnalyzer {
     }
 
     const method = findMethod(documents.get(uri).getText(), token)
-
     if (method.position) {
       return [{
         uri: uri,
         range: {
           start: method.position,
           end: method.position
-        } 
-      }] as Location[]
-    }
-
-    const linkedObject = findLinkedObject(uri, token, position)
-
-    if (linkedObject.location) {
-      return [{
-        uri: linkedObject.location.uri,
-        range: {
-          start: linkedObject.location.range.start,
-          end: linkedObject.location.range.end
         } 
       }] as Location[]
     }
@@ -165,7 +181,7 @@ export default class DefinitionAnalyzer {
       } else {
         // check if we have assignment node, then check if assignment lhs is same as tokenNode
         const assignmentNode = findParentNodeWithType(node, 'assignment', true)
-        if (assignmentNode) {
+        if (assignmentNode && assignmentNode.type !== 'program') {
           return !!tokenNode?.parent?.text.match(RegExp(`^${assignmentNode?.firstChild?.text}\.`))
         }
       }

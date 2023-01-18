@@ -68,9 +68,10 @@ import { Position } from 'vscode-languageserver'
  
  export const forest = new Forest()
 
- interface Link {
+ export interface ILink {
   name: string,
   body: string,
+  from: string,
   as: string,
   imports: string[],
   isSymbol: boolean,
@@ -78,10 +79,12 @@ import { Position } from 'vscode-languageserver'
 }
 
 export const importRegexp = /(import\:\s)?(\-\>\s?\{(?<import>.+)\})/
+export const fromRegexp = /from\:\s(?<from>(\:\w+)|((\'|\")\w+(\/\w+)*(\'|\")))/
 export const asRegexp = /as\:\s\:(\w+)/
 
-export function mapLinkQueryMatches(matches: QueryMatch[]): Array<Link> {
+export function mapLinkQueryMatches(matches: QueryMatch[]): Array<ILink> {
   return matches.map(qm => {
+    let from = null
     let name = qm.captures[1].node.text
     let body = qm.captures[0].node.text
     let as = body.match(asRegexp)?.[1]
@@ -91,9 +94,16 @@ export function mapLinkQueryMatches(matches: QueryMatch[]): Array<Link> {
       imports = importsString.trim().split(' & ')
     }
     let isSymbol = name[0] === ":"
-    name = name.replace(/\"|\'|\:/, '') 
+    name = name.replace(/\"|\'|\:/g, '') 
 
-    return { name: name, body: body, as: as, imports: imports, isSymbol: isSymbol, queryMatch: qm } as Link
+    if (isSymbol) {
+      from = qm.captures[0].node.text.match(fromRegexp)?.groups?.from
+    } else {
+      from = name.split('/')[0]
+    }
+    from = from?.replace(/\"|\'|\:/g, '')
+
+    return { name: name, body: body, as: as, from: from, imports: imports, isSymbol: isSymbol, queryMatch: qm } as ILink
   })
 }
 
