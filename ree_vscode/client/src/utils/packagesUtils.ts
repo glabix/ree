@@ -1,9 +1,8 @@
 
 import * as vscode from 'vscode'
-import { PACKAGES_SCHEMA_FILE } from '../core/constants'
 import { getCurrentProjectDir } from './fileUtils'
 import { getProjectRootDir } from './packageUtils'
-import { spawnCommand } from './reeUtils'
+import { execGetReeFileIndex, execGetReeProjectIndex, execGetReePackageIndex, spawnCommand } from './reeUtils'
 
 const path = require('path')
 const fs = require('fs')
@@ -77,11 +76,6 @@ export function getNewProjectIndex() {
       }
     })
   })  
-}
-
-export let cachedPackages: IPackagesSchema | undefined = undefined
-export function setCachedPackages(packagesSchema: IPackagesSchema) {
-  cachedPackages = packagesSchema
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -178,86 +172,12 @@ export function cacheProjectIndex(rootDir: string): Promise<ExecCommand | undefi
   return execGetReeProjectIndex(rootDir)
 }
 
+export function cachePackageIndex(rootDir: string, packageName: string): Promise<ExecCommand | undefined> {
+  return execGetReePackageIndex(rootDir, packageName)
+}
+
 export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecCommand | undefined> {
   return execGetReeFileIndex(rootDir, filePath)
-}
-
-async function execGetReeProjectIndex(rootDir: string): Promise<ExecCommand | undefined> {
-  try {
-    const dockerPresented = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('presented') as boolean
-    const dockerContainerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
-    const dockerAppDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
-
-    if (dockerPresented) { 
-      return spawnCommand([
-        'docker', [
-          'exec',
-          '-i',
-          '-e',
-          'REE_SKIP_ENV_VARS_CHECK=true',
-          '-w',
-          dockerAppDirectory,
-          dockerContainerName,
-          'bundle',
-          'exec',
-          'ree',
-          'gen.index_project'
-        ]
-      ])
-    } else {
-      return spawnCommand([
-        'bundle', [
-          'exec',
-          'ree',
-          'gen.index_project'
-        ],
-        { cwd: rootDir }
-      ])
-    }
-  } catch(e) {
-    console.error(e)
-    return new Promise(() => undefined)
-  }
-}
-
-async function execGetReeFileIndex(rootDir: string, filePath: string): Promise<ExecCommand | undefined> {
-  try {
-    const dockerPresented = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('presented') as boolean
-    const dockerContainerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
-    const dockerAppDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
-
-    if (dockerPresented) { 
-      return spawnCommand([
-        'docker', [
-          'exec',
-          '-i',
-          '-e',
-          'REE_SKIP_ENV_VARS_CHECK=true',
-          '-w',
-          dockerAppDirectory,
-          dockerContainerName,
-          'bundle',
-          'exec',
-          'ree',
-          'gen.index_file',
-          filePath
-        ]
-      ])
-    } else {
-      return spawnCommand([
-        'bundle', [
-          'exec',
-          'ree',
-          'gen.index_file',
-          filePath
-        ],
-        { cwd: rootDir }
-      ])
-    }
-  } catch(e) {
-    console.error(e)
-    return new Promise(() => undefined)
-  }
 }
 
 export function getGemPackageSchemaPath(gemPackageName: string): string | undefined {

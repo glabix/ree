@@ -184,6 +184,10 @@ export function cacheProjectIndex(rootDir: string): Promise<ExecCommand | undefi
   return execGetReeProjectIndex(rootDir)
 }
 
+export function cachePackageIndex(rootDir: string, packageName: string): Promise<ExecCommand | undefined> {
+  return execGetReePackageIndex(rootDir, packageName)
+}
+
 export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecCommand | undefined> {
   return execGetReeFileIndex(rootDir, filePath)
 }
@@ -298,6 +302,44 @@ async function execGetReeFileIndex(rootDir: string, filePath: string): Promise<E
           'ree',
           'gen.index_file',
           filePath
+        ],
+        { cwd: rootDir }
+      ])
+    }
+  } catch(e) {
+    console.error(e)
+    return new Promise(() => undefined)
+  }
+}
+
+async function execGetReePackageIndex(rootDir: string, packageName: string): Promise<ExecCommand | undefined> {
+  try {
+    const {dockerAppDirectory, dockerContainerName, dockerPresented} = getReeVscodeSettings(rootDir)
+
+    if (dockerPresented) { 
+      return spawnCommand([
+        'docker', [
+          'exec',
+          '-i',
+          '-e',
+          'REE_SKIP_ENV_VARS_CHECK=true',
+          '-w',
+          dockerAppDirectory,
+          dockerContainerName,
+          'bundle',
+          'exec',
+          'ree',
+          'gen.index_package',
+          packageName
+        ]
+      ])
+    } else {
+      return spawnCommand([
+        'bundle', [
+          'exec',
+          'ree',
+          'gen.index_package',
+          packageName
         ],
         { cwd: rootDir }
       ])
