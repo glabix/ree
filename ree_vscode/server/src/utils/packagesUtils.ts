@@ -1,6 +1,5 @@
 import { connection } from '..'
-import { PACKAGES_SCHEMA_FILE } from './constants'
-import { getPackageEntryPath, getProjectRootDir } from './packageUtils'
+import { getPackageEntryPath, getProjectRootDir, getPackagesSchemaPath } from './packageUtils'
 import { getReeVscodeSettings } from './reeUtils'
 
 const path = require('path')
@@ -11,9 +10,60 @@ let cachedIndex: ICachedIndex
 let getNewIndexRetryCount: number = 0
 const MAX_GET_INDEX_RETRY_COUNT = 5
 
+let packagesSchemaCtime: number | null = null
+export function getPackagesSchemaCtime(): number | null {
+  return packagesSchemaCtime
+}
+export function setPackagesSchemaCtime(value: number) {
+  packagesSchemaCtime = value
+}
+export function isPackagesSchemaCtimeChanged(): boolean {
+  const root = getCachedProjectRoot()
+  const oldCtime = getPackagesSchemaCtime()
+  const newCtime = fs.statSync(getPackagesSchemaPath(root)).ctimeMs
+  return oldCtime !== newCtime
+}
+
+let packageSchemasCtimes: { [key: string]: number } = {}
+export function getPackageSchemaCtime(packageName: string) {
+  return packageSchemasCtimes[packageName]
+}
+export function setPackageSchemaCtime(packageName: string, ctime: number) {
+  packageSchemasCtimes[packageName] = ctime
+}
+export function isPackageSchemaCtimeChanged(pckg: IPackageSchema): boolean {
+  const root = getCachedProjectRoot()
+  const oldCtime = getPackageSchemaCtime(pckg.name)
+  const pckgSchemaPath = pckg.schema_rpath
+  const newCtime = fs.statSync(path.join(root, pckgSchemaPath)).ctimeMs
+  return oldCtime !== newCtime
+}
+
+let projectRoot: string
+export function getCachedProjectRoot(): string {
+  return projectRoot
+}
+export function setCachedProjectRoot(value: string) {
+  projectRoot = value
+}
+
 export function getCachedIndex(): ICachedIndex {
   if (!cachedIndex || (isCachedIndexIsEmpty())) {
     getNewProjectIndex()
+  }
+
+  if (cachedIndex) {
+    let root = getCachedProjectRoot()
+    if (isPackagesSchemaCtimeChanged()) {
+      calculatePackagesSchemaCtime(root)
+    }
+
+    if (cachedIndex.packages_schema && cachedIndex.packages_schema.packages) {
+      let changedPackages = cachedIndex.packages_schema.packages.filter(p => isPackageSchemaCtimeChanged(p))
+      changedPackages.forEach(p => {
+        calculatePackageSchemaCtime(root, p)
+      })
+    }
   }
 
   return cachedIndex
@@ -39,6 +89,10 @@ export function getNewProjectIndex() {
     if (v) { 
       const folder = v[0]
       const root = url.fileURLToPath(folder.uri)
+      let projectRoot = getProjectRootDir(root)
+      if (projectRoot) {
+        setCachedProjectRoot(projectRoot)
+      }
 
       cacheProjectIndex(root).then(r => {
         try {
@@ -190,6 +244,19 @@ export function cachePackageIndex(rootDir: string, packageName: string): Promise
 
 export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecCommand | undefined> {
   return execGetReeFileIndex(rootDir, filePath)
+}
+
+export function calculatePackagesSchemaCtime(root: string) {
+  const packagesSchemaPath = getPackagesSchemaPath(root)
+  if (packagesSchemaPath) { 
+    setPackagesSchemaCtime(fs.statSync(packagesSchemaPath).ctimeMs)
+  }
+}
+
+export function calculatePackageSchemaCtime(root: string, pckg: IPackageSchema) {
+  let schemaAbsPath = path.join(root, pckg.schema_rpath)
+  let time = fs.statSync(schemaAbsPath).ctimeMs
+  setPackageSchemaCtime(pckg.name, time)
 }
 
 export function getGemPackageSchemaPath(gemPackageName: string): string | undefined {
