@@ -31,22 +31,22 @@ module Ree
               gem_package_hsh[:schema_rpath] = package.schema_rpath
               gem_package_hsh[:entry_rpath] = package.entry_rpath
               gem_package_hsh[:objects] = package.objects.map {
-              {
-                name: _1.name,
-                schema_rpath: _1.schema_rpath,
-                file_rpath: _1.rpath,
-                mount_as: _1.mount_as,
-                methods: map_fn_methods(_1),
-                links: _1.links.sort_by(&:object_name).map { |link|
-                  {
-                    Ree::ObjectSchema::Links::TARGET => link.object_name,
-                    Ree::ObjectSchema::Links::PACKAGE_NAME => link.package_name,
-                    Ree::ObjectSchema::Links::AS => link.as,
-                    Ree::ObjectSchema::Links::IMPORTS => link.constants
+                {
+                  name: _1.name,
+                  schema_rpath: _1.schema_rpath,
+                  file_rpath: _1.rpath,
+                  mount_as: _1.mount_as,
+                  methods: map_fn_methods(_1),
+                  links: _1.links.sort_by(&:object_name).map { |link|
+                    {
+                      Ree::ObjectSchema::Links::TARGET => link.object_name,
+                      Ree::ObjectSchema::Links::PACKAGE_NAME => link.package_name,
+                      Ree::ObjectSchema::Links::AS => link.as,
+                      Ree::ObjectSchema::Links::IMPORTS => link.constants
+                    }
                   }
                 }
               }
-            }
 
               @index_hash[:packages_schema][:gem_packages] << gem_package_hsh
 
@@ -57,28 +57,7 @@ module Ree
               
             facade.load_entire_package(package.name)
 
-            package_hsh = {}
-            package_hsh[:name] = package.name
-            package_hsh[:schema_rpath] = package.schema_rpath
-            package_hsh[:entry_rpath] = package.entry_rpath
-            package_hsh[:tags] = package.tags
-            package_hsh[:objects] = package.objects.map {
-              {
-                name: _1.name,
-                schema_rpath: _1.schema_rpath,
-                file_rpath: _1.rpath,
-                mount_as: _1.mount_as,
-                methods: map_fn_methods(_1),
-                links: _1.links.sort_by(&:object_name).map { |link|
-                  {
-                    Ree::ObjectSchema::Links::TARGET => link.object_name,
-                    Ree::ObjectSchema::Links::PACKAGE_NAME => link.package_name,
-                    Ree::ObjectSchema::Links::AS => link.as,
-                    Ree::ObjectSchema::Links::IMPORTS => link.constants
-                  }
-                }
-              }
-            }
+            package_hsh = Ree::CLI::IndexPackage.send(:map_package_entry, package)
 
             @index_hash[:packages_schema][:packages] << package_hsh
 
@@ -200,67 +179,6 @@ module Ree
             @index_hash[:classes][const_name] ||= []
             @index_hash[:classes][const_name] << hsh
           end
-        end
-
-        def map_fn_methods(object)
-          if !object.fn?
-            return []
-          end
-  
-          klass = object.klass
-      
-          method_decorator = Ree::Contracts.get_method_decorator(
-            klass, :call, scope: :instance
-          )
-      
-          begin
-            if method_decorator.nil?
-              parameters = klass.instance_method(:call).parameters
-      
-              args = parameters.inject({}) do |res, param|
-                res[param.last] = Ree::Contracts::CalledArgsValidator::Arg.new(
-                  param.last, param.first, nil, nil
-                )
-      
-                res
-              end
-            else
-              parameters = method_decorator.args.params
-              args = method_decorator.args.get_args
-            end
-          rescue NameError
-            raise Ree::Error.new("method call is not defined for #{klass}")
-          end
-      
-          arg_list = parameters.map do |param|
-            arg = args[param.last]
-            validator = arg.validator
-            arg_type = arg.type
-      
-            type = if validator
-              validator.to_s
-            else
-              if arg_type == :block
-                "Block"
-              else
-                "Any"
-              end
-            end
-      
-            {
-              Ree::ObjectSchema::Methods::Args::ARG => arg.name,
-              Ree::ObjectSchema::Methods::Args::TYPE => type
-            }
-          end
-      
-          [
-            {
-              Ree::ObjectSchema::Methods::DOC => method_decorator&.doc || "",
-              Ree::ObjectSchema::Methods::THROWS => method_decorator&.errors&.map { _1.name } || [],
-              Ree::ObjectSchema::Methods::RETURN => method_decorator&.contract_definition&.return_contract || "Any",
-              Ree::ObjectSchema::Methods::ARGS => arg_list
-            }
-          ]
         end
       end
     end
