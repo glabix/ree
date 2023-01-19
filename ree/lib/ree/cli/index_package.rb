@@ -14,6 +14,7 @@ module Ree
 
           facade = Ree.container.packages_facade
 
+          package_name = package_name.to_sym
           package = facade.get_loaded_package(package_name)
           package_hsh = map_package_entry(package)
 

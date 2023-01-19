@@ -360,7 +360,7 @@ class ReeCliRunner
       c.example     'ree gen.index_package /app/bc/accounts/commands/create_account_cmd.rb --project_path=/project_dir/', ''
       c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
       c.action do |args, options|
-        package_name = args[0]
+        package_name = args[0]&.to_sym || (raise Ree::Error.new("package name should be provided"))
         options_hash = options.__hash__
 
         if options_hash[:project_path]
