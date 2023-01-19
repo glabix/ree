@@ -49,13 +49,32 @@ export function getCachedIndex(): ICachedIndex {
   if (cachedIndex) {
     let root = getCurrentProjectDir()
     if (isPackagesSchemaCtimeChanged()) {
+      getNewProjectIndex()
       calculatePackagesSchemaCtime(root)
+      return cachedIndex
     }
 
     if (cachedIndex.packages_schema && cachedIndex.packages_schema.packages) {
       let changedPackages = cachedIndex.packages_schema.packages.filter(p => isPackageSchemaCtimeChanged(p))
-      changedPackages.forEach(p => {
-        calculatePackageSchemaCtime(root, p)
+      changedPackages.forEach(pckg => {
+        cachePackageIndex(root, pckg.name).then(r => {
+          try {
+            if (r) {
+              if (r.code === 0) {
+                let newPackageIndex = JSON.parse(r.message) as IPackageSchema    
+                calculatePackageSchemaCtime(root, pckg.name)
+                let refreshedPackages = cachedIndex.packages_schema.packages.filter(p => p.name !== pckg.name)
+                refreshedPackages.push(newPackageIndex)
+                cachedIndex.packages_schema.packages = refreshedPackages
+                setCachedIndex(cachedIndex)
+              } else {
+                vscode.window.showErrorMessage(`GetPackageIndexError: ${r.message}`)
+              }
+            }
+          } catch(e: any) {
+            vscode.window.showErrorMessage(e.toString())
+          }
+        })
       })
     }
   }
@@ -69,7 +88,7 @@ export function setCachedIndex(value: ICachedIndex) {
 
 export function isCachedIndexIsEmpty(): boolean {
   if (!cachedIndex) { return true }
-  if (cachedIndex && Object.keys(cachedIndex).length > 0) { return false }
+  if (cachedIndex && cachedIndex.packages_schema && Object.keys(cachedIndex).length > 0) { return false }
 
   return true
 }
@@ -87,7 +106,7 @@ export function getNewProjectIndex() {
           cachedIndex = JSON.parse(r.message)
           calculatePackagesSchemaCtime(root)
           cachedIndex.packages_schema.packages.forEach(pckg => {
-            calculatePackageSchemaCtime(root, pckg)
+            calculatePackageSchemaCtime(root, pckg.name)
           })
           getNewIndexRetryCount = 0
         } else {
@@ -106,7 +125,7 @@ export function getNewProjectIndex() {
       if (r) {
         if (r.code === 0) {
           const gemPathsArr = r?.message.split("\n")
-          let index = getCachedIndex()
+          let index = cachedIndex
           if (isCachedIndexIsEmpty()) { index ??= <ICachedIndex>{} }
           index.gem_paths ??= {}
 
@@ -235,7 +254,8 @@ export function calculatePackagesSchemaCtime(root: string) {
   }
 }
 
-export function calculatePackageSchemaCtime(root: string, pckg: IPackageSchema) {
+export function calculatePackageSchemaCtime(root: string, packageName: string) {
+  const pckg = cachedIndex.packages_schema.packages.find(p => p.name === packageName)
   let schemaAbsPath = path.join(root, pckg.schema_rpath)
   let time = fs.statSync(schemaAbsPath).ctimeMs
   setPackageSchemaCtime(pckg.name, time)

@@ -10,7 +10,7 @@ import CompletionProvider from './providers/completionProvider'
 import CompletionResolveProvider from './providers/completionResolveProvider'
 import { documents } from './documentManager'
 import { forest } from './forest'
-import { cacheProjectIndex, ICachedIndex, setCachedIndex, cacheGemPaths, getCachedIndex, isCachedIndexIsEmpty } from './utils/packagesUtils'
+import { cacheProjectIndex, ICachedIndex, setCachedIndex, cacheGemPaths, getCachedIndex, isCachedIndexIsEmpty, getNewProjectIndex } from './utils/packagesUtils'
 
 const url = require('url')
 
@@ -52,52 +52,7 @@ export class Server implements ILanguageServer {
 	public setup(): void {
 		this.registerInitializedProviders()
 
-		this.connection.workspace.getWorkspaceFolders().then(v => {
-			return v?.map(folder => folder)
-		}).then(v => {
-			if (v) { 
-				const folder = v[0]
-				const root = url.fileURLToPath(folder.uri) 
-
-				cacheProjectIndex(root).then(r => {
-					try {
-						if (r) {
-							if (r.code === 0) {
-								setCachedIndex(JSON.parse(r.message))
-							} else {
-								this.connection.window.showErrorMessage(`GetProjectIndexError: ${r.message.toString()}`)
-							}
-						}
-					}	catch (e: any) {
-						setCachedIndex(<ICachedIndex>{})
-						this.connection.window.showErrorMessage(e.toString())
-					}
-				}).then(() => {
-					cacheGemPaths(root.toString()).then((r) => {
-						if (r)  {
-							if (r.code === 0) {
-								const gemPathsArr = r?.message.split("\n")
-								let index = getCachedIndex()
-								if (isCachedIndexIsEmpty()) { index ??= <ICachedIndex>{} }
-								index.gem_paths ??= {}
-		
-								gemPathsArr?.map((path) => {
-									let splitedPath = path.split("/")
-									let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
-					
-									index.gem_paths[name] = path
-								})
-
-								setCachedIndex(index)
-							} else {
-								this.connection.window.showErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
-							}
-						}
-
-					})
-				})
-			}
-		})
+		getNewProjectIndex()
 	}
 
 	public shutdown(): void {

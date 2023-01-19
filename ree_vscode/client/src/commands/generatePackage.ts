@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, ExecCommand, spawnCommand } from '../utils/reeUtils'
-import { getCachedIndex, isCachedIndexIsEmpty } from '../utils/packagesUtils'
+import { cachePackageIndex, calculatePackageSchemaCtime, getCachedIndex, IPackageSchema, isCachedIndexIsEmpty, setCachedIndex } from '../utils/packagesUtils'
 import { PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
 
@@ -109,6 +109,25 @@ export function generatePackage() {
     
           if (!fs.existsSync(entryPath)) { return }
           openDocument(entryPath)
+
+          cachePackageIndex(rootProjectDir, name).then(r => {
+            try {
+              if (r) {
+                if (r.code === 0) {
+                  let newPackageIndex = JSON.parse(r.message) as IPackageSchema
+                  calculatePackageSchemaCtime(rootProjectDir, name)
+                  let refreshedPackages = index.packages_schema.packages.filter(p => p.name !== name)
+                  refreshedPackages.push(newPackageIndex)
+                  index.packages_schema.packages = refreshedPackages
+                  setCachedIndex(index)
+                } else {
+                  vscode.window.showErrorMessage(`GetPackageIndexError: ${r.message}`)
+                }
+              }
+            } catch(e: any) {
+              vscode.window.showErrorMessage(e.toString())
+            }
+          })
         })
       })
 

@@ -21,7 +21,8 @@
     "onCommand:ree.generatePackageSchema",
     "onCommand:ree.generatePackagesSchema",
     "onCommand:ree.generateObjectSchema",
-    "onCommand:ree.generatePackage"
+    "onCommand:ree.generatePackage",
+    "onCommand:ree.reindexProject"
   ],
   "main": "./client/out/extension.js",
   "contributes": {
