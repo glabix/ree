@@ -1,13 +1,11 @@
-import { from } from 'rxjs'
-import { Range } from 'vscode'
 import { Location, Hover, MarkupKind } from 'vscode-languageserver'
-import { Position, TextDocument } from 'vscode-languageserver-textdocument'
+import { Position, } from 'vscode-languageserver-textdocument'
 import { Query } from 'web-tree-sitter'
 import { documents } from '../documentManager'
-import { forest, mapLinkQueryMatches, ILink } from '../forest'
-import { getGemPackageSchemaPath, getGemDir, getCachedIndex, IPackagesSchema, IPackageSchema, IGemPackageSchema, IObjectMethod, isCachedIndexIsEmpty } from '../utils/packagesUtils'
+import { forest, mapLinkQueryMatches } from '../forest'
+import { getGemDir, getCachedIndex, IPackageSchema, IGemPackageSchema, IObjectMethod, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { RUBY_EXT } from './constants'
-import { getObjectNameFromPath, getPackageNameFromPath, getProjectRootDir } from './packageUtils'
+import { getPackageNameFromPath, getProjectRootDir } from './packageUtils'
 
 const url = require('node:url')
 const path = require('path')
@@ -151,6 +149,8 @@ export function findLinkedObject(uri: string, token: string, position: Position)
     }
 
     let location = null
+    if (!fs.existsSync(linkedFilePath)) { return ret }
+
     const tokenLocation = findTokenInFile(token, url.pathToFileURL(linkedFilePath))
     if (tokenLocation) {
       location = tokenLocation
