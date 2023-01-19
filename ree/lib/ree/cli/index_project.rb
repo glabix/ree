@@ -36,7 +36,7 @@ module Ree
                   schema_rpath: _1.schema_rpath,
                   file_rpath: _1.rpath,
                   mount_as: _1.mount_as,
-                  methods: map_fn_methods(_1),
+                  methods: Ree::CLI::IndexPackage.send(:map_fn_methods, _1),
                   links: _1.links.sort_by(&:object_name).map { |link|
                     {
                       Ree::ObjectSchema::Links::TARGET => link.object_name,
