@@ -36,6 +36,8 @@ export function isPackageSchemaCtimeChanged(pckg: IPackageSchema): boolean {
   const root = getCurrentProjectDir()
   const oldCtime = getPackageSchemaCtime(pckg.name)
   const pckgSchemaPath = pckg.schema_rpath
+  if (!fs.existsSync(pckgSchemaPath)) { return true }
+
   const newCtime = fs.statSync(path.join(root, pckgSchemaPath)).ctimeMs
   return oldCtime !== newCtime
 }
@@ -61,7 +63,7 @@ export function getCachedIndex(): ICachedIndex {
           try {
             if (r) {
               if (r.code === 0) {
-                let newPackageIndex = JSON.parse(r.message) as IPackageSchema    
+                let newPackageIndex = JSON.parse(r.message) as IPackageSchema
                 calculatePackageSchemaCtime(root, pckg.name)
                 let refreshedPackages = cachedIndex.packages_schema.packages.filter(p => p.name !== pckg.name)
                 refreshedPackages.push(newPackageIndex)
