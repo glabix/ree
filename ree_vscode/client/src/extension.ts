@@ -9,25 +9,25 @@ import {
 } from 'vscode-languageclient/node'
 import { goToPackage } from "./commands/goToPackage"
 import { goToPackageObject } from "./commands/goToPackageObject"
-import { generatePackageSchema } from './commands/generatePackageSchema'
 import { updateStatusBar, statusBarCallbacks } from "./commands/statusBar"
 import { goToSpec } from "./commands/goToSpec"
 import { onCreatePackageFile, onRenamePackageFile } from "./commands/documentTemplates"
 import { isBundleGemsInstalled, isBundleGemsInstalledInDocker } from "./utils/reeUtils"
-import { getCurrentProjectDir } from './utils/fileUtils'
 import { generatePackagesSchema } from "./commands/generatePackagesSchema"
 import { genObjectSchemaCmd, generateObjectSchema } from "./commands/generateObjectSchema"
 import { generatePackage } from "./commands/generatePackage"
 import { getFileFromManager, updatePackageDeps } from './commands/updatePackageDeps'
 import { selectAndGeneratePackageSchema } from './commands/selectAndGeneratePackageSchema'
 import { onDeletePackageFile } from "./commands/deleteObjectSchema"
+import { reindexProject } from "./commands/reindexProject"
+import { getCurrentProjectDir } from './utils/fileUtils'
 import { forest } from './utils/forest'
 import { clearDocumentProblems } from "./utils/documentUtils"
-import { cacheGemPaths, setCachedPackages, parsePackagesSchema, setCachedGems } from "./utils/packagesUtils"
-import { PACKAGES_SCHEMA_FILE } from "./core/constants"
+import { getNewProjectIndex } from "./utils/packagesUtils"
+
 
 const fs = require('fs')
-let client: LanguageClient
+export let client: LanguageClient
 export const diagnosticCollection = vscode.languages.createDiagnosticCollection('ruby')
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -69,6 +69,11 @@ export async function activate(context: vscode.ExtensionContext) {
   let updatePackageDepsCmd = vscode.commands.registerCommand(
     "ree.updatePackageDeps",
     updatePackageDeps
+  )
+
+  let reindexProjectCmd = vscode.commands.registerCommand(
+    "ree.reindexProject",
+    reindexProject
   )
 
   let onDidOpenTextDocument = vscode.workspace.onDidOpenTextDocument(
@@ -134,6 +139,7 @@ export async function activate(context: vscode.ExtensionContext) {
     generateObjectSchemaCmd,
     generatePackageCmd,
     updatePackageDepsCmd,
+    reindexProjectCmd,
     onDidOpenTextDocument,
     onDidChangeActiveTextEditor,
     onDidCreateFiles,
@@ -142,22 +148,9 @@ export async function activate(context: vscode.ExtensionContext) {
   )
 
   let curPath = getCurrentProjectDir()
-  cacheGemPaths(curPath).then((r) => {
-    const gemPathsArr = r?.message.split("\n")
-      gemPathsArr?.map((path) => {
-        let splitedPath = path.split("/")
-        let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
-
-        setCachedGems(name, path)
-      })
-
-      setCachedPackages(
-        parsePackagesSchema(
-          fs.readFileSync(path.join(curPath, PACKAGES_SCHEMA_FILE),{ encoding: 'utf8' }),
-          path.join(curPath, PACKAGES_SCHEMA_FILE)
-        )
-      )
-  })
+  if (curPath) {  
+    getNewProjectIndex()
+  }
 
   if (isBundleGemsInstalled(curPath)) {
     isBundleGemsInstalled(curPath).then((res) => {
@@ -170,7 +163,7 @@ export async function activate(context: vscode.ExtensionContext) {
   if (isBundleGemsInstalledInDocker()) {
     isBundleGemsInstalledInDocker().then((res) => {
       if (res && res.code !== 0) {
-        vscode.window.showWarningMessage(`CheckIsBundleGemInstalledInDockerError: ${res.message}`)
+        vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledInDockerError: ${res.message}`)
       }
     })
   }

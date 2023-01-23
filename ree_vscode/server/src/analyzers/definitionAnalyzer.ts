@@ -4,7 +4,7 @@ import { Query, SyntaxNode, Tree } from 'web-tree-sitter'
 import { connection } from '..'
 import { documents } from '../documentManager'
 import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
-import { getCachedIndex, ICachedIndex } from '../utils/packagesUtils'
+import { getCachedIndex, ICachedIndex, IGemPackageSchema, IIndexedElement, IPackagesSchema, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getLocalePath, getProjectRootDir, Locale, resolveObject } from '../utils/packageUtils'
 import { extractToken, findTokenInFile, findLinkedObject, findMethod } from '../utils/tokenUtils'
 
@@ -38,6 +38,36 @@ export default class DefinitionAnalyzer {
     }
 
     const index = getCachedIndex()
+    if (isCachedIndexIsEmpty()) { 
+      const method = findMethod(documents.get(uri).getText(), token)
+
+      if (method.position) {
+        return [{
+          uri: uri,
+          range: {
+            start: method.position,
+            end: method.position
+          } 
+        }] as Location[]
+      }
+
+      // search in file
+      let locationInFile = findTokenInFile(token, uri)
+      if (!locationInFile) { return [defaultLocation] }
+
+      return [locationInFile]
+    }
+
+    const linkedObject = findLinkedObject(uri, token, position)
+    if (linkedObject.location) {
+      return [{
+        uri: linkedObject.location.uri,
+        range: {
+          start: linkedObject.location.range.start,
+          end: linkedObject.location.range.end
+        } 
+      }] as Location[]
+    }
 
     const tokenNode = findTokenNodeInTree(token, tree, position)
     if (tokenNode) {
@@ -76,25 +106,12 @@ export default class DefinitionAnalyzer {
     }
 
     const method = findMethod(documents.get(uri).getText(), token)
-
     if (method.position) {
       return [{
         uri: uri,
         range: {
           start: method.position,
           end: method.position
-        } 
-      }] as Location[]
-    }
-
-    const linkedObject = findLinkedObject(uri, token, position)
-
-    if (linkedObject.location) {
-      return [{
-        uri: linkedObject.location.uri,
-        range: {
-          start: linkedObject.location.range.start,
-          end: linkedObject.location.range.end
         } 
       }] as Location[]
     }
@@ -164,7 +181,7 @@ export default class DefinitionAnalyzer {
       } else {
         // check if we have assignment node, then check if assignment lhs is same as tokenNode
         const assignmentNode = findParentNodeWithType(node, 'assignment', true)
-        if (assignmentNode) {
+        if (assignmentNode && assignmentNode.type !== 'program') {
           return !!tokenNode?.parent?.text.match(RegExp(`^${assignmentNode?.firstChild?.text}\.`))
         }
       }
@@ -253,10 +270,11 @@ export default class DefinitionAnalyzer {
     return []
   }
 
-  private static findFilteredMethodsFromIndex(token: string, index: ICachedIndex, projectRoot: string, type: keyof ICachedIndex): Location[] {
+  private static findFilteredMethodsFromIndex(token: string, index: ICachedIndex, projectRoot: string, type: ('objects' | 'classes')): Location[] {
     const keys = Object.keys(index[type])
     const allMethods = keys.map(k => {
-      return index[type][k].map(c => {
+      let val: ICachedIndex['objects'] | ICachedIndex['classes'] = index[type]  
+      return val[k].map((c) => {
         let filteredMethods = c.methods.filter(m => m.name === token)
         return filteredMethods.map(m => {
           return {

@@ -1,13 +1,11 @@
-import { Range } from 'vscode'
 import { Location, Hover, MarkupKind } from 'vscode-languageserver'
-import { Position, TextDocument } from 'vscode-languageserver-textdocument'
+import { Position, } from 'vscode-languageserver-textdocument'
 import { Query } from 'web-tree-sitter'
 import { documents } from '../documentManager'
-import { forest } from '../forest'
-import { loadPackagesSchema, getGemPackageSchemaPath, getGemDir, IPackagesSchema } from '../utils/packagesUtils'
-import { IObjectMethod, loadObjectSchema } from './objectUtils'
-import { PackageFacade } from './packageFacade'
-import { getObjectNameFromPath, getPackageNameFromPath, getProjectRootDir } from './packageUtils'
+import { forest, mapLinkQueryMatches } from '../forest'
+import { getGemDir, getCachedIndex, IPackageSchema, IGemPackageSchema, IObjectMethod, isCachedIndexIsEmpty } from '../utils/packagesUtils'
+import { RUBY_EXT } from './constants'
+import { getPackageNameFromPath, getProjectRootDir } from './packageUtils'
 
 const url = require('node:url')
 const path = require('path')
@@ -65,7 +63,6 @@ export interface IArg {
 export interface ILinkedObject {
   linkDef: string,
   method: IObjectMethod | null
-  defLocation: Location
   location: Location
 }
 
@@ -79,134 +76,105 @@ export function findLinkedObject(uri: string, token: string, position: Position)
     return ret
   }
 
+  const index = getCachedIndex()
+  if (isCachedIndexIsEmpty()) { return ret }
+
   const doc = documents.get(uri)
+  let tree = forest.getTree(uri)
+  if (!tree) {
+    tree = forest.createTree(uri, doc.getText())
+  }
 
-  const objectName = getObjectNameFromPath(filePath)
-  if (!objectName) { return ret }
+  // filter that already using
+  const query = tree.getLanguage().query(
+    `(
+      (link
+         link_name: (_) @name) @link
+      (#select-adjacent! @link)
+    ) `
+  ) as Query
 
-  const packagesSchema = loadPackagesSchema(filePath)
+  const linkQueryMatches = query.matches(tree.rootNode)
+  const links = mapLinkQueryMatches(linkQueryMatches)
+
+  const packagesSchema = index.packages_schema
   if (!packagesSchema) { return ret }
 
-  const packageName = getPackageNameFromPath(filePath)
-  if (!packageName) { return ret }
-
-  const pckg = packagesSchema.packages.find(p => p.name === packageName)
-  if (!pckg) { return ret }
+  const currentPackageName = getPackageNameFromPath(filePath)
+  if (!currentPackageName) { return ret }
 
   const projectRootDir = getProjectRootDir(filePath)
   if (!projectRootDir) { return ret }
 
-  const packageFacade = new PackageFacade(path.join(projectRootDir, pckg.schema))
-
-  const object = packageFacade.objects().find(o => o.name === objectName)
-  if (!object) {
-    // maybe we inside object that don't have entry in package.schema, like entity
-    let obj = packageFacade.objects().find(o => o.name.match(RegExp(`${token.replace(/\'|\"|\:/, '')}`)))
-    
-    // maybe it's a constant
-    const constantLocation = findConstant(token, uri, position, doc, packagesSchema, projectRootDir, packageName)
-    if (!constantLocation) { return ret }
-
-    return constantLocation
-  }
-
-  const currentObject = loadObjectSchema(path.join(projectRootDir, object.schema))
-  if (!currentObject) { return ret }
-
-  const link = currentObject.links.find((l) => {
-    return l.target === token || l.as === token || l.imports.includes(token)
+  const link = links.find(l => {
+    return (l.name === token) || (!l.isSymbol && l.name.includes(token)) || (l.as === token) || l.imports.includes(token)
   })
 
-  if (!link) { 
-    // maybe it's a constant
-    const constantLocation = findConstant(token, uri, position, doc, packagesSchema, projectRootDir, packageName)
-    if (!constantLocation) { return ret }
-
-    return constantLocation
-  }
-
   if (link) {
-    const linkRegexp = RegExp(`link\\s+:${link.target}`)
-    let lineNumber = 0
-    let startPos = 0
+    let fromPackage = link.from
+    fromPackage ??= currentPackageName
 
-    doc.getText().split("\n").forEach((s, index) => {
-      if (s.match(linkRegexp)) {
-        lineNumber = index
-        startPos = s.indexOf("link")
-        return
-      }
-    })
+    let linkedPackage: IPackageSchema | IGemPackageSchema | undefined = index.packages_schema.packages.find(p => p.name === fromPackage)
+    let linkedFilePath: string
+    let rootUrl: string | undefined
 
-    let linkDef = ""
-    
-    if (link.target !== link.as) {
-      linkDef = `link :${link.target}, as: :${link.as}, from: :${link.package_name}`
-    } else {
-      linkDef = `link :${link.target}, from: :${link.package_name}`
-    }
-
-    if (link.imports.length) {
-      linkDef = linkDef + ", import: -> {" + link.imports.join(", ") + "}"
-    }
-
-    const linkedPackageName = link.package_name
-    const linkedPackage = packagesSchema.packages.find(p => p.name === linkedPackageName)
-
-    let linkedPackageSchemaPath = null
     if (!linkedPackage) {
-      // check gemPackages
-      const linkedGemPackage = packagesSchema.gemPackages.find(p => p.name === linkedPackageName)
-      if (!linkedGemPackage) { return ret }
-
-      const gemPackageDir = getGemPackageSchemaPath(linkedPackageName)
-      linkedPackageSchemaPath = gemPackageDir
-
-    } else {
-      linkedPackageSchemaPath = path.join(projectRootDir, linkedPackage.schema)
+      // maybe it's a gem
+      linkedPackage = index.packages_schema.gem_packages.find(p => p.name === fromPackage)
+      if (!linkedPackage) { return ret }
     }
 
-    const linkedPackageFacade = new PackageFacade(linkedPackageSchemaPath)
+    let method = null
+    let linkDef = ""
+    rootUrl = ('gem' in linkedPackage) ? getGemDir(linkedPackage.name) : projectRootDir
+    if (link.isSymbol) {
+      let obj = linkedPackage.objects.find(o => o.name === link.name)
+      linkedFilePath = path.join(rootUrl, obj?.file_rpath)
 
-    const linkedObjectSchema = linkedPackageFacade.objects().find(o => o.name === link.target)
-    if (!linkedObjectSchema) { return ret }
+      if (link.as && link.name !== link.as) {
+        linkDef = `link :${link.name}, as: :${link.as}, from: :${fromPackage}`
+      } else {
+        linkDef = `link :${link.name}, from: :${fromPackage}`
+      }
 
-    const linkedObjectRoot = linkedPackage ? projectRootDir : getGemDir(linkedPackageName)
-    if (!linkedObjectRoot) { return ret }
+      if (link.imports.length > 0) {
+        linkDef = linkDef + ", import: -> {" + link.imports.join(", ") + "}"
+      }
 
-    const linkedObject = loadObjectSchema(path.join(linkedObjectRoot, linkedObjectSchema.schema))
-    if (!linkedObject) { return ret }
+      method =  obj?.mount_as === 'fn' ? obj?.methods[0] : null
+    } else {
+      let pathToPckgFiles = linkedPackage.entry_rpath.split("/").slice(0, -1).join("/")
+      let pathToLinkFile = link.name.split("/").slice(1).join("/").concat(RUBY_EXT)
+      linkedFilePath = path.join(rootUrl, pathToPckgFiles, linkedPackage.name, pathToLinkFile)
+    }
+
+    let location = null
+    if (!fs.existsSync(linkedFilePath)) { return ret }
+
+    const tokenLocation = findTokenInFile(token, url.pathToFileURL(linkedFilePath))
+    if (tokenLocation) {
+      location = tokenLocation
+    } else {
+      location = {
+        uri: linkedFilePath,
+        range: {
+          start: {
+            line: 0,
+            character: 0
+          },
+          end: {
+            line: 0,
+            character: 0
+          }
+        }
+      } as Location
+    }
 
     return {
       linkDef: linkDef,
-      method: linkedObject.mount_as === 'fn' ? linkedObject.methods[0] : null,
-      defLocation: {
-        uri: filePath,
-        range: {
-          start: {
-            line: lineNumber,
-            character: startPos,
-          } as Position,
-          end: {
-            line: lineNumber,
-            character: startPos + linkDef.length - 1,
-          } as Position
-        } as Range
-      },
-      location: {
-        uri: path.join(linkedObjectRoot, linkedObject.path),
-        range: {
-          start: {
-            line: 0,
-            character: 0,
-          } as Position,
-          end: {
-            line: 0,
-            character: 0,
-          } as Position
-        } as Range
-      },
-    } as ILinkedObject
+      method: method,
+      location: location
+    }
   }
   
   return ret
@@ -215,111 +183,6 @@ export function findLinkedObject(uri: string, token: string, position: Position)
 export interface ILocalMethod {
   position?: Position
   methodDef?: string
-}
-
-export function findConstant(
-    token: string,
-    uri: string,
-    position: Position,
-    doc: TextDocument,
-    packagesSchema: IPackagesSchema,
-    projectRootDir: string,
-    currentPackageName?: string
-  ): ILinkedObject | undefined {
-  const ret = {} as ILinkedObject
-  let constantTokenLine = findTokenInFile(token, uri)
-  if (!constantTokenLine) { return ret }
-
-  let tree = forest.getTree(uri)
-  if (!tree) {
-    tree = forest.createTree(uri, doc.getText())
-  }
-
-  const query = tree.getLanguage().query(
-    `((link) @link)`
-  ) as Query
-
-  const queryMatches = query.matches(tree.rootNode)
-
-  const queryCaptureLinkWithToken = queryMatches.filter(q => {
-    return q.captures[0].node.text.match(RegExp(`${token}`)) && q.captures[0].node.startPosition.row === position.line
-  })?.[0]
-  if (!queryCaptureLinkWithToken) { return ret }
-
-  const linkText = queryCaptureLinkWithToken.captures[0].node.text
-  if (!linkText) { return ret }
-
-  const linkNameNode = queryCaptureLinkWithToken.captures[0].node.namedChildren[0]
-  if (!linkNameNode) { return ret }
-
-  const linkName = linkNameNode.text
-  const fromRegexp = /from\:\s(?<from>(\:\w+)|((\'|\")\w+(\/\w+)*(\'|\")))/
-  const importRegexp = /(import\:\s)?(?<import>\-\>\s?\{.+\})/
-
-  const fromName = linkText.match(fromRegexp)?.groups?.from
-  const importText = linkText.match(importRegexp)?.groups?.import
-  let constLocation = null
-
-  const isSymbol = linkName.includes(":")
-  let linkPackage = null
-  if (isSymbol) {
-    if (fromName) {
-      linkPackage = packagesSchema.packages.find(p => p.name === fromName.slice(1))   
-    } else {
-      linkPackage = packagesSchema.packages.find(p => p.name === currentPackageName)
-    }
-  }
-  const splittedLinkName = linkName.replace(/\'|\:|\"/g,'').split('/')
-  const packageName = splittedLinkName[0]
-
-  linkPackage ??= packagesSchema.packages.find(p => p.name === packageName)
-
-  let linkedFilePath = null
-  if (!linkPackage) {
-    // maybe it's a gem
-    const gemPackage = packagesSchema.gemPackages.find(p => p.name === packageName)
-    if (!gemPackage) { return ret }
-
-    const gemDir = getGemDir(gemPackage.name)
-    const gemPackageFilePath = `${gemDir}/packages/${gemPackage.name}/package/${gemPackage.name}/${splittedLinkName.slice(1).join('/')}.rb`
-    linkedFilePath = url.pathToFileURL(gemPackageFilePath).toString()
-  } else {
-    const linkPackageFacade = new PackageFacade(path.join(projectRootDir, linkPackage?.schema))
-    if (!linkPackageFacade) { return ret }
-
-    let importLinkPath = null
-    let obj = linkPackageFacade.objects().find(o => o.name === linkName.slice(1))
-    if (obj) {
-      const currentObject = loadObjectSchema(path.join(projectRootDir, obj.schema))
-      importLinkPath = path.join(projectRootDir, currentObject?.path) 
-    } else {
-      const packageRootPath = linkPackageFacade.entryPath().split('/').slice(0, -1).join('/')
-      const importLinkRelativePath = packageRootPath + '/' + linkName.replace(/\'|\:|\"/g,'') + '.rb'
-      importLinkPath = path.join(projectRootDir, importLinkRelativePath)
-    }
-
-    linkedFilePath = url.pathToFileURL(importLinkPath).toString()
-  }
-
-  const tokenLocation = findTokenInFile(token, linkedFilePath)
-  if (tokenLocation) {
-    constLocation = tokenLocation
-  } else {
-    constLocation = {
-      uri: linkedFilePath,
-      range: {
-        start: {
-          line: 0,
-          character: 0
-        },
-        end: {
-          line: 0,
-          character: 0
-        }
-      }
-    } as Location
-  }
-  return { location: constLocation } as ILinkedObject
 }
 
 export function findMethod(doc: string, token: string): ILocalMethod {

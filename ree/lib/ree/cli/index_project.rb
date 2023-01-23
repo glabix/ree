@@ -11,16 +11,55 @@ module Ree
           Ree.init(dir)
 
           @index_hash = {}
+          # completion/etc data
           @index_hash[:classes] = {}
           @index_hash[:objects] = {}
+
+          # schema data
+          @index_hash[:gem_paths] = {}
+          @index_hash[:packages_schema] = {}
+          @index_hash[:packages_schema][:packages] = []
+          @index_hash[:packages_schema][:gem_packages] = []
 
           facade = Ree.container.packages_facade
 
           facade.packages_store.packages.each do |package|
-            next if package.gem?
-            next if package.dir.nil?
+            if package.gem?
+              gem_package_hsh = {}
+              gem_package_hsh[:name] = package.name
+              gem_package_hsh[:gem] = package.gem_name
+              gem_package_hsh[:schema_rpath] = package.schema_rpath
+              gem_package_hsh[:entry_rpath] = package.entry_rpath
+              gem_package_hsh[:objects] = package.objects.map {
+                {
+                  name: _1.name,
+                  schema_rpath: _1.schema_rpath,
+                  file_rpath: _1.rpath,
+                  mount_as: _1.mount_as,
+                  methods: Ree::CLI::IndexPackage.send(:map_fn_methods, _1),
+                  links: _1.links.sort_by(&:object_name).map { |link|
+                    {
+                      Ree::ObjectSchema::Links::TARGET => link.object_name,
+                      Ree::ObjectSchema::Links::PACKAGE_NAME => link.package_name,
+                      Ree::ObjectSchema::Links::AS => link.as,
+                      Ree::ObjectSchema::Links::IMPORTS => link.constants
+                    }
+                  }
+                }
+              }
 
+              @index_hash[:packages_schema][:gem_packages] << gem_package_hsh
+
+              next
+            end
+
+            next if package.dir.nil?
+              
             facade.load_entire_package(package.name)
+
+            package_hsh = Ree::CLI::IndexPackage.send(:map_package_entry, package)
+
+            @index_hash[:packages_schema][:packages] << package_hsh
 
             objects_class_names = package.objects.map(&:class_name)
 

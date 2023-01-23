@@ -1,14 +1,8 @@
 import * as vscode from 'vscode'
-import { getPackageEntryPath, getPackageObjectFromCurrentPath, getProjectRootDir } from '../utils/packageUtils'
-import { loadPackagesSchema } from '../utils/packagesUtils'
-import { PackageFacade } from '../utils/packageFacade'
-import { loadObjectSchema } from '../utils/objectUtils'
 import { forest, mapLinkQueryMatches } from '../utils/forest'
 import { Query } from 'web-tree-sitter'
 import { CompletionItemKind } from 'vscode-languageclient'
 
-const fs = require('fs')
-const path = require('path')
 const TAB_LENGTH = 2
 
 export function updatePackageDeps(
@@ -40,61 +34,6 @@ export function getFileFromManager(filePath: string): Thenable<vscode.TextDocume
   } else {
     return vscode.workspace.openTextDocument(vscode.Uri.parse(filePath)).then((f: vscode.TextDocument) => { return f }) 
   }
-}
-
-function updatePackageDependsOn(currentFile: vscode.TextDocument, fromPackageName: string): Thenable<boolean> {
-  const packageFacade = getPackageObjectFromCurrentPath(currentFile.fileName)
-  if (packageFacade.deps().map(d => d.name).includes(fromPackageName)) { return }
-
-  const packageEntryPath = getPackageEntryPath(currentFile.fileName)
-  const packageFile = getFileFromManager(packageEntryPath)
-
-  return packageFile.then(file => {  
-    const text = file.getText()
-    const textArray = text.split('\n')
-    let dependsOnLine = 0
-    let dependsOnStartPos = 0
-    let dependsOnEndPos = 0
-    let dependsOnStr = `depends_on :${fromPackageName}`
-  
-    let insertLine = 0
-    let insertCharacter = 0
-    
-    let packageDefinitionLine = 0
-    let packageDefinitionStartPos = 0
-    let packageDefinitionEndPos = 0
-    
-    packageDefinitionLine = textArray.findIndex((s) => !!s.match(/package/))
-    packageDefinitionStartPos = textArray[packageDefinitionLine].indexOf('package')
-    packageDefinitionEndPos = textArray[packageDefinitionLine].length
-  
-    let insertStr = ''
-    if (textArray[packageDefinitionLine].match(/\sdo/)) {
-      const isDependsOnPresent = textArray.reverse().some((s, index) => {
-        dependsOnLine = textArray.length - index - 1
-        dependsOnStartPos = s.indexOf('depends')
-        dependsOnEndPos = s.length
-        return !!s.match(/depends_on/)
-      })
-  
-      if (isDependsOnPresent) {
-        insertStr = `\n${' '.repeat(dependsOnStartPos)}${dependsOnStr}`
-        insertLine = dependsOnLine
-        insertCharacter = dependsOnEndPos
-      } else {
-        insertStr = `\n${' '.repeat(packageDefinitionStartPos * TAB_LENGTH)}${dependsOnStr}\n`
-        insertLine = packageDefinitionLine
-        insertCharacter = packageDefinitionEndPos
-      }
-    } else {
-      insertStr = ` do\n${' '.repeat(packageDefinitionStartPos * TAB_LENGTH)}${dependsOnStr}\n${' '.repeat(packageDefinitionStartPos)}end\n`
-      insertLine = packageDefinitionLine
-      insertCharacter = packageDefinitionEndPos
-    }
-  
-  
-    return editDocument(file, insertLine, insertCharacter, insertStr)
-  })
 }
 
 function updateObjectLinks(
@@ -154,7 +93,7 @@ function updateObjectLinks(
       })
       if (!rspecDescribePresent) { return }
   
-      offset = startCharPos == 0 ? (' '.repeat(TAB_LENGTH)) : (' '.repeat(startCharPos + TAB_LENGTH)) 
+      offset = startCharPos === 0 ? (' '.repeat(TAB_LENGTH)) : (' '.repeat(startCharPos + TAB_LENGTH)) 
       linkText = `\n${offset}${linkText}\n`
     } else {
       let firstLink = queryMatches[0].captures[0].node
@@ -167,11 +106,6 @@ function updateObjectLinks(
 
     return editDocument(currentFile, lineNumber, endCharPos, linkText)
   }
-
-  const packagesSchema = loadPackagesSchema(currentFile.fileName)
-  if (!packagesSchema) { return }
-
-  const currentPackage = packagesSchema.packages.find(p => p.name === toPackageName)
 
   const isLinkDslPresent = text.split("\n").some((line, index) => { 
     if (line.match(/include\sRee::LinkDSL/)) {

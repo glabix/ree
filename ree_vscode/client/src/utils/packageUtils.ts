@@ -1,26 +1,9 @@
 import * as vscode from 'vscode'
 import { PACKAGES_SCHEMA_FILE, PACKAGE_DIR, PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { getPackageDir } from './fileUtils'
-import { PackageFacade } from './packageFacade'
 
 const path = require("path")
 const fs = require("fs")
-
-export function getPackageObjectFromCurrentPath(dirname: string): PackageFacade | undefined {
-  let packageSchemaFilePath = path.join(dirname, PACKAGE_SCHEMA_FILE)
-
-  if (fs.existsSync(packageSchemaFilePath)) {
-    return new PackageFacade(packageSchemaFilePath)
-  }
-
-  if (dirname === '/') {
-    return
-  }
-
-  return getPackageObjectFromCurrentPath(
-    path.resolve(dirname, "../")
-  )
-}
 
 export function getPackageNameFromPath(pathToFile: string): string | null {
   const packageSchemaPath = getPackageSchemaPath(

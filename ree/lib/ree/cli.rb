@@ -11,6 +11,7 @@ module Ree
     autoload :GenerateTemplate, 'ree/cli/generate_template'
     autoload :IndexProject, 'ree/cli/index_project'
     autoload :IndexFile, 'ree/cli/index_file'
+    autoload :IndexPackage, 'ree/cli/index_package'
     autoload :SpecRunner, 'ree/cli/spec_runner'
   end
 end

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { PACKAGES_SCHEMA_FILE, PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
-import { IGemPackageSchema, IPackageSchema, loadPackagesSchema, getGemDir } from '../utils/packagesUtils'
+import { IGemPackageSchema, IPackageSchema, getGemDir, getCachedIndex, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getCurrentProjectDir } from '../utils/fileUtils'
 
 var fs = require('fs')
@@ -21,14 +21,17 @@ export function goToPackage() {
     return
   }
 
-  const packagesSchema = loadPackagesSchema(projectPath)
+  const index = getCachedIndex()
+  if (isCachedIndexIsEmpty()) { return }
+
+  const packagesSchema = index.packages_schema
 
   if (!packagesSchema) {
     vscode.window.showErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
     return
   }
 
-  const allPackages = [...packagesSchema.packages, ...packagesSchema.gemPackages] as Array<IPackageSchema | IGemPackageSchema>
+  const allPackages = [...packagesSchema.packages, ...packagesSchema.gem_packages] as Array<IPackageSchema | IGemPackageSchema>
 
   selectPackage(allPackages, (selected: string | undefined) => {
     if (selected === undefined) { return }
@@ -41,7 +44,7 @@ export function goToPackage() {
     if ('gem' in p) {
       projectRoot = getGemDir(p.name)
     }
-    const packageSchemaPath = path.join(projectRoot, p?.schema)
+    const packageSchemaPath = path.join(projectRoot, p?.schema_rpath)
     const entryPath = packageSchemaPath.split(PACKAGE_SCHEMA_FILE)[0] + `package/${p?.name}.rb`
 
     if (!fs.existsSync(entryPath)) {

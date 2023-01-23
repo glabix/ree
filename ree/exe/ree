@@ -334,7 +334,7 @@ class ReeCliRunner
       c.syntax      = 'ree gen.index_file FILE_PATH'
       c.description = 'generate index schema of methods'
       c.summary     = '> ' + c.description
-      c.example     'ree gen.index /app/bc/accounts/commands/create_account_cmd.rb --project_path=/project_dir/', ''
+      c.example     'ree gen.index_file /app/bc/accounts/commands/create_account_cmd.rb --project_path=/project_dir/', ''
       c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
       c.action do |args, options|
         file_path = args[0]
@@ -350,6 +350,29 @@ class ReeCliRunner
         }
 
         puts Ree::CLI::IndexFile.run(**default_options)
+      end
+    end
+
+    command :"gen.index_package" do |c|
+      c.syntax      = 'ree gen.index_package PACKAGE_NAME'
+      c.description = 'generate index for package'
+      c.summary     = '> ' + c.description
+      c.example     'ree gen.index_package /app/bc/accounts/commands/create_account_cmd.rb --project_path=/project_dir/', ''
+      c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
+      c.action do |args, options|
+        package_name = args[0]&.to_sym || (raise Ree::Error.new("package name should be provided"))
+        options_hash = options.__hash__
+
+        if options_hash[:project_path]
+          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
+        end
+
+        default_options = {
+          package_name: package_name,
+          project_path: options_hash[:project_path] || File.expand_path(Dir.pwd)
+        }
+
+        puts Ree::CLI::IndexPackage.run(**default_options)
       end
     end
 

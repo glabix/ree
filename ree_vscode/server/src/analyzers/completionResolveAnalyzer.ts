@@ -1,13 +1,16 @@
 import { CompletionItem, CompletionItemKind, MarkupContent, MarkupKind } from 'vscode-languageserver'
 import { splitArgsType } from '../utils/tokenUtils'
-import { loadObjectSchema, IObject } from '../utils/objectUtils'
+import { getCachedIndex, isCachedIndexIsEmpty, IObject } from '../utils/packagesUtils'
 
 const path = require('path')
 
 export default class CompletionResolveAnalyzer {
 	public static analyze(item: CompletionItem): CompletionItem {
+    const index = getCachedIndex()
+    if (isCachedIndexIsEmpty()) { return item } 
+
     if (item.data) {
-      if (item.kind == CompletionItemKind.Method) {
+      if (item.kind === CompletionItemKind.Method) {
         item.labelDetails = {
           description: `from: ${item.data.fromPackageName}`
         }
@@ -23,12 +26,21 @@ export default class CompletionResolveAnalyzer {
           }]
         }
 
-        const schema = loadObjectSchema(
-          path.join(item.data.projectRootDir, item.data.objectSchema)
-        )
-        if (schema) {
-          item.detail = `mount_as: ${schema.mount_as}`
-          item.documentation = this.buildMethodsDocumentation(schema)
+        const isGem = item.data.isGem
+        let object = null
+        if (isGem) {
+          object = index.packages_schema.packages
+                      .find(p => p.name === item.data.fromPackageName)
+                      ?.objects.find(o => o.name === item.data.label)
+        } else {
+          object = index.packages_schema.gem_packages
+                      .find(p => p.name === item.data.fromPackageName)
+                      ?.objects.find(o => o.name === item.data.label)
+        }
+        
+        if (object) {
+          item.detail = `mount_as: ${object.mount_as}`
+          item.documentation = this.buildMethodsDocumentation(object)
         }
       }
 

@@ -1,83 +1,266 @@
 
 import * as vscode from 'vscode'
-import { PACKAGES_SCHEMA_FILE } from '../core/constants'
-import { getProjectRootDir } from './packageUtils'
-import { spawnCommand } from './reeUtils'
+import { getCurrentProjectDir } from './fileUtils'
+import { getPackagesSchemaPath, getProjectRootDir } from './packageUtils'
+import { execGetReeFileIndex, execGetReeProjectIndex, execGetReePackageIndex, spawnCommand } from './reeUtils'
 
 const path = require('path')
 const fs = require('fs')
+const MAX_GET_INDEX_RETRY_COUNT = 5
 
-export let cachedPackages: IPackagesSchema | undefined = undefined
-export function setCachedPackages(packagesSchema: IPackagesSchema) {
-  cachedPackages = packagesSchema
+let cachedIndex: ICachedIndex
+let getNewIndexRetryCount: number = 0
+
+let packagesSchemaCtime: number | null = null
+export function getPackagesSchemaCtime(): number | null {
+  return packagesSchemaCtime
+}
+export function setPackagesSchemaCtime(value) {
+  packagesSchemaCtime = value
+}
+export function isPackagesSchemaCtimeChanged(): boolean {
+  const root = getCurrentProjectDir()
+  const oldCtime = getPackagesSchemaCtime()
+  const newCtime = fs.statSync(getPackagesSchemaPath(root)).ctimeMs
+  return oldCtime !== newCtime
 }
 
-let packagesCtime: number | null = null
-let cachedGemPackages: Object | null = null
+let packageSchemasCtimes = {}
+export function getPackageSchemaCtime(packageName: string) {
+  return packageSchemasCtimes[packageName]
+}
+export function setPackageSchemaCtime(packageName: string, ctime: number) {
+  packageSchemasCtimes[packageName] = ctime
+}
+export function isPackageSchemaCtimeChanged(pckg: IPackageSchema): boolean {
+  const root = getCurrentProjectDir()
+  const oldCtime = getPackageSchemaCtime(pckg.name)
+  const pckgSchemaPath = pckg.schema_rpath
+  if (!fs.existsSync(pckgSchemaPath)) { return true }
 
-export let cachedGems: ICachedGems = {}
-export function setCachedGems(gemName: string, gemPath: string) {
-  cachedGems[gemName] = gemPath
+  const newCtime = fs.statSync(path.join(root, pckgSchemaPath)).ctimeMs
+  return oldCtime !== newCtime
 }
 
+
+export function getCachedIndex(): ICachedIndex {
+  if (!cachedIndex || (isCachedIndexIsEmpty())) {
+    getNewProjectIndex()
+  }
+
+  if (cachedIndex) {
+    let root = getCurrentProjectDir()
+    if (isPackagesSchemaCtimeChanged()) {
+      getNewProjectIndex()
+      calculatePackagesSchemaCtime(root)
+      return cachedIndex
+    }
+
+    if (cachedIndex.packages_schema && cachedIndex.packages_schema.packages) {
+      let changedPackages = cachedIndex.packages_schema.packages.filter(p => isPackageSchemaCtimeChanged(p))
+      changedPackages.forEach(pckg => {
+        cachePackageIndex(root, pckg.name).then(r => {
+          try {
+            if (r) {
+              if (r.code === 0) {
+                let newPackageIndex = JSON.parse(r.message) as IPackageSchema
+                calculatePackageSchemaCtime(root, pckg.name)
+                let refreshedPackages = cachedIndex.packages_schema.packages.filter(p => p.name !== pckg.name)
+                refreshedPackages.push(newPackageIndex)
+                cachedIndex.packages_schema.packages = refreshedPackages
+                setCachedIndex(cachedIndex)
+              } else {
+                vscode.window.showErrorMessage(`GetPackageIndexError: ${r.message}`)
+              }
+            }
+          } catch(e: any) {
+            vscode.window.showErrorMessage(e.toString())
+          }
+        })
+      })
+    }
+  }
+
+  return cachedIndex
+}
+
+export function setCachedIndex(value: ICachedIndex) {
+  cachedIndex = value
+}
+
+export function isCachedIndexIsEmpty(): boolean {
+  if (!cachedIndex) { return true }
+  if (cachedIndex && cachedIndex.packages_schema && Object.keys(cachedIndex).length > 0) { return false }
+
+  return true
+}
+
+export function getNewProjectIndex() {
+  if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT) { return }
+
+  const root = getCurrentProjectDir()
+  if (!root) { return }
+
+  cacheProjectIndex(root).then(r => {
+    try {
+      if (r) {
+        if (r.code === 0) {
+          cachedIndex = JSON.parse(r.message)
+          calculatePackagesSchemaCtime(root)
+          cachedIndex.packages_schema.packages.forEach(pckg => {
+            calculatePackageSchemaCtime(root, pckg.name)
+          })
+          getNewIndexRetryCount = 0
+        } else {
+          cachedIndex = <ICachedIndex>{}
+          getNewIndexRetryCount += 1
+          vscode.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
+        }
+      }
+    } catch(e: any) {
+      cachedIndex = <ICachedIndex>{}
+      getNewIndexRetryCount += 1
+      vscode.window.showErrorMessage(e.toString())
+    }
+  }).then(() => {
+    cacheGemPaths(root.toString()).then((r) => {
+      if (r) {
+        if (r.code === 0) {
+          const gemPathsArr = r?.message.split("\n")
+          let index = cachedIndex
+          if (isCachedIndexIsEmpty()) { index ??= <ICachedIndex>{} }
+          index.gem_paths ??= {}
+
+          gemPathsArr?.map((path) => {
+            let splitedPath = path.split("/")
+            let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
+    
+            index.gem_paths[name] = path
+          })
+
+          setCachedIndex(index)
+        } else {
+          vscode.window.showErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
+        }
+      }
+    })
+  })  
+}
+
+/* eslint-disable @typescript-eslint/naming-convention */
 interface ExecCommand {
   message: string
   code: number
 }
 
-interface ICachedGems {
+export interface ICachedIndex {
+  classes: {
+    [key: string]: IIndexedElement[]
+  },
+  objects: {
+    [key: string]: IIndexedElement[]
+  },
+  packages_schema: IPackagesSchema,
+  gem_paths: GemPath
+}
+
+interface GemPath {
   [key: string]: string | undefined
 }
 
-interface IPackagesSchema {
+export interface IIndexedElement {
+  path: string,
+  package: string,
+  methods: [
+    {
+      name: string,
+      parameters?: { name: number, required: string }[]
+      location: number
+    }
+  ]
+}
+
+export interface IPackagesSchema {
   packages: IPackageSchema[]
-  gemPackages: IGemPackageSchema[]
+  gem_packages: IGemPackageSchema[]
 }
 
 export interface IPackageSchema {
   name: string
-  schema: string
+  schema_rpath: string
+  entry_rpath: string
+  tags: string[]
+  objects: IObject[]
 }
+
 export interface IGemPackageSchema {
   gem: string
   name: string
-  schema: string
+  schema_rpath: string
+  entry_rpath: string
+  objects: IObject[]
 }
+
+export interface IObject {
+  name: string
+  schema_rpath: string
+  file_rpath: string
+  mount_as: string
+  factory: string | null
+  methods: IObjectMethod[]
+  links: IObjectLink[]
+}
+
+export interface IMethodArg {
+  arg: string
+  type: string
+}
+
+export interface IObjectMethod {
+  doc: string
+  throws: string[]
+  return: String | null
+  args: IMethodArg[]
+}
+
+export interface IObjectLink {
+  target: string,
+  package_name: string,
+  as: string,
+  imports: string[]
+}
+
+/* eslint-enable @typescript-eslint/naming-convention */
+
 
 export function cacheGemPaths(rootDir: string): Promise<ExecCommand | undefined> {
   return execBundlerGetGemPaths(rootDir)
 }
 
-export function loadPackagesSchema(currentPath: string): IPackagesSchema | undefined {
-  const root = getProjectRootDir(currentPath)
-  if (!root) { return }
+export function cacheProjectIndex(rootDir: string): Promise<ExecCommand | undefined> {
+  return execGetReeProjectIndex(rootDir)
+}
 
-  const schemaPath = path.join(root, PACKAGES_SCHEMA_FILE)
-  if (!fs.existsSync(schemaPath)) { return }
+export function cachePackageIndex(rootDir: string, packageName: string): Promise<ExecCommand | undefined> {
+  return execGetReePackageIndex(rootDir, packageName)
+}
 
-  const ctime = fs.statSync(schemaPath).ctimeMs
+export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecCommand | undefined> {
+  return execGetReeFileIndex(rootDir, filePath)
+}
 
-  if (packagesCtime !== ctime || !cachedPackages) {
-    packagesCtime = ctime
-
-    cacheGemPaths(root).then((r) => {
-      const gemPathsArr = r?.message.split("\n")
-      gemPathsArr?.map((path) => {
-        let splitedPath = path.split("/")
-        let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
-
-        setCachedGems(name, path)
-      })
-
-      setCachedPackages(
-        parsePackagesSchema(
-          fs.readFileSync(schemaPath, { encoding: 'utf8' }), root
-        )
-      )
-    })
+export function calculatePackagesSchemaCtime(root: string) {
+  const packagesSchemaPath = getPackagesSchemaPath(root)
+  if (packagesSchemaPath) { 
+    setPackagesSchemaCtime(fs.statSync(packagesSchemaPath).ctimeMs)
   }
+}
 
-  return cachedPackages
+export function calculatePackageSchemaCtime(root: string, packageName: string) {
+  const pckg = cachedIndex.packages_schema.packages.find(p => p.name === packageName)
+  let schemaAbsPath = path.join(root, pckg.schema_rpath)
+  let time = fs.statSync(schemaAbsPath).ctimeMs
+  setPackageSchemaCtime(pckg.name, time)
 }
 
 export function getGemPackageSchemaPath(gemPackageName: string): string | undefined {
@@ -87,50 +270,28 @@ export function getGemPackageSchemaPath(gemPackageName: string): string | undefi
   const gemPackage = getCachedGemPackage(gemPackageName)
   if (!gemPackage) { return }
 
-  return path.join(gemPath, gemPackage.schema)
+  return path.join(gemPath, gemPackage.schema_rpath)
 }
 
 export function getCachedGemPackage(gemPackageName: string): IGemPackageSchema | undefined {
-  if (!cachedPackages) { return }
+  if (!cachedIndex) { return }
 
-  const gemPackage = cachedPackages?.gemPackages.find(p => p.name === gemPackageName)
+  const gemPackage = cachedIndex?.packages_schema.gem_packages.find(p => p.name === gemPackageName)
   if (!gemPackage) { return }
 
   return gemPackage
 }
 
 export function getGemDir(gemPackageName: string): string | undefined {
-  if (!cachedPackages) { return }
+  if (!cachedIndex) { return }
 
-  const gemPackage = cachedPackages?.gemPackages.find(p => p.name === gemPackageName)
+  const gemPackage = cachedIndex?.packages_schema.gem_packages.find(p => p.name === gemPackageName)
   if (!gemPackage) { return }
 
-  const gemDir = cachedGems[gemPackage.gem]
+  const gemDir = cachedIndex.gem_paths[gemPackage.gem]
   if (!gemDir) { return }
 
   return path.join(gemDir.trim(), 'lib', gemPackage.gem)
-}
-
-export function parsePackagesSchema(data: string, rootDir: string) : IPackagesSchema | undefined {
-  try {
-    const schema = JSON.parse(data) as any
-    const obj = {} as IPackagesSchema
-
-    obj.packages = schema.packages.map((p: any) => {
-      return {name: p.name, schema: p.schema} as IPackageSchema
-    })
-
-    obj.gemPackages = schema.gem_packages.map((p: any) => {
-      return {gem: p.gem, name: p.name, schema: p.schema} as IGemPackageSchema
-    })
-
-    // cache gemPackages by gem
-    cachedGemPackages = groupBy(obj.gemPackages, 'gem')
-
-    return obj
-  } catch (err) {
-    return undefined
-  }
 }
 
 async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | undefined> {

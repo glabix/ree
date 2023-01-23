@@ -12,6 +12,7 @@ import log from 'loglevel'
 
 import { ILanguageServer } from './server'
 import TreeSitterFactory from './utils/treeSitterFactory'
+import { getNewProjectIndex } from './utils/packagesUtils'
 
 export const connection: Connection = createConnection(ProposedFeatures.all)
 let server: ILanguageServer
@@ -37,6 +38,12 @@ connection.onInitialized(() => {
 
 connection.onShutdown(() => server.shutdown())
 connection.onExit(() => server.shutdown())
+
+connection.onNotification(
+	"reeLanguageServer/reindex", () => {
+		getNewProjectIndex()
+	}
+)
 
 // Listen on the connection
 connection.listen()

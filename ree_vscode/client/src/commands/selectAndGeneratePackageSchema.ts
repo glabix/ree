@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { PACKAGES_SCHEMA_FILE } from '../core/constants'
-import { IPackageSchema, loadPackagesSchema } from '../utils/packagesUtils'
+import { getCachedIndex, IPackageSchema, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { getPackageNameFromPath } from '../utils/packageUtils'
 import { generatePackageSchema } from './generatePackageSchema'
@@ -28,7 +28,10 @@ export function selectAndGeneratePackageSchema() {
     return
   }
 
-  const packagesSchema = loadPackagesSchema(projectPath)
+  const index = getCachedIndex()
+  if (isCachedIndexIsEmpty()) { return }
+
+  const packagesSchema = index.packages_schema
 
   if (!packagesSchema) {
     vscode.window.showErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
@@ -36,7 +39,8 @@ export function selectAndGeneratePackageSchema() {
   }
 
   const currentPackageName = getPackageNameFromPath(currentFilePath)
-  const allPackageOption = { name: 'All Packages', schema: null }
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const allPackageOption = { name: 'All Packages', schema_rpath: null } as IPackageSchema
 
   const filteredPackages = [
     allPackageOption,
