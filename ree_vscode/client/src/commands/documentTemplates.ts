@@ -66,7 +66,7 @@ export function onRenamePackageFile(filePath: string) {
     content = content.replace(`class ${className}`, `class ${variables.moduleName}::${variables.className}`)
   }
 
-  const mObject = content.match(/(fn|bean|dao|enum|mapper)\s(:[^\s]+).*/)
+  const mObject = content.match(/(fn|bean|async\_bean|dao|enum|mapper)\s(:[^\s]+).*/)
 
   if (mObject && mObject.length > 1) {
     const fn = mObject[1]

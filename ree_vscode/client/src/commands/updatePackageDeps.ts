@@ -142,7 +142,7 @@ function updateObjectLinks(
   if (links.length === 0) {
     // block, don't have links
     const isLinksBlock = text.split('\n').some((line, index) => {
-      let searchIndex = line.search(/(fn|bean|dao|mapper)\s\:[A-Za-z\_]+/)
+      let searchIndex = line.search(/(fn|bean|dao|mapper|async\_bean)\s\:[A-Za-z\_]+/)
       if (searchIndex !== -1) { 
         lineNumber = index
         endCharPos = line.length
