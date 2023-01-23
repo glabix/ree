@@ -257,6 +257,8 @@ export function calculatePackagesSchemaCtime(root: string) {
 }
 
 export function calculatePackageSchemaCtime(root: string, packageName: string) {
+  if (!cachedIndex.packages_schema?.packages) { return }
+
   const pckg = cachedIndex.packages_schema.packages.find(p => p.name === packageName)
   let schemaAbsPath = path.join(root, pckg.schema_rpath)
   let time = fs.statSync(schemaAbsPath).ctimeMs

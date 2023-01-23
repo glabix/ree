@@ -4,3 +4,4 @@ export const PACKAGE_DIR = "package"
 export const RUBY_EXT = '.rb'
 export const SPEC_EXT = '_spec.rb'
 export const SPEC_FOLDER = 'spec'
+export const TAB_LENGTH = 2
