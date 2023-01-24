@@ -113,13 +113,16 @@ module Ree
         private
 
         def index_class(klass, file_name, package_name, root_dir, hash_key)
-          methods = klass
-            .public_instance_methods(false)
-            .reject { _1.match?(/original/) } # remove aliases defined by contracts
-            .map {
+          all_methods = klass.public_instance_methods(false)
+          orig_methods = all_methods.grep(/original/)
+          methods = (all_methods - orig_methods) # remove aliases defined by contracts
+            .map { |m|
+              orig_method_name = orig_methods.find { |om| om.match(/original_#{Regexp.escape(m.name)}_[0-9a-fA-F]+/) }
+              orig_method = orig_method_name ? klass.public_instance_method(orig_method_name) : nil
               {
-                name: _1,
-                location: klass.public_instance_method(_1).source_location&.last,
+                name: m,
+                parameters: orig_method&.parameters&.map { |param| { name: param.last, required: param.first } },
+                location: orig_method&.source_location&.last,
               }
             }
 

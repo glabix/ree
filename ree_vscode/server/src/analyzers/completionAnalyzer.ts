@@ -212,6 +212,7 @@ export default class CompletionAnalyzer {
             label: m.name,
             details: `${snakeToCamelCase(c.package)}`,
             kind: CompletionItemKind.Field,
+            insertText: this.buildMethodInsertString(m)
           } as CompletionItem
         })
       }).flat()
@@ -251,6 +252,7 @@ export default class CompletionAnalyzer {
               label: m.name,
               details: `${snakeToCamelCase(c.package)}`,
               kind: CompletionItemKind.Field,
+              insertText: this.buildMethodInsertString(m)
             } as CompletionItem
           })
         }).flat()
@@ -292,14 +294,6 @@ export default class CompletionAnalyzer {
       return checkParent(node.parent, targetNode)
     }
 
-    const buildMethodInsertString = (method: any): string => {
-      const params = method.parameters
-      if (method.parameters.length > 0) {
-        return `${method.name}(${params.map((p: any) => p.name).join(', ')})`
-      }
-      return method.name
-    }
-
     let identifiersCallQueryMatches = linksQuery.captures(tree.rootNode).filter(e => e.node?.parent?.type === 'call')
     let objectsFromIndexNodes = identifiersCallQueryMatches.filter(e => objects.includes(e.node.text)).map(e => e.node)
 
@@ -322,7 +316,7 @@ export default class CompletionAnalyzer {
               label: m.name,
               details: `${snakeToCamelCase(c.package)}`,
               kind: CompletionItemKind.Method,
-              insertText: buildMethodInsertString(m)
+              insertText: this.buildMethodInsertString(m)
             } as CompletionItem
           })
         }).flat()
@@ -332,6 +326,14 @@ export default class CompletionAnalyzer {
     }
 
     return []
+  }
+
+  private static buildMethodInsertString(method: any): string {
+    const params = method.parameters
+    if (method?.parameters?.length > 0) {
+      return `${method.name}(${params.map((p: any) => p.name).join(', ')})`
+    }
+    return method.name
   }
 }
 
