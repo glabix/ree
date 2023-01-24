@@ -20,7 +20,7 @@ import { getFileFromManager, updatePackageDeps } from './commands/updatePackageD
 import { selectAndGeneratePackageSchema } from './commands/selectAndGeneratePackageSchema'
 import { onDeletePackageFile } from "./commands/deleteObjectSchema"
 import { reindexProject } from "./commands/reindexProject"
-import { getCurrentProjectDir } from './utils/fileUtils'
+import { getCurrentProjectDir, isReeProject } from './utils/fileUtils'
 import { forest } from './utils/forest'
 import { clearDocumentProblems } from "./utils/documentUtils"
 import { getNewProjectIndex } from "./utils/packagesUtils"
@@ -146,6 +146,8 @@ export async function activate(context: vscode.ExtensionContext) {
     onDidRenameFiles,
     onDidDeleteFiles,
   )
+
+  if (!isReeProject()) { return } // register commands, but don't go further
 
   let curPath = getCurrentProjectDir()
   if (curPath) {  

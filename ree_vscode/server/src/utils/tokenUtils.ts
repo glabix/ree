@@ -67,17 +67,17 @@ export interface ILinkedObject {
 }
 
 export function findLinkedObject(uri: string, token: string, position: Position): ILinkedObject  {
-  const ret = {} as ILinkedObject
+  const defaultObject = {} as ILinkedObject
   let filePath = ''
 
   try {
     filePath = url.fileURLToPath(uri)
   } catch {
-    return ret
+    return defaultObject
   }
 
   const index = getCachedIndex()
-  if (isCachedIndexIsEmpty()) { return ret }
+  if (isCachedIndexIsEmpty()) { return defaultObject }
 
   const doc = documents.get(uri)
   let tree = forest.getTree(uri)
@@ -98,13 +98,13 @@ export function findLinkedObject(uri: string, token: string, position: Position)
   const links = mapLinkQueryMatches(linkQueryMatches)
 
   const packagesSchema = index.packages_schema
-  if (!packagesSchema) { return ret }
+  if (!packagesSchema) { return defaultObject }
 
   const currentPackageName = getPackageNameFromPath(filePath)
-  if (!currentPackageName) { return ret }
+  if (!currentPackageName) { return defaultObject }
 
   const projectRootDir = getProjectRootDir(filePath)
-  if (!projectRootDir) { return ret }
+  if (!projectRootDir) { return defaultObject }
 
   const link = links.find(l => {
     return (l.name === token) || (!l.isSymbol && l.name.includes(token)) || (l.as === token) || l.imports.includes(token)
@@ -121,12 +121,14 @@ export function findLinkedObject(uri: string, token: string, position: Position)
     if (!linkedPackage) {
       // maybe it's a gem
       linkedPackage = index.packages_schema.gem_packages.find(p => p.name === fromPackage)
-      if (!linkedPackage) { return ret }
+      if (!linkedPackage) { return defaultObject }
     }
 
     let method = null
     let linkDef = ""
     rootUrl = ('gem' in linkedPackage) ? getGemDir(linkedPackage.name) : projectRootDir
+    if (!rootUrl) { return defaultObject }
+
     if (link.isSymbol) {
       let obj = linkedPackage.objects.find(o => o.name === link.name)
       linkedFilePath = path.join(rootUrl, obj?.file_rpath)
@@ -149,7 +151,7 @@ export function findLinkedObject(uri: string, token: string, position: Position)
     }
 
     let location = null
-    if (!fs.existsSync(linkedFilePath)) { return ret }
+    if (!fs.existsSync(linkedFilePath)) { return defaultObject }
 
     const tokenLocation = findTokenInFile(token, url.pathToFileURL(linkedFilePath))
     if (tokenLocation) {
@@ -177,7 +179,7 @@ export function findLinkedObject(uri: string, token: string, position: Position)
     }
   }
   
-  return ret
+  return defaultObject
 }
 
 export interface ILocalMethod {

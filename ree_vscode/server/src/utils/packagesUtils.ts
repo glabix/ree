@@ -55,7 +55,7 @@ export function getCachedIndex(): ICachedIndex {
     getNewProjectIndex()
   }
 
-  if (cachedIndex) {
+  if (cachedIndex && !isCachedIndexIsEmpty()) {
     let root = getCachedProjectRoot()
     if (isPackagesSchemaCtimeChanged()) {
       getNewProjectIndex()
