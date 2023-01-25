@@ -10,6 +10,7 @@ import { getPackageNameFromPath, getProjectRootDir } from './packageUtils'
 const url = require('node:url')
 const path = require('path')
 const fs = require('fs')
+const ARG_REGEXP_GLOBAL = /((\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(\w*)?(\[(.*?)\])?/g
 
 export function extractToken(uri: string, position: Position): string | undefined {
   const doc = documents.get(uri)
@@ -322,9 +323,7 @@ export function splitArgsType(argType: string): string {
   if (contractMatch && contractMatch.groups.args.split(',')?.length < 2) { return argType } // if we have only one arg and don't need to split
   if (!['Ksplat', 'Kwargs'].includes(contractMatch.groups.contract)) { return argType }
 
-  const argRegexp = /((\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(\w*)?(\[(.*?)\])?/g
-
-  let splittedArgs = contractMatch.groups.args.match(argRegexp)?.join(',\n   ')
+  let splittedArgs = contractMatch.groups.args.match(ARG_REGEXP_GLOBAL)?.join(',\n   ')
   let resultArgs = `${contractMatch.groups.contract}[\n   ${splittedArgs}\n  ]`
   return resultArgs
 }
