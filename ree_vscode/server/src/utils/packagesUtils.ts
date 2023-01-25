@@ -105,7 +105,7 @@ export function isCachedIndexIsEmpty(): boolean {
   return true
 }
 
-export function getNewProjectIndex() {
+export function getNewProjectIndex(showNotification = false) {
   if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT) { return }
 
   connection.workspace.getWorkspaceFolders().then(v => {
@@ -162,6 +162,10 @@ export function getNewProjectIndex() {
             }
           }
         })
+      }).then(() => {
+        if (showNotification) {
+          connection.window.showInformationMessage("SERVER: Reindex is completed!")
+        }
       })
     }
   })

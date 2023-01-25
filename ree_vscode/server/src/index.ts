@@ -42,7 +42,7 @@ connection.onExit(() => server.shutdown())
 
 connection.onNotification(
 	"reeLanguageServer/reindex", () => {
-		getNewProjectIndex()
+		getNewProjectIndex(true)
 	}
 )
 
