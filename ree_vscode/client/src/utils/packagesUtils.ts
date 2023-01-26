@@ -95,7 +95,7 @@ export function isCachedIndexIsEmpty(): boolean {
   return true
 }
 
-export function getNewProjectIndex() {
+export function getNewProjectIndex(showNotification = false) {
   if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT) { return }
 
   const root = getCurrentProjectDir()
@@ -144,7 +144,11 @@ export function getNewProjectIndex() {
         }
       }
     })
-  })  
+  }).then(() => {
+    if (showNotification) {
+      vscode.window.showInformationMessage("CLIENT: Reindex is completed!")
+    }
+  }) 
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */

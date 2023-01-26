@@ -25,6 +25,7 @@ connection.onInitialize(async (params: InitializeParams) => {
 
 	log.info('TreeSitterFactory initialized')
 
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const { Server } = await import('./server')
 	server = new Server(connection, params)
 	server.initialize()
@@ -41,7 +42,7 @@ connection.onExit(() => server.shutdown())
 
 connection.onNotification(
 	"reeLanguageServer/reindex", () => {
-		getNewProjectIndex()
+		getNewProjectIndex(true)
 	}
 )
 

@@ -10,7 +10,7 @@ import CompletionProvider from './providers/completionProvider'
 import CompletionResolveProvider from './providers/completionResolveProvider'
 import { documents } from './documentManager'
 import { forest } from './forest'
-import { cacheProjectIndex, ICachedIndex, setCachedIndex, cacheGemPaths, getCachedIndex, isCachedIndexIsEmpty, getNewProjectIndex } from './utils/packagesUtils'
+import { getNewProjectIndex } from './utils/packagesUtils'
 
 const url = require('url')
 

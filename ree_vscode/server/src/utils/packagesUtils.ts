@@ -7,6 +7,9 @@ const path = require('path')
 const fs = require('fs')
 const url = require('url')
 
+const ARG_REGEXP = /(?<key>(\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(?<value>(\w*)?(\[(.*?)\])?)/
+const ARG_REGEXP_GLOBAL = /(?<key>(\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(?<value>(\w*)?(\[(.*?)\])?)/g
+
 let cachedIndex: ICachedIndex
 let getNewIndexRetryCount: number = 0
 const MAX_GET_INDEX_RETRY_COUNT = 5
@@ -102,7 +105,7 @@ export function isCachedIndexIsEmpty(): boolean {
   return true
 }
 
-export function getNewProjectIndex() {
+export function getNewProjectIndex(showNotification = false) {
   if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT) { return }
 
   connection.workspace.getWorkspaceFolders().then(v => {
@@ -159,6 +162,10 @@ export function getNewProjectIndex() {
             }
           }
         })
+      }).then(() => {
+        if (showNotification) {
+          connection.window.showInformationMessage("SERVER: Reindex is completed!")
+        }
       })
     }
   })
@@ -529,12 +536,59 @@ export function buildObjectArguments(obj: IObject): string {
   if (obj.methods[0]) {
     const method = obj.methods[0]
     if (method.args.length === 0) { return `${obj.name}` }
-    if (method.args.length === 1) { return `${obj.name}(${method.args[0].arg}: _)`}
+    if (method.args.length === 1) { return `${obj.name}(${mapObjectArgument(method.args[0])})`}
 
-    return `${obj.name}(\n${method.args.map(arg => `${' '.repeat(TAB_LENGTH)}${arg.arg}: _`).join(',\n')}\n)`
+    return `${obj.name}(\n${method.args.map(arg => `${' '.repeat(TAB_LENGTH)}${mapObjectArgument(arg)}`).join(',\n')}\n)`
   } else {
     return `${obj.name}`
   }
+}
+
+function getHashArgs(str: string): string {
+  const matches = str.match(/(\{|Ksplat\[)(?<body>.*)(\}|\])/)
+  if (matches?.groups?.body) {
+    const body = matches.groups.body
+    const eachArg = body.match(ARG_REGEXP_GLOBAL)
+    if (!eachArg || eachArg.length === 0) { return str }
+
+    const keyValueMatches = eachArg.map(e => e.match(ARG_REGEXP))
+    if (!keyValueMatches || keyValueMatches.length === 0) { return str }
+
+    const keyValueArrs = keyValueMatches.map(e => [e?.groups?.key?.replace(/\:/, ''), e?.groups?.value])
+    if (keyValueArrs.some(e => e.length === 0)) { return str }
+
+    return `{\n${keyValueArrs.map(e => `${' '.repeat(TAB_LENGTH * 2)}${e[0]}: ${e[1]},\n`).join('')}${' '.repeat(TAB_LENGTH)}}`
+  }
+  return str
+}
+
+function mapObjectArgument(arg: IMethodArg): string {
+  const basicTypes = [
+    'Date', 'Time', 'Numeric',
+    'String', 'FalseClass', 'TrueClass',
+    'NilClass', 'Symbol', 'Module', 'Class', 'Hash'
+  ]
+
+  const index = getCachedIndex()
+
+  if (basicTypes.includes(arg.type) || arg.type.startsWith('ArrayOf')) { return arg.arg }
+  if (
+    (arg.type.startsWith("{") && arg.type.endsWith("}")) ||
+    (arg.type.startsWith("Ksplat[") && arg.type.endsWith("]"))
+  ){
+    return getHashArgs(arg.type)
+  }
+
+  if (arg.type === "Block") { return `&${arg.arg}`}
+  if (arg.type.startsWith("SplatOf")) { return `*${arg.arg}`}
+
+  if (index && !isCachedIndexIsEmpty()) {
+    if (index.classes && Object.keys(index.classes).includes(arg.type)) {
+      return arg.arg
+    }
+  }
+
+  return arg.arg
 }
 
 function groupBy(data: Array<any>, key: string) {
