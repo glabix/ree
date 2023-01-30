@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ree_lib (1.0.28)
+    ree_lib (1.0.29)
       binding_of_caller (~> 1.0.0)
       i18n (~> 1.12.0)
       loofah (~> 2.18.0)
@@ -22,7 +22,7 @@ GEM
       msgpack (~> 1.2)
     commander (4.6.0)
       highline (~> 2.0.0)
-    concurrent-ruby (1.1.10)
+    concurrent-ruby (1.2.0)
     crack (0.4.5)
       rexml
     crass (1.0.6)
@@ -36,9 +36,9 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     msgpack (1.6.0)
-    nokogiri (1.13.10-x86_64-darwin)
+    nokogiri (1.14.0-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.13.10-x86_64-linux)
+    nokogiri (1.14.0-x86_64-linux)
       racc (~> 1.4)
     oj (3.13.23)
     pg (1.4.5)
@@ -46,7 +46,7 @@ GEM
     racc (1.6.2)
     rainbow (3.1.1)
     rake (13.0.6)
-    ree (1.0.14)
+    ree (1.0.18)
       commander (~> 4.6.0)
     rexml (3.2.5)
     rollbar (3.3.3)
@@ -66,7 +66,7 @@ GEM
     sequel (5.58.0)
     sqlite3 (1.4.4)
     timecop (0.9.6)
-    tzinfo (2.0.5)
+    tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     webmock (3.18.1)
       addressable (>= 2.8.0)
