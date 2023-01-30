@@ -13,6 +13,7 @@ class ReeDao::BuildSqliteConnection
       database: String,
       readonly?: Bool,
       timeout?: Integer,
+      max_connections?: Integer,
     },
     Ksplat[
       RestKeys => Any # inherited from `build_connection` opts
