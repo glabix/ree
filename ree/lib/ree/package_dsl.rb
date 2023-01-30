@@ -15,7 +15,10 @@ module Ree::PackageDSL
         Ree.container.packages_facade, self
       )
 
-      dsl.instance_exec(&proc) if block_given?
+      if block_given?
+        dsl.instance_exec(&proc)
+        dsl.load_dependent_packages
+      end
 
       return if dsl.package.preloaded?
       dsl.package.set_preloaded(true)

@@ -52,6 +52,12 @@ class Ree::BuildPackageDsl
     package_dep
   end
 
+  def load_dependent_packages
+    @package.deps.each do |dep|
+      @packages_facade.load_package_entry(dep.name)
+    end
+  end
+
   # @param [Proc] block
   def default_links(&block)
     raise Ree::Error.new("block missing") if !block_given?
