@@ -158,7 +158,7 @@ class Ree::ObjectDsl
     check_package_dependency_added(package_name)
 
     @packages_facade.load_package_entry(package_name)
-    package = @packages_facade.get_package(package_name)
+    package = @packages_facade.get_loaded_package(package_name)
 
     file_path = File.join(
       Ree::PathHelper.abs_package_dir(package),
@@ -250,7 +250,7 @@ class Ree::ObjectDsl
       raise Ree::Error.new(":#{object_name} does not correspond to class name #{list.last}. Change object name to '#{auto_object_name}' or change name of the class", :invalid_dsl_usage)
     end
 
-    package = @packages_facade.get_package(package_name)
+    package = @packages_facade.get_loaded_package(package_name)
     object = package.get_object(object_name)
 
     object_rpath = if !Ree.irb_mode?
