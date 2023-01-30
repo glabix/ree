@@ -47,8 +47,6 @@ class Ree::BuildPackageDsl
       raise_error("Dependent package :#{depends_on} was not found in #{Ree::PACKAGES_SCHEMA_FILE}. Run `ree gen.packages_json` to update schema or fix package name")
     end
 
-    @packages_facade.load_package_entry(dep_package.name)
-
     package_dep
   end
 
