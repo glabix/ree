@@ -25,6 +25,7 @@ class ReeDao::BuildPgConnection
       sslrootcert?: String,
       search_path?: String,
       use_iso_date_format?: Bool,
+      max_connections?: Integer,
     },
     Ksplat[
       RestKeys => Any # inherited from `build_connection` opts
