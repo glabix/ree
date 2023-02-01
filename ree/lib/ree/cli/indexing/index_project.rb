@@ -56,7 +56,7 @@ module Ree
               
             facade.load_entire_package(package.name)
 
-            package_hsh = Ree::CLI::IndexPackage.send(:map_package_entry, package)
+            package_hsh = Ree::CLI::IndexPackage.send(:index_package_entry, package)
 
             index_hash[:packages_schema][:packages] << package_hsh
 
