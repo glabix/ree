@@ -24,7 +24,7 @@ module Ree
           package_hsh = map_package_entry(package)
 
           hsh[:package_schema] = package_hsh
-          hsh = map_package_files(package, hsh)
+          hsh = map_package_files(package, dir, hsh)
 
           JSON.pretty_generate(hsh)
         end
@@ -119,8 +119,8 @@ module Ree
           ]
         end
 
-        def map_package_files(package, index_hash)
-          Ree::CLI::IndexProject.send(:index_package_files, package, index_hash)
+        def map_package_files(package, dir, index_hash)
+          Ree::CLI::IndexProject.send(:index_package_files, package, dir, index_hash)
         end
       end
     end

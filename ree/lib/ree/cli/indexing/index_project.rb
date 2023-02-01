@@ -60,7 +60,7 @@ module Ree
 
             index_hash[:packages_schema][:packages] << package_hsh
 
-            index_hash = index_package_files(package, index_hash)
+            index_hash = index_package_files(package, dir, index_hash)
           end
 
           if facade.get_package(:ree_errors, false)
@@ -72,7 +72,7 @@ module Ree
 
         private
 
-        def index_package_files(package, index_hash)
+        def index_package_files(package, dir, index_hash)
           objects_class_names = package.objects.map(&:class_name)
 
           files = Dir[
