@@ -10,16 +10,15 @@ module Ree
 
           Ree.init(dir)
 
-          @index_hash = {}
+          index_hash = {}
           # completion/etc data
-          @index_hash[:classes] = {}
-          @index_hash[:objects] = {}
+          index_hash[:classes] = {}
+          index_hash[:objects] = {}
 
           # schema data
-          @index_hash[:gem_paths] = {}
-          @index_hash[:packages_schema] = {}
-          @index_hash[:packages_schema][:packages] = []
-          @index_hash[:packages_schema][:gem_packages] = []
+          index_hash[:packages_schema] = {}
+          index_hash[:packages_schema][:packages] = []
+          index_hash[:packages_schema][:gem_packages] = []
 
           facade = Ree.container.packages_facade
 
@@ -48,7 +47,7 @@ module Ree
                 }
               }
 
-              @index_hash[:packages_schema][:gem_packages] << gem_package_hsh
+              index_hash[:packages_schema][:gem_packages] << gem_package_hsh
 
               next
             end
@@ -59,58 +58,73 @@ module Ree
 
             package_hsh = Ree::CLI::IndexPackage.send(:map_package_entry, package)
 
-            @index_hash[:packages_schema][:packages] << package_hsh
+            index_hash[:packages_schema][:packages] << package_hsh
 
-            objects_class_names = package.objects.map(&:class_name)
-
-            files = Dir[
-              File.join(
-                Ree::PathHelper.abs_package_module_dir(package), '**/*.rb'
-              )
-            ]
-
-            files.each do |file_name|
-              begin
-                const_string_from_file_name = Ree::StringUtils.camelize(file_name.split('/')[-1].split('.rb')[0])
-                const_string_with_module = "#{package.module}::#{const_string_from_file_name}"
-                klass = Object.const_get(const_string_with_module)
-
-                if klass.include?(ReeEnum::DSL)
-                  index_enum(klass, file_name, package.name, dir, const_string_from_file_name)
-
-                  next
-                end
-
-                if klass.include?(ReeDao::DSL)
-                  index_dao(klass, file_name, package.name, dir, const_string_from_file_name)
-                  next
-                end
-
-                if klass.include?(ReeMapper::DSL)
-                  # TODO
-                  next
-                end
-
-                if !objects_class_names.include?(const_string_with_module)
-                  index_class(klass, file_name, package.name, dir, const_string_from_file_name)
-
-                  next
-                end
-              rescue NameError
-                next
-              end
-            end
+            index_hash = index_package_files(package, index_hash)
           end
 
           if facade.get_package(:ree_errors, false)
-            index_exceptions(facade.get_package(:ree_errors))
+            index_hash = index_exceptions(facade.get_package(:ree_errors), index_hash)
           end
-          
 
-          JSON.pretty_generate(@index_hash)
+          JSON.pretty_generate(index_hash)
         end
 
         private
+
+        def index_package_files(package, index_hash)
+          objects_class_names = package.objects.map(&:class_name)
+
+          files = Dir[
+            File.join(
+              Ree::PathHelper.abs_package_module_dir(package), '**/*.rb'
+            )
+          ]
+
+          files.each do |file_name|
+            begin
+              const_string_from_file_name = Ree::StringUtils.camelize(file_name.split('/')[-1].split('.rb')[0])
+              const_string_with_module = "#{package.module}::#{const_string_from_file_name}"
+              klass = Object.const_get(const_string_with_module)
+
+              if klass.include?(ReeEnum::DSL)
+                hsh = index_enum(klass, file_name, package.name, dir, const_string_from_file_name)
+                hash_key = const_string_from_file_name
+                index_hash[:classes][hash_key] ||= []
+                index_hash[:classes][hash_key] << hsh
+
+                next
+              end
+
+              if klass.include?(ReeDao::DSL)
+                hsh = index_dao(klass, file_name, package.name, dir, const_string_from_file_name)
+                obj_name_key = Ree::StringUtils.underscore(const_string_from_file_name)
+                index_hash[:objects][obj_name_key] ||= []
+                index_hash[:objects][obj_name_key] << hsh
+
+                next
+              end
+
+              if klass.include?(ReeMapper::DSL)
+                # TODO
+                next
+              end
+
+              if !objects_class_names.include?(const_string_with_module)
+                hsh = index_class(klass, file_name, package.name, dir, const_string_from_file_name)
+                hash_key = const_string_from_file_name
+                index_hash[:classes][hash_key] ||= []
+                index_hash[:classes][hash_key] << hsh
+
+                next
+              end
+            rescue NameError
+              next
+            end
+          end
+
+          index_hash
+        end
 
         def index_class(klass, file_name, package_name, root_dir, hash_key)
           all_methods = klass.public_instance_methods(false)
@@ -127,14 +141,12 @@ module Ree
             }
 
           rpath_from_root_file_path = Pathname.new(file_name).relative_path_from(Pathname.new(root_dir)).to_s
-          hsh = {
+
+          {
             path: rpath_from_root_file_path,
             package: package_name,
             methods: methods
           }
-
-          @index_hash[:classes][hash_key] ||= []
-          @index_hash[:classes][hash_key] << hsh
         end
 
         def index_enum(klass, file_name, package_name, root_dir, hash_key)
@@ -152,20 +164,16 @@ module Ree
               }
             }
 
-          obj_name_key = Ree::StringUtils.underscore(hash_key)
           rpath_from_root_file_path = Pathname.new(file_name).relative_path_from(Pathname.new(root_dir)).to_s
 
-          hsh = {
+          {
             path: rpath_from_root_file_path,
             package: package_name,
             methods: filters
           }
-
-          @index_hash[:objects][obj_name_key] ||= []
-          @index_hash[:objects][obj_name_key] << hsh
         end
 
-        def index_exceptions(errors_package)
+        def index_exceptions(errors_package, index_hash)
           errors_package.objects.each do |obj|
             const_name = obj.class_name.split("::")[-1]
             file_name = File.join(
@@ -179,9 +187,11 @@ module Ree
               methods: []
             }
 
-            @index_hash[:classes][const_name] ||= []
-            @index_hash[:classes][const_name] << hsh
+            index_hash[:classes][const_name] ||= []
+            index_hash[:classes][const_name] << hsh
           end
+
+          index_hash
         end
       end
     end
