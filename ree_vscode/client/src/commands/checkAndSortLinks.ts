@@ -25,7 +25,8 @@ export function checkAndSortLinks(filePath: string) {
 
   const offset = ' '.repeat(queryMatches[0].captures[0].node.startPosition.column)
   const firstLinkLineNumber = queryMatches[0].captures[0].node.startPosition.row
-  const links = mapLinkQueryMatches(queryMatches)
+  const filteredQueryMatches = queryMatches.filter(m => m.captures[0].node.parent.equals(queryMatches[0].captures[0].node.parent))
+  const links = mapLinkQueryMatches(filteredQueryMatches)
 
   const content = file.split("\n")
   if (links.length === 0) { return }
@@ -140,7 +141,7 @@ export function checkAndSortLinks(filePath: string) {
 
   content.splice(
     firstLinkLineNumber,
-    queryMatches.slice(-1)[0].captures[0].node.endPosition.row - queryMatches[0].captures[0].node.startPosition.row + 1
+    filteredQueryMatches.slice(-1)[0].captures[0].node.endPosition.row - filteredQueryMatches[0].captures[0].node.startPosition.row + 1
   )
   content.splice(firstLinkLineNumber, 0, ...sortedWithOffset)
   const data = content.join("\n")
