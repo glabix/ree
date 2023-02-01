@@ -227,4 +227,38 @@ RSpec.describe :build_sqlite_connection do
       expect(dao.count).to eq(1)
     }
   end
+
+  context "update with condition" do
+    it {
+      dao.delete_all
+
+      user = ReeDaoTest::User.new(name: 'John', age: 30)
+      other_user = ReeDaoTest::User.new(name: 'Steve', age: 30)
+      dao.put(user)
+      dao.put(other_user)
+
+      dao.where(name: 'John').update(name: 'Doe')
+
+      user = dao.find(user.id)
+      other_user = dao.find(other_user.id)
+      expect(user.name).to eq('Doe')
+      expect(other_user.name).to eq('Steve')
+    }
+  end
+
+  context "uodate with entity" do
+    it {
+      dao.delete_all
+
+      user = ReeDaoTest::User.new(name: 'John', age: 30)
+      dao.put(user)
+
+      user.name = 'Doe'
+
+      dao.where(name: 'John').update(user)
+
+      user = dao.find(user.id)
+      expect(user.name).to eq('Doe')
+    }
+  end
 end
