@@ -24,10 +24,32 @@ export function currentTimeStamp(): string {
   return new Date().toISOString()
 }
 
-export function logDebugClientMessage(message: string) {
-  debugOutputClientChannel.appendLine(`[CLIENT][${currentTimeStamp()}] ${message}`)
+enum LogLevel {
+  info = 'INFO',
+  warn = 'WARN',
+  error = 'ERROR'
+}
+
+export function buildLogMessage(message: string, level: LogLevel): string {
+  return `[${level}][${currentTimeStamp()}] ${message}`
+}
+
+export function logInfoMessage(message: string) {
+  logDebugClientMessage(message, LogLevel.info)
+}
+
+export function logWarnMessage(message: string) {
+  logDebugClientMessage(message, LogLevel.warn)
+}
+
+export function logErrorMessage(message: string) {
+  logDebugClientMessage(message, LogLevel.error)
+}
+
+export function logDebugClientMessage(message: string, level: LogLevel) {
+  debugOutputClientChannel.appendLine(buildLogMessage(message, level))
 }
 
 export function logDebugServerMessage(message: string) {
-  debugOutputServerChannel.appendLine(`[SERVER]${message}`)
+  debugOutputServerChannel.appendLine(`${message}`)
 }

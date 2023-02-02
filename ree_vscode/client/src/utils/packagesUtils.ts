@@ -3,7 +3,7 @@ import * as vscode from 'vscode'
 import { getCurrentProjectDir } from './fileUtils'
 import { getPackagesSchemaPath, getProjectRootDir } from './packageUtils'
 import { execGetReeFileIndex, execGetReeProjectIndex, execGetReePackageIndex, spawnCommand } from './reeUtils'
-import { logDebugClientMessage } from './stringUtils'
+import { logDebugClientMessage, logErrorMessage, logInfoMessage, logWarnMessage } from './stringUtils'
 
 const path = require('path')
 const fs = require('fs')
@@ -52,7 +52,7 @@ export function getCachedIndex(): ICachedIndex {
   if (cachedIndex) {
     let root = getCurrentProjectDir()
     if (isPackagesSchemaCtimeChanged()) {
-      logDebugClientMessage('Packages.schema.json is changed')
+      logInfoMessage('Packages.schema.json is changed')
       getNewProjectIndex()
       calculatePackagesSchemaCtime(root)
       return cachedIndex
@@ -61,8 +61,8 @@ export function getCachedIndex(): ICachedIndex {
     if (cachedIndex.packages_schema && cachedIndex.packages_schema.packages) {
       let changedPackages = cachedIndex.packages_schema.packages.filter(p => isPackageSchemaCtimeChanged(p))
       if (changedPackages.length > 0) {
-        logDebugClientMessage('Some packages schemas is changed')
-        changedPackages.forEach(p => logDebugClientMessage(`Package ${p.name} schema is changed`))
+        logInfoMessage('Some packages schemas is changed')
+        changedPackages.forEach(p => logInfoMessage(`Package ${p.name} schema is changed`))
       }
       changedPackages.forEach(pckg => {
         cachePackageIndex(root, pckg.name).then(r => {
@@ -70,13 +70,13 @@ export function getCachedIndex(): ICachedIndex {
             if (r) {
               if (r.code === 0) {
                 let newPackageIndex = JSON.parse(r.message) as IPackageSchema
-                logDebugClientMessage(`Got Package index for ${pckg.name}`)
+                logInfoMessage(`Got Package index for ${pckg.name}`)
                 calculatePackageSchemaCtime(root, pckg.name)
                 let refreshedPackages = cachedIndex.packages_schema.packages.filter(p => p.name !== pckg.name)
                 refreshedPackages.push(newPackageIndex)
                 cachedIndex.packages_schema.packages = refreshedPackages
               } else {
-                vscode.window.showErrorMessage(`GetPackageIndexError: ${r.message}`)
+                logErrorMessage(`GetPackageIndexError: ${r.message}`)
               }
             }
           } catch(e: any) {
@@ -103,7 +103,7 @@ export function isCachedIndexIsEmpty(): boolean {
 
 export function getNewProjectIndex(manual = false, showNotification = false) {
   if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT && !manual) { 
-    logDebugClientMessage('getNewProjectIndex reached max limit')
+    logWarnMessage('getNewProjectIndex reached max limit')
     return
   }
 
@@ -119,22 +119,22 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
           cachedIndex.packages_schema.packages.forEach(pckg => {
             calculatePackageSchemaCtime(root, pckg.name)
           })
-          logDebugClientMessage('Got new Project Index')
+          logInfoMessage('Got new Project Index')
           getNewIndexRetryCount = 0
         } else {
-          logDebugClientMessage('Got error code when getting new Project index')
+          logErrorMessage('Got error code when getting new Project index')
           if (isCachedIndexIsEmpty()) {
-            logDebugClientMessage('Index is empty, set as empty object')
+            logInfoMessage('Index is empty, set as empty object')
             cachedIndex = <ICachedIndex>{}
           }
           getNewIndexRetryCount += 1
-          vscode.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
+          logErrorMessage(`GetProjectIndexError: ${r.message}`)
         }
       }
     } catch(e: any) {
-      logDebugClientMessage('Catched some error when tried to get new Project index')
+      logErrorMessage('Catched some error when tried to get new Project index')
       if (isCachedIndexIsEmpty()) {
-        logDebugClientMessage('Index is empty, set as empty object')
+        logInfoMessage('Index is empty, set as empty object')
         cachedIndex = <ICachedIndex>{}
       }
       getNewIndexRetryCount += 1
@@ -144,10 +144,10 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
     cacheGemPaths(root.toString()).then((r) => {
       if (r) {
         if (r.code === 0) {
-          logDebugClientMessage('Got Gem Paths')
+          logInfoMessage('Got Gem Paths')
           const gemPathsArr = r?.message.split("\n")
           if (isCachedIndexIsEmpty()) {
-            logDebugClientMessage('Index is empty, set as empty object')
+            logInfoMessage('Index is empty, set as empty object')
             cachedIndex ??= <ICachedIndex>{}
           }
           cachedIndex.gem_paths ??= {}
@@ -158,7 +158,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
     
             cachedIndex.gem_paths[name] = path
           })
-          logDebugClientMessage('Gem Paths setted')
+          logInfoMessage('Gem Paths setted')
         } else {
           vscode.window.showErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
         }
@@ -274,16 +274,16 @@ export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecC
 }
 
 export function calculatePackagesSchemaCtime(root: string) {
-  logDebugClientMessage('Trying to recalculate Packages.schema.json ctime')
+  logInfoMessage('Trying to recalculate Packages.schema.json ctime')
   const packagesSchemaPath = getPackagesSchemaPath(root)
   if (packagesSchemaPath) { 
-    logDebugClientMessage('Packages.schema.json ctime recalculated')
+    logInfoMessage('Packages.schema.json ctime recalculated')
     setPackagesSchemaCtime(fs.statSync(packagesSchemaPath).ctimeMs)
   }
 }
 
 export function calculatePackageSchemaCtime(root: string, packageName: string) {
-  logDebugClientMessage(`Trying to recalculate Package.schema.json for ${packageName}`)
+  logInfoMessage(`Trying to recalculate Package.schema.json for ${packageName}`)
   if (!cachedIndex.packages_schema?.packages) { return }
 
   const pckg = cachedIndex.packages_schema.packages.find(p => p.name === packageName)
@@ -291,7 +291,7 @@ export function calculatePackageSchemaCtime(root: string, packageName: string) {
 
   let schemaAbsPath = path.join(root, pckg.schema_rpath)
   let time = fs.statSync(schemaAbsPath).ctimeMs
-  logDebugClientMessage(`Package.schema.json for ${packageName} recalculated`)
+  logInfoMessage(`Package.schema.json for ${packageName} recalculated`)
   setPackageSchemaCtime(pckg.name, time)
 }
 

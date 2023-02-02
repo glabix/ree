@@ -6,7 +6,7 @@ import { QueryMatch, Query, SyntaxNode, Tree, QueryCapture } from 'web-tree-sitt
 import { getCachedIndex, getGemDir, IPackagesSchema, ICachedIndex, isCachedIndexIsEmpty, IObject, buildObjectArguments } from '../utils/packagesUtils'
 import { getPackageNameFromPath, getProjectRootDir, getObjectNameFromPath } from '../utils/packageUtils'
 import { extractToken } from '../utils/tokenUtils'
-import { sendDebugServerLogToClient, snakeToCamelCase } from '../utils/stringUtils'
+import { logInfoMessage, LogLevel, sendDebugServerLogToClient, snakeToCamelCase } from '../utils/stringUtils'
 
 const fs = require('fs')
 const url = require('node:url')
@@ -27,10 +27,9 @@ export default class CompletionAnalyzer {
       return defaultCompletion
     }
 
-    sendDebugServerLogToClient('Getting index in completionAnalyzer')
     const index = getCachedIndex()
     if (isCachedIndexIsEmpty()) {
-      sendDebugServerLogToClient('Index is empty in completionAnalyzer')
+      logInfoMessage('Index is empty in completionAnalyzer')
       return defaultCompletion
     } 
 

@@ -5,7 +5,7 @@ import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, E
 import { cachePackageIndex, calculatePackageSchemaCtime, getCachedIndex, IPackageSchema, isCachedIndexIsEmpty, setCachedIndex } from '../utils/packagesUtils'
 import { PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
-import { logDebugClientMessage } from '../utils/stringUtils'
+import { logDebugClientMessage, logInfoMessage } from '../utils/stringUtils'
 
 const fs = require('fs')
 const path = require('path')
@@ -19,10 +19,9 @@ export function generatePackage() {
   const rootProjectDir = getCurrentProjectDir()
   if (!rootProjectDir) { return }
 
-  logDebugClientMessage('Getting index in generatePackage Command')
   const index = getCachedIndex()
   if (isCachedIndexIsEmpty()) {
-    logDebugClientMessage('Index is empty in generatePackage Command')
+    logInfoMessage('Index is empty in generatePackage Command')
     return
   }
 

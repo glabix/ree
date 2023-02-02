@@ -6,7 +6,7 @@ import { documents } from '../documentManager'
 import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
 import { getCachedIndex, ICachedIndex, IGemPackageSchema, IIndexedElement, IPackagesSchema, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getLocalePath, getProjectRootDir, Locale, resolveObject } from '../utils/packageUtils'
-import { sendDebugServerLogToClient } from '../utils/stringUtils'
+import { logInfoMessage, LogLevel, sendDebugServerLogToClient } from '../utils/stringUtils'
 import { extractToken, findTokenInFile, findLinkedObject, findMethod } from '../utils/tokenUtils'
 
 const url = require('node:url')
@@ -38,10 +38,9 @@ export default class DefinitionAnalyzer {
       tree = forest.createTree(uri, doc.getText())
     }
 
-    sendDebugServerLogToClient('Getting index in definitionAnalyzer')
     const index = getCachedIndex()
     if (isCachedIndexIsEmpty()) { 
-      sendDebugServerLogToClient('Index is empty in definitionAnalyzer')
+      logInfoMessage('Index is empty in definitionAnalyzer')
       const method = findMethod(documents.get(uri).getText(), token)
 
       if (method.position) {
