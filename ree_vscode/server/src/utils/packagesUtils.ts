@@ -15,6 +15,15 @@ let cachedIndex: ICachedIndex
 let getNewIndexRetryCount: number = 0
 const MAX_GET_INDEX_RETRY_COUNT = 5
 
+enum Semaphore {
+  open = 0,
+  closed = 1
+}
+
+let getProjectIndexSemaphore: Semaphore = Semaphore.open
+let getPackageIndexSemaphore: Semaphore = Semaphore.open
+let getFileIndexSemaphore: Semaphore = Semaphore.open
+
 let packagesSchemaCtime: number | null = null
 export function getPackagesSchemaCtime(): number | null {
   return packagesSchemaCtime
@@ -92,6 +101,9 @@ export function getCachedIndex(): ICachedIndex {
 }
 
 export function getPackageIndex(root: string, packageName: string) {
+  if (getPackageIndexSemaphore === Semaphore.closed) { return }
+
+  getPackageIndexSemaphore = Semaphore.closed
   cachePackageIndex(root, packageName).then(r => {
     try {
       if (r) {
@@ -144,12 +156,15 @@ export function getPackageIndex(root: string, packageName: string) {
           let refreshedPackages = cachedIndex.packages_schema.packages.filter(p => p.name !== packageName)
           refreshedPackages.push(packageSchema)
           cachedIndex.packages_schema.packages = refreshedPackages
+          getPackageIndexSemaphore = Semaphore.open
         } else {
           connection.window.showErrorMessage(`GetPackageIndexError: ${r.message}`)
+          getPackageIndexSemaphore = Semaphore.open
         }
       }
     } catch(e: any) {
       connection.window.showErrorMessage(e.toString())
+      getPackageIndexSemaphore = Semaphore.open
     }
   })
 }
@@ -171,6 +186,9 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
     return
   }
 
+  if (getProjectIndexSemaphore === Semaphore.closed) { return }
+
+  getProjectIndexSemaphore = Semaphore.closed
   connection.workspace.getWorkspaceFolders().then(v => {
     return v?.map(folder => folder)
   }).then(v => {
@@ -193,6 +211,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
               })
               sendDebugServerLogToClient('Got new Project Index')
               getNewIndexRetryCount = 0
+              getProjectIndexSemaphore = Semaphore.open
             } else {
               sendDebugServerLogToClient('Got error code when getting new Project index')
               if (isCachedIndexIsEmpty()) {
@@ -201,6 +220,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
               }
               getNewIndexRetryCount += 1
               connection.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
+              getProjectIndexSemaphore = Semaphore.open
             }
           }
         } catch(e: any) {
@@ -211,6 +231,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
           }
           getNewIndexRetryCount += 1
           connection.window.showErrorMessage(e.toString())
+          getProjectIndexSemaphore = Semaphore.open
         }
       }).then(() => {
         cacheGemPaths(root.toString()).then((r) => {
@@ -534,6 +555,9 @@ async function execGetReePackageIndex(rootDir: string, packageName: string): Pro
 }
 
 export function updateFileIndex(uri: string) {
+  if (getFileIndexSemaphore === Semaphore.closed) { return }
+
+  getFileIndexSemaphore = Semaphore.closed
   let filePath = url.fileURLToPath(uri)
   const isSpecFile = !!filePath.split("/").pop().match(/\_spec/)
   if (isSpecFile) { return }
@@ -573,11 +597,14 @@ export function updateFileIndex(uri: string) {
                 index.classes[classConst].push(newIndexForFile)
               }
             }
+            getFileIndexSemaphore = Semaphore.open
           } catch (e: any) {
             connection.window.showErrorMessage(e)
+            getFileIndexSemaphore = Semaphore.open
           }
         } else {
           connection.window.showErrorMessage(r.message)
+          getFileIndexSemaphore = Semaphore.open
         }
       }
     })
