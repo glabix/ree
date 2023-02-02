@@ -166,6 +166,16 @@ class Ree::Package
   end
 
   # @param [Symbol] name
+  # @return [nil]
+  def remove_object(name)
+    if @objects_store[name]
+      @objects_store.delete(name)
+    end
+
+    nil
+  end
+
+  # @param [Symbol] name
   # @return [Nilor[Ree::Object]]
   def get_object(name)
     @objects_store[name]
