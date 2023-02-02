@@ -24,11 +24,13 @@ import { getCurrentProjectDir, isReeProject } from './utils/fileUtils'
 import { forest } from './utils/forest'
 import { clearDocumentProblems } from "./utils/documentUtils"
 import { getNewProjectIndex } from "./utils/packagesUtils"
+import { logDebugServerMessage } from "./utils/stringUtils"
 
 
-const fs = require('fs')
 export let client: LanguageClient
 export const diagnosticCollection = vscode.languages.createDiagnosticCollection('ruby')
+export const debugOutputClientChannel = vscode.window.createOutputChannel("Ree Debug Client")
+export const debugOutputServerChannel = vscode.window.createOutputChannel("Ree Debug Server")
 
 export async function activate(context: vscode.ExtensionContext) {
   let gotoPackageCmd = vscode.commands.registerCommand(
@@ -206,7 +208,11 @@ export async function activate(context: vscode.ExtensionContext) {
   )
 
   // Start the client. This will also launch the server
-  client.start()
+  client.start().then(() => {
+    client.onNotification('reeLanguageServer/serverLog', (message) => {
+      logDebugServerMessage(message)
+    })
+  })
 }
 
 export function deactivate(): Thenable<void> | undefined {

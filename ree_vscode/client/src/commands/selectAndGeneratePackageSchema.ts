@@ -4,6 +4,7 @@ import { getCachedIndex, IPackageSchema, isCachedIndexIsEmpty } from '../utils/p
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { getPackageNameFromPath } from '../utils/packageUtils'
 import { generatePackageSchema } from './generatePackageSchema'
+import { logDebugClientMessage } from '../utils/stringUtils'
 
 type SelectPackageCb = (selected: string | undefined) => void
 
@@ -28,8 +29,12 @@ export function selectAndGeneratePackageSchema() {
     return
   }
 
+  logDebugClientMessage('Getting index in selectAndGeneratePackageSchema Command')
   const index = getCachedIndex()
-  if (isCachedIndexIsEmpty()) { return }
+  if (isCachedIndexIsEmpty()) {
+    logDebugClientMessage('Index is empty in selectAndGeneratePackageSchema Command')
+    return
+  }
 
   const packagesSchema = index.packages_schema
 

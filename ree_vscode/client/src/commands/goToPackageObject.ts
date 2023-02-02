@@ -3,6 +3,7 @@ import { PACKAGES_SCHEMA_FILE, PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
 import { IPackageSchema, IGemPackageSchema, getGemDir, getCachedIndex, isCachedIndexIsEmpty, IObject } from '../utils/packagesUtils'
 import { getCurrentProjectDir } from '../utils/fileUtils'
+import { logDebugClientMessage } from '../utils/stringUtils'
 
 var fs = require('fs')
 var path = require("path")
@@ -21,8 +22,12 @@ export function goToPackageObject() {
     return
   }
 
+  logDebugClientMessage('Getting index in goToPackageObject Command')
   const index = getCachedIndex()
-  if (isCachedIndexIsEmpty()) { return }
+  if (isCachedIndexIsEmpty()) {
+    logDebugClientMessage('Index is empty in goToPackageObject Command')
+    return
+  }
 
   const packagesSchema = index.packages_schema
 

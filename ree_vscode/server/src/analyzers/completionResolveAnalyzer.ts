@@ -1,13 +1,18 @@
 import { CompletionItem, CompletionItemKind, MarkupContent, MarkupKind } from 'vscode-languageserver'
 import { splitArgsType } from '../utils/tokenUtils'
 import { getCachedIndex, isCachedIndexIsEmpty, IObject } from '../utils/packagesUtils'
+import { sendDebugServerLogToClient } from '../utils/stringUtils'
 
 const path = require('path')
 
 export default class CompletionResolveAnalyzer {
 	public static analyze(item: CompletionItem): CompletionItem {
+    sendDebugServerLogToClient('Getting index in completionResolveAnalyzer')
     const index = getCachedIndex()
-    if (isCachedIndexIsEmpty()) { return item } 
+    if (isCachedIndexIsEmpty()) {
+      sendDebugServerLogToClient('Index is empty in completionResolveAnalyzer')
+      return item
+    } 
 
     if (item.data) {
       if (item.kind === CompletionItemKind.Method) {

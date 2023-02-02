@@ -1,3 +1,5 @@
+import { connection } from ".."
+
 export function capitilizeString(string: string): string {
   const firstLetter = string.toLowerCase().charAt(0).toUpperCase()
   return string.replace(string[0], firstLetter)
@@ -21,4 +23,16 @@ export function toSnakeCase(string: string): string {
   }
 
   return string
+}
+
+export function currentTimeStamp(): string {
+  return new Date().toISOString()
+}
+
+export function buildLogMessage(message: string): string {
+  return `[${currentTimeStamp()}] ${message}`
+}
+
+export function sendDebugServerLogToClient(message: string) {
+  connection.sendNotification('reeLanguageServer/serverLog', buildLogMessage(message))
 }

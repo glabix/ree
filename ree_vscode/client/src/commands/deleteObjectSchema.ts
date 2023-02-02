@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import { client } from '../extension'
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { getPackageEntryPath } from '../utils/packageUtils'
 import {
@@ -20,11 +21,14 @@ export function deleteObjectSchema(filePath: string, silent: boolean) {
     return
   }
 
+  const packageEntry = getPackageEntryPath(filePath)
   if (!filePath.split("/").pop().match(/\.rb/)) {
     return 
   } else {
-    if (!getPackageEntryPath(filePath)) { return }
+    if (!packageEntry) { return }
   }
+
+  const packageName = packageEntry.split('/').slice(-1)[0].split('.rb')[0]
 
   const rootProjectDir = getCurrentProjectDir()
   if (!rootProjectDir) { return }
@@ -53,6 +57,8 @@ export function deleteObjectSchema(filePath: string, silent: boolean) {
       if (commandResult && commandResult.code !== 0) {
         vscode.window.showErrorMessage(`DeleteObjectSchemaError: ${commandResult.message}`)
       }
+    }).then(() => {
+      client.sendNotification("reeLanguageServer/reindexPackage", { root: rootProjectDir, packageName: packageName })
     })
   })
 }
