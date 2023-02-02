@@ -26,8 +26,8 @@ module Ree
             package_name = Ree::PathHelper.package_name_from_dir(File.dirname(object_path))
             if package_name
               package_name = package_name.to_sym
-              Ree.load_package(package_name)
-              package = facade.get_loaded_package(package_name)
+              facade.load_package_entry(package_name)
+              package = facade.get_package(package_name)
               package.remove_object(object_name)
               facade.dump_package_schema(package_name)
             end
