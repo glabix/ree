@@ -1,4 +1,3 @@
-const childProcess = require('child_process')
 const vscode = require('vscode')
 
 export interface ExecCommand {
@@ -91,7 +90,7 @@ export async function spawnCommand(args): Promise<ExecCommand | undefined> {
       message += chunk
     }
 
-    const code: number  = await new Promise( (resolve, reject) => {
+    const code: number  = await new Promise( (resolve, _) => {
       child.on('close', resolve)
     })
 

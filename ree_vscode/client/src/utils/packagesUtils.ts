@@ -1,9 +1,9 @@
 
 import * as vscode from 'vscode'
 import { getCurrentProjectDir } from './fileUtils'
-import { getPackagesSchemaPath, getProjectRootDir } from './packageUtils'
+import { getPackagesSchemaPath } from './packageUtils'
 import { execGetReeFileIndex, execGetReeProjectIndex, execGetReePackageIndex, spawnCommand } from './reeUtils'
-import { logDebugClientMessage, logErrorMessage, logInfoMessage, logWarnMessage } from './stringUtils'
+import { logErrorMessage, logInfoMessage, logWarnMessage } from './stringUtils'
 
 const path = require('path')
 const fs = require('fs')
@@ -69,17 +69,60 @@ export function getCachedIndex(): ICachedIndex {
           try {
             if (r) {
               if (r.code === 0) {
-                let newPackageIndex = JSON.parse(r.message) as IPackageSchema
+                let newPackageIndex = JSON.parse(r.message)
                 logInfoMessage(`Got Package index for ${pckg.name}`)
+                const packageSchema = newPackageIndex.package_schema as IPackageSchema
+                const classes = newPackageIndex.classes as ICachedIndex["classes"]
+                const objects = newPackageIndex.objects as ICachedIndex["objects"]
+
+                if (classes && Object.keys(classes).length > 0) {
+                  let classKeys = Object.keys(classes)
+                  classKeys.forEach(key => {
+                    if (cachedIndex.classes[key]) {
+                      let newValues = classes[key]
+                      newValues.forEach(v => {
+                        const oldIndex = cachedIndex.classes[key].findIndex(e => e.path === v.path)
+                        if (oldIndex !== -1) {
+                          cachedIndex.classes[key][oldIndex] = v
+                        } else {
+                          cachedIndex.classes[key].push(v)
+                        }
+                      })
+                    } else {
+                      cachedIndex.classes[key] = classes[key]
+                    }
+                  })
+                }
+      
+                if (objects && Object.keys(objects).length > 0) {
+                  let objectsKeys = Object.keys(objects)
+                  objectsKeys.forEach(key => {
+                    if (cachedIndex.objects[key]) {
+                      let newValues = objects[key]
+                      newValues.forEach(v => {
+                        const oldIndex = cachedIndex.objects[key].findIndex(e => e.path === v.path)
+                        if (oldIndex !== -1) {
+                          cachedIndex.objects[key][oldIndex] = v
+                        } else {
+                          cachedIndex.objects[key].push(v)
+                        }
+                      })
+                    } else {
+                      cachedIndex.objects[key] = objects[key]
+                    }
+                  })
+                }
+                
                 calculatePackageSchemaCtime(root, pckg.name)
                 let refreshedPackages = cachedIndex.packages_schema.packages.filter(p => p.name !== pckg.name)
-                refreshedPackages.push(newPackageIndex)
+                refreshedPackages.push(packageSchema)
                 cachedIndex.packages_schema.packages = refreshedPackages
               } else {
                 logErrorMessage(`GetPackageIndexError: ${r.message}`)
               }
             }
           } catch(e: any) {
+            logErrorMessage(e.toString())
             vscode.window.showErrorMessage(e.toString())
           }
         })

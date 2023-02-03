@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { Query } from 'web-tree-sitter'
-import { forest, asRegexp, importRegexp, mapLinkQueryMatches } from '../utils/forest'
+import { forest, asRegexp, mapLinkQueryMatches } from '../utils/forest'
 const fs = require('fs')
 
 export function checkAndSortLinks(filePath: string) {

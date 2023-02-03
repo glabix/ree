@@ -80,7 +80,7 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
     location: vscode.ProgressLocation.Notification
   }, async (progress) => {
     progress.report({
-      message: `Generating "${execPackageName}" package schema...`
+      message: execPackageName !== null ? `Generating "${execPackageName}" package schema...` : `Generating schemas for all packages...`
     })
 
     return result.then((commandResult) => {

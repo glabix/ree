@@ -4,7 +4,7 @@ import { getCachedIndex, IPackageSchema, isCachedIndexIsEmpty } from '../utils/p
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { getPackageNameFromPath } from '../utils/packageUtils'
 import { generatePackageSchema } from './generatePackageSchema'
-import { logDebugClientMessage, logInfoMessage } from '../utils/stringUtils'
+import { logInfoMessage } from '../utils/stringUtils'
 
 type SelectPackageCb = (selected: string | undefined) => void
 

@@ -1,8 +1,10 @@
 import log from 'loglevel'
 import Ruby from 'web-tree-sitter-ruby'
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const Parser = require('web-tree-sitter')
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const TreeSitterFactory = {
 	language: null,
 

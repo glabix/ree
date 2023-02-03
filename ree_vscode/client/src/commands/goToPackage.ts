@@ -3,7 +3,7 @@ import { PACKAGES_SCHEMA_FILE, PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
 import { IGemPackageSchema, IPackageSchema, getGemDir, getCachedIndex, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getCurrentProjectDir } from '../utils/fileUtils'
-import { logDebugClientMessage, logInfoMessage } from '../utils/stringUtils'
+import { logInfoMessage } from '../utils/stringUtils'
 
 var fs = require('fs')
 var path = require("path")

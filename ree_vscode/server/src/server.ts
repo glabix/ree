@@ -12,8 +12,6 @@ import { documents } from './documentManager'
 import { forest } from './forest'
 import { getNewProjectIndex } from './utils/packagesUtils'
 
-const url = require('url')
-
 export interface ILanguageServer {
 	readonly capabilities: InitializeResult
   initialize(): void

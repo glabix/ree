@@ -1,9 +1,7 @@
 import { CompletionItem, CompletionItemKind, MarkupContent, MarkupKind } from 'vscode-languageserver'
 import { splitArgsType } from '../utils/tokenUtils'
 import { getCachedIndex, isCachedIndexIsEmpty, IObject } from '../utils/packagesUtils'
-import { logInfoMessage, LogLevel, sendDebugServerLogToClient } from '../utils/stringUtils'
-
-const path = require('path')
+import { logInfoMessage } from '../utils/stringUtils'
 
 export default class CompletionResolveAnalyzer {
 	public static analyze(item: CompletionItem): CompletionItem {

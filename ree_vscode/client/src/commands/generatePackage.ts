@@ -5,7 +5,7 @@ import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, E
 import { cachePackageIndex, calculatePackageSchemaCtime, getCachedIndex, IPackageSchema, isCachedIndexIsEmpty, setCachedIndex } from '../utils/packagesUtils'
 import { PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
-import { logDebugClientMessage, logInfoMessage } from '../utils/stringUtils'
+import { logInfoMessage } from '../utils/stringUtils'
 
 const fs = require('fs')
 const path = require('path')

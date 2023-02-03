@@ -2,7 +2,7 @@ import { connection } from '..'
 import { getPackageEntryPath, getProjectRootDir, getPackagesSchemaPath } from './packageUtils'
 import { getReeVscodeSettings } from './reeUtils'
 import { TAB_LENGTH } from './constants'
-import { logErrorMessage, logInfoMessage, LogLevel, logWarnMessage, sendDebugServerLogToClient } from './stringUtils'
+import { logErrorMessage, logInfoMessage, logWarnMessage } from './stringUtils'
 
 const path = require('path')
 const fs = require('fs')
@@ -106,7 +106,7 @@ export function getPackageIndex(root: string, packageName: string) {
       if (r) {
         if (r.code === 0) {
           let newPackageIndex = JSON.parse(r.message)
-          sendDebugServerLogToClient(`Got Package index for ${packageName}`, LogLevel.info)
+          logInfoMessage(`Got Package index for ${packageName}`)
           const packageSchema = newPackageIndex.package_schema as IPackageSchema
           const classes = newPackageIndex.classes as ICachedIndex["classes"]
           const objects = newPackageIndex.objects as ICachedIndex["objects"]
@@ -622,7 +622,7 @@ async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> 
       message += chunk
     }
 
-    const code: number  = await new Promise( (resolve, reject) => {
+    const code: number  = await new Promise( (resolve, _) => {
       child.on('close', resolve)
     })
 

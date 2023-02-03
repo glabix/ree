@@ -6,7 +6,7 @@ import { forest, mapLinkQueryMatches } from '../forest'
 import { getGemDir, getCachedIndex, IPackageSchema, IGemPackageSchema, IObjectMethod, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { RUBY_EXT } from './constants'
 import { getPackageNameFromPath, getProjectRootDir } from './packageUtils'
-import { logInfoMessage, sendDebugServerLogToClient } from './stringUtils'
+import { logInfoMessage } from './stringUtils'
 
 const url = require('node:url')
 const path = require('path')

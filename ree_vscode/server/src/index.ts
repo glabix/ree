@@ -13,7 +13,6 @@ import log from 'loglevel'
 import { ILanguageServer } from './server'
 import TreeSitterFactory from './utils/treeSitterFactory'
 import { cachePackageIndex, getNewProjectIndex } from './utils/packagesUtils'
-import { sendDebugServerLogToClient } from './utils/stringUtils'
 
 export const connection: Connection = createConnection(ProposedFeatures.all)
 let server: ILanguageServer

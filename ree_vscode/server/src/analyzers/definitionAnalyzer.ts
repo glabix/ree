@@ -4,9 +4,9 @@ import { Query, SyntaxNode, Tree } from 'web-tree-sitter'
 import { connection } from '..'
 import { documents } from '../documentManager'
 import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
-import { getCachedIndex, ICachedIndex, IGemPackageSchema, IIndexedElement, IPackagesSchema, isCachedIndexIsEmpty } from '../utils/packagesUtils'
+import { getCachedIndex, ICachedIndex, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getLocalePath, getProjectRootDir, Locale, resolveObject } from '../utils/packageUtils'
-import { logInfoMessage, LogLevel, sendDebugServerLogToClient } from '../utils/stringUtils'
+import { logInfoMessage } from '../utils/stringUtils'
 import { extractToken, findTokenInFile, findLinkedObject, findMethod } from '../utils/tokenUtils'
 
 const url = require('node:url')
