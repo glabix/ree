@@ -6,6 +6,7 @@ import { forest, mapLinkQueryMatches } from '../forest'
 import { getGemDir, getCachedIndex, IPackageSchema, IGemPackageSchema, IObjectMethod, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { RUBY_EXT } from './constants'
 import { getPackageNameFromPath, getProjectRootDir } from './packageUtils'
+import { logInfoMessage } from './stringUtils'
 
 const url = require('node:url')
 const path = require('path')
@@ -78,7 +79,10 @@ export function findLinkedObject(uri: string, token: string, position: Position)
   }
 
   const index = getCachedIndex()
-  if (isCachedIndexIsEmpty()) { return defaultObject }
+  if (isCachedIndexIsEmpty()) {
+    logInfoMessage('Index is empty in findLinkedObject')
+    return defaultObject
+  }
 
   const doc = documents.get(uri)
   let tree = forest.getTree(uri)

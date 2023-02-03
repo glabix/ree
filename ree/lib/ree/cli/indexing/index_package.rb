@@ -14,16 +14,25 @@ module Ree
 
           facade = Ree.container.packages_facade
 
-          package_name = package_name.to_sym
-          package = facade.get_loaded_package(package_name)
-          package_hsh = map_package_entry(package)
+          hsh = {}
+          hsh[:package_schema] = {}
+          hsh[:classes] = {}
+          hsh[:objects] = {}
 
-          JSON.pretty_generate(package_hsh)
+          package_name = package_name.to_sym
+          facade.load_entire_package(package_name)
+          package = facade.get_loaded_package(package_name)
+          package_hsh = index_package_entry(package)
+
+          hsh[:package_schema] = package_hsh
+          hsh = index_package_files(package, dir, hsh)
+
+          JSON.pretty_generate(hsh)
         end
 
         private
 
-        def map_package_entry(package)
+        def index_package_entry(package)
           package_hsh = {}
           package_hsh[:name] = package.name
           package_hsh[:schema_rpath] = package.schema_rpath
@@ -109,6 +118,10 @@ module Ree
               Ree::ObjectSchema::Methods::ARGS => arg_list
             }
           ]
+        end
+
+        def index_package_files(package, dir, index_hash)
+          Ree::CLI::IndexProject.send(:index_package_files, package, dir, index_hash)
         end
       end
     end

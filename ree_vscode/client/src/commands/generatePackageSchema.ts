@@ -12,6 +12,7 @@ import {
 } from '../utils/reeUtils'
 import { addDocumentProblems, ReeDiagnosticCode, removeDocumentProblems } from '../utils/documentUtils'
 import { getCurrentPackage } from './generateObjectSchema'
+import { logErrorMessage } from '../utils/stringUtils'
 
 const path = require('path')
 
@@ -72,6 +73,7 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
 
   let result = execGeneratePackageSchema(rootProjectDir, execPackageName)
   if (!result) {
+    logErrorMessage(`Can't generate Package.schema.json for ${execPackageName}`)
     vscode.window.showErrorMessage(`Can't generate Package.schema.json for ${execPackageName}`)
     return
   }
@@ -80,7 +82,7 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
     location: vscode.ProgressLocation.Notification
   }, async (progress) => {
     progress.report({
-      message: `Generating "${execPackageName}" package schema...`
+      message: execPackageName !== null ? `Generating "${execPackageName}" package schema...` : `Generating schemas for all packages...`
     })
 
     return result.then((commandResult) => {
@@ -146,6 +148,7 @@ export function execGeneratePackageSchema(rootProjectDir: string, name: string):
 
     return spawnCommand(fullArgsArr)
   } catch(e) {
+    logErrorMessage(`Error. ${e.toString()}`)
     vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
   }

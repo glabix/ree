@@ -1,6 +1,7 @@
 import Ruby from 'web-tree-sitter-ruby'
 import * as Parser from 'web-tree-sitter'
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const TreeSitterFactory = {
 	language: null,
 	parser: null,

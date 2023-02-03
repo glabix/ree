@@ -52,6 +52,22 @@ class Ree::PathHelper
       File.join(dir, "#{Ree::PACKAGE}/#{name}.rb")
     end
 
+    # @param [String] directory inside package
+    # @return [String] name of package
+    def package_name_from_dir(dir)
+      package_schema = File.join(dir, Ree::PACKAGE_SCHEMA_FILE)
+
+      if File.exist?(package_schema)
+        return package_schema.split('/')[-2]
+      end
+
+      if dir == '/'
+        return nil
+      end
+
+      package_name_from_dir(File.expand_path('..', dir))
+    end
+
     # @param [Ree::Package] package Package schema
     # @return [String] Absolute package entry path (ex. /data/project/bc/accounts/package/accounts.rb)
     def abs_package_entry_path(package)

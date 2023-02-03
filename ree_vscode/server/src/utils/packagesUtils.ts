@@ -2,6 +2,7 @@ import { connection } from '..'
 import { getPackageEntryPath, getProjectRootDir, getPackagesSchemaPath } from './packageUtils'
 import { getReeVscodeSettings } from './reeUtils'
 import { TAB_LENGTH } from './constants'
+import { logErrorMessage, logInfoMessage, logWarnMessage } from './stringUtils'
 
 const path = require('path')
 const fs = require('fs')
@@ -13,6 +14,15 @@ const ARG_REGEXP_GLOBAL = /(?<key>(\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(?<
 let cachedIndex: ICachedIndex
 let getNewIndexRetryCount: number = 0
 const MAX_GET_INDEX_RETRY_COUNT = 5
+
+enum Semaphore {
+  open = 0,
+  closed = 1
+}
+
+let getProjectIndexSemaphore: Semaphore = Semaphore.open
+let getPackageIndexSemaphore: Semaphore = Semaphore.open
+let getFileIndexSemaphore: Semaphore = Semaphore.open
 
 let packagesSchemaCtime: number | null = null
 export function getPackagesSchemaCtime(): number | null {
@@ -39,10 +49,14 @@ export function isPackageSchemaCtimeChanged(pckg: IPackageSchema): boolean {
   const root = getCachedProjectRoot()
   const oldCtime = getPackageSchemaCtime(pckg.name)
   const pckgSchemaPath = pckg.schema_rpath
-  if (!fs.existsSync(pckgSchemaPath)) { return true }
+  if (!fs.existsSync(pckgSchemaPath)) {
+    logErrorMessage(`Package.schema.json for ${pckg.name} package is not exists`)
+    return true
+  }
 
   const newCtime = fs.statSync(path.join(root, pckgSchemaPath)).ctimeMs
-  return oldCtime !== newCtime
+  const isChanged = oldCtime !== newCtime
+  return isChanged
 }
 
 let projectRoot: string
@@ -61,6 +75,8 @@ export function getCachedIndex(): ICachedIndex {
   if (cachedIndex && !isCachedIndexIsEmpty()) {
     let root = getCachedProjectRoot()
     if (isPackagesSchemaCtimeChanged()) {
+      
+      logInfoMessage('Packages.schema.json is changed')
       getNewProjectIndex()
       calculatePackagesSchemaCtime(root)
       return cachedIndex
@@ -68,30 +84,87 @@ export function getCachedIndex(): ICachedIndex {
 
     if (cachedIndex.packages_schema && cachedIndex.packages_schema.packages) {
       let changedPackages = cachedIndex.packages_schema.packages.filter(p => isPackageSchemaCtimeChanged(p))
+      if (changedPackages.length > 0) {
+        logInfoMessage('Some packages schemas is changed')
+        changedPackages.forEach(p => logInfoMessage(`Package ${p.name} schema is changed`))
+      }
       changedPackages.forEach(pckg => {
-        cachePackageIndex(root, pckg.name).then(r => {
-          try {
-            if (r) {
-              if (r.code === 0) {
-                let newPackageIndex = JSON.parse(r.message) as IPackageSchema
-                calculatePackageSchemaCtime(root, pckg)
-                let refreshedPackages = cachedIndex.packages_schema.packages.filter(p => p.name !== pckg.name)
-                refreshedPackages.push(newPackageIndex)
-                cachedIndex.packages_schema.packages = refreshedPackages
-                setCachedIndex(cachedIndex)
-              } else {
-                connection.window.showErrorMessage(`GetPackageIndexError: ${r.message}`)
-              }
-            }
-          } catch(e: any) {
-            connection.window.showErrorMessage(e.toString())
-          }
-        })
+        getPackageIndex(root, pckg.name)
       })
     }
   }
 
   return cachedIndex
+}
+
+export function getPackageIndex(root: string, packageName: string) {
+  if (getPackageIndexSemaphore === Semaphore.closed) { return }
+
+  getPackageIndexSemaphore = Semaphore.closed
+  cachePackageIndex(root, packageName).then(r => {
+    try {
+      if (r) {
+        if (r.code === 0) {
+          let newPackageIndex = JSON.parse(r.message)
+          logInfoMessage(`Got Package index for ${packageName}`)
+          const packageSchema = newPackageIndex.package_schema as IPackageSchema
+          const classes = newPackageIndex.classes as ICachedIndex["classes"]
+          const objects = newPackageIndex.objects as ICachedIndex["objects"]
+
+          if (classes && Object.keys(classes).length > 0) {
+            let classKeys = Object.keys(classes)
+            classKeys.forEach(key => {
+              if (cachedIndex.classes[key]) {
+                let newValues = classes[key]
+                newValues.forEach(v => {
+                  const oldIndex = cachedIndex.classes[key].findIndex(e => e.path === v.path)
+                  if (oldIndex !== -1) {
+                    cachedIndex.classes[key][oldIndex] = v
+                  } else {
+                    cachedIndex.classes[key].push(v)
+                  }
+                })
+              } else {
+                cachedIndex.classes[key] = classes[key]
+              }
+            })
+          }
+
+          if (objects && Object.keys(objects).length > 0) {
+            let objectsKeys = Object.keys(objects)
+            objectsKeys.forEach(key => {
+              if (cachedIndex.objects[key]) {
+                let newValues = objects[key]
+                newValues.forEach(v => {
+                  const oldIndex = cachedIndex.objects[key].findIndex(e => e.path === v.path)
+                  if (oldIndex !== -1) {
+                    cachedIndex.objects[key][oldIndex] = v
+                  } else {
+                    cachedIndex.objects[key].push(v)
+                  }
+                })
+              } else {
+                cachedIndex.objects[key] = objects[key]
+              }
+            })
+          }
+
+          calculatePackageSchemaCtime(root, packageName)
+          let refreshedPackages = cachedIndex.packages_schema.packages.filter(p => p.name !== packageName)
+          refreshedPackages.push(packageSchema)
+          cachedIndex.packages_schema.packages = refreshedPackages
+          getPackageIndexSemaphore = Semaphore.open
+        } else {
+          logErrorMessage(`GetPackageIndexError: ${r.message}`)
+          getPackageIndexSemaphore = Semaphore.open
+        }
+      }
+    } catch(e: any) {
+      logErrorMessage(e.toString())
+      connection.window.showErrorMessage(e.toString())
+      getPackageIndexSemaphore = Semaphore.open
+    }
+  })
 }
 
 export function setCachedIndex(value: ICachedIndex) {
@@ -105,9 +178,15 @@ export function isCachedIndexIsEmpty(): boolean {
   return true
 }
 
-export function getNewProjectIndex(showNotification = false) {
-  if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT) { return }
+export function getNewProjectIndex(manual = false, showNotification = false) {
+  if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT && !manual) {
+    logWarnMessage('getNewProjectIndex reached max limit')
+    return
+  }
 
+  if (getProjectIndexSemaphore === Semaphore.closed) { return }
+
+  getProjectIndexSemaphore = Semaphore.closed
   connection.workspace.getWorkspaceFolders().then(v => {
     return v?.map(folder => folder)
   }).then(v => {
@@ -126,38 +205,54 @@ export function getNewProjectIndex(showNotification = false) {
               cachedIndex = JSON.parse(r.message)
               calculatePackagesSchemaCtime(root)
               cachedIndex.packages_schema.packages.forEach(pckg => {
-                calculatePackageSchemaCtime(root, pckg)
+                calculatePackageSchemaCtime(root, pckg.name)
               })
+              logInfoMessage('Got new Project Index')
               getNewIndexRetryCount = 0
+              getProjectIndexSemaphore = Semaphore.open
             } else {
-              cachedIndex = <ICachedIndex>{}
+              logErrorMessage('Got error code when getting new Project index')
+              if (isCachedIndexIsEmpty()) {
+                logInfoMessage('Index is empty, set as empty object')
+                cachedIndex = <ICachedIndex>{}
+              }
               getNewIndexRetryCount += 1
-              connection.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
+              logErrorMessage(`GetProjectIndexError: ${r.message}`)
+              getProjectIndexSemaphore = Semaphore.open
             }
           }
         } catch(e: any) {
-          cachedIndex = <ICachedIndex>{}
+          logErrorMessage('Catched some error when tried to get new Project index')
+          if (isCachedIndexIsEmpty()) {
+            logInfoMessage('Index is empty, set as empty object')
+            cachedIndex = <ICachedIndex>{}
+          }
           getNewIndexRetryCount += 1
+          logErrorMessage(e.toString())
           connection.window.showErrorMessage(e.toString())
+          getProjectIndexSemaphore = Semaphore.open
         }
       }).then(() => {
         cacheGemPaths(root.toString()).then((r) => {
           if (r) {
             if (r.code === 0) {
+              logInfoMessage('Got Gem Paths')
               const gemPathsArr = r?.message.split("\n")
-              let index = cachedIndex
-              if (isCachedIndexIsEmpty()) { index ??= <ICachedIndex>{} }
-              index.gem_paths ??= {}
+              if (isCachedIndexIsEmpty()) {
+                logInfoMessage('Index is empty, set as empty object')
+                cachedIndex ??= <ICachedIndex>{}
+              }
+              cachedIndex.gem_paths ??= {}
     
               gemPathsArr?.map((path) => {
                 let splitedPath = path.split("/")
                 let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
         
-                index.gem_paths[name] = path
+                cachedIndex.gem_paths[name] = path
               })
-    
-              setCachedIndex(index)
+              logInfoMessage('Gem Paths setted')
             } else {
+              logErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
               connection.window.showErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
             }
           }
@@ -280,15 +375,24 @@ export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecC
 }
 
 export function calculatePackagesSchemaCtime(root: string) {
+  logInfoMessage('Trying to recalculate Packages.schema.json ctime')
   const packagesSchemaPath = getPackagesSchemaPath(root)
-  if (packagesSchemaPath) { 
+  if (packagesSchemaPath) {
+    logInfoMessage('Packages.schema.json ctime recalculated')
     setPackagesSchemaCtime(fs.statSync(packagesSchemaPath).ctimeMs)
   }
 }
 
-export function calculatePackageSchemaCtime(root: string, pckg: IPackageSchema) {
+export function calculatePackageSchemaCtime(root: string, packageName: string) {
+  logInfoMessage(`Trying to recalculate Package.schema.json for ${packageName}`)
+  if (!cachedIndex.packages_schema?.packages) { return }
+
+  const pckg = cachedIndex.packages_schema.packages.find(p => p.name === packageName)
+  if (!pckg) { return }
+
   let schemaAbsPath = path.join(root, pckg.schema_rpath)
   let time = fs.statSync(schemaAbsPath).ctimeMs
+  logInfoMessage(`Package.schema.json for ${pckg.name} recalculated`)
   setPackageSchemaCtime(pckg.name, time)
 }
 
@@ -451,6 +555,9 @@ async function execGetReePackageIndex(rootDir: string, packageName: string): Pro
 }
 
 export function updateFileIndex(uri: string) {
+  if (getFileIndexSemaphore === Semaphore.closed) { return }
+
+  getFileIndexSemaphore = Semaphore.closed
   let filePath = url.fileURLToPath(uri)
   const isSpecFile = !!filePath.split("/").pop().match(/\_spec/)
   if (isSpecFile) { return }
@@ -481,7 +588,6 @@ export function updateFileIndex(uri: string) {
             if (Object.keys(newIndexForFile).length === 0) { return }
 
             let classConst = Object.keys(newIndexForFile)?.[0]
-            // TODO: update index for objects/mappers
             if (index.classes) {
               const oldIndex = index.classes[classConst].findIndex(v => v.path.match(RegExp(`${rFilePath}`)))
               if (oldIndex !== -1) {
@@ -491,13 +597,15 @@ export function updateFileIndex(uri: string) {
                 index.classes[classConst].push(newIndexForFile)
               }
             }
-
-            setCachedIndex(index)
+            getFileIndexSemaphore = Semaphore.open
           } catch (e: any) {
-            connection.window.showErrorMessage(e)
+            logErrorMessage(e.toString())
+            connection.window.showErrorMessage(e.toString())
+            getFileIndexSemaphore = Semaphore.open
           }
         } else {
-          connection.window.showErrorMessage(r.message)
+          logErrorMessage(`CacheFileIndexError: ${r.message}`)
+          getFileIndexSemaphore = Semaphore.open
         }
       }
     })
@@ -518,7 +626,7 @@ async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> 
       message += chunk
     }
 
-    const code: number  = await new Promise( (resolve, reject) => {
+    const code: number  = await new Promise( (resolve, _) => {
       child.on('close', resolve)
     })
 
@@ -569,7 +677,7 @@ function mapObjectArgument(arg: IMethodArg): string {
     'NilClass', 'Symbol', 'Module', 'Class', 'Hash'
   ]
 
-  const index = getCachedIndex()
+  const index = cachedIndex
 
   if (basicTypes.includes(arg.type) || arg.type.startsWith('ArrayOf')) { return arg.arg }
   if (

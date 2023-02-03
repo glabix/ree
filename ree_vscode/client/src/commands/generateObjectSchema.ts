@@ -14,6 +14,7 @@ import { PACKAGES_SCHEMA_FILE } from '../core/constants'
 import { checkAndSortLinks } from './checkAndSortLinks'
 import { checkExceptions } from './checkExceptions'
 import { addDocumentProblems, ReeDiagnosticCode, removeDocumentProblems } from '../utils/documentUtils'
+import { logErrorMessage } from '../utils/stringUtils'
 
 const path = require('path')
 const fs = require('fs')
@@ -35,6 +36,7 @@ export function genObjectSchemaCmd() {
 
   const projectPath = getCurrentProjectDir()
   if (!projectPath) {
+    logErrorMessage(`Unable to find ${PACKAGES_SCHEMA_FILE}`)
     vscode.window.showErrorMessage(`Unable to find ${PACKAGES_SCHEMA_FILE}`)
     return
   }
@@ -124,6 +126,7 @@ export function generateObjectSchema(fileName: string, silent: boolean, packageN
   const result = execGenerateObjectSchema(rootProjectDir, execPackageName, path.relative(rootProjectDir, fileName))
 
   if (!result) {
+    logErrorMessage(`Can't generate Package.schema.json for ${execPackageName}`)
     vscode.window.showErrorMessage(`Can't generate Package.schema.json for ${execPackageName}`)
     return
   }
@@ -189,7 +192,8 @@ export async function execGenerateObjectSchema(rootProjectDir: string, name: str
 
     return spawnCommand(fullArgsArr)
   } catch(e) {
-    vscode.window.showErrorMessage(`Error. ${e}`)
+    logErrorMessage(`Error. ${e.toString()}`)
+    vscode.window.showErrorMessage(`Error. ${e.toString()}`)
     return undefined
   }
 }
@@ -200,6 +204,7 @@ export function getCurrentPackage(fileName?: string): string | null {
   let currentFileName = fileName || vscode.window.activeTextEditor.document.fileName
 
   if (!currentFileName) {
+    logErrorMessage("Open any package file")
     vscode.window.showErrorMessage("Open any package file")
     return
   }

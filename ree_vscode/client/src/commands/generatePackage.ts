@@ -5,6 +5,7 @@ import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, E
 import { cachePackageIndex, calculatePackageSchemaCtime, getCachedIndex, IPackageSchema, isCachedIndexIsEmpty, setCachedIndex } from '../utils/packagesUtils'
 import { PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
+import { logErrorMessage, logInfoMessage } from '../utils/stringUtils'
 
 const fs = require('fs')
 const path = require('path')
@@ -19,7 +20,10 @@ export function generatePackage() {
   if (!rootProjectDir) { return }
 
   const index = getCachedIndex()
-  if (isCachedIndexIsEmpty()) { return }
+  if (isCachedIndexIsEmpty()) {
+    logInfoMessage('Index is empty in generatePackage Command')
+    return
+  }
 
   const checkReeIsInstalled = isReeInstalled(rootProjectDir)?.then((res) => {
     if (res.code !== 0) {
@@ -66,6 +70,7 @@ export function generatePackage() {
     if (!name) { return }
 
     if (!/^[a-z_0-9]+$/.test(name)) {
+      logErrorMessage("Invalid package name. Name should contain a-z, 0-9 & _/")
       vscode.window.showErrorMessage("Invalid package name. Name should contain a-z, 0-9 & _/")
       return
     }
@@ -79,6 +84,7 @@ export function generatePackage() {
       const result = execGeneratePackage(rootProjectDir, rPath, name)
 
       if (!result) {
+        logErrorMessage("Can't generate package")
         vscode.window.showErrorMessage("Can't generate package")
         return
       }
@@ -92,6 +98,7 @@ export function generatePackage() {
 
         return result.then((commandResult) => {      
           if (commandResult.code !== 0) {
+            logErrorMessage(`GeneratePackageError: ${commandResult.message}`)
             vscode.window.showErrorMessage(`GeneratePackageError: ${commandResult.message}`)
             return
           }
@@ -121,10 +128,12 @@ export function generatePackage() {
                   index.packages_schema.packages = refreshedPackages
                   setCachedIndex(index)
                 } else {
+                  logErrorMessage(`GetPackageIndexError: ${r.message}`)
                   vscode.window.showErrorMessage(`GetPackageIndexError: ${r.message}`)
                 }
               }
             } catch(e: any) {
+              logErrorMessage(e.toString())
               vscode.window.showErrorMessage(e.toString())
             }
           })
@@ -145,6 +154,7 @@ async function execGeneratePackage(rootProjectDir: string, relativePath: string,
       ]
     )
   } catch(e) {
+    logErrorMessage(`Error. ${e}`)
     vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
   }

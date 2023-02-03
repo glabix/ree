@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import { client } from '../extension'
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { getPackageEntryPath } from '../utils/packageUtils'
 import {
@@ -7,6 +8,7 @@ import {
   ExecCommand,
   spawnCommand
 } from '../utils/reeUtils'
+import { logErrorMessage } from '../utils/stringUtils'
 
 const path = require('path')
 
@@ -20,11 +22,14 @@ export function deleteObjectSchema(filePath: string, silent: boolean) {
     return
   }
 
+  const packageEntry = getPackageEntryPath(filePath)
   if (!filePath.split("/").pop().match(/\.rb/)) {
     return 
   } else {
-    if (!getPackageEntryPath(filePath)) { return }
+    if (!packageEntry) { return }
   }
+
+  const packageName = packageEntry.split('/').slice(-1)[0].split('.rb')[0]
 
   const rootProjectDir = getCurrentProjectDir()
   if (!rootProjectDir) { return }
@@ -34,6 +39,7 @@ export function deleteObjectSchema(filePath: string, silent: boolean) {
   const result = execDeleteObjectSchema(rootProjectDir, relativeFilePath)
 
   if (!result) {
+    logErrorMessage(`Can't delete object schema ${relativeFilePath}`)
     vscode.window.showErrorMessage(`Can't delete object schema ${relativeFilePath}`)
     return
   }
@@ -51,8 +57,11 @@ export function deleteObjectSchema(filePath: string, silent: boolean) {
       }
 
       if (commandResult && commandResult.code !== 0) {
+        logErrorMessage(`DeleteObjectSchemaError: ${commandResult.message}`)
         vscode.window.showErrorMessage(`DeleteObjectSchemaError: ${commandResult.message}`)
       }
+    }).then(() => {
+      client.sendNotification("reeLanguageServer/reindexPackage", { root: rootProjectDir, packageName: packageName })
     })
   })
 }
@@ -66,7 +75,8 @@ export async function execDeleteObjectSchema(rootProjectDir: string, objectPath:
 
     return spawnCommand(fullArgsArr)
   } catch(e) {
-    vscode.window.showErrorMessage(`Error. ${e}`)
+    logErrorMessage(`Error. ${e.toString()}`)
+    vscode.window.showErrorMessage(`Error. ${e.toString()}`)
     return undefined
   }
 }

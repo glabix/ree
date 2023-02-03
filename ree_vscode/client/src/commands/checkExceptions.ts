@@ -3,7 +3,7 @@ import { Query, SyntaxNode } from 'web-tree-sitter'
 import { addDocumentProblems, ReeDiagnosticCode, removeDocumentProblems } from '../utils/documentUtils'
 import { forest } from '../utils/forest'
 import { getLocalePath, Locale } from '../utils/packageUtils'
-import { toSnakeCase } from '../utils/stringUtils'
+import { logErrorMessage, toSnakeCase } from '../utils/stringUtils'
 
 const fs = require('fs')
 const yaml = require('js-yaml')
@@ -244,7 +244,8 @@ export function checkExceptions(filePath: string): void {
       ruLocaleFile = fs.readFileSync(ruLocaleFilePath, {encoding: 'utf-8'})
       enLocaleFile = fs.readFileSync(enLocaleFilePath, {encoding: 'utf-8'})
     } catch (error) {
-      vscode.window.showErrorMessage(`Error: Locale file not found - ${error}`)
+      logErrorMessage(`Error: Locale file not found - ${error.toString()}`)
+      vscode.window.showErrorMessage(`Error: Locale file not found - ${error.toString()}`)
       return
     }
 
@@ -307,7 +308,8 @@ async function checkLocale(localeFile: string, localeFilePath: string, locale: L
       })
     }
   } catch (error) {
-    vscode.window.showErrorMessage(`${locale}.yml locales parsing error ${localeFilePath} - ${error}`)
+    logErrorMessage(`${locale}.yml locales parsing error ${localeFilePath} - ${error.toString()}`)
+    vscode.window.showErrorMessage(`${locale}.yml locales parsing error ${localeFilePath} - ${error.toString()}`)
   }
 }
 

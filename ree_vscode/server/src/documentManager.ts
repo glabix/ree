@@ -3,17 +3,6 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import { forest } from './forest'
 import { updateFileIndex } from './utils/packagesUtils'
 
-export enum DocumentEventKind {
-	OPEN,
-	CHANGE_CONTENT,
-	CLOSE,
-}
-
-export interface DocumentEvent {
-	kind: DocumentEventKind
-	document: TextDocument
-}
-
 export default class DocumentManager {
 	private readonly documents: TextDocuments<TextDocument>
 

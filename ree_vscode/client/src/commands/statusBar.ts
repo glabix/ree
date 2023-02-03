@@ -1,7 +1,6 @@
 import * as vscode from "vscode"
 import { getPackageNameFromPath } from "../utils/packageUtils"
 import { getSpecFilePath } from "../utils/fileUtils"
-import { forest } from "../utils/forest"
 
 const path = require("path")
 const fs = require("fs")

@@ -1,8 +1,9 @@
 
 import * as vscode from 'vscode'
 import { getCurrentProjectDir } from './fileUtils'
-import { getPackagesSchemaPath, getProjectRootDir } from './packageUtils'
+import { getPackagesSchemaPath } from './packageUtils'
 import { execGetReeFileIndex, execGetReeProjectIndex, execGetReePackageIndex, spawnCommand } from './reeUtils'
+import { logErrorMessage, logInfoMessage, logWarnMessage } from './stringUtils'
 
 const path = require('path')
 const fs = require('fs')
@@ -51,6 +52,7 @@ export function getCachedIndex(): ICachedIndex {
   if (cachedIndex) {
     let root = getCurrentProjectDir()
     if (isPackagesSchemaCtimeChanged()) {
+      logInfoMessage('Packages.schema.json is changed')
       getNewProjectIndex()
       calculatePackagesSchemaCtime(root)
       return cachedIndex
@@ -58,22 +60,69 @@ export function getCachedIndex(): ICachedIndex {
 
     if (cachedIndex.packages_schema && cachedIndex.packages_schema.packages) {
       let changedPackages = cachedIndex.packages_schema.packages.filter(p => isPackageSchemaCtimeChanged(p))
+      if (changedPackages.length > 0) {
+        logInfoMessage('Some packages schemas is changed')
+        changedPackages.forEach(p => logInfoMessage(`Package ${p.name} schema is changed`))
+      }
       changedPackages.forEach(pckg => {
         cachePackageIndex(root, pckg.name).then(r => {
           try {
             if (r) {
               if (r.code === 0) {
-                let newPackageIndex = JSON.parse(r.message) as IPackageSchema
+                let newPackageIndex = JSON.parse(r.message)
+                logInfoMessage(`Got Package index for ${pckg.name}`)
+                const packageSchema = newPackageIndex.package_schema as IPackageSchema
+                const classes = newPackageIndex.classes as ICachedIndex["classes"]
+                const objects = newPackageIndex.objects as ICachedIndex["objects"]
+
+                if (classes && Object.keys(classes).length > 0) {
+                  let classKeys = Object.keys(classes)
+                  classKeys.forEach(key => {
+                    if (cachedIndex.classes[key]) {
+                      let newValues = classes[key]
+                      newValues.forEach(v => {
+                        const oldIndex = cachedIndex.classes[key].findIndex(e => e.path === v.path)
+                        if (oldIndex !== -1) {
+                          cachedIndex.classes[key][oldIndex] = v
+                        } else {
+                          cachedIndex.classes[key].push(v)
+                        }
+                      })
+                    } else {
+                      cachedIndex.classes[key] = classes[key]
+                    }
+                  })
+                }
+      
+                if (objects && Object.keys(objects).length > 0) {
+                  let objectsKeys = Object.keys(objects)
+                  objectsKeys.forEach(key => {
+                    if (cachedIndex.objects[key]) {
+                      let newValues = objects[key]
+                      newValues.forEach(v => {
+                        const oldIndex = cachedIndex.objects[key].findIndex(e => e.path === v.path)
+                        if (oldIndex !== -1) {
+                          cachedIndex.objects[key][oldIndex] = v
+                        } else {
+                          cachedIndex.objects[key].push(v)
+                        }
+                      })
+                    } else {
+                      cachedIndex.objects[key] = objects[key]
+                    }
+                  })
+                }
+                
                 calculatePackageSchemaCtime(root, pckg.name)
                 let refreshedPackages = cachedIndex.packages_schema.packages.filter(p => p.name !== pckg.name)
-                refreshedPackages.push(newPackageIndex)
+                refreshedPackages.push(packageSchema)
                 cachedIndex.packages_schema.packages = refreshedPackages
-                setCachedIndex(cachedIndex)
               } else {
-                vscode.window.showErrorMessage(`GetPackageIndexError: ${r.message}`)
+                logErrorMessage(`GetPackageIndexError: ${r.message}`)
               }
             }
           } catch(e: any) {
+            logErrorMessage(e.toString())
             vscode.window.showErrorMessage(e.toString())
           }
         })
@@ -95,8 +144,11 @@ export function isCachedIndexIsEmpty(): boolean {
   return true
 }
 
-export function getNewProjectIndex(showNotification = false) {
-  if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT) { return }
+export function getNewProjectIndex(manual = false, showNotification = false) {
+  if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT && !manual) { 
+    logWarnMessage('getNewProjectIndex reached max limit')
+    return
+  }
 
   const root = getCurrentProjectDir()
   if (!root) { return }
@@ -110,36 +162,49 @@ export function getNewProjectIndex(showNotification = false) {
           cachedIndex.packages_schema.packages.forEach(pckg => {
             calculatePackageSchemaCtime(root, pckg.name)
           })
+          logInfoMessage('Got new Project Index')
           getNewIndexRetryCount = 0
         } else {
-          cachedIndex = <ICachedIndex>{}
+          logErrorMessage('Got error code when getting new Project index')
+          if (isCachedIndexIsEmpty()) {
+            logInfoMessage('Index is empty, set as empty object')
+            cachedIndex = <ICachedIndex>{}
+          }
           getNewIndexRetryCount += 1
-          vscode.window.showErrorMessage(`GetProjectIndexError: ${r.message}`)
+          logErrorMessage(`GetProjectIndexError: ${r.message}`)
         }
       }
     } catch(e: any) {
-      cachedIndex = <ICachedIndex>{}
+      logErrorMessage('Catched some error when tried to get new Project index')
+      if (isCachedIndexIsEmpty()) {
+        logInfoMessage('Index is empty, set as empty object')
+        cachedIndex = <ICachedIndex>{}
+      }
       getNewIndexRetryCount += 1
+      logErrorMessage(e.toString())
       vscode.window.showErrorMessage(e.toString())
     }
   }).then(() => {
     cacheGemPaths(root.toString()).then((r) => {
       if (r) {
         if (r.code === 0) {
+          logInfoMessage('Got Gem Paths')
           const gemPathsArr = r?.message.split("\n")
-          let index = cachedIndex
-          if (isCachedIndexIsEmpty()) { index ??= <ICachedIndex>{} }
-          index.gem_paths ??= {}
+          if (isCachedIndexIsEmpty()) {
+            logInfoMessage('Index is empty, set as empty object')
+            cachedIndex ??= <ICachedIndex>{}
+          }
+          cachedIndex.gem_paths ??= {}
 
           gemPathsArr?.map((path) => {
             let splitedPath = path.split("/")
             let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
     
-            index.gem_paths[name] = path
+            cachedIndex.gem_paths[name] = path
           })
-
-          setCachedIndex(index)
+          logInfoMessage('Gem Paths setted')
         } else {
+          logErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
           vscode.window.showErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
         }
       }
@@ -254,18 +319,24 @@ export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecC
 }
 
 export function calculatePackagesSchemaCtime(root: string) {
+  logInfoMessage('Trying to recalculate Packages.schema.json ctime')
   const packagesSchemaPath = getPackagesSchemaPath(root)
   if (packagesSchemaPath) { 
+    logInfoMessage('Packages.schema.json ctime recalculated')
     setPackagesSchemaCtime(fs.statSync(packagesSchemaPath).ctimeMs)
   }
 }
 
 export function calculatePackageSchemaCtime(root: string, packageName: string) {
+  logInfoMessage(`Trying to recalculate Package.schema.json for ${packageName}`)
   if (!cachedIndex.packages_schema?.packages) { return }
 
   const pckg = cachedIndex.packages_schema.packages.find(p => p.name === packageName)
+  if (!pckg) { return }
+
   let schemaAbsPath = path.join(root, pckg.schema_rpath)
   let time = fs.statSync(schemaAbsPath).ctimeMs
+  logInfoMessage(`Package.schema.json for ${packageName} recalculated`)
   setPackageSchemaCtime(pckg.name, time)
 }
 

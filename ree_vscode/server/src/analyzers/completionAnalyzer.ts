@@ -2,15 +2,13 @@ import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
 import { Position } from 'vscode-languageserver-textdocument'
 import { documents } from '../documentManager'
 import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
-import { QueryMatch, Query, SyntaxNode, Tree, QueryCapture } from 'web-tree-sitter'
-import { getCachedIndex, getGemDir, IPackagesSchema, ICachedIndex, isCachedIndexIsEmpty, IObject, buildObjectArguments } from '../utils/packagesUtils'
+import { Query, SyntaxNode, Tree, QueryCapture } from 'web-tree-sitter'
+import { getCachedIndex, getGemDir, IPackagesSchema, ICachedIndex, isCachedIndexIsEmpty, buildObjectArguments } from '../utils/packagesUtils'
 import { getPackageNameFromPath, getProjectRootDir, getObjectNameFromPath } from '../utils/packageUtils'
 import { extractToken } from '../utils/tokenUtils'
-import { snakeToCamelCase } from '../utils/stringUtils'
+import { logInfoMessage, snakeToCamelCase } from '../utils/stringUtils'
 
-const fs = require('fs')
 const url = require('node:url')
-const path = require('path')
 
 export default class CompletionAnalyzer {
   public static analyze(uri: string, position: Position): CompletionItem[] {
@@ -28,7 +26,10 @@ export default class CompletionAnalyzer {
     }
 
     const index = getCachedIndex()
-    if (isCachedIndexIsEmpty()) { return defaultCompletion } 
+    if (isCachedIndexIsEmpty()) {
+      logInfoMessage('Index is empty in completionAnalyzer')
+      return defaultCompletion
+    } 
 
     const token = extractToken(uri, position)
     if (!token) { return defaultCompletion }
