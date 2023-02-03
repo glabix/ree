@@ -8,6 +8,7 @@ import {
   ExecCommand,
   spawnCommand
 } from '../utils/reeUtils'
+import { logErrorMessage } from '../utils/stringUtils'
 
 const path = require('path')
 
@@ -38,6 +39,7 @@ export function deleteObjectSchema(filePath: string, silent: boolean) {
   const result = execDeleteObjectSchema(rootProjectDir, relativeFilePath)
 
   if (!result) {
+    logErrorMessage(`Can't delete object schema ${relativeFilePath}`)
     vscode.window.showErrorMessage(`Can't delete object schema ${relativeFilePath}`)
     return
   }
@@ -55,6 +57,7 @@ export function deleteObjectSchema(filePath: string, silent: boolean) {
       }
 
       if (commandResult && commandResult.code !== 0) {
+        logErrorMessage(`DeleteObjectSchemaError: ${commandResult.message}`)
         vscode.window.showErrorMessage(`DeleteObjectSchemaError: ${commandResult.message}`)
       }
     }).then(() => {
@@ -72,7 +75,8 @@ export async function execDeleteObjectSchema(rootProjectDir: string, objectPath:
 
     return spawnCommand(fullArgsArr)
   } catch(e) {
-    vscode.window.showErrorMessage(`Error. ${e}`)
+    logErrorMessage(`Error. ${e.toString()}`)
+    vscode.window.showErrorMessage(`Error. ${e.toString()}`)
     return undefined
   }
 }

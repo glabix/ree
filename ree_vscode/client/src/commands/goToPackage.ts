@@ -3,7 +3,7 @@ import { PACKAGES_SCHEMA_FILE, PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { openDocument } from '../utils/documentUtils'
 import { IGemPackageSchema, IPackageSchema, getGemDir, getCachedIndex, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getCurrentProjectDir } from '../utils/fileUtils'
-import { logInfoMessage } from '../utils/stringUtils'
+import { logErrorMessage, logInfoMessage } from '../utils/stringUtils'
 
 var fs = require('fs')
 var path = require("path")
@@ -18,6 +18,7 @@ export function goToPackage() {
 
   const projectPath = getCurrentProjectDir()
   if (!projectPath) {
+    logErrorMessage(`Unable to find ${PACKAGES_SCHEMA_FILE}`)
     vscode.window.showErrorMessage(`Unable to find ${PACKAGES_SCHEMA_FILE}`)
     return
   }
@@ -31,6 +32,7 @@ export function goToPackage() {
   const packagesSchema = index.packages_schema
 
   if (!packagesSchema) {
+    logErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
     vscode.window.showErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
     return
   }
@@ -52,6 +54,7 @@ export function goToPackage() {
     const entryPath = packageSchemaPath.split(PACKAGE_SCHEMA_FILE)[0] + `package/${p?.name}.rb`
 
     if (!fs.existsSync(entryPath)) {
+      logErrorMessage(`Error. File not found: ${p?.name}/package/${p?.name}.rb`)
       vscode.window.showErrorMessage(`Error. File not found: ${p?.name}/package/${p?.name}.rb`)
       return
     }

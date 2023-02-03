@@ -4,7 +4,7 @@ import { getCachedIndex, IPackageSchema, isCachedIndexIsEmpty } from '../utils/p
 import { getCurrentProjectDir } from '../utils/fileUtils'
 import { getPackageNameFromPath } from '../utils/packageUtils'
 import { generatePackageSchema } from './generatePackageSchema'
-import { logInfoMessage } from '../utils/stringUtils'
+import { logErrorMessage, logInfoMessage } from '../utils/stringUtils'
 
 type SelectPackageCb = (selected: string | undefined) => void
 
@@ -25,6 +25,7 @@ export function selectAndGeneratePackageSchema() {
 
   const projectPath = getCurrentProjectDir()
   if (!projectPath) {
+    logErrorMessage(`Unable to find ${PACKAGES_SCHEMA_FILE}`)
     vscode.window.showErrorMessage(`Unable to find ${PACKAGES_SCHEMA_FILE}`)
     return
   }
@@ -38,6 +39,7 @@ export function selectAndGeneratePackageSchema() {
   const packagesSchema = index.packages_schema
 
   if (!packagesSchema) {
+    logErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
     vscode.window.showErrorMessage(`Unable to read ${PACKAGES_SCHEMA_FILE}`)
     return
   }

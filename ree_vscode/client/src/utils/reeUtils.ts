@@ -1,3 +1,5 @@
+import { logErrorMessage } from "./stringUtils"
+
 const vscode = require('vscode')
 
 export interface ExecCommand {
@@ -99,6 +101,7 @@ export async function spawnCommand(args): Promise<ExecCommand | undefined> {
       code: code
     }
   } catch(e) {
+    logErrorMessage(`Error. ${e}`)
     vscode.window.showErrorMessage(`Error. ${e}`)
     return undefined
   }

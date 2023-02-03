@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import { getProjectRootDir } from '../utils/packageUtils'
 import { isReeInstalled, isBundleGemsInstalled, isBundleGemsInstalledInDocker, ExecCommand, spawnCommand } from '../utils/reeUtils'
 import { buildReeCommandFullArgsArray } from '../utils/reeUtils'
+import { logErrorMessage } from '../utils/stringUtils'
 
 export function generatePackagesSchema(silent: boolean) {
   if (!vscode.workspace.workspaceFolders) {
@@ -46,6 +47,7 @@ export function generatePackagesSchema(silent: boolean) {
 
   let result = execGeneratePackagesSchema(rootProjectDir)
   if (!result) {
+    logErrorMessage("Can't generate Packages.schema.json")
     vscode.window.showErrorMessage("Can't generate Packages.schema.json")
     return
   }
@@ -59,6 +61,7 @@ export function generatePackagesSchema(silent: boolean) {
 
     return result.then((commandResult) => {
       if (commandResult.code !== 0) {
+        logErrorMessage(`GeneratePackagesSchemaError: ${commandResult.message}`)
         vscode.window.showErrorMessage(`GeneratePackagesSchemaError: ${commandResult.message}`)
         return
       }
@@ -76,7 +79,8 @@ function execGeneratePackagesSchema(rootProjectDir: string): Promise<ExecCommand
       buildReeCommandFullArgsArray(rootProjectDir, ['gen.packages_json'])
     )
   } catch(e) {
-    vscode.window.showErrorMessage(`Error. ${e}`)
+    logErrorMessage(`Error. ${e.toString()}`)
+    vscode.window.showErrorMessage(`Error. ${e.toString()}`)
     return undefined
   }
 }

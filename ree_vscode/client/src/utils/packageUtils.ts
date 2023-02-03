@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import { PACKAGES_SCHEMA_FILE, PACKAGE_DIR, PACKAGE_SCHEMA_FILE } from '../core/constants'
 import { getPackageDir } from './fileUtils'
+import { logErrorMessage } from './stringUtils'
 
 const path = require("path")
 const fs = require("fs")
@@ -22,6 +23,7 @@ export function getPackageNameFromPath(pathToFile: string): string | null {
     }
   } catch(err) {
     console.log(err)
+    logErrorMessage(`Error: Unable to parse ${PACKAGE_SCHEMA_FILE}`)
     vscode.window.showErrorMessage(`Error: Unable to parse ${PACKAGE_SCHEMA_FILE}`)
     return null
   }

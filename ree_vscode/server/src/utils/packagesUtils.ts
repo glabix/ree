@@ -160,6 +160,7 @@ export function getPackageIndex(root: string, packageName: string) {
         }
       }
     } catch(e: any) {
+      logErrorMessage(e.toString())
       connection.window.showErrorMessage(e.toString())
       getPackageIndexSemaphore = Semaphore.open
     }
@@ -227,6 +228,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
             cachedIndex = <ICachedIndex>{}
           }
           getNewIndexRetryCount += 1
+          logErrorMessage(e.toString())
           connection.window.showErrorMessage(e.toString())
           getProjectIndexSemaphore = Semaphore.open
         }
@@ -250,6 +252,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
               })
               logInfoMessage('Gem Paths setted')
             } else {
+              logErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
               connection.window.showErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
             }
           }
@@ -596,7 +599,8 @@ export function updateFileIndex(uri: string) {
             }
             getFileIndexSemaphore = Semaphore.open
           } catch (e: any) {
-            connection.window.showErrorMessage(e)
+            logErrorMessage(e.toString())
+            connection.window.showErrorMessage(e.toString())
             getFileIndexSemaphore = Semaphore.open
           }
         } else {

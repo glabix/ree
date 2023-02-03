@@ -181,6 +181,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
         cachedIndex = <ICachedIndex>{}
       }
       getNewIndexRetryCount += 1
+      logErrorMessage(e.toString())
       vscode.window.showErrorMessage(e.toString())
     }
   }).then(() => {
@@ -203,6 +204,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
           })
           logInfoMessage('Gem Paths setted')
         } else {
+          logErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
           vscode.window.showErrorMessage(`GetGemPathsError: ${r.message.toString()}`)
         }
       }

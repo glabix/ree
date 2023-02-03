@@ -6,7 +6,7 @@ import { documents } from '../documentManager'
 import { findTokenNodeInTree, forest, mapLinkQueryMatches } from '../forest'
 import { getCachedIndex, ICachedIndex, isCachedIndexIsEmpty } from '../utils/packagesUtils'
 import { getLocalePath, getProjectRootDir, Locale, resolveObject } from '../utils/packageUtils'
-import { logInfoMessage } from '../utils/stringUtils'
+import { logErrorMessage, logInfoMessage } from '../utils/stringUtils'
 import { extractToken, findTokenInFile, findLinkedObject, findMethod } from '../utils/tokenUtils'
 
 const url = require('node:url')
@@ -316,6 +316,7 @@ export default class DefinitionAnalyzer {
         ruLocales = yaml.load(ruLocaleFile)
       } catch (e: any) {
         ruLocales = {}
+        logErrorMessage(`LocaleParsingError: ${ruLocalePath} - ${e.toString()}`)
         connection.window.showErrorMessage(`LocaleParsingError: ${ruLocalePath} - ${e.toString()}`)
       }
       ruValue = resolveObject(ruFullKey, ruLocales)
@@ -330,6 +331,7 @@ export default class DefinitionAnalyzer {
         enLocales = yaml.load(enLocaleFile)
       } catch (e: any) {
         enLocales = {}
+        logErrorMessage(`LocaleParsingError: ${enLocalePath} - ${e.toString()}`)
         connection.window.showErrorMessage(`LocaleParsingError: ${enLocalePath} - ${e.toString()}`)
       }
       enValue = resolveObject(enFullKey, enLocales)
