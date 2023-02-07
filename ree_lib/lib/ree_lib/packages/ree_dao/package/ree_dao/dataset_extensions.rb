@@ -110,29 +110,20 @@ module ReeDao
         nil
       end
 
-      def update(entity)
-        if opts[:schema_mapper]
-          raw = opts[:schema_mapper].db_dump(entity)
-          raw = extract_changes(entity, raw)
+      def update(hash_or_entity)
+        return __original_update(hash_or_entity) if !opts[:schema_mapper]
+        return __original_update(hash_or_entity) if hash_or_entity.is_a?(Hash)
 
-          unless raw.empty?
-            update_persistence_state(entity, raw)
-            key_condition = prepare_key_condition_from_entity(entity)
-            where(key_condition).__original_update(raw)
-          end
+        raw = opts[:schema_mapper].db_dump(hash_or_entity)
+        raw = extract_changes(hash_or_entity, raw)
 
-          entity
-        else
-          __original_update(entity)
+        unless raw.empty?
+          update_persistence_state(hash_or_entity, raw)
+          key_condition = prepare_key_condition_from_entity(hash_or_entity)
+          where(key_condition).__original_update(raw)
         end
-      end
 
-      def update_where(conditions)
-        __original_update(conditions)
-      end
-
-      def delete_where(conditions)
-        __original_delete(conditions)
+        hash_or_entity
       end
 
       def naked_first
@@ -143,13 +134,12 @@ module ReeDao
         __original_last
       end
 
-      def delete(entity = nil)
-        if entity
-          key_condition = prepare_key_condition_from_entity(entity)
-          where(key_condition).__original_delete
-        else
-          __original_delete
-        end
+      def delete(hash_or_entity = nil)
+        return __original_delete if hash_or_entity.nil?
+        return where(hash_or_entity).__original_delete if hash_or_entity.is_a?(Hash)
+
+        key_condition = prepare_key_condition_from_entity(hash_or_entity)
+        where(key_condition).__original_delete
       end
 
       def with_lock
