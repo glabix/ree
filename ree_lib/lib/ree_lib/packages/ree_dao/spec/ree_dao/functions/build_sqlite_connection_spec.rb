@@ -228,7 +228,7 @@ RSpec.describe :build_sqlite_connection do
     }
   end
 
-  context "update with condition" do
+  context "update by condition" do
     it {
       dao.delete_all
 
@@ -246,7 +246,7 @@ RSpec.describe :build_sqlite_connection do
     }
   end
 
-  context "uodate with entity" do
+  context "uodate by entity" do
     it {
       dao.delete_all
 
@@ -259,6 +259,56 @@ RSpec.describe :build_sqlite_connection do
 
       user = dao.find(user.id)
       expect(user.name).to eq('Doe')
+    }
+  end
+
+  context "delete by condition" do
+    it {
+      dao.delete_all
+
+      user = ReeDaoTest::User.new(name: 'John', age: 30)
+      other_user = ReeDaoTest::User.new(name: 'Steve', age: 30)
+
+      dao.put(user)
+      dao.put(other_user)
+
+      dao.where(name: 'John').delete(name: 'John')
+
+      user = dao.find(user.id)
+      other_user = dao.find(other_user.id)
+
+      expect(user).to eq(nil)
+      expect(other_user.id).to be_a(Integer)
+    }
+  end
+
+  context "delete by entity" do
+    it {
+      dao.delete_all
+
+      user = ReeDaoTest::User.new(name: 'John', age: 30)
+      dao.put(user)
+
+      user.name = 'Doe'
+
+      dao.where(name: 'John').delete(user)
+
+      user = dao.find(user.id)
+      expect(user).to eq(nil)
+    }
+
+    it {
+      dao.delete_all
+
+      user = ReeDaoTest::User.new(name: 'John', age: 30)
+      dao.put(user)
+
+      user.name = 'Doe'
+
+      dao.delete(user)
+
+      user = dao.find(user.id)
+      expect(user).to eq(nil)
     }
   end
 end
