@@ -10,7 +10,7 @@
     {
       "doc": "",
       "throws": [
-        "ArgumentError"
+
       ],
       "return": "ReeMapper::MapperStrategy",
       "args": [
@@ -19,8 +19,8 @@
           "type": "Symbol"
         },
         {
-          "arg": "output",
-          "type": "Symbol"
+          "arg": "dto",
+          "type": "Class"
         },
         {
           "arg": "always_optional",

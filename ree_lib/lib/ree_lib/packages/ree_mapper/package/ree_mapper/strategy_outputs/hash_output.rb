@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-class ReeMapper::SymbolKeyHashOutput < ReeMapper::StrategyOutput
-  contract(Hash)
-  def build_object
-    Hash.new
+class ReeMapper::HashOutput < ReeMapper::StrategyOutput
+  contract(ArrayOf[Symbol] => Object)
+  def build_object(_field_names)
+    dto.new
   end
 
   contract(Object, ReeMapper::Field, Any => nil)

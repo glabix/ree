@@ -7,7 +7,7 @@ RSpec.describe ReeMapper::MapperFactory do
 
   let(:mapper_factory) {
     build_mapper_factory(strategies: [
-      build_mapper_strategy(method: :cast, output: :symbol_key_hash)
+      build_mapper_strategy(method: :cast, dto: Hash)
     ])
   }
 

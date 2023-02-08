@@ -8,7 +8,7 @@ RSpec.describe ReeMapper::Mapper do
     let(:mapper) {
       build_mapper_factory(
         strategies: [
-          build_mapper_strategy(method: :cast, output: :symbol_key_hash),
+          build_mapper_strategy(method: :cast, dto: Hash),
         ]
       ).call.use(:cast) do
         integer :my_field
@@ -28,27 +28,11 @@ RSpec.describe ReeMapper::Mapper do
     }
   end
 
-  describe 'string key hash output' do
+  describe 'hash dto' do
     let(:mapper) {
       build_mapper_factory(
         strategies: [
-          build_mapper_strategy(method: :cast, output: :string_key_hash),
-        ]
-      ).call.use(:cast) do
-        integer :my_field
-      end
-    }
-
-    it {
-      expect(mapper.cast({ my_field: 1 })).to eq({ 'my_field' => 1 })
-    }
-  end
-
-  describe 'string key hash output' do
-    let(:mapper) {
-      build_mapper_factory(
-        strategies: [
-          build_mapper_strategy(method: :cast, output: :symbol_key_hash),
+          build_mapper_strategy(method: :cast, dto: Hash),
         ]
       ).call.use(:cast) do
         integer :my_field
@@ -60,12 +44,32 @@ RSpec.describe ReeMapper::Mapper do
     }
   end
 
-  describe 'object output' do
+  describe 'struct dto' do
+    let(:mapper) {
+      build_mapper_factory(
+        strategies: [
+          build_mapper_strategy(method: :cast, dto: Struct),
+        ]
+      ).call.use(:cast) do
+        integer :my_field
+      end
+    }
+
+    it {
+      expect(mapper.cast({ my_field: 1 }).to_h).to eq({ my_field: 1 })
+    }
+
+    it { 
+      expect(mapper.cast({ my_field: 1 })).to be_a(Struct)
+    }
+  end
+
+  describe 'object dto' do
     let(:dto) { Class.new }
     let(:mapper) {
       build_mapper_factory(
         strategies: [
-          build_mapper_strategy(method: :cast, output: :object),
+          build_mapper_strategy(method: :cast, dto: Object),
         ]
       ).call.use(:cast, dto: dto) do
         integer :my_field
@@ -87,7 +91,7 @@ RSpec.describe ReeMapper::Mapper do
     let(:mapper_factory) {
       build_mapper_factory(
         strategies: [
-          build_mapper_strategy(method: :cast, output: :symbol_key_hash, always_optional: true),
+          build_mapper_strategy(method: :cast, dto: Hash, always_optional: true),
         ]
       )
     }

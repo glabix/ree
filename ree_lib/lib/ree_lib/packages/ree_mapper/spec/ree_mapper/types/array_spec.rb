@@ -7,10 +7,10 @@ RSpec.describe 'ReeMapper::Array' do
   let(:mapper_factory) {
     build_mapper_factory(
       strategies: [
-        build_mapper_strategy(method: :cast,      output: :symbol_key_hash),
-        build_mapper_strategy(method: :serialize, output: :symbol_key_hash),
-        build_mapper_strategy(method: :db_dump,   output: :symbol_key_hash),
-        build_mapper_strategy(method: :db_load,   output: :symbol_key_hash)
+        build_mapper_strategy(method: :cast,      dto: Hash),
+        build_mapper_strategy(method: :serialize, dto: Hash),
+        build_mapper_strategy(method: :db_dump,   dto: Hash),
+        build_mapper_strategy(method: :db_load,   dto: Hash)
       ]
     )
   }
@@ -135,10 +135,10 @@ RSpec.describe 'ReeMapper::Array' do
     }
   end
 
-  context 'with array of hashes with key option' do
+  context 'with array of hashes with dto option' do
     let(:mapper) {
       mapper_factory.call.use(:serialize) {
-        array :coords, key: :string do
+        array :coords, dto: OpenStruct do
           integer :x
           integer :y
         end
@@ -146,8 +146,8 @@ RSpec.describe 'ReeMapper::Array' do
     }
 
     it {
-      expect(mapper.serialize({ coords: [{ x: 1, y: 1 }, { x: 2, y: 2 }] }))
-        .to eq({ coords: [{ 'x' => 1, 'y' => 1 }, { 'x' => 2, 'y' => 2 }] })
+      expect(mapper.serialize({ coords: [{ x: 1, y: 1 }] }))
+        .to eq({ coords: [OpenStruct.new({ x: 1, y: 1 })] })
     }
   end
 end

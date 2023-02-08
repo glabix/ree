@@ -33,8 +33,8 @@ module ReeMapper
 
   require_relative 'ree_mapper/strategy_outputs/strategy_output'
   require_relative 'ree_mapper/strategy_outputs/object_output'
-  require_relative 'ree_mapper/strategy_outputs/string_key_hash_output'
-  require_relative 'ree_mapper/strategy_outputs/symbol_key_hash_output'
+  require_relative 'ree_mapper/strategy_outputs/hash_output'
+  require_relative 'ree_mapper/strategy_outputs/struct_output'
 
   require_relative 'ree_mapper/mapper_strategy'
   require_relative 'ree_mapper/mapper'
@@ -154,10 +154,10 @@ Create `mapper_factory.rb` file to declare `MapperFactory` class.
 
     def build
       mapper_factory = build_mapper_factory(strategies: [
-        build_mapper_strategy(method: :cast,      output: :symbol_key_hash),
-        build_mapper_strategy(method: :serialize, output: :symbol_key_hash),
-        build_mapper_strategy(method: :db_dump,   output: :string_key_hash),
-        build_mapper_strategy(method: :db_load,   output: :object)
+        build_mapper_strategy(method: :cast,      dto: Hash),
+        build_mapper_strategy(method: :serialize, dto: Hash),
+        build_mapper_strategy(method: :db_dump,   dto: Hash),
+        build_mapper_strategy(method: :db_load,   dto: Object)
       ])
 
       mapper_factory.register(:cart_user, user_caster)

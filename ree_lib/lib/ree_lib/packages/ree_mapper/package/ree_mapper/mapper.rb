@@ -40,7 +40,7 @@ class ReeMapper::Mapper
 
               user_fields_filter = ReeMapper::FieldsFilter.build(only: only, except: except)
 
-              @fields.each_with_object(@#{method}_strategy.build_object) do |(_, field), acc|
+              @fields.each_with_object(@#{method}_strategy.build_object(@fields.keys)) do |(_, field), acc|
                 field_fields_filters = fields_filters + [user_fields_filter]
 
                 next unless field_fields_filters.all? { _1.allow? field.name }

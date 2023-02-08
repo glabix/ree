@@ -6,7 +6,7 @@ RSpec.describe :build_mapper_factory do
 
   it {
     result = build_mapper_factory(strategies: [
-      build_mapper_strategy(method: :cast, output: :symbol_key_hash)
+      build_mapper_strategy(method: :cast, dto: Hash)
     ])
 
     expect(result).to be_a(Class)

@@ -7,7 +7,7 @@ RSpec.describe 'Mapper Hash' do
   let(:mapper_factory) {
     build_mapper_factory(
       strategies: [
-        build_mapper_strategy(method: :cast, output: :symbol_key_hash)
+        build_mapper_strategy(method: :cast, dto: Hash)
       ]
     )
   }
@@ -35,38 +35,16 @@ RSpec.describe 'Mapper Hash' do
     }
   end
 
-  describe 'key: option' do
+  describe 'dto: option' do
     it {
       expect(
         mapper_factory.call.use(:cast) {
-          hash :point, key: :string do
+          hash :point, dto: OpenStruct do
             integer :x
             integer :y
           end
         }.cast({ point: { x: 1, y: 1 } })
-      ).to eq({ point: { 'x' => 1, 'y' => 1 } })
-    }
-
-    it {
-      expect(
-        mapper_factory.call.use(:cast) {
-          hash :point, key: :symbol do
-            integer :x
-            integer :y
-          end
-        }.cast({ point: { x: 1, y: 1 } })
-      ).to eq({ point: { x: 1, y: 1 } })
-    }
-
-    it {
-      expect {
-        mapper_factory.call.use(:cast) {
-          hash :point, key: :whatever do
-            integer :x
-            integer :y
-          end
-        }
-      }.to raise_error(ArgumentError)
+      ).to eq({ point: OpenStruct.new({ x: 1, y: 1 }) })
     }
   end
 
@@ -74,7 +52,7 @@ RSpec.describe 'Mapper Hash' do
     let(:mapper_factory) {
       build_mapper_factory(
         strategies: [
-          build_mapper_strategy(method: :cast, output: :object)
+          build_mapper_strategy(method: :cast, dto: Object)
         ]
       )
     }

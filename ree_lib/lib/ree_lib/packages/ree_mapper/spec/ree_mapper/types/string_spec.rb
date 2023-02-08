@@ -7,10 +7,10 @@ RSpec.describe 'ReeMapper::String' do
   let(:mapper_factory) {
     build_mapper_factory(
       strategies: [
-        build_mapper_strategy(method: :cast,      output: :symbol_key_hash),
-        build_mapper_strategy(method: :serialize, output: :symbol_key_hash),
-        build_mapper_strategy(method: :db_dump,   output: :symbol_key_hash),
-        build_mapper_strategy(method: :db_load,   output: :symbol_key_hash)
+        build_mapper_strategy(method: :cast,      dto: Hash),
+        build_mapper_strategy(method: :serialize, dto: Hash),
+        build_mapper_strategy(method: :db_dump,   dto: Hash),
+        build_mapper_strategy(method: :db_load,   dto: Hash)
       ]
     )
   }

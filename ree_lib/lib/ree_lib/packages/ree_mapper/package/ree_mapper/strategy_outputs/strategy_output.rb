@@ -1,21 +1,17 @@
 # frozen_string_literal: true
 
 class ReeMapper::StrategyOutput
-  def build_object
-    raise NotImplementedError
-  end
-
-  def assign_value(*)
-    raise NotImplementedError
-  end
-
-  contract(Class => Class)
-  def dto=(dto)
+  contract(Class => Any)
+  def initialize(dto)
     @dto = dto
   end
 
-  contract(None => Nilor[Class])
-  def dto
-    @dto
+  contract(Object, ReeMapper::Field, Any => nil).throws(NotImplementedError)
+  def assign_value(object, field, value)
+    raise NotImplementedError
   end
+
+  private
+
+  attr_reader :dto
 end

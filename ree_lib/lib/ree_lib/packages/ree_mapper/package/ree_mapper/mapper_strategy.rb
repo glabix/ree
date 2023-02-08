@@ -3,26 +3,16 @@
 class ReeMapper::MapperStrategy
   attr_reader :method, :always_optional
 
-  contract(Symbol, ReeMapper::StrategyOutput, Bool => Any)
-  def initialize(method:, output:, always_optional:)
+  contract(Symbol, Class, Bool => Any)
+  def initialize(method:, dto:, always_optional:)
     @method          = method
-    @output          = output
+    @output          = build_output(dto)
     @always_optional = always_optional
   end
 
-  contract None => ReeMapper::StrategyOutput
-  def output
-    @output
-  end
-
-  contract ReeMapper::StrategyOutput => ReeMapper::StrategyOutput
-  def output=(output)
-    @output = output
-  end
-
-  contract(Any)
-  def build_object
-    output.build_object
+  contract(ArrayOf[Symbol] => Any)
+  def build_object(field_names)
+    output.build_object(field_names)
   end
 
   contract(Any, ReeMapper::Field, Any => nil)
@@ -48,13 +38,23 @@ class ReeMapper::MapperStrategy
     end
   end
 
-  contract(Class => Class)
+  contract(Class => nil)
   def dto=(dto)
-    output.dto = dto
+    @output = build_output(dto)
+    nil
   end
 
-  contract(None => Nilor[Class])
-  def dto
-    output.dto
+  private
+
+  attr_reader :output
+
+  def build_output(dto)
+    if dto == Hash || (defined?(OpenStruct) && dto == OpenStruct)
+      ReeMapper::HashOutput.new(dto)
+    elsif dto == Struct
+      ReeMapper::StructOutput.new
+    else
+      ReeMapper::ObjectOutput.new(dto)
+    end
   end
 end
