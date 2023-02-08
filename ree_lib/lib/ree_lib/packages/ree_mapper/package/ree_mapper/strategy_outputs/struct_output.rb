@@ -4,6 +4,11 @@ class ReeMapper::StructOutput < ReeMapper::StrategyOutput
   contract(None => Any)
   def initialize; end
 
+  def initialize_dup(orig)
+    @dto = nil
+    super
+  end
+
   contract(ArrayOf[Symbol] => Object)
   def build_object(field_names)
     @dto ||= begin

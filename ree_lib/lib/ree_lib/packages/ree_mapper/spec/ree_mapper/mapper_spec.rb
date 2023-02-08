@@ -52,15 +52,22 @@ RSpec.describe ReeMapper::Mapper do
         ]
       ).call.use(:cast) do
         integer :my_field
+        hash :hsh do
+          integer :nested_field
+        end
       end
     }
 
     it {
-      expect(mapper.cast({ my_field: 1 }).to_h).to eq({ my_field: 1 })
+      nested_struct = Struct.new(:nested_field)
+      struct = Struct.new(:my_field, :hsh)
+      expect(mapper.cast({ my_field: 1, hsh: { nested_field: 1 } }).inspect).to eq(
+        struct.new(1, nested_struct.new(1)).inspect
+      )
     }
 
     it { 
-      expect(mapper.cast({ my_field: 1 })).to be_a(Struct)
+      expect(mapper.cast({ my_field: 1, hsh: { nested_field: 1 } })).to be_a(Struct)
     }
   end
 

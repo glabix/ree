@@ -10,6 +10,11 @@ class ReeMapper::MapperStrategy
     @always_optional = always_optional
   end
 
+  def initialize_dup(_orig)
+    @output = @output.dup
+    super
+  end
+
   contract(ArrayOf[Symbol] => Any)
   def build_object(field_names)
     output.build_object(field_names)
