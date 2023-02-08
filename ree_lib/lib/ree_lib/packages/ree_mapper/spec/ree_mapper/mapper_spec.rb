@@ -44,6 +44,26 @@ RSpec.describe ReeMapper::Mapper do
     }
   end
 
+  describe 'ostruct dto' do
+    let(:mapper) {
+      build_mapper_factory(
+        strategies: [
+          build_mapper_strategy(method: :cast, dto: OpenStruct),
+        ]
+      ).call.use(:cast) do
+        integer :my_field
+      end
+    }
+
+    it {
+      expect(mapper.cast({ my_field: 1 }).to_h).to eq({ my_field: 1 })
+    }
+
+    it {
+      expect(mapper.cast({ my_field: 1 })).to be_a(OpenStruct)
+    }
+  end
+
   describe 'struct dto' do
     let(:mapper) {
       build_mapper_factory(
