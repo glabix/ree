@@ -3,8 +3,8 @@ class ReeDao::OneToOne
 
   fn :one_to_one do
     link :demodulize, from: :ree_string
-    link :underscore, from: :ree_string
     link :index_by, from: :ree_array
+    link :underscore, from: :ree_string
   end
 
   contract(
@@ -21,10 +21,7 @@ class ReeDao::OneToOne
 
     dto_class = assoc_dao
       .opts[:schema_mapper]
-      .strategies
-      .detect {_1 .method == :db_load }
-      .output
-      .dto
+      .dto(:db_load)
 
     assoc_name = underscore(demodulize(dto_class.name))
     reverse = opts[:reverse]

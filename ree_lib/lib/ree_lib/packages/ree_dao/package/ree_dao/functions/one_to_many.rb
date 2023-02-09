@@ -3,8 +3,8 @@ class ReeDao::OneToMany
 
   fn :one_to_many do
     link :demodulize, from: :ree_string
-    link :underscore, from: :ree_string
     link :group_by, from: :ree_array
+    link :underscore, from: :ree_string
   end
 
   contract(
@@ -24,10 +24,7 @@ class ReeDao::OneToMany
     else
       dto_class = assoc_dao
         .opts[:schema_mapper]
-        .strategies
-        .detect {_1 .method == :db_load }
-        .output
-        .dto
+        .dto(:db_load)
 
       name = underscore(demodulize(dto_class.name))
       "set_#{name}s".to_sym
