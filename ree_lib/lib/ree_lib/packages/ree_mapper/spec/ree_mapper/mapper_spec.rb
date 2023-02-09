@@ -4,7 +4,7 @@ RSpec.describe ReeMapper::Mapper do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
 
-  describe 'input' do
+  describe '#:strategy_method' do
     let(:mapper) {
       build_mapper_factory(
         strategies: [
@@ -25,6 +25,12 @@ RSpec.describe ReeMapper::Mapper do
 
     it {
       expect(mapper.cast(OpenStruct.new({ my_field: 1 }))).to eq({ my_field: 1 })
+    }
+
+    it {
+      obj = Object.new
+      obj.define_singleton_method(:my_field) { 1 }
+      expect(mapper.cast(obj)).to eq({ my_field: 1 })
     }
   end
 
@@ -130,6 +136,34 @@ RSpec.describe ReeMapper::Mapper do
 
     it {
       expect(mapper.cast({})).to eq({})
+    }
+  end
+
+  describe '#dto' do
+    let(:mapper_factory) {
+      build_mapper_factory(
+        strategies: [
+          build_mapper_strategy(method: :cast, dto: Hash, always_optional: true),
+          build_mapper_strategy(method: :serialize, dto: Object),
+        ]
+      )
+    }
+    let(:mapper) {
+      mapper_factory.call.use(:cast).use(:serialize, dto: Struct) do
+        integer :my_field
+      end
+    }
+
+    it {
+      expect(mapper.dto(:cast)).to eq(Hash)
+    }
+
+    it {
+      expect(mapper.dto(:serialize)).to be < Struct
+    }
+
+    it {
+      expect { mapper.dto(:db_dump) }.to raise_error(ArgumentError, "there is no :db_dump strategy")
     }
   end
 end

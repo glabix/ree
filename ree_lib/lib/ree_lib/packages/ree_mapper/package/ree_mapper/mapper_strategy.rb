@@ -15,9 +15,9 @@ class ReeMapper::MapperStrategy
     super
   end
 
-  contract(ArrayOf[Symbol] => Any)
-  def build_object(field_names)
-    output.build_object(field_names)
+  contract(None => Object)
+  def build_object
+    output.build_object
   end
 
   contract(Any, ReeMapper::Field, Any => nil)
@@ -47,6 +47,16 @@ class ReeMapper::MapperStrategy
   def dto=(dto)
     @output = build_output(dto)
     nil
+  end
+
+  contract(None => Class)
+  def dto
+    output.dto
+  end
+
+  contract(ArrayOf[Symbol] => nil)
+  def prepare_dto(field_names)
+    output.prepare_dto(field_names)
   end
 
   private

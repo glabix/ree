@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class ReeMapper::ObjectOutput < ReeMapper::StrategyOutput
-  contract(ArrayOf[Symbol] => Object)
-  def build_object(_field_names)
+  contract(None => Object)
+  def build_object
     dto.allocate
   end
 

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ReeMapper::StrategyOutput
+  attr_reader :dto
+
   contract(Class => Any)
   def initialize(dto)
     @dto = dto
@@ -11,7 +13,6 @@ class ReeMapper::StrategyOutput
     raise NotImplementedError
   end
 
-  private
-
-  attr_reader :dto
+  contract(ArrayOf[Symbol] => nil)
+  def prepare_dto(field_names); end
 end

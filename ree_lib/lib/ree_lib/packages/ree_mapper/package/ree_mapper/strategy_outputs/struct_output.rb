@@ -9,18 +9,20 @@ class ReeMapper::StructOutput < ReeMapper::StrategyOutput
     super
   end
 
-  contract(ArrayOf[Symbol] => Object)
-  def build_object(field_names)
-    @dto ||= begin
-      field_names = [:_] if field_names.empty?
-      Struct.new(*field_names)
-    end
+  contract(None => Object)
+  def build_object
     dto.allocate
   end
 
   contract(Object, ReeMapper::Field, Any => nil)
   def assign_value(object, field, value)
     object[field.name] = value
+    nil
+  end
+
+  contract(ArrayOf[Symbol] => nil)
+  def prepare_dto(field_names)
+    @dto = Struct.new(*field_names)
     nil
   end
 end

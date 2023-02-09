@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ReeMapper::Mapper
-  contract(ArrayOf[ReeMapper::MapperStrategy], Nilor[ReeMapper::AbstractType] => Any)
+  contract(ArrayOf[ReeMapper::MapperStrategy], Nilor[ReeMapper::AbstractType] => Any).throws(ReeMapper::UnsupportedTypeError)
   def self.build(strategies, type = nil)
     if type
       strategies.each do |strategy|
@@ -40,7 +40,7 @@ class ReeMapper::Mapper
 
               user_fields_filter = ReeMapper::FieldsFilter.build(only: only, except: except)
 
-              @fields.each_with_object(@#{method}_strategy.build_object(@fields.keys)) do |(_, field), acc|
+              @fields.each_with_object(@#{method}_strategy.build_object) do |(_, field), acc|
                 field_fields_filters = fields_filters + [user_fields_filter]
 
                 next unless field_fields_filters.all? { _1.allow? field.name }
@@ -109,5 +109,19 @@ class ReeMapper::Mapper
   contract(Symbol => Symbol)
   def name=(name)
     @name = name
+  end
+
+  contract(Symbol => Class).throws(ArgumentError)
+  def dto(strategy_method)
+    strategy = strategies.detect { _1.method == strategy_method }
+    raise ArgumentError, "there is no :#{strategy_method} strategy" unless strategy
+    strategy.dto
+  end
+
+  contract(None => nil).throws(ReeMapper::ArgumentError)
+  def prepare_dto
+    raise ReeMapper::ArgumentError, "mapper should contain at least one field" if fields.empty?
+    strategies.each { _1.prepare_dto(fields.keys) }
+    nil
   end
 end

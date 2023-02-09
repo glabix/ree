@@ -34,6 +34,7 @@ class ReeMapper::MapperFactoryProxy
 
     mapper = ReeMapper::Mapper.build(strategies)
     mapper_factory.new(mapper).instance_exec(&blk)
+    mapper.prepare_dto
 
     mapper_factory.register(register_as, mapper) if register_as
 
