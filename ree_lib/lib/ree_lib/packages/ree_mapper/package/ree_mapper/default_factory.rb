@@ -10,10 +10,10 @@ class ReeMapper::DefaultFactory
 
   def build
     build_mapper_factory(strategies: [
-      build_mapper_strategy(method: :cast, output: :symbol_key_hash),
-      build_mapper_strategy(method: :serialize, output: :symbol_key_hash),
-      build_mapper_strategy(method: :db_dump, output: :symbol_key_hash),
-      build_mapper_strategy(method: :db_load, output: :object, always_optional: true)
+      build_mapper_strategy(method: :cast),
+      build_mapper_strategy(method: :serialize),
+      build_mapper_strategy(method: :db_dump),
+      build_mapper_strategy(method: :db_load, dto: Object, always_optional: true)
     ])
   end
 end

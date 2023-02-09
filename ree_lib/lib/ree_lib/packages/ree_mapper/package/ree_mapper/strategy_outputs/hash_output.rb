@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-class ReeMapper::StringKeyHashOutput < ReeMapper::StrategyOutput
-  contract(Hash)
+class ReeMapper::HashOutput < ReeMapper::StrategyOutput
+  contract(None => Object)
   def build_object
-    Hash.new
+    dto.new
   end
 
   contract(Object, ReeMapper::Field, Any => nil)
   def assign_value(object, field, value)
-    object[field.name_as_str] = value
+    object[field.name] = value
     nil
   end
 end

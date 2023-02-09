@@ -27,10 +27,7 @@ class ReeDao::PersistAssoc
     assoc_name = if opts[:child_assoc].nil?
       dto_class = assoc_dao
         .opts[:schema_mapper]
-        .strategies
-        .detect {_1 .method == :db_load }
-        .output
-        .dto
+        .dto(:db_load)
 
       name = underscore(demodulize(dto_class.name))
       "#{name}s"

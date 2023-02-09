@@ -5,12 +5,6 @@ class ReeMapper::MapperFactory
     attr_reader :types, :strategies
   end
 
-  HASH_KEY_OPTION_VALUES = [:symbol, :string, nil].freeze
-  HASH_KEY_OPTION_MAP = {
-    symbol: ReeMapper::SymbolKeyHashOutput,
-    string: ReeMapper::StringKeyHashOutput
-  }.freeze
-
   contract(Symbol, Any => Class).throws(ArgumentError)
   def self.register_type(name, object_type)
     register(
@@ -70,17 +64,17 @@ class ReeMapper::MapperFactory
     @mapper = mapper
   end
 
-  contract(Nilor[Symbol], Kwargs[each: Nilor[ReeMapper::Field], optional: Bool, key: Nilor[Symbol]], Ksplat[RestKeys => Any], Optblock => Nilor[ReeMapper::Field])
-  def array(field_name = nil, each: nil, optional: false, key: nil, **opts, &blk)
+  contract(Nilor[Symbol], Kwargs[each: Nilor[ReeMapper::Field], optional: Bool, dto: Nilor[Class]], Ksplat[RestKeys => Any], Optblock => Nilor[ReeMapper::Field])
+  def array(field_name = nil, each: nil, optional: false, dto: nil, **opts, &blk)
     raise ReeMapper::Error, "invalid DSL usage" unless @mapper
     raise ArgumentError, "array item can't be optional" if field_name.nil? && optional
     raise ArgumentError, 'array type should use either :each or :block' if each && blk || !each && !blk
-    raise ArgumentError, 'invalid :key option value' unless HASH_KEY_OPTION_VALUES.include?(key)
+    raise ArgumentError, 'array does not permit :dto without :block' if dto && !blk
     raise ArgumentError, 'array does not permit :only and :except keys' if opts.key?(:only) || opts.key?(:except)
 
     if blk
       each = ReeMapper::Field.new(
-        hash_from_blk(key: key, &blk)
+        hash_from_blk(dto: dto, &blk)
       )
     end
 
@@ -98,12 +92,11 @@ class ReeMapper::MapperFactory
     array(field_name, each: each, optional: true, **opts, &blk)
   end
 
-  contract(Symbol, Kwargs[key: Nilor[Symbol]], Ksplat[RestKeys => Any], Block => nil)
-  def hash(field_name, key: nil, **opts, &blk)
+  contract(Symbol, Kwargs[dto: Nilor[Class]], Ksplat[RestKeys => Any], Block => nil)
+  def hash(field_name, dto: nil, **opts, &blk)
     raise ReeMapper::Error, "invalid DSL usage" unless @mapper
-    raise ArgumentError, 'invalid :key option value' unless HASH_KEY_OPTION_VALUES.include?(key)
 
-    type = hash_from_blk(key: key, &blk)
+    type = hash_from_blk(dto: dto, &blk)
 
     @mapper.add_field(type, field_name, **opts)
   end
@@ -115,17 +108,12 @@ class ReeMapper::MapperFactory
 
   private
 
-  def hash_from_blk(key:, &blk)
+  def hash_from_blk(dto:, &blk)
     mapper_proxy = self.class.call
 
     strategies = @mapper.strategies.map do |strategy|
       strategy = strategy.dup
-      output = strategy.output
-      if key
-        strategy.output = HASH_KEY_OPTION_MAP.fetch(key).new
-      elsif !(output.is_a?(ReeMapper::SymbolKeyHashOutput) || output.is_a?(ReeMapper::StringKeyHashOutput))
-        strategy.output = ReeMapper::SymbolKeyHashOutput.new
-      end
+      strategy.dto = dto if dto
       strategy
     end
 

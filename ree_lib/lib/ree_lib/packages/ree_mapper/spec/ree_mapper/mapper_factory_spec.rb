@@ -7,7 +7,7 @@ RSpec.describe ReeMapper::MapperFactory do
 
   let(:mapper_factory) {
     build_mapper_factory(strategies: [
-      build_mapper_strategy(method: :cast, output: :symbol_key_hash)
+      build_mapper_strategy(method: :cast, dto: Hash)
     ])
   }
 
@@ -71,6 +71,13 @@ RSpec.describe ReeMapper::MapperFactory do
           integer :id
         end
       }.to raise_error(ArgumentError, 'MapperFactory strategy :not_found not found')
+    }
+
+    it {
+      expect {
+        mapper_factory.call.use(:cast) do
+        end
+      }.to raise_error(ReeMapper::ArgumentError, "mapper should contain at least one field")
     }
   end
 end

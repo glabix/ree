@@ -1,8 +1,8 @@
 RSpec.describe :register_type do
-  link :register_type, from: :ree_swagger
-  link :build_serializer_schema, from: :ree_swagger
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
+  link :build_serializer_schema, from: :ree_swagger
+  link :register_type, from: :ree_swagger
 
   class ReeSwagger::MyType < ReeMapper::AbstractType
     def serialize(obj, role: nil)
@@ -12,7 +12,7 @@ RSpec.describe :register_type do
 
   let(:mapper_factory) {
     strategies = [
-      build_mapper_strategy(method: :serialize, output: :symbol_key_hash),
+      build_mapper_strategy(method: :serialize, dto: Hash),
     ]
 
     build_mapper_factory(strategies: strategies).register(

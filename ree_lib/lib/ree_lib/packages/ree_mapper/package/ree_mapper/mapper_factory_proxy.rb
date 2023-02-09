@@ -24,7 +24,7 @@ class ReeMapper::MapperFactoryProxy
     else
       strategy = mapper_factory.strategies.detect { _1.method == strategy_or_method }
       raise ArgumentError, "MapperFactory strategy :#{strategy_or_method} not found" unless strategy
-      strategy = Marshal.load(Marshal.dump(strategy))
+      strategy = strategy.dup
       strategy.dto = dto if dto
     end
 
@@ -34,6 +34,7 @@ class ReeMapper::MapperFactoryProxy
 
     mapper = ReeMapper::Mapper.build(strategies)
     mapper_factory.new(mapper).instance_exec(&blk)
+    mapper.prepare_dto
 
     mapper_factory.register(register_as, mapper) if register_as
 

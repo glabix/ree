@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 RSpec.describe :build_serializer_schema do
-  link :build_serializer_schema, from: :ree_swagger
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
+  link :build_serializer_schema, from: :ree_swagger
 
   let(:mapper_factory) {
     strategies = [
-      build_mapper_strategy(method: :serialize, output: :symbol_key_hash),
+      build_mapper_strategy(method: :serialize, dto: Hash),
     ]
 
     build_mapper_factory(

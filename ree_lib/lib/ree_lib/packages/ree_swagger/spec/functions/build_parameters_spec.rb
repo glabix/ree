@@ -1,11 +1,11 @@
 RSpec.describe :build_parameters_spec do
-  link :build_parameters, from: :ree_swagger
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
+  link :build_parameters, from: :ree_swagger
 
   let(:mapper_factory) {
     strategies = [
-      build_mapper_strategy(method: :cast, output: :symbol_key_hash),
+      build_mapper_strategy(method: :cast, dto: Hash),
     ]
 
     build_mapper_factory(

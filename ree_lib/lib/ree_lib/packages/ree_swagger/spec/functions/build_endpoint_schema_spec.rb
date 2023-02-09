@@ -13,8 +13,8 @@ RSpec.describe :build_endpoint_schema do
 
   let(:mapper_factory) {
     strategies = [
-      build_mapper_strategy(method: :serialize, output: :symbol_key_hash),
-      build_mapper_strategy(method: :cast, output: :symbol_key_hash),
+      build_mapper_strategy(method: :serialize, dto: Hash),
+      build_mapper_strategy(method: :cast, dto: Hash),
     ]
 
     build_mapper_factory(
