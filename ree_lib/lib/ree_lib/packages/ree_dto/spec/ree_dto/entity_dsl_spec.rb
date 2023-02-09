@@ -38,6 +38,8 @@ RSpec.describe ReeDto::EntityDSL do
   it { expect(@test_dto.email).to eq('test@example.com') }
   it { expect(@test_dto).to eq(@compare_dto) }
   it { expect(@test_dto).to_not eq(@uncompareable_dto)}
+  it { expect(@test_dto == Object.new).to eq(false) }
+  it { expect(@test_dto == @test_dto).to eq(true) }
 
   context "missing args" do
     it {

@@ -63,8 +63,10 @@ module ReeDto::EntityDSL
           }
         end
 
-        contract self => Bool
+        contract Any => Bool
         def ==(val)
+          return false unless val.is_a?(self.class)
+
           #{
             args.map {|k, _|
               "@#{k} == val.#{k}"
