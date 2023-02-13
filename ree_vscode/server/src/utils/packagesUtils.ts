@@ -3,6 +3,7 @@ import { getPackageEntryPath, getProjectRootDir, getPackagesSchemaPath } from '.
 import { getReeVscodeSettings } from './reeUtils'
 import { TAB_LENGTH } from './constants'
 import { logErrorMessage, logInfoMessage, logWarnMessage } from './stringUtils'
+import { SyntaxNode } from 'web-tree-sitter'
 
 const path = require('path')
 const fs = require('fs')
@@ -640,9 +641,11 @@ async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> 
   }
 }
 
-export function buildObjectArguments(obj: IObject): string {
+export function buildObjectArguments(obj: IObject, tokenNode?: SyntaxNode | null): string {
   if (obj.methods[0]) {
     const method = obj.methods[0]
+
+    if (tokenNode?.nextSibling?.type === 'argument_list') { return obj.name }
     if (method.args.length === 0) { return `${obj.name}` }
     if (method.args.length === 1) { return `${obj.name}(${mapObjectArgument(method.args[0])})`}
 

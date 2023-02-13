@@ -88,8 +88,8 @@ export default class CompletionAnalyzer {
     }
   
     // if there are no matching nodes, show package objects and constants
-    const currentProjectPackages = this.getCurrentProjectPackages(packagesSchema, projectRootDir, currentPackageName, filePath)
-    const gemPackageObjects = this.getGemPackageObjects(packagesSchema, projectRootDir, currentPackageName, filePath)
+    const currentProjectPackages = this.getCurrentProjectPackages(packagesSchema, projectRootDir, currentPackageName, filePath, tokenNode)
+    const gemPackageObjects = this.getGemPackageObjects(packagesSchema, projectRootDir, currentPackageName, filePath, tokenNode)
     let allItems = currentProjectPackages.concat(...gemPackageObjects)
 
     // add constants
@@ -108,7 +108,9 @@ export default class CompletionAnalyzer {
     packagesSchema: IPackagesSchema,
     projectRootDir: string,
     currentPackage: string,
-    filePath: string): CompletionItem[] {
+    filePath: string,
+    tokenNode: SyntaxNode | null
+  ): CompletionItem[] {
     return packagesSchema.packages.map((pckg) => {
       let objects = pckg.objects.map(obj => (
           {
@@ -117,7 +119,7 @@ export default class CompletionAnalyzer {
               description: `from: ${pckg.name}`
             },
             kind: CompletionItemKind.Method,
-            insertText: buildObjectArguments(obj),
+            insertText: buildObjectArguments(obj, tokenNode),
             data: {
               objectSchema: obj.schema_rpath,
               isGem: false,
@@ -139,7 +141,8 @@ export default class CompletionAnalyzer {
     packagesSchema: IPackagesSchema,
     projectRootDir: string,
     currentPackageName: string,
-    filePath: string
+    filePath: string,
+    tokenNode: SyntaxNode | null
     ): CompletionItem[] {
       return packagesSchema.gem_packages.map((pckg) => {
         let gemPath = getGemDir(pckg.name)
@@ -152,7 +155,7 @@ export default class CompletionAnalyzer {
                 description: `from: ${pckg.name}`
               },
               kind: CompletionItemKind.Method,
-              insertText: buildObjectArguments(obj),
+              insertText: buildObjectArguments(obj, tokenNode),
               data: {
                 objectSchema: obj.schema_rpath,
                 fromPackageName: pckg.name,
