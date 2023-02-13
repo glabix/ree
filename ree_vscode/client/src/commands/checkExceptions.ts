@@ -91,7 +91,7 @@ export function checkExceptions(filePath: string): void {
           (constant) @call
           (#match? @call "(${c})$")
         )`
-      ).matches(tree.rootNode).length > 1 // more than one, because one use is in throws already
+      ).matches(tree.rootNode).length > 2 // more than two, because one use is in throws and one in link/defined somewhere
 
       if (isThrowsConstIsUsed) { return }
 
@@ -316,13 +316,10 @@ async function checkLocale(localeFile: string, localeFilePath: string, locale: L
 function checkOccurrence(array, element) {
   let counter = 0
 
-  array.flat().forEach(item =>
-    {
-      if (item === element) {
-          counter++
-      }
-    }
-  )
+  array.flat().forEach(item => {
+    if (item === element) { counter++ }
+  })
+
   return counter
 }
 
