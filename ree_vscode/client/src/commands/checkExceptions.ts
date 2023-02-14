@@ -20,9 +20,14 @@ export function checkExceptions(filePath: string): void {
   const query = forest.language.query(
     `
     (throws (argument_list)* @throws_args) @throws_call
+    (
+      (contract)
+      (identifier)
+      (argument_list) @throws_args
+    ) @throws_call
     (raise) @raise_call
     (
-      (assignment 
+      (assignment
         left: (constant) @exception_constant
         right: (call) @exception_build_call
       ) 
@@ -127,7 +132,7 @@ export function checkExceptions(filePath: string): void {
           (constant) @call
           (#match? @call "(${diffThrows.join("|")})$")
         )`
-      ).matches(tree.rootNode).length > 1 // more than one, because one use is in throws already
+      ).matches(tree.rootNode).length > 2 // more than one, because one use is in throws already
 
       if (!checkIfDiffConstIsUsed) {
         diagnostics.push(
