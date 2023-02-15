@@ -3,10 +3,17 @@ import { getPackageEntryPath, getProjectRootDir, getPackagesSchemaPath } from '.
 import { getReeVscodeSettings } from './reeUtils'
 import { TAB_LENGTH } from './constants'
 import { logErrorMessage, logInfoMessage, logWarnMessage } from './stringUtils'
+import { SyntaxNode } from 'web-tree-sitter'
 
 const path = require('path')
 const fs = require('fs')
 const url = require('url')
+
+export const BASIC_TYPES = [
+  'Date', 'Time', 'Numeric', 'Integer',
+  'String', 'FalseClass', 'TrueClass',
+  'NilClass', 'Symbol', 'Module', 'Class', 'Hash'
+]
 
 const ARG_REGEXP = /(?<key>(\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(?<value>(\w*)?(\[(.*?)\])?)/
 const ARG_REGEXP_GLOBAL = /(?<key>(\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(?<value>(\w*)?(\[(.*?)\])?)/g
@@ -640,11 +647,16 @@ async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> 
   }
 }
 
-export function buildObjectArguments(obj: IObject): string {
+export function buildObjectArguments(obj: IObject, tokenNode?: SyntaxNode | null): string {
   if (obj.methods[0]) {
     const method = obj.methods[0]
+
+    if (tokenNode?.nextSibling?.type === 'argument_list') { return obj.name }
     if (method.args.length === 0) { return `${obj.name}` }
     if (method.args.length === 1) { return `${obj.name}(${mapObjectArgument(method.args[0])})`}
+    if (method.args.every(arg => [...BASIC_TYPES, 'Block'].includes(arg.type) || arg.type.startsWith('ArrayOf') || arg.type.startsWith('SplatOf'))) {
+      return `${obj.name}(${method.args.map(arg => mapObjectArgument(arg)).join(', ')})`
+    }
 
     return `${obj.name}(\n${method.args.map(arg => `${' '.repeat(TAB_LENGTH)}${mapObjectArgument(arg)}`).join(',\n')}\n)`
   } else {
@@ -671,15 +683,9 @@ function getHashArgs(str: string): string {
 }
 
 function mapObjectArgument(arg: IMethodArg): string {
-  const basicTypes = [
-    'Date', 'Time', 'Numeric',
-    'String', 'FalseClass', 'TrueClass',
-    'NilClass', 'Symbol', 'Module', 'Class', 'Hash'
-  ]
-
   const index = cachedIndex
 
-  if (basicTypes.includes(arg.type) || arg.type.startsWith('ArrayOf')) { return arg.arg }
+  if (BASIC_TYPES.includes(arg.type) || arg.type.startsWith('ArrayOf')) { return arg.arg }
   if (
     (arg.type.startsWith("{") && arg.type.endsWith("}")) ||
     (arg.type.startsWith("Ksplat[") && arg.type.endsWith("]"))
