@@ -157,7 +157,7 @@ function updateObjectLinks(
     }
 
     offset = startCharPos === 0 ? (' '.repeat(TAB_LENGTH)) : (' '.repeat(startCharPos + TAB_LENGTH)) 
-    linkText = `\n${offset}${linkText}`
+    linkText = ` do\n${offset}${linkText}\n${' '.repeat(startCharPos)}end`
   } else {
     // block, have links
     lineNumber = queryMatches[0].captures[0].node.startPosition.row
@@ -167,6 +167,8 @@ function updateObjectLinks(
     offset = ' '.repeat(startCharPos) 
     linkText = `${linkText}\n${offset}`
   }
+
+  // TODO: presort links before adding
 
   return editDocument(currentFile, lineNumber, endCharPos, linkText)
 }
