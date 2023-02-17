@@ -24,7 +24,21 @@ export default class DefinitionAnalyzer {
       } 
     }
 
-    const projectRoot = getProjectRootDir(url.fileURLToPath(uri))
+    let filePath = null
+
+    try {
+      filePath = url.fileURLToPath(uri)
+    } catch (err: unknown) {
+      if (err instanceof TypeError && err.message === 'The URL must be of scheme file') {
+        return [defaultLocation]
+      } else {
+        throw err
+      }
+    }
+
+    if (!filePath) { return [defaultLocation] }
+
+    const projectRoot = getProjectRootDir(filePath)
     if (!projectRoot) { return [defaultLocation] }
 
     const doc = documents.get(uri)
