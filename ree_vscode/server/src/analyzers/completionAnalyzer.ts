@@ -19,10 +19,32 @@ export default class CompletionAnalyzer {
     const defaultCompletion : CompletionItem[] = []
     let filePath = ''
     
+
     try {
       filePath = url.fileURLToPath(uri)
-    } catch {
-      return defaultCompletion
+    } catch (err: unknown) {
+      if (err instanceof TypeError && err.message === 'The URL must be of scheme file') {
+        filePath = uri
+        const index = getCachedIndex()
+        if (isCachedIndexIsEmpty()) {
+          logInfoMessage('Index is empty in completionAnalyzer')
+          return defaultCompletion
+        } 
+
+        const packagesSchema = index.packages_schema
+        if (!packagesSchema) { return defaultCompletion }
+
+        const currentPackageName = ''
+
+        const projectRootDir = getProjectRootDir(filePath)
+        if (!projectRootDir) { return defaultCompletion }
+
+        const currentProjectPackages = this.getCurrentProjectPackages(packagesSchema, projectRootDir, currentPackageName, filePath, null)
+        const gemPackageObjects = this.getGemPackageObjects(packagesSchema, projectRootDir, currentPackageName, filePath, null)
+        return currentProjectPackages.concat(...gemPackageObjects)
+      } else {
+        throw err
+      }
     }
 
     const index = getCachedIndex()

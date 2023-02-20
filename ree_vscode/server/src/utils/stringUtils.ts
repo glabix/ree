@@ -52,5 +52,5 @@ export function logErrorMessage(message: string) {
 }
 
 export function sendDebugServerLogToClient(message: string, level: LogLevel) {
-  connection.sendNotification('reeLanguageServer/serverLog', buildLogMessage(message, level))
+  if (connection) { connection.sendNotification('reeLanguageServer/serverLog', buildLogMessage(message, level)) }
 }

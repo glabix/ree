@@ -3,5 +3,7 @@ import { getNewProjectIndex } from "../utils/packagesUtils"
 
 export function reindexProject() {
   getNewProjectIndex(true, true)
-  client.sendNotification("reeLanguageServer/reindex")
+  if (client) {
+    client.sendNotification("reeLanguageServer/reindex")
+  }
 }

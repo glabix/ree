@@ -21,7 +21,7 @@ export function updatePackageDeps(
       type: CompletionItemKind,
       linkPath?: string
     }
-  ) { 
+  ) {
     getFileFromManager(currentFilePath).then(currentFile => {
       updateObjectLinks(currentFile, objectName, fromPackageName, toPackageName, type, linkPath)
     })
@@ -30,8 +30,8 @@ export function updatePackageDeps(
 export function getFileFromManager(filePath: string): Thenable<vscode.TextDocument> {
   const textDocs = vscode.workspace.textDocuments
 
-  if (textDocs.map(t => t.fileName).includes(filePath)) {
-    return new Promise(resolve => resolve(textDocs.filter(t => t.fileName === filePath)[0]))
+  if (textDocs.map(t => t.fileName).includes(filePath) || textDocs.map(t => t.uri.toString()).includes(filePath)) {
+    return new Promise(resolve => resolve(textDocs.filter(t => t.fileName === filePath || t.uri.toString() === filePath)[0]))
   } else {
     return vscode.workspace.openTextDocument(vscode.Uri.parse(filePath)).then((f: vscode.TextDocument) => { return f }) 
   }
@@ -165,17 +165,16 @@ function updateObjectLinks(
       }
     })
 
-    if (!isLinksBlock) {
-      vscode.window.showWarningMessage('LinkDSL or object block not found!')
-      return
-    }
-
     offset = startCharPos === 0 ? (' '.repeat(TAB_LENGTH)) : (' '.repeat(startCharPos + TAB_LENGTH))
     
     if (text.split("\n")[lineNumber].match(/\sdo/)) {
       linkText = `\n${offset}${linkText}`
     } else {
-      linkText = ` do\n${offset}${linkText}\n${' '.repeat(startCharPos)}end`
+      if (!isLinksBlock) {
+        linkText = `${linkText}\n`
+      } else {
+        linkText = ` do\n${offset}${linkText}\n${' '.repeat(startCharPos)}end`
+      }
     }
   } else {
     // block, have links
@@ -248,8 +247,6 @@ function updateObjectLinks(
     }
   }
 
-  // TODO: presort links before adding
-
   return editDocument(currentFile, lineNumber, endCharPos, linkText)
 }
 
@@ -287,7 +284,7 @@ function buildLinkText(
 }
 
 function editDocument(currentFile: vscode.TextDocument, line: number, character: number, insertString: string): Thenable<boolean> {
-  return vscode.workspace.openTextDocument(vscode.Uri.parse(currentFile.fileName)).then((f: vscode.TextDocument) => {
+  return vscode.workspace.openTextDocument(currentFile.uri).then((f: vscode.TextDocument) => {
     const edit = new vscode.WorkspaceEdit()
 
     edit.insert(f.uri, new vscode.Position(line, character), insertString)

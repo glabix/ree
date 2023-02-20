@@ -15,7 +15,7 @@
 			"outFiles": [
 				"${workspaceFolder}/client/out/**/*.js"
 			],
-			"preLaunchTask": "clean-and-watch"
+			"preLaunchTask": "clean-and-watch-client"
 		},
 		{
 			"type": "node",
@@ -24,7 +24,7 @@
 			"port": 6009,
 			"restart": true,
 			"outFiles": ["${workspaceRoot}/server/out/**/*.js"],
-			"preLaunchTask": "clean-and-watch"
+			"preLaunchTask": "clean-and-watch-server"
 		},
 		{
 			"name": "Extension Tests",
