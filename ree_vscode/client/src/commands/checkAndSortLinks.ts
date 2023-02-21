@@ -170,7 +170,7 @@ function createLinksHash(links: Array<{ name: string, body: string }>) {
   return uniqLinks
 }
 
-function sortLinksByNameAsc(a, b) {
+export function sortLinksByNameAsc(a, b) {
   let cleanA = a.name.replace(/\"|\'|\:/, '')
   let cleanB = b.name.replace(/\"|\'|\:/, '')
   if (cleanA > cleanB) { return 1 }

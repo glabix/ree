@@ -24,7 +24,21 @@ export default class DefinitionAnalyzer {
       } 
     }
 
-    const projectRoot = getProjectRootDir(url.fileURLToPath(uri))
+    let filePath = null
+
+    try {
+      filePath = url.fileURLToPath(uri)
+    } catch (err: unknown) {
+      if (err instanceof TypeError && err.message === 'The URL must be of scheme file') {
+        return [defaultLocation]
+      } else {
+        throw err
+      }
+    }
+
+    if (!filePath) { return [defaultLocation] }
+
+    const projectRoot = getProjectRootDir(filePath)
     if (!projectRoot) { return [defaultLocation] }
 
     const doc = documents.get(uri)
@@ -400,9 +414,10 @@ export default class DefinitionAnalyzer {
     const rPath = tokenNode.text
 
     // check if root + rpath exists
-    if (fs.existsSync(path.join(projectRoot, rPath))) {
+    const rootWithRPath = path.join(projectRoot, rPath) 
+    if (fs.existsSync(rootWithRPath) && fs.lstatSync(rootWithRPath).isFile()) {
       return [{
-        uri: url.pathToFileURL(path.join(projectRoot, rPath)),
+        uri: url.pathToFileURL(rootWithRPath),
         range: {
           start: {line: 0, character: 0},
           end: {line: 0, character: 0}
@@ -411,9 +426,11 @@ export default class DefinitionAnalyzer {
     }
 
     // check if filepathDir + rPath exists
-    if (fs.existsSync(path.join(path.parse(filePath).dir, rPath))) {
+    const filePathDir = path.parse(filePath).dir
+    const filePathWithRPath = path.join(filePathDir, rPath)
+    if (fs.existsSync(filePathWithRPath) && fs.lstatSync(filePathWithRPath).isFile()) {
       return [{
-        uri: url.pathToFileURL(path.join(path.parse(filePath).dir, rPath)),
+        uri: url.pathToFileURL(filePathWithRPath),
         range: {
           start: {line: 0, character: 0},
           end: {line: 0, character: 0}

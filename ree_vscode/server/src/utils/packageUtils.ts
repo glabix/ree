@@ -78,10 +78,16 @@ export function getProjectRootDir(currentPath: string): string | null {
 }
 
 export function getPackageEntryPath(filePath: string) : string | null {
+  const packageDir = getPackageDir(filePath)
+  if (!packageDir) { return null }
+
+  const packageName = getPackageNameFromPath(filePath)
+  if (!packageName) { return null }
+
   const packageFilePath = path.join(
-    getPackageDir(filePath),
+    packageDir,
     PACKAGE_DIR,
-    getPackageNameFromPath(filePath)
+    packageName
   ) + ".rb"
 
   if (fs.existsSync(packageFilePath)) {
