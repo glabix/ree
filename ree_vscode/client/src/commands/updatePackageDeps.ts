@@ -171,7 +171,35 @@ function updateObjectLinks(
       linkText = `\n${offset}${linkText}`
     } else {
       if (!isLinksBlock) {
-        linkText = `${linkText}\n`
+        const includeQuery = forest.language.query(
+          `(
+            (call) @include
+            (#match? @include "^include")
+           )
+          `
+        ) as Query
+
+        const includeMatches = includeQuery.matches(tree.rootNode)
+        if (includeMatches.length > 0) {
+          const lastIncludeNode = includeMatches[includeMatches.length - 1].captures[0].node
+          lineNumber = lastIncludeNode.startPosition.row
+          endCharPos = lastIncludeNode.endPosition.column
+          linkText = `\n${offset}include Ree::LinkDSL\n\n${offset}${linkText}`
+        } else {
+          const classQuery = forest.language.query(`(class) @class`)
+          const classMatches = classQuery.matches(tree.rootNode)
+
+          if (classMatches.length > 0) {
+            const classNameNode = classMatches[0].captures[0].node.children[1]
+            lineNumber = classNameNode.startPosition.row
+            endCharPos = classNameNode.endPosition.column
+            linkText = `\n${offset}include Ree::LinkDSL\n\n${offset}${linkText}`
+          } else {
+            linkText = `${linkText}\n`
+          }
+        }
+
+        
       } else {
         linkText = ` do\n${offset}${linkText}\n${' '.repeat(startCharPos)}end`
       }
