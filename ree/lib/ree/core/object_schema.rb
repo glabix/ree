@@ -40,6 +40,7 @@ module Ree::ObjectSchema
 
     module Args
       ARG = 'arg'
+      ARG_TYPE = 'arg_type'
       TYPE = 'type'
     end
   end
