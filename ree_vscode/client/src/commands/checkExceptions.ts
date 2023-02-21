@@ -297,6 +297,7 @@ async function checkLocale(localeFile: string, localeFilePath: string, locale: L
         { modal: true } as vscode.MessageOptions,
         ...[`Add missing values to ${locale}.yml`, 'Dismiss']
       ).then(selection => {
+        if (!selection) { return }
         if (selection === 'Dismiss') { return }
 
         missingValues.forEach(l => {
