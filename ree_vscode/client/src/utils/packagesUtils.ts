@@ -282,6 +282,7 @@ export interface IObject {
 
 export interface IMethodArg {
   arg: string
+  arg_type: string
   type: string
 }
 

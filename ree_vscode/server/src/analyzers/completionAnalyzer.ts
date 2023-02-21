@@ -18,7 +18,6 @@ export default class CompletionAnalyzer {
   private static getFilteredCompletionList(uri: string, position: Position): CompletionItem[] {
     const defaultCompletion : CompletionItem[] = []
     let filePath = ''
-    
 
     try {
       filePath = url.fileURLToPath(uri)
