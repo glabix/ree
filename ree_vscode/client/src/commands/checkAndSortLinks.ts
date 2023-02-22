@@ -100,9 +100,15 @@ export function checkAndSortLinks(filePath: string) {
       }
 
       if (importsStrings.includes(nodeText)) {
-        if (el.captures[0].node.parent.type === 'block') { return }
+        if (
+          el.captures[0].node.parent.type === 'block' ||
+          el.captures[0].node?.nextSibling?.text === '&' ||
+          el.captures[0].node?.previousSibling?.text === '&'
+        ) { return }
 
-        importsStrings.splice(importsStrings.indexOf(nodeText), 1)
+        if (importsStrings.indexOf(nodeText) !== -1) {
+          importsStrings.splice(importsStrings.indexOf(nodeText), 1)
+        }
       }
     })
 
@@ -123,7 +129,7 @@ export function checkAndSortLinks(filePath: string) {
         if (l.imports.length === 0) { return true }
 
         if (sortedImportsStrings.includes(l.imports.sort().join(''))) {
-          if (!nameStrings.includes(l.name)) { return true }
+          if (nameStrings.length > 0 && !nameStrings.includes(l.name)) { return true }
 
           return false
         } else {
