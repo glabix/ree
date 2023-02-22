@@ -65,7 +65,7 @@ function updateObjectLinks(
   const queryMatches = query.matches(tree.rootNode)
   const links = mapLinkQueryMatches(queryMatches)
 
-  if (links.find(l => ((l.name === objectName && l?.from === fromPackageName) || l.imports.includes(objectName)))) {
+  if (links.find(l => ((l.name === objectName && (l?.from === fromPackageName || l.from === undefined)) || l.imports.includes(objectName)))) {
     return null
   }
 
