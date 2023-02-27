@@ -6,10 +6,11 @@
 		"vscode": "^1.66.0"
 	},
 	"dependencies": {
+		"js-yaml": "^4.1.0",
+		"lodash": "^4.17.21",
 		"vscode-languageclient": "^8.0.1",
 		"web-tree-sitter": "^0.20.7",
-		"web-tree-sitter-ruby": "file:lib/web-tree-sitter-ruby",
-		"js-yaml": "^4.1.0"
+		"web-tree-sitter-ruby": "file:lib/web-tree-sitter-ruby"
 	},
 	"devDependencies": {
 		"@types/vscode": "^1.63.0",
