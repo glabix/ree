@@ -2,6 +2,7 @@ import * as vscode from 'vscode'
 import { Query } from 'web-tree-sitter'
 import { forest, asRegexp, mapLinkQueryMatches } from '../utils/forest'
 const fs = require('fs')
+const lodash = require('lodash')
 
 export function checkAndSortLinks(filePath: string) {
   const file = fs.readFileSync(filePath, { encoding: 'utf8' })
@@ -34,8 +35,8 @@ export function checkAndSortLinks(filePath: string) {
   const isMapper = !!content[firstLinkLineNumber - 1]?.match(/mapper/)?.length
   const isDao = !!content[firstLinkLineNumber - 1]?.match(/dao/)?.length
 
-  const linksWithFileName = links.filter(l => !l.isSymbol)
-  const linksWithSymbolName = links.filter(l => l.isSymbol)
+  const linksWithFileName = lodash.cloneDeep(links).filter(l => !l.isSymbol)
+  const linksWithSymbolName = lodash.cloneDeep(links).filter(l => l.isSymbol)
   const sortedLinksWithFileName = linksWithFileName.sort(sortLinksByNameAsc)
   const sortedLinksWithSymbolName = linksWithSymbolName.sort(sortLinksByNameAsc)
   let allSorted = [...sortedLinksWithSymbolName, ...sortedLinksWithFileName]
@@ -133,6 +134,22 @@ export function checkAndSortLinks(filePath: string) {
 
           return false
         } else {
+          const notAllUsedLinks = importsStrings.sort().filter(e => l.imports.sort().includes(e))
+          if (notAllUsedLinks.length > 0) {
+            // build new link string without unused
+            let newLinkBody = ''
+            if (l.isSymbol) {
+              newLinkBody += `link :${l.name}`
+
+              if (l.from) { newLinkBody += `, from: :${l.from}` }
+
+              newLinkBody += `, import: -> { ${l.imports.sort().filter(e => !notAllUsedLinks.includes(e)).join(' & ')} }`
+            } else {
+              newLinkBody += `link "${l.name}"`
+              newLinkBody += `, -> { ${l.imports.sort().filter(e => !notAllUsedLinks.includes(e)).join(' & ')} }`
+            }
+            l.body = newLinkBody
+          }
           return true
         }
       })
