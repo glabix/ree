@@ -19,10 +19,32 @@ export default class CompletionAnalyzer {
     const defaultCompletion : CompletionItem[] = []
     let filePath = ''
     
+
     try {
       filePath = url.fileURLToPath(uri)
-    } catch {
-      return defaultCompletion
+    } catch (err: unknown) {
+      if (err instanceof TypeError && err.message === 'The URL must be of scheme file') {
+        filePath = uri
+        const index = getCachedIndex()
+        if (isCachedIndexIsEmpty()) {
+          logInfoMessage('Index is empty in completionAnalyzer')
+          return defaultCompletion
+        } 
+
+        const packagesSchema = index.packages_schema
+        if (!packagesSchema) { return defaultCompletion }
+
+        const currentPackageName = ''
+
+        const projectRootDir = getProjectRootDir(filePath)
+        if (!projectRootDir) { return defaultCompletion }
+
+        const currentProjectPackages = this.getCurrentProjectPackages(packagesSchema, projectRootDir, currentPackageName, filePath, null)
+        const gemPackageObjects = this.getGemPackageObjects(packagesSchema, projectRootDir, currentPackageName, filePath, null)
+        return currentProjectPackages.concat(...gemPackageObjects)
+      } else {
+        throw err
+      }
     }
 
     const index = getCachedIndex()
@@ -243,7 +265,7 @@ export default class CompletionAnalyzer {
       } else {
         // check if we have assignment node, then check if assignment lhs is same as tokenNode
         const assignmentNode = findParentNodeWithType(node, 'assignment', true)
-        if (assignmentNode) {
+        if (assignmentNode && assignmentNode.type !== 'program') {
           return !!tokenNode?.parent?.text.match(RegExp(`^${assignmentNode?.firstChild?.text}\\.`))
         }
       }
@@ -293,7 +315,7 @@ export default class CompletionAnalyzer {
       if (node === null) { return null }
       if (node.children.find(c => c.equals(targetNode))) { return node }
       if (!node.parent) { return null }
-      if (node.parent && node.parent?.firstChild?.type === 'def') { return null }
+      if (node.parent && (node.parent?.firstChild?.type === 'def' || node.parent?.firstChild?.type === 'do')) { return null }
       
       return checkParent(node.parent, targetNode)
     }

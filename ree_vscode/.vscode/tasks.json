@@ -5,16 +5,28 @@
 	"tasks": [
 		{
 			"type": "npm",
-			"script": "clean-and-watch",
+			"script": "clean-and-watch-client",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"presentation": {
 				"reveal": "never"
 			},
-			"label": "clean-and-watch",
+			"label": "clean-and-watch-client",
 			"group": {
-				"kind": "build",
-				"isDefault": true
+				"kind": "build"
+			}
+		},
+		{
+			"type": "npm",
+			"script": "clean-and-watch-server",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"presentation": {
+				"reveal": "never"
+			},
+			"label": "clean-and-watch-server",
+			"group": {
+				"kind": "build"
 			}
 		},
 		{

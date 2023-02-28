@@ -64,7 +64,7 @@ class Forest implements IForest {
  
 export const forest = new Forest()
 
-interface Link {
+export interface Link {
   name: string,
   body: string,
   as: string,
