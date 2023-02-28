@@ -152,15 +152,15 @@ module Ree
         end
 
         def index_dao(klass, rpath, package_name)
-          filters = klass
-            .instance_variable_get(:@filters)
-            .map {
-              {
-                name: _1.name,
-                parameters: _1.proc.parameters.map { |param| { name: param.last, required: param.first } },
-                location: _1.proc&.source_location&.last
-              }
+          filters = (klass.instance_variable_get(:@filters) || []).map do
+            {
+              name: _1.name,
+              parameters: _1.proc.parameters.map { |param|
+                {name: param.last, required: param.first}
+              },
+              location: _1.proc&.source_location&.last
             }
+          end
 
           {
             path: rpath,
