@@ -5,9 +5,7 @@ require 'set'
 class ReeObject::DumpAsJson
   include Ree::FnDSL
 
-  fn :dump_as_json do
-    def_error { RecursiveObjectErr }
-  end
+  fn :dump_as_json
 
   ARRAY = 'array'
   HASH = 'hash'
@@ -21,7 +19,7 @@ class ReeObject::DumpAsJson
 
   contract(
     Any => Or[Hash, ArrayOf[Any], *BASIC_TYPES]
-  ).throws(RecursiveObjectErr)
+  )
   def call(obj)
     recursively_convert(obj, {})
   end
@@ -84,10 +82,6 @@ class ReeObject::DumpAsJson
   end
 
   def convert_object(obj, cache)
-    if cache.key?(obj.object_id)
-      raise RecursiveObjectErr, "Recursive object found: #{obj}"
-    end
-
     cache[obj.object_id] = true
     result = []
 
