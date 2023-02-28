@@ -5,6 +5,7 @@
 import { Tree, QueryMatch, SyntaxNode } from 'web-tree-sitter'
 import TreeSitterFactory from './utils/treeSitterFactory'
 import { Position } from 'vscode-languageserver'
+import { escapeRegExp } from './utils/stringUtils'
 
  // eslint-disable-next-line @typescript-eslint/naming-convention
 const Parser = require('web-tree-sitter')
@@ -112,7 +113,7 @@ export function findTokenNodeInTree(token: string | undefined, tree: Tree, posit
  
   const cursor = tree.walk()
   const walk = (depth: number): void => {
-    if (cursor.currentNode().text.match(`${token}`) && isPositionInsideNode(position, cursor.currentNode())) {
+    if (cursor.currentNode().text.match(`${escapeRegExp(token)}`) && isPositionInsideNode(position, cursor.currentNode())) {
       tokenNode = cursor.currentNode()
     }
     if (cursor.gotoFirstChild()) {
@@ -131,7 +132,7 @@ export function findTokenNodeInTree(token: string | undefined, tree: Tree, posit
 export function isPositionInsideNode(position: Position, node: SyntaxNode) {
   if (
     node.startPosition.row <= position.line && node.endPosition.row >= position.line &&
-    node.startPosition.column <= position.character && node.endPosition.column >= position.character
+    node.startPosition.column <= position.character && (node.endPosition.column >= position.character || node.endPosition.column >= (position.character - 1))
   ) { return true }
 
   return false

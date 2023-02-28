@@ -326,9 +326,7 @@ export default class CompletionAnalyzer {
       // if tokenNode inside parent children
       // ex: someDao.active.*tokenNode*
       let nodeHaveTokenNode = !!checkParent(node, tokenNode)
-      if (nodeHaveTokenNode) {
-        return true
-      }
+      if (nodeHaveTokenNode) { return true }
 
       return false
     })
