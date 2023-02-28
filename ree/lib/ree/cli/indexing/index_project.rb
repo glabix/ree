@@ -53,7 +53,7 @@ module Ree
             end
 
             next if package.dir.nil?
-              
+
             facade.load_entire_package(package.name)
 
             package_hsh = Ree::CLI::IndexPackage.send(:index_package_entry, package)
@@ -73,7 +73,7 @@ module Ree
         private
 
         def index_public_methods_for_package_classes(package, index_hash)
-          package.objects.each do |obj| 
+          package.objects.each do |obj|
             klass = obj.klass
             klass_name = demodulize(klass.to_s)
             obj_name = obj.name.to_s
@@ -96,22 +96,25 @@ module Ree
             end
           end
 
-          recursively_index_module(package.module, index_hash, package)
+          recursively_index_module(package.module, index_hash, package, {})
 
           index_hash
         end
 
-        def recursively_index_module(mod, index_hsh, package)
+        def recursively_index_module(mod, index_hsh, package, mod_index)
           return if !mod.is_a?(Module)
+          return if mod_index[mod]
+
+          mod_index[mod] = true
 
           mod.constants.each do |const_name|
             const = mod.const_get(const_name)
 
-            recursively_index_module(const, index_hsh, package)
+            recursively_index_module(const, index_hsh, package, mod_index)
 
             next if !const.is_a?(Class)
             next if package.objects.any? { |o| o.klass == const }
-            next if index_hsh[:classes].has_key?(demodulize(const.name))     
+            next if index_hsh[:classes].has_key?(demodulize(const.name))
 
             const_abs_path = mod.const_source_location(const.name).first
             next if !const_abs_path
