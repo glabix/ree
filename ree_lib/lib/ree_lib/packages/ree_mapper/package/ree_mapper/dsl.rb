@@ -28,6 +28,7 @@ module ReeMapper::DSL
       )
 
       dsl.instance_exec(&proc) if block_given?
+      dsl.tags(["object", "mapper"])
       dsl.factory :build
 
       Ree.container.compile(dsl.package, name)

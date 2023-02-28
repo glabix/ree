@@ -60,7 +60,7 @@ module Ree
 
             index_hash[:packages_schema][:packages] << package_hsh
 
-            index_hash = index_package_files(package, dir, index_hash)
+            index_hash = index_public_methods_for_package_classes(package, index_hash)
           end
 
           if facade.get_package(:ree_errors, false)
@@ -72,67 +72,68 @@ module Ree
 
         private
 
-        def index_package_files(package, dir, index_hash)
-          objects_class_names = package.objects.map(&:class_name)
+        def index_public_methods_for_package_classes(package, index_hash)
+          package.objects.each do |obj| 
+            klass = obj.klass
+            klass_name = demodulize(klass.to_s)
+            obj_name = obj.name.to_s
+            rpath = obj.rpath
 
-          files = Dir[
-            File.join(
-              Ree::PathHelper.abs_package_module_dir(package), '**/*.rb'
-            )
-          ]
-
-          files.each do |file_name|
-            begin
-              const_string_from_file_name = Ree::StringUtils.camelize(file_name.split('/')[-1].split('.rb')[0])
-              const_string_with_module = "#{package.module}::#{const_string_from_file_name}"
-              klass = Object.const_get(const_string_with_module)
-
-              if klass.include?(ReeEnum::DSL)
-                hsh = index_enum(klass, file_name, package.name, dir, const_string_from_file_name)
-                hash_key = const_string_from_file_name
-                index_hash[:classes][hash_key] ||= []
-                index_hash[:classes][hash_key] << hsh
-
-                next
-              end
-
-              if klass.include?(ReeDao::DSL)
-                hsh = index_dao(klass, file_name, package.name, dir, const_string_from_file_name)
-                obj_name_key = Ree::StringUtils.underscore(const_string_from_file_name)
-                index_hash[:objects][obj_name_key] ||= []
-                index_hash[:objects][obj_name_key] << hsh
-
-                next
-              end
-
-              if klass.include?(ReeMapper::DSL)
-                # TODO
-                next
-              end
-
-              if !objects_class_names.include?(const_string_with_module)
-                hsh = index_class(klass, file_name, package.name, dir, const_string_from_file_name)
-                hash_key = const_string_from_file_name
-                index_hash[:classes][hash_key] ||= []
-                index_hash[:classes][hash_key] << hsh
-
-                next
-              end
-            rescue NameError
-              next
+            if obj.tags.include?("enum")
+              hsh = index_class(klass, rpath, package.name)
+              index_hash[:classes][klass_name] ||= []
+              index_hash[:classes][klass_name] << hsh
+              index_hash[:objects][obj_name] ||= []
+              index_hash[:objects][obj_name] << hsh
+            elsif obj.tags.include?("dao")
+              hsh = index_dao(klass, rpath, package.name)
+              index_hash[:objects][obj_name] ||= []
+              index_hash[:objects][obj_name] << hsh
+            elsif obj.tags.include?("object")
+              hsh = index_class(klass, rpath, package.name)
+              index_hash[:objects][obj_name] ||= []
+              index_hash[:objects][obj_name] << hsh
             end
           end
+
+          recursively_index_module(package.module, index_hash, package)
 
           index_hash
         end
 
-        def index_class(klass, file_name, package_name, root_dir, hash_key)
+        def recursively_index_module(mod, index_hsh, package)
+          return if !mod.is_a?(Module)
+
+          mod.constants.each do |const_name|
+            const = mod.const_get(const_name)
+
+            recursively_index_module(const, index_hsh, package)
+
+            next if !const.is_a?(Class)
+            next if package.objects.any? { |o| o.klass == const }
+            next if index_hsh[:classes].has_key?(demodulize(const.name))     
+
+            const_abs_path = mod.const_source_location(const.name).first
+            next if !const_abs_path
+
+            rpath = Pathname.new(const_abs_path).relative_path_from(Ree.root_dir).to_s
+            hsh = index_class(const, rpath, package.name)
+            class_name = demodulize(const.name)
+
+            index_hsh[:classes][class_name] ||= []
+            index_hsh[:classes][class_name] << hsh
+          end
+        end
+
+        def index_class(klass, rpath, package_name)
           all_methods = klass.public_instance_methods(false)
           orig_methods = all_methods.grep(/original/)
+
           methods = (all_methods - orig_methods) # remove aliases defined by contracts
             .map { |m|
               orig_method_name = orig_methods.find { |om| om.match(/original_#{Regexp.escape(m.name)}_[0-9a-fA-F]+/) }
               orig_method = orig_method_name ? klass.public_instance_method(orig_method_name) : nil
+
               {
                 name: m,
                 parameters: orig_method&.parameters&.map { |param| { name: param.last, required: param.first } },
@@ -140,20 +141,14 @@ module Ree
               }
             }
 
-          rpath_from_root_file_path = Pathname.new(file_name).relative_path_from(Pathname.new(root_dir)).to_s
-
           {
-            path: rpath_from_root_file_path,
+            path: rpath,
             package: package_name,
             methods: methods
           }
         end
 
-        def index_enum(klass, file_name, package_name, root_dir, hash_key)
-          index_class(klass, file_name, package_name, root_dir, hash_key)
-        end
-
-        def index_dao(klass, file_name, package_name, root_dir, hash_key)
+        def index_dao(klass, rpath, package_name)
           filters = klass
             .instance_variable_get(:@filters)
             .map {
@@ -164,10 +159,8 @@ module Ree
               }
             }
 
-          rpath_from_root_file_path = Pathname.new(file_name).relative_path_from(Pathname.new(root_dir)).to_s
-
           {
-            path: rpath_from_root_file_path,
+            path: rpath,
             package: package_name,
             methods: filters
           }
@@ -175,7 +168,7 @@ module Ree
 
         def index_exceptions(errors_package, index_hash)
           errors_package.objects.each do |obj|
-            const_name = obj.class_name.split("::")[-1]
+            const_name = demodulize(obj.class_name)
             file_name = File.join(
               Ree::PathHelper.abs_package_module_dir(errors_package),
               obj.name.to_s + ".rb"
@@ -192,6 +185,10 @@ module Ree
           end
 
           index_hash
+        end
+
+        def demodulize(str)
+          str.split("::").last
         end
       end
     end

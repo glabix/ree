@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "build_user",
   "path": "bc/accounts/package/accounts/services/build_user.rb",
   "mount_as": "fn",
@@ -17,10 +17,12 @@
       "args": [
         {
           "arg": "name",
+          "arg_type": "req",
           "type": "String"
         },
         {
           "arg": "email",
+          "arg_type": "req",
           "type": "String"
         }
       ]
