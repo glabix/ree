@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "to_obj",
   "path": "packages/ree_object/package/ree_object/functions/to_obj.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "obj",
+          "arg_type": "req",
           "type": "Any"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:include? => [:key0, .., :keyM => [:keyN, .., :keyZ]], :exclude? => [:key0, .., :keyM => [:keyN, .., :keyZ]], :global_exclude? => ArrayOf[Symbol]]"
         }
       ]

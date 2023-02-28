@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "escape_html",
   "path": "packages/ree_text/package/ree_text/functions/escape_html.rb",
   "mount_as": "fn",
@@ -16,6 +16,7 @@
       "args": [
         {
           "arg": "str",
+          "arg_type": "req",
           "type": "String"
         }
       ]

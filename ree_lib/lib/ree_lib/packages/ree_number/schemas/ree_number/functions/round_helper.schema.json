@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "round_helper",
   "path": "packages/ree_number/package/ree_number/functions/round_helper.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "number",
+          "arg_type": "req",
           "type": "Or[Integer, Float, Rational, String]"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:precision? => Integer, :significant? => Bool, :round_mode? => Or[up, down, truncate, half_up, default, half_down, half_even, banker, ceiling, floor]]"
         }
       ]

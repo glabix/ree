@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "upcase_first",
   "path": "packages/ree_string/package/ree_string/functions/upcase_first.rb",
   "mount_as": "fn",
@@ -16,6 +16,7 @@
       "args": [
         {
           "arg": "string",
+          "arg_type": "req",
           "type": "String"
         }
       ]

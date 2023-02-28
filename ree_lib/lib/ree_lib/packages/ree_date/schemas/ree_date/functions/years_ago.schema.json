@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "years_ago",
   "path": "packages/ree_date/package/ree_date/functions/years_ago.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "date",
+          "arg_type": "opt",
           "type": "Nilor[Date]"
         },
         {
           "arg": "year_count",
+          "arg_type": "req",
           "type": "Integer"
         }
       ]

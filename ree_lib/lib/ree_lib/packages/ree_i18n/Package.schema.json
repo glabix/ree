@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "ree_i18n",
   "entry_path": "packages/ree_i18n/package/ree_i18n.rb",
   "tags": [
@@ -20,31 +20,52 @@
   "objects": [
     {
       "name": "add_load_path",
-      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/add_load_path.schema.json"
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/add_load_path.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "get_default_locale",
-      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/get_default_locale.schema.json"
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/get_default_locale.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "get_locale",
-      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/get_locale.schema.json"
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/get_locale.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "set_default_locale",
-      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/set_default_locale.schema.json"
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/set_default_locale.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "set_locale",
-      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/set_locale.schema.json"
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/set_locale.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "t",
-      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/t.schema.json"
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/t.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "with_locale",
-      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/with_locale.schema.json"
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/with_locale.schema.json",
+      "tags": [
+        "fn"
+      ]
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "build_request_executor",
   "path": "packages/ree_http/package/ree_http/functions/build_request_executor.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "uri",
+          "arg_type": "req",
           "type": "URI"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:timeout? => Integer, :write_timeout? => Integer, :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :proxy? => {:address => String, :port? => Integer, :username? => String, :password? => String}]"
         }
       ]

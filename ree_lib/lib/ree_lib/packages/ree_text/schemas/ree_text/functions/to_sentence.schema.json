@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "to_sentence",
   "path": "packages/ree_text/package/ree_text/functions/to_sentence.rb",
   "mount_as": "fn",
@@ -16,14 +16,17 @@
       "args": [
         {
           "arg": "array",
+          "arg_type": "req",
           "type": "Array"
         },
         {
           "arg": "locale",
+          "arg_type": "key",
           "type": "Symbol"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:words_connector? => String, :two_words_connector? => String, :last_word_connector? => String]"
         }
       ]

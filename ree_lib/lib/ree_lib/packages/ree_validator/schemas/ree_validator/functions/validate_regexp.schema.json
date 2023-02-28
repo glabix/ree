@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "validate_regexp",
   "path": "packages/ree_validator/package/ree_validator/functions/validate_regexp.rb",
   "mount_as": "fn",
@@ -16,14 +16,17 @@
       "args": [
         {
           "arg": "value",
+          "arg_type": "req",
           "type": "String"
         },
         {
           "arg": "regexp",
+          "arg_type": "req",
           "type": "Regexp"
         },
         {
           "arg": "error",
+          "arg_type": "opt",
           "type": "Nilor[StandardError]"
         }
       ]

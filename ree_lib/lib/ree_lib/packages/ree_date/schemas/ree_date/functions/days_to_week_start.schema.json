@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "days_to_week_start",
   "path": "packages/ree_date/package/ree_date/functions/days_to_week_start.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "date",
+          "arg_type": "opt",
           "type": "Nilor[Date]"
         },
         {
           "arg": "start_week_day",
+          "arg_type": "req",
           "type": "Or[sunday, monday]"
         }
       ]

@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "index_by",
   "path": "packages/ree_array/package/ree_array/functions/index_by.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "list",
+          "arg_type": "req",
           "type": "ArrayOf[Any]"
         },
         {
           "arg": "proc",
+          "arg_type": "block",
           "type": "Block"
         }
       ]

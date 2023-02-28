@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "build_dao",
   "path": "packages/ree_dao/package/ree_dao/functions/build_dao.rb",
   "mount_as": "fn",
@@ -16,18 +16,22 @@
       "args": [
         {
           "arg": "connection",
+          "arg_type": "keyreq",
           "type": "Any"
         },
         {
           "arg": "table_name",
+          "arg_type": "keyreq",
           "type": "Symbol"
         },
         {
           "arg": "mapper",
+          "arg_type": "keyreq",
           "type": "Proc#call"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:primary_key? => Nilor[Or[Symbol, ArrayOf[Symbol]]], :default_select_columns? => Nilor[ArrayOf[Symbol]]]"
         }
       ]

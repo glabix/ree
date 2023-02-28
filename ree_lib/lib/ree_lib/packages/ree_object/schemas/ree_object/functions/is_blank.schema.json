@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "is_blank",
   "path": "packages/ree_object/package/ree_object/functions/is_blank.rb",
   "mount_as": "fn",
@@ -16,6 +16,7 @@
       "args": [
         {
           "arg": "obj",
+          "arg_type": "req",
           "type": "Any"
         }
       ]

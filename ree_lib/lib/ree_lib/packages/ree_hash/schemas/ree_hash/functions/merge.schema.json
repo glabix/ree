@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "merge",
   "path": "packages/ree_hash/package/ree_hash/functions/merge.rb",
   "mount_as": "fn",
@@ -16,18 +16,22 @@
       "args": [
         {
           "arg": "first_hash",
+          "arg_type": "req",
           "type": "Hash"
         },
         {
           "arg": "other_hash",
+          "arg_type": "req",
           "type": "Hash"
         },
         {
           "arg": "deep",
+          "arg_type": "key",
           "type": "Bool"
         },
         {
           "arg": "block",
+          "arg_type": "block",
           "type": "Block"
         }
       ]
