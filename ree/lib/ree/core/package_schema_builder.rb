@@ -36,6 +36,7 @@ class Ree::PackageSchemaBuilder
         {
           Schema::Objects::NAME => object.name,
           Schema::Objects::SCHEMA => object.schema_rpath,
+          Schema::Objects::TAGS => object.tags
         }
       }
     }

@@ -37,6 +37,10 @@ class Ree::ObjectDsl
     end
   end
 
+  def tags(list)
+    @object.add_tags(list)
+  end
+
   # @param [Symbol] object_name
   # @param [Nilor[Symbol]] as
   # @param [Nilor[Symbol]] from

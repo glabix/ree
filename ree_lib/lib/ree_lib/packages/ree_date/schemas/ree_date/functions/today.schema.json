@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "today",
   "path": "packages/ree_date/package/ree_date/functions/today.rb",
   "mount_as": "fn",

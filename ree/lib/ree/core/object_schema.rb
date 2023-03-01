@@ -1,7 +1,7 @@
 # frozen_string_literal  = true
 
 module Ree::ObjectSchema
-  SCHEMA_VERSION_NUMBER = '1.0'
+  SCHEMA_VERSION_NUMBER = '1.1'
 
   SCHEMA_TYPE = 'schema_type'
   REE_VERSION = 'ree_version'
@@ -40,6 +40,7 @@ module Ree::ObjectSchema
 
     module Args
       ARG = 'arg'
+      ARG_TYPE = 'arg_type'
       TYPE = 'type'
     end
   end

@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "register_type",
   "path": "packages/ree_swagger/package/ree_swagger/functions/register_type.rb",
   "mount_as": "fn",
@@ -16,14 +16,17 @@
       "args": [
         {
           "arg": "kind",
+          "arg_type": "req",
           "type": "Or[casters, serializers...]"
         },
         {
           "arg": "type",
+          "arg_type": "req",
           "type": "Any"
         },
         {
           "arg": "definition",
+          "arg_type": "req",
           "type": "Proc"
         }
       ]

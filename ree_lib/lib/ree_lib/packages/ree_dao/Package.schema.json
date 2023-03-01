@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "ree_dao",
   "entry_path": "packages/ree_dao/package/ree_dao.rb",
   "tags": [
@@ -29,35 +29,59 @@
   "objects": [
     {
       "name": "build_connection",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_connection.schema.json"
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_connection.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "build_dao",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_dao.schema.json"
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_dao.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "build_pg_connection",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_pg_connection.schema.json"
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_pg_connection.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "build_sqlite_connection",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_sqlite_connection.schema.json"
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/build_sqlite_connection.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "connections",
-      "schema": "packages/ree_dao/schemas/ree_dao/beans/connections.schema.json"
+      "schema": "packages/ree_dao/schemas/ree_dao/beans/connections.schema.json",
+      "tags": [
+        "object"
+      ]
     },
     {
       "name": "one_to_many",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/one_to_many.schema.json"
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/one_to_many.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "one_to_one",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/one_to_one.schema.json"
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/one_to_one.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "persist_assoc",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/persist_assoc.schema.json"
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/persist_assoc.schema.json",
+      "tags": [
+        "fn"
+      ]
     }
   ]
 }

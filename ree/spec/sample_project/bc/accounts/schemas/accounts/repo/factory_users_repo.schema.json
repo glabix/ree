@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "factory_users_repo",
   "path": "bc/accounts/package/accounts/repo/factory_users_repo.rb",
   "mount_as": "object",

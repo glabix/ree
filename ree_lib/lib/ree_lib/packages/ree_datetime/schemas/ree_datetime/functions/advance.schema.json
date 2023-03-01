@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "advance",
   "path": "packages/ree_datetime/package/ree_datetime/functions/advance.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "date_time",
+          "arg_type": "req",
           "type": "DateTime"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:years? => Integer, :quarters? => Integer, :months? => Integer, :weeks? => Integer, :days? => Integer, :hours? => Integer, :minutes? => Integer, :seconds? => Integer]"
         }
       ]

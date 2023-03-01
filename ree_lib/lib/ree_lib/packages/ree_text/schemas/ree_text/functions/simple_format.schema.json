@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "simple_format",
   "path": "packages/ree_text/package/ree_text/functions/simple_format.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "text",
+          "arg_type": "req",
           "type": "Nilor[String]"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:html_options? => Hash, :wrapper_tag? => Or[Symbol, String], :sanitize? => Bool]"
         }
       ]

@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "ree_array",
   "entry_path": "packages/ree_array/package/ree_array.rb",
   "tags": [
@@ -15,27 +15,45 @@
   "objects": [
     {
       "name": "group_by",
-      "schema": "packages/ree_array/schemas/ree_array/functions/group_by.schema.json"
+      "schema": "packages/ree_array/schemas/ree_array/functions/group_by.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "in_groups",
-      "schema": "packages/ree_array/schemas/ree_array/functions/in_groups.schema.json"
+      "schema": "packages/ree_array/schemas/ree_array/functions/in_groups.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "in_groups_of",
-      "schema": "packages/ree_array/schemas/ree_array/functions/in_groups_of.schema.json"
+      "schema": "packages/ree_array/schemas/ree_array/functions/in_groups_of.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "index_by",
-      "schema": "packages/ree_array/schemas/ree_array/functions/index_by.schema.json"
+      "schema": "packages/ree_array/schemas/ree_array/functions/index_by.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "split_by",
-      "schema": "packages/ree_array/schemas/ree_array/functions/split_by.schema.json"
+      "schema": "packages/ree_array/schemas/ree_array/functions/split_by.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "wrap",
-      "schema": "packages/ree_array/schemas/ree_array/functions/wrap.schema.json"
+      "schema": "packages/ree_array/schemas/ree_array/functions/wrap.schema.json",
+      "tags": [
+        "fn"
+      ]
     }
   ]
 }

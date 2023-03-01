@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "t",
   "path": "packages/ree_i18n/package/ree_i18n/functions/t.rb",
   "mount_as": "fn",
@@ -22,14 +22,17 @@
       "args": [
         {
           "arg": "key",
+          "arg_type": "opt",
           "type": "Nilor[Or[String, Symbol]]"
         },
         {
           "arg": "context",
+          "arg_type": "opt",
           "type": "HashOf[Or[String, Symbol], Any]"
         },
         {
           "arg": "options",
+          "arg_type": "keyrest",
           "type": "Ksplat[:throw? => Bool, :raise? => Bool, :locale? => Symbol, :scope? => Or[String, Symbol], :default? => Or[String, Symbol], :deep_interpolation? => Bool, :count? => Integer, :exception_handler? => Or[Symbol, Proc], :default_by_locale? => Or[Symbol]]"
         }
       ]

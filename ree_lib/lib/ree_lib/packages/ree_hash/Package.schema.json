@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "ree_hash",
   "entry_path": "packages/ree_hash/package/ree_hash.rb",
   "tags": [
@@ -20,35 +20,59 @@
   "objects": [
     {
       "name": "build_filter_keys",
-      "schema": "packages/ree_hash/schemas/ree_hash/functions/build_filter_keys.schema.json"
+      "schema": "packages/ree_hash/schemas/ree_hash/functions/build_filter_keys.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "except",
-      "schema": "packages/ree_hash/schemas/ree_hash/functions/except.schema.json"
+      "schema": "packages/ree_hash/schemas/ree_hash/functions/except.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "merge",
-      "schema": "packages/ree_hash/schemas/ree_hash/functions/merge.schema.json"
+      "schema": "packages/ree_hash/schemas/ree_hash/functions/merge.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "slice",
-      "schema": "packages/ree_hash/schemas/ree_hash/functions/slice.schema.json"
+      "schema": "packages/ree_hash/schemas/ree_hash/functions/slice.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "stringify_keys",
-      "schema": "packages/ree_hash/schemas/ree_hash/functions/stringify_keys.schema.json"
+      "schema": "packages/ree_hash/schemas/ree_hash/functions/stringify_keys.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "symbolize_keys",
-      "schema": "packages/ree_hash/schemas/ree_hash/functions/symbolize_keys.schema.json"
+      "schema": "packages/ree_hash/schemas/ree_hash/functions/symbolize_keys.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "transform_keys",
-      "schema": "packages/ree_hash/schemas/ree_hash/functions/transform_keys.schema.json"
+      "schema": "packages/ree_hash/schemas/ree_hash/functions/transform_keys.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "transform_values",
-      "schema": "packages/ree_hash/schemas/ree_hash/functions/transform_values.schema.json"
+      "schema": "packages/ree_hash/schemas/ree_hash/functions/transform_values.schema.json",
+      "tags": [
+        "fn"
+      ]
     }
   ]
 }

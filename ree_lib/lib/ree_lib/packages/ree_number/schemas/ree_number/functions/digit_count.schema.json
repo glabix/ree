@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "digit_count",
   "path": "packages/ree_number/package/ree_number/functions/digit_count.rb",
   "mount_as": "fn",
@@ -16,6 +16,7 @@
       "args": [
         {
           "arg": "number",
+          "arg_type": "req",
           "type": "Or[Integer, Float, BigDecimal]"
         }
       ]

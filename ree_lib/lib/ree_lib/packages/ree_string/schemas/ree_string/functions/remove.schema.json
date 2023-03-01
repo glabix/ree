@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "remove",
   "path": "packages/ree_string/package/ree_string/functions/remove.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "str",
+          "arg_type": "req",
           "type": "String"
         },
         {
           "arg": "patterns",
+          "arg_type": "req",
           "type": "ArrayOf[Or[String, Regexp]]"
         }
       ]

@@ -9,11 +9,17 @@
   "objects": [
     {
       "name": null,
-      "schema": "schemas/accounts/accounts_cfg.schema.json"
+      "schema": "schemas/accounts/accounts_cfg.schema.json",
+      "tags": [
+        "object"
+      ]
     },
     {
       "name": "transaction",
-      "schema": "schemas/accounts/transaction.schema.json"
+      "schema": "schemas/accounts/transaction.schema.json",
+      "tags": [
+        "fn"
+      ]
     }
   ]
 }

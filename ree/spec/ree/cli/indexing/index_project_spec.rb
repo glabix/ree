@@ -10,11 +10,13 @@ RSpec.describe Ree::CLI::IndexProject do
       )
 
       expect(result).to_not be(nil)
+
       expect {
         JSON.parse(result)
       }.to_not raise_error
 
       parsed_result = JSON.parse(result)
+
       expect(parsed_result["packages_schema"]).to_not be(nil)
       expect(parsed_result["classes"]).to_not be(nil)
       expect(parsed_result["objects"]).to_not be(nil)

@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "deliver_email",
   "path": "bc/accounts/package/accounts/services/deliver_email.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "to",
+          "arg_type": "keyreq",
           "type": "Any"
         },
         {
           "arg": "body",
+          "arg_type": "keyreq",
           "type": "Any"
         }
       ]

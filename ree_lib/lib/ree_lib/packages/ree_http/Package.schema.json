@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "ree_http",
   "entry_path": "packages/ree_http/package/ree_http.rb",
   "tags": [
@@ -23,47 +23,80 @@
   "objects": [
     {
       "name": "build_request",
-      "schema": "packages/ree_http/schemas/ree_http/functions/build_request.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/build_request.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "build_request_executor",
-      "schema": "packages/ree_http/schemas/ree_http/functions/build_request_executor.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/build_request_executor.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "execute_request",
-      "schema": "packages/ree_http/schemas/ree_http/functions/execute_request.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/execute_request.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "http_delete",
-      "schema": "packages/ree_http/schemas/ree_http/functions/http_delete.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/http_delete.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "http_exec",
-      "schema": "packages/ree_http/schemas/ree_http/functions/http_exec.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/http_exec.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "http_get",
-      "schema": "packages/ree_http/schemas/ree_http/functions/http_get.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/http_get.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "http_head",
-      "schema": "packages/ree_http/schemas/ree_http/functions/http_head.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/http_head.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "http_options",
-      "schema": "packages/ree_http/schemas/ree_http/functions/http_options.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/http_options.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "http_patch",
-      "schema": "packages/ree_http/schemas/ree_http/functions/http_patch.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/http_patch.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "http_post",
-      "schema": "packages/ree_http/schemas/ree_http/functions/http_post.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/http_post.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "http_put",
-      "schema": "packages/ree_http/schemas/ree_http/functions/http_put.schema.json"
+      "schema": "packages/ree_http/schemas/ree_http/functions/http_put.schema.json",
+      "tags": [
+        "fn"
+      ]
     }
   ]
 }
