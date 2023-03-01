@@ -18,7 +18,6 @@ export default class CompletionAnalyzer {
   private static getFilteredCompletionList(uri: string, position: Position): CompletionItem[] {
     const defaultCompletion : CompletionItem[] = []
     let filePath = ''
-    
 
     try {
       filePath = url.fileURLToPath(uri)
@@ -327,9 +326,7 @@ export default class CompletionAnalyzer {
       // if tokenNode inside parent children
       // ex: someDao.active.*tokenNode*
       let nodeHaveTokenNode = !!checkParent(node, tokenNode)
-      if (nodeHaveTokenNode) {
-        return true
-      }
+      if (nodeHaveTokenNode) { return true }
 
       return false
     })

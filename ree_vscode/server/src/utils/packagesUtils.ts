@@ -347,6 +347,7 @@ export interface IObject {
 
 export interface IMethodArg {
   arg: string
+  arg_type: string
   type: string
 }
 
@@ -654,7 +655,14 @@ export function buildObjectArguments(obj: IObject, tokenNode?: SyntaxNode | null
     if (tokenNode?.nextSibling?.type === 'argument_list') { return obj.name }
     if (method.args.length === 0) { return `${obj.name}` }
     if (method.args.length === 1) { return `${obj.name}(${mapObjectArgument(method.args[0])})`}
-    if (method.args.every(arg => [...BASIC_TYPES, 'Block'].includes(arg.type) || arg.type.startsWith('ArrayOf') || arg.type.startsWith('SplatOf'))) {
+    if (method.args.every(arg => {
+      return [...BASIC_TYPES, 'Block'].includes(arg.type) ||
+              arg.type.startsWith('ArrayOf') ||
+              arg.type.startsWith('SplatOf') ||
+              arg.type.startsWith('Nilor') ||
+              arg.type.startsWith('Or')
+            })
+    ) {
       return `${obj.name}(${method.args.map(arg => mapObjectArgument(arg)).join(', ')})`
     }
 
@@ -685,7 +693,12 @@ function getHashArgs(str: string): string {
 function mapObjectArgument(arg: IMethodArg): string {
   const index = cachedIndex
 
-  if (BASIC_TYPES.includes(arg.type) || arg.type.startsWith('ArrayOf')) { return arg.arg }
+  if (arg.arg_type === 'key' || arg.arg_type === 'keyreq') {
+    return `${arg.arg}:`
+  }
+
+  if (BASIC_TYPES.includes(arg.type)) { return arg.arg }
+
   if (
     (arg.type.startsWith("{") && arg.type.endsWith("}")) ||
     (arg.type.startsWith("Ksplat[") && arg.type.endsWith("]"))

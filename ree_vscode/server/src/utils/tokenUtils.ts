@@ -32,21 +32,21 @@ export function extractToken(uri: string, position: Position): string | undefine
   }
 
   const reverseLeft = left.split("").reverse().join("")
-  let matchData = reverseLeft.match(/^([a-zA-Z_]*)[^a-zA-Z_]*/)
+  const leftMatchData = reverseLeft.match(/^\.?([a-zA-Z_]*)[^a-zA-Z_]*/)
   let lToken = ''
 
   if (reverseLeft.length) {
-    if (matchData && matchData[1]) {
-      lToken = matchData[1].split("").reverse().join("")
+    if (leftMatchData && leftMatchData[1]) {
+      lToken = leftMatchData[1].split("").reverse().join("")
     }
   }
 
-  matchData = right.match(/^([a-zA-Z_]*)[^a-zA-Z_]*/)
+  const rightMatchData = right.match(/^\.?([a-zA-Z_]*)\.?[^a-zA-Z_]*/)
   let rToken = ''
 
   if (right.length) {
-    if (matchData && matchData[1]) { 
-      rToken = matchData[1]
+    if (rightMatchData && rightMatchData[1]) { 
+      rToken = rightMatchData[1]
     }
   }
 

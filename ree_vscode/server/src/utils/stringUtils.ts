@@ -54,3 +54,7 @@ export function logErrorMessage(message: string) {
 export function sendDebugServerLogToClient(message: string, level: LogLevel) {
   if (connection) { connection.sendNotification('reeLanguageServer/serverLog', buildLogMessage(message, level)) }
 }
+
+export function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}

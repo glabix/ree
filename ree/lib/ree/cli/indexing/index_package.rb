@@ -106,6 +106,7 @@ module Ree
       
             {
               Ree::ObjectSchema::Methods::Args::ARG => arg.name,
+              Ree::ObjectSchema::Methods::Args::ARG_TYPE => arg.type,
               Ree::ObjectSchema::Methods::Args::TYPE => type
             }
           end
