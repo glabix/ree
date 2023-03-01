@@ -85,7 +85,7 @@ class Ree::ObjectSchemaBuilder
 
       {
         Schema::Methods::Args::ARG => arg.name,
-        Schema::Methods::Args::ARG_TYPE => arg.name,
+        Schema::Methods::Args::ARG_TYPE => arg.type,
         Schema::Methods::Args::TYPE => type
       }
     end

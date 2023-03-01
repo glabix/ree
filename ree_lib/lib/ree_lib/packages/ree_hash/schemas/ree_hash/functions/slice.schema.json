@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "slice",
   "path": "packages/ree_hash/package/ree_hash/functions/slice.rb",
   "mount_as": "fn",
@@ -17,14 +17,17 @@
       "args": [
         {
           "arg": "hash",
+          "arg_type": "req",
           "type": "Hash"
         },
         {
           "arg": "keys",
+          "arg_type": "req",
           "type": "[:key0, .., :keyM => [:keyN, .., :keyZ]]"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:raise? => Bool]"
         }
       ]

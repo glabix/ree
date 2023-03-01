@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "config",
   "path": "packages/ree_logger/package/ree_logger/config.rb",
   "mount_as": "object",

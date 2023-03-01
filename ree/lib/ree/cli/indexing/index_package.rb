@@ -25,7 +25,7 @@ module Ree
           package_hsh = index_package_entry(package)
 
           hsh[:package_schema] = package_hsh
-          hsh = index_package_files(package, dir, hsh)
+          hsh = index_public_methods_for_package_classes(package, dir, hsh)
 
           JSON.pretty_generate(hsh)
         end
@@ -121,8 +121,8 @@ module Ree
           ]
         end
 
-        def index_package_files(package, dir, index_hash)
-          Ree::CLI::IndexProject.send(:index_package_files, package, dir, index_hash)
+        def index_public_methods_for_package_classes(package, dir, index_hash)
+          Ree::CLI::IndexProject.send(:index_public_methods_for_package_classes, package, index_hash)
         end
       end
     end

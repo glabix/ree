@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "ree_text",
   "entry_path": "packages/ree_text/package/ree_text.rb",
   "tags": [
@@ -23,55 +23,94 @@
   "objects": [
     {
       "name": "escape_html",
-      "schema": "packages/ree_text/schemas/ree_text/functions/escape_html.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/escape_html.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "escape_javascript",
-      "schema": "packages/ree_text/schemas/ree_text/functions/escape_javascript.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/escape_javascript.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "excerpt",
-      "schema": "packages/ree_text/schemas/ree_text/functions/excerpt.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/excerpt.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "highlight",
-      "schema": "packages/ree_text/schemas/ree_text/functions/highlight.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/highlight.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "safe_join",
-      "schema": "packages/ree_text/schemas/ree_text/functions/safe_join.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/safe_join.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "sanitize_css",
-      "schema": "packages/ree_text/schemas/ree_text/functions/sanitize_css.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/sanitize_css.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "sanitize_html",
-      "schema": "packages/ree_text/schemas/ree_text/functions/sanitize_html.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/sanitize_html.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "simple_format",
-      "schema": "packages/ree_text/schemas/ree_text/functions/simple_format.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/simple_format.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "strip_links",
-      "schema": "packages/ree_text/schemas/ree_text/functions/strip_links.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/strip_links.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "strip_tags",
-      "schema": "packages/ree_text/schemas/ree_text/functions/strip_tags.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/strip_tags.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "to_sentence",
-      "schema": "packages/ree_text/schemas/ree_text/functions/to_sentence.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/to_sentence.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "unescape_html",
-      "schema": "packages/ree_text/schemas/ree_text/functions/unescape_html.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/unescape_html.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "word_wrap",
-      "schema": "packages/ree_text/schemas/ree_text/functions/word_wrap.schema.json"
+      "schema": "packages/ree_text/schemas/ree_text/functions/word_wrap.schema.json",
+      "tags": [
+        "fn"
+      ]
     }
   ]
 }

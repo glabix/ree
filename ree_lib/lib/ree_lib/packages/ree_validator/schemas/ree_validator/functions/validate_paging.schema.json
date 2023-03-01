@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "validate_paging",
   "path": "packages/ree_validator/package/ree_validator/functions/validate_paging.rb",
   "mount_as": "fn",
@@ -16,26 +16,32 @@
       "args": [
         {
           "arg": "page",
+          "arg_type": "keyreq",
           "type": "Integer"
         },
         {
           "arg": "per_page",
+          "arg_type": "keyreq",
           "type": "Integer"
         },
         {
           "arg": "min_per_page",
+          "arg_type": "keyreq",
           "type": "Integer"
         },
         {
           "arg": "max_per_page",
+          "arg_type": "keyreq",
           "type": "Integer"
         },
         {
           "arg": "error",
+          "arg_type": "key",
           "type": "Nilor[StandardError]"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:max_result_window? => Integer]"
         }
       ]

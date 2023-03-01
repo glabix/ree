@@ -18,6 +18,8 @@ module ReeEnum
 
         dsl.instance_exec(&proc) if block_given?
 
+        dsl.tags(["object", "enum"])
+
         klass = dsl.object.klass
         klass.send(:include, ReeEnum::Enumerable)
         klass.setup_enum(dsl.object.name)

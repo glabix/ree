@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "ree_string",
   "entry_path": "packages/ree_string/package/ree_string.rb",
   "tags": [
@@ -17,67 +17,115 @@
   "objects": [
     {
       "name": "acronyms_camelize_regex",
-      "schema": "packages/ree_string/schemas/ree_string/functions/acronyms_camelize_regex.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/acronyms_camelize_regex.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "acronyms_underscore_regex",
-      "schema": "packages/ree_string/schemas/ree_string/functions/acronyms_underscore_regex.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/acronyms_underscore_regex.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "camelize",
-      "schema": "packages/ree_string/schemas/ree_string/functions/camelize.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/camelize.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "dasherize",
-      "schema": "packages/ree_string/schemas/ree_string/functions/dasherize.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/dasherize.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "deconstantize",
-      "schema": "packages/ree_string/schemas/ree_string/functions/deconstantize.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/deconstantize.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "demodulize",
-      "schema": "packages/ree_string/schemas/ree_string/functions/demodulize.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/demodulize.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "indent",
-      "schema": "packages/ree_string/schemas/ree_string/functions/indent.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/indent.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "pluralize",
-      "schema": "packages/ree_string/schemas/ree_string/functions/pluralize.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/pluralize.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "remove",
-      "schema": "packages/ree_string/schemas/ree_string/functions/remove.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/remove.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "squish",
-      "schema": "packages/ree_string/schemas/ree_string/functions/squish.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/squish.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "strip_heredoc",
-      "schema": "packages/ree_string/schemas/ree_string/functions/strip_heredoc.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/strip_heredoc.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "truncate",
-      "schema": "packages/ree_string/schemas/ree_string/functions/truncate.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/truncate.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "truncate_bytes",
-      "schema": "packages/ree_string/schemas/ree_string/functions/truncate_bytes.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/truncate_bytes.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "truncate_words",
-      "schema": "packages/ree_string/schemas/ree_string/functions/truncate_words.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/truncate_words.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "underscore",
-      "schema": "packages/ree_string/schemas/ree_string/functions/underscore.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/underscore.schema.json",
+      "tags": [
+        "fn"
+      ]
     },
     {
       "name": "upcase_first",
-      "schema": "packages/ree_string/schemas/ree_string/functions/upcase_first.schema.json"
+      "schema": "packages/ree_string/schemas/ree_string/functions/upcase_first.schema.json",
+      "tags": [
+        "fn"
+      ]
     }
   ]
 }

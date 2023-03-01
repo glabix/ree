@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "in_groups",
   "path": "packages/ree_array/package/ree_array/functions/in_groups.rb",
   "mount_as": "fn",
@@ -16,18 +16,22 @@
       "args": [
         {
           "arg": "array",
+          "arg_type": "req",
           "type": "ArrayOf[Any]"
         },
         {
           "arg": "number",
+          "arg_type": "req",
           "type": "Integer"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:fill_with? => Any]"
         },
         {
           "arg": "block",
+          "arg_type": "block",
           "type": "Block"
         }
       ]

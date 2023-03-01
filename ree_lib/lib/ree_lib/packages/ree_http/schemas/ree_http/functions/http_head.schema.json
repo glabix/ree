@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "http_head",
   "path": "packages/ree_http/package/ree_http/functions/http_head.rb",
   "mount_as": "fn",
@@ -16,14 +16,17 @@
       "args": [
         {
           "arg": "url",
+          "arg_type": "req",
           "type": "String"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:headers? => HashOf[Or[String, Symbol], Or[String, Integer]], :body? => Or[String, Hash, File], :form_data? => HashOf[Or[Symbol, String], Or[Integer, Float, Bool, String, Array, File]], :write_timeout? => Integer, :timeout? => Integer, :redirects_count? => Integer, :strict_redirect_mode? => Bool, :query_params? => HashOf[Or[String, Symbol], Any], :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :basic_auth? => {:username => String, :password => String}, :bearer_token? => String, :proxy? => {:address => String, :port? => Integer, :username? => String, :password? => String}]"
         },
         {
           "arg": "block",
+          "arg_type": "block",
           "type": "Block"
         }
       ]

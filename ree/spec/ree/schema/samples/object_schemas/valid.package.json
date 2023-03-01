@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "register_account_cmd",
   "path": "bc/accounts/package/accounts/commands/register_account_cmd.rb",
   "mount_as": "fn",
@@ -16,30 +16,37 @@
       "args": [
         {
           "arg": "name",
+          "arg_type": "req",
           "type": "String"
         },
         {
           "arg": "email",
+          "arg_type": "opt",
           "type": "String"
         },
         {
           "arg": "args",
+          "arg_type": "rest",
           "type": "SplatOf[Any]"
         },
         {
           "arg": "int",
+          "arg_type": "keyreq",
           "type": "Integer"
         },
         {
           "arg": "test",
+          "arg_type": "key",
           "type": "String"
         },
         {
           "arg": "kwargs",
+          "arg_type": "keyrest",
           "type": "Ksplat[:string? => String]"
         },
         {
           "arg": "proc",
+          "arg_type": "block",
           "type": "Block"
         }
       ]

@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "default_formatter",
   "path": "packages/ree_logger/package/ree_logger/formatters/default_formatter.rb",
   "mount_as": "object",

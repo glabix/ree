@@ -66,6 +66,7 @@ module ReeDao::DSL
       )
 
       dsl.instance_exec(&proc)
+      dsl.tags(["object", "dao"])
 
       db_link = dsl.object.links.detect { _1.as == :db }
 

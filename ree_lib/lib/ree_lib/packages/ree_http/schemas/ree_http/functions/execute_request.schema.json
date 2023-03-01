@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "execute_request",
   "path": "packages/ree_http/package/ree_http/functions/execute_request.rb",
   "mount_as": "fn",
@@ -17,14 +17,17 @@
       "args": [
         {
           "arg": "request",
+          "arg_type": "req",
           "type": "Net::HTTPRequest"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:write_timeout? => Integer, :timeout? => Integer, :redirects_count? => Integer, :strict_redirect_mode? => Bool, :force_ssl? => Bool, :ca_certs? => ArrayOf[File], :proxy? => {:address => String, :port? => Integer, :username? => String, :password? => String}]"
         },
         {
           "arg": "block",
+          "arg_type": "block",
           "type": "Block"
         }
       ]

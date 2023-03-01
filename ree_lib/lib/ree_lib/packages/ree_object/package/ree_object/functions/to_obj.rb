@@ -4,9 +4,9 @@ class ReeObject::ToObj
   include Ree::FnDSL
 
   fn :to_obj do
-    link :as_json, import: -> { BASIC_TYPES }
-    link :slice, from: :ree_hash
     link :except, from: :ree_hash
+    link :slice, from: :ree_hash
+    link :to_hash, import: -> { BASIC_TYPES }
     link 'ree_hash/contracts/hash_keys_contract', -> { HashKeysContract }
   end
 
@@ -19,7 +19,7 @@ class ReeObject::ToObj
     ] => Or[Object, ArrayOf[Object], *BASIC_TYPES]
   ).throws(ArgumentError)
   def call(obj, **opts)
-    dump = as_json(obj)
+    dump = to_hash(obj)
 
     options = prepare_options(opts)
 
@@ -37,7 +37,7 @@ class ReeObject::ToObj
 
     ancestors = dump.class.ancestors
     return dump if ancestors.intersection(BASIC_TYPES).size > 0
-      
+
     if dump.is_a?(Array)
       build_array(dump)
     else
@@ -63,7 +63,7 @@ class ReeObject::ToObj
     hash.each do |key, value|
       var = :"@#{key}"
 
-      obj.define_singleton_method key do 
+      obj.define_singleton_method key do
         instance_variable_get(var)
       end
 
@@ -75,7 +75,7 @@ class ReeObject::ToObj
         obj.instance_variable_set(var, value)
       end
     end
-    
+
     obj
   end
 

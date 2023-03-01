@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "excerpt",
   "path": "packages/ree_text/package/ree_text/functions/excerpt.rb",
   "mount_as": "fn",
@@ -16,14 +16,17 @@
       "args": [
         {
           "arg": "text",
+          "arg_type": "req",
           "type": "String"
         },
         {
           "arg": "phrase",
+          "arg_type": "req",
           "type": "Or[String, Regexp]"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:radius? => Integer, :omission? => String, :separator? => String]"
         }
       ]

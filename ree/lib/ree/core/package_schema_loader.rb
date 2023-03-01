@@ -102,6 +102,7 @@ class Ree::PackageSchemaLoader
       name = item[Schema::Objects::NAME].to_s
       schema_rpath = item[Schema::Objects::SCHEMA].to_s
       list = [name, schema_rpath]
+      tags = item[Schema::Objects::TAGS] || []
 
       if list.reject(&:empty?).size != list.size
         raise Ree::Error.new("invalid object data for #{item.inspect}: #{abs_schema_path}", :invalid_package_schema)
@@ -119,6 +120,7 @@ class Ree::PackageSchemaLoader
         Ree::PathHelper.object_rpath(schema_rpath),
       )
 
+      object.add_tags(tags)
       object.set_package(package.name)
 
       package.set_object(object)

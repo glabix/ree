@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "split_by",
   "path": "packages/ree_array/package/ree_array/functions/split_by.rb",
   "mount_as": "fn",
@@ -16,14 +16,17 @@
       "args": [
         {
           "arg": "array",
+          "arg_type": "req",
           "type": "ArrayOf[Any]"
         },
         {
           "arg": "value",
+          "arg_type": "opt",
           "type": "Any"
         },
         {
           "arg": "block",
+          "arg_type": "block",
           "type": "Block"
         }
       ]

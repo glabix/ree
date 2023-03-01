@@ -5,7 +5,7 @@ class Ree::Object
               :package_name, :factory, :after_init,
               :class_name, :links, :mount_as, :freeze,
               :errors, :linked_const_list, :compiled_frozen,
-              :singleton
+              :singleton, :tags
   
   # @param [Symbol] name Object name
   # @param [String] schema_rpath Object schema path relative to project root dir
@@ -22,6 +22,7 @@ class Ree::Object
     @singleton = false
     @compiled_frozen = @freeze
     @linked_const_list = []
+    @tags = []
   end
 
   def reset
@@ -128,5 +129,10 @@ class Ree::Object
   # @param [Symbol] After init method name
   def set_after_init(val)
     @after_init = val; self
+  end
+
+  def add_tags(list)
+    @tags += list
+    @tags.uniq!
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal  = true
 
 module Ree::PackageSchema
-  SCHEMA_VERSION_NUMBER = '1.0'
+  SCHEMA_VERSION_NUMBER = '1.1'
 
   SCHEMA_TYPE = 'schema_type'
   REE_VERSION = 'ree_version'
@@ -17,6 +17,7 @@ module Ree::PackageSchema
   module Objects
     NAME = 'name'
     SCHEMA = 'schema'
+    TAGS = 'tags'
   end
 
   module DependsOn

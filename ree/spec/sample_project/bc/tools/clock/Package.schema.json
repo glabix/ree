@@ -1,6 +1,6 @@
 {
   "schema_type": "package",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "clock",
   "entry_path": "bc/tools/clock/package/clock.rb",
   "tags": [
@@ -25,7 +25,10 @@
   "objects": [
     {
       "name": "time",
-      "schema": "bc/tools/clock/schemas/clock/time.schema.json"
+      "schema": "bc/tools/clock/schemas/clock/time.schema.json",
+      "tags": [
+        "object"
+      ]
     }
   ]
 }

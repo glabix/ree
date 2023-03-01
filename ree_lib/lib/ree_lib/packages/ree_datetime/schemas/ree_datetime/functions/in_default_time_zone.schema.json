@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "in_default_time_zone",
   "path": "packages/ree_datetime/package/ree_datetime/functions/in_default_time_zone.rb",
   "mount_as": "fn",
@@ -16,6 +16,7 @@
       "args": [
         {
           "arg": "date_time",
+          "arg_type": "req",
           "type": "DateTime"
         }
       ]

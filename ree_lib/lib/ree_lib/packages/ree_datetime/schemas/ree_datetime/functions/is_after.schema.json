@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "is_after",
   "path": "packages/ree_datetime/package/ree_datetime/functions/is_after.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "date_time_start",
+          "arg_type": "req",
           "type": "DateTime"
         },
         {
           "arg": "date_time_end",
+          "arg_type": "req",
           "type": "DateTime"
         }
       ]

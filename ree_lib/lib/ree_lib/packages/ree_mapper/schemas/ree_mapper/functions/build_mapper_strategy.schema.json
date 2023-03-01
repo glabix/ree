@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "build_mapper_strategy",
   "path": "packages/ree_mapper/package/ree_mapper/functions/build_mapper_strategy.rb",
   "mount_as": "fn",
@@ -16,14 +16,17 @@
       "args": [
         {
           "arg": "method",
+          "arg_type": "keyreq",
           "type": "Symbol"
         },
         {
           "arg": "dto",
+          "arg_type": "key",
           "type": "Class"
         },
         {
           "arg": "always_optional",
+          "arg_type": "key",
           "type": "Bool"
         }
       ]

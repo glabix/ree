@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "end_of_week",
   "path": "packages/ree_date/package/ree_date/functions/end_of_week.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "date",
+          "arg_type": "opt",
           "type": "Nilor[Date]"
         },
         {
           "arg": "week_start",
+          "arg_type": "req",
           "type": "Or[sunday, monday]"
         }
       ]

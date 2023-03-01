@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "beginning_of_quarter",
   "path": "packages/ree_datetime/package/ree_datetime/functions/beginning_of_quarter.rb",
   "mount_as": "fn",
@@ -16,6 +16,7 @@
       "args": [
         {
           "arg": "date_time",
+          "arg_type": "opt",
           "type": "Nilor[DateTime]"
         }
       ]

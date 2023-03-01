@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "number_to_currency",
   "path": "packages/ree_number/package/ree_number/functions/number_to_currency.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "number",
+          "arg_type": "req",
           "type": "Or[Integer, Float, String]"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:format? => String, :precision? => Integer, :unit? => String, :negative_format? => String, :separator? => String, :delimiter? => String, :significant? => Bool, :strip_insignificant_zeros? => Bool, :round_mode? => Or[up, down, truncate, half_up, default, half_down, half_even, banker, ceiling, floor]]"
         }
       ]

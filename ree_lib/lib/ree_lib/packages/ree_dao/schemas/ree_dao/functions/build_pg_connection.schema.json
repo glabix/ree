@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "build_pg_connection",
   "path": "packages/ree_dao/package/ree_dao/functions/build_pg_connection.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "conn_opts",
+          "arg_type": "req",
           "type": "{:conn_str? => String, :adapter => String, :database? => String, :encoding? => String, :user? => String, :password? => String, :host? => String, :port? => String, :convert_infinite_timestamps? => Or[string, nil, float], :connect_timeout? => Integer, :driver_options? => Hash, :notice_receiver? => Proc, :sslmode? => Or[disable, allow, prefer, require, verify-ca, verify-full...], :sslrootcert? => String, :search_path? => String, :use_iso_date_format? => Bool, :max_connections? => Integer}"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[\"RestKeys\" => Any]"
         }
       ]

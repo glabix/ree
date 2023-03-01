@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "safe_join",
   "path": "packages/ree_text/package/ree_text/functions/safe_join.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "array",
+          "arg_type": "req",
           "type": "Array"
         },
         {
           "arg": "opts",
+          "arg_type": "keyrest",
           "type": "Ksplat[:sep? => String]"
         }
       ]

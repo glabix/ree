@@ -16,6 +16,7 @@ module Ree::BeanDSL
       )
 
       dsl.instance_exec(&proc) if block_given?
+      dsl.tags(["object"])
       dsl.object.set_as_compiled(false)
 
       Ree.container.compile(dsl.package, name)

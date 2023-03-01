@@ -1,6 +1,6 @@
 {
   "schema_type": "object",
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "name": "migrate_db",
   "path": "packages/ree_migrator/package/ree_migrator/functions/migrate_db.rb",
   "mount_as": "fn",
@@ -16,10 +16,12 @@
       "args": [
         {
           "arg": "db_connection",
+          "arg_type": "req",
           "type": "Sequel::Database"
         },
         {
           "arg": "migrations_yml_path",
+          "arg_type": "req",
           "type": "String"
         }
       ]
