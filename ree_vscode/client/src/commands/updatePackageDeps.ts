@@ -239,7 +239,7 @@ function updateObjectLinks(
           linkText = `\n${offset}${linkText}`
         }
       } else {
-        lineNumber = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.row - 1
+        lineNumber = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.row
         startCharPos = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.column
         endCharPos = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.column
         linkText = `${linkText}\n${offset}`
