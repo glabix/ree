@@ -1,7 +1,7 @@
 class ReeLogger::MultiLogger < Logger
   include Ree::LinkDSL
 
-  link :as_json, from: :ree_object
+  link :to_hash, from: :ree_object
   link :transform_values, from: :ree_hash
   link 'ree_logger/log_event', -> { LogEvent }
   link 'ree_logger/rate_limiter', -> { RateLimiter }
@@ -149,7 +149,7 @@ class ReeLogger::MultiLogger < Logger
           args[name] = method_binding.local_variable_get(name)
         end
 
-        args = transform_values(as_json(args)) do |k, v|
+        args = transform_values(to_hash(args)) do |k, v|
           if @filter_words.any? { k.to_s.include?(_1) }
             'FILTERED'
           else
