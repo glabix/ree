@@ -125,6 +125,8 @@ TestDTO
         email: 'test@example.com',
       )
 
+      expect(dto.respond_to? "set_tasks").to eq(true)
+
       task_1 = TestTaskDTO.new(id: 1, title: "new task")
       task_2 = TestTaskDTO.new(id: 2, title: "other task")
 
