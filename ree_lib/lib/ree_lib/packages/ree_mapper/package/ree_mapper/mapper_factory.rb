@@ -22,7 +22,6 @@ class ReeMapper::MapperFactory
   def self.register(name, type)
     raise ArgumentError, "name of mapper type should not end with `?`" if name.to_s.end_with?('?')
 
-    name_types = types[name]
     defined_strategy_method = types[name]&.flat_map(&:strategies)&.map(&:method)&.detect { type.find_strategy(_1) }
     raise ArgumentError, "type :#{name} with `#{defined_strategy_method}` strategy already registered" if defined_strategy_method
     raise ArgumentError, "method :#{name} already defined" if !types.key?(name) && method_defined?(name)
