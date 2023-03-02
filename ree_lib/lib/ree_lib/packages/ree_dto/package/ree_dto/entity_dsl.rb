@@ -113,6 +113,7 @@ module ReeDto::EntityDSL
       class_eval %Q(
         instance_variable_set(:@#{collection_name}, nil)
 
+        contract None => #{contract_class}
         def #{collection_name}
           @#{collection_name}
         end
