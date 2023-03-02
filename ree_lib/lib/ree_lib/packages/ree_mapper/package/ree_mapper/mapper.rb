@@ -7,7 +7,7 @@ class ReeMapper::Mapper
       strategies.each do |strategy|
         method = strategy.method
         next if type.respond_to?(method)
-        raise ReeMapper::UnsupportedTypeError, "type #{type.name} should implement method `#{method}`"
+        raise ReeMapper::UnsupportedTypeError, "type #{type.inspect} should implement method `#{method}`"
       end
     end
 

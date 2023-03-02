@@ -5,17 +5,17 @@ class ReeMapper::MapperFactory
     attr_reader :types, :strategies
   end
 
-  contract(Symbol, Any => Class).throws(ArgumentError)
-  def self.register_type(name, object_type)
+  contract(Symbol, ReeMapper::AbstractType, Kwargs[strategies: ArrayOf[ReeMapper::MapperStrategy]] => Class)
+  def self.register_type(name, object_type, strategies: self.strategies)
     register(
       name,
       ReeMapper::Mapper.build(strategies, object_type)
     )
   end
 
-  contract(Symbol, Any => Class).throws(ArgumentError)
+  contract(Symbol, ReeMapper::Mapper => Class).throws(ArgumentError)
   def self.register(name, type)
-    raise ArgumentError, "name of mapper type should not include `?`" if name.to_s.end_with?('?')
+    raise ArgumentError, "name of mapper type should not end with `?`" if name.to_s.end_with?('?')
     raise ArgumentError, "type :#{name} already registered" if types.key?(name)
     raise ArgumentError, "method :#{name} already defined" if method_defined?(name)
 
