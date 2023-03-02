@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { Query } from 'web-tree-sitter'
-import { forest, asRegexp, mapLinkQueryMatches } from '../utils/forest'
+import { forest, asRegexp, mapLinkQueryMatches, Link } from '../utils/forest'
 const fs = require('fs')
 const lodash = require('lodash')
 
@@ -39,7 +39,7 @@ export function checkAndSortLinks(filePath: string) {
   const linksWithSymbolName = lodash.cloneDeep(links).filter(l => l.isSymbol)
   const sortedLinksWithFileName = linksWithFileName.sort(sortLinksByNameAsc)
   const sortedLinksWithSymbolName = linksWithSymbolName.sort(sortLinksByNameAsc)
-  let allSorted = [...sortedLinksWithSymbolName, ...sortedLinksWithFileName]
+  let allSorted = [...sortedLinksWithSymbolName, ...sortedLinksWithFileName] as Link[]
   let sortedWithoutUnused = []
 
   // check uniq
@@ -125,31 +125,27 @@ export function checkAndSortLinks(filePath: string) {
     }
 
     if (importsStrings.length > 0) {
-      let sortedImportsStrings = importsStrings.sort().join('')
+      const sortedImportsStrings = importsStrings.sort()
       allSorted = allSorted.filter(l => {
         if (l.imports.length === 0) { return true }
 
-        if (sortedImportsStrings.includes(l.imports.sort().join(''))) {
-          if (nameStrings.length > 0 && !nameStrings.includes(l.name)) { return true }
+        if (l.imports.every(i => sortedImportsStrings.includes(i))) {
+          if (nameStrings.length > 0 && !nameStrings.includes(l.name) && l.isSymbol) {
+            const newLinkBody = removeUnusedImportFromLink(l, importsStrings)
+
+            if (!newLinkBody) { return false }
+
+            l.body = newLinkBody
+            return true
+          }
 
           return false
         } else {
-          const notAllUsedLinks = importsStrings.sort().filter(e => l.imports.sort().includes(e))
-          if (notAllUsedLinks.length > 0) {
-            // build new link string without unused
-            let newLinkBody = ''
-            if (l.isSymbol) {
-              newLinkBody += `link :${l.name}`
+          const newLinkBody = removeUnusedImportFromLink(l, importsStrings)
+          if (!newLinkBody) { return false }
 
-              if (l.from) { newLinkBody += `, from: :${l.from}` }
+          l.body = newLinkBody
 
-              newLinkBody += `, import: -> { ${l.imports.sort().filter(e => !notAllUsedLinks.includes(e)).join(' & ')} }`
-            } else {
-              newLinkBody += `link "${l.name}"`
-              newLinkBody += `, -> { ${l.imports.sort().filter(e => !notAllUsedLinks.includes(e)).join(' & ')} }`
-            }
-            l.body = newLinkBody
-          }
           return true
         }
       })
@@ -199,4 +195,30 @@ export function sortLinksByNameAsc(a, b) {
   if (cleanA > cleanB) { return 1 }
   if (cleanA < cleanB) { return -1 }
   return 0
+}
+
+function removeUnusedImportFromLink(link: Link, importsStringsArr: string[]): string | null {
+  const notAllUsedLinks = importsStringsArr.sort().filter(e => link.imports.sort().includes(e))
+  if (notAllUsedLinks.length > 0) {
+    // build new link string without unused
+    let newLinkBody = ''
+    if (link.isSymbol) {
+      newLinkBody += `link :${link.name}`
+
+      if (link.from) { newLinkBody += `, from: :${link.from}` }
+
+      if (notAllUsedLinks.length !== link.imports.length) {
+        newLinkBody += `, import: -> { ${link.imports.sort().filter(e => !notAllUsedLinks.includes(e)).join(' & ')} }`
+      }
+    } else {
+      if (notAllUsedLinks.length === link.imports.length) { return null }
+      
+      newLinkBody += `link "${link.name}"`
+      newLinkBody += `, -> { ${link.imports.sort().filter(e => !notAllUsedLinks.includes(e)).join(' & ')} }`
+    }
+
+    return newLinkBody
+  }
+
+  return link.body
 }
