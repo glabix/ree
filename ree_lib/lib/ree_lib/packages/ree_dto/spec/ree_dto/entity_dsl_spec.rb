@@ -4,6 +4,15 @@ package_require('ree_dto/entity_dsl')
 
 RSpec.describe ReeDto::EntityDSL do
   before :all do
+    class TestTaskDTO
+      include ReeDto::EntityDSL
+
+      properties(
+        id: Nilor[Integer],
+        title: String
+      )
+    end
+
     class TestDTO
       include ReeDto::EntityDSL
 
@@ -12,6 +21,8 @@ RSpec.describe ReeDto::EntityDSL do
         name: String,
         email: Nilor[String]
       )
+
+      collection :tasks, ArrayOf[TestTaskDTO]
     end
 
     @test_dto = TestDTO.new(
@@ -103,6 +114,26 @@ TestDTO
         name: 'John',
         email: 'test@example.com'
       })
+    }
+  end
+
+  context "collection methods" do
+    it {
+      dto = TestDTO.new(
+        id: 1,
+        name: 'John',
+        email: 'test@example.com',
+      )
+
+      task_1 = TestTaskDTO.new(id: 1, title: "new task")
+      task_2 = TestTaskDTO.new(id: 2, title: "other task")
+
+      dto.set_tasks([task_1, task_2])
+
+      expect(dto.tasks.class).to eq(Array)
+      expect(dto.tasks.size).to eq(2)
+      expect(dto.tasks.first.class).to eq(task_1.class)
+      expect(dto.tasks.last.class).to eq(task_2.class)
     }
   end
 end

@@ -107,5 +107,24 @@ module ReeDto::EntityDSL
 
       nil
     end
+
+    contract(Symbol, Any => nil)
+    def collection(collection_name, contract_class)
+      class_eval %Q(
+        instance_variable_set(:@#{collection_name}, nil)
+
+        def #{collection_name}
+          @#{collection_name}
+        end
+
+        contract #{contract_class} => nil
+        def set_#{collection_name}(list)
+          @#{collection_name} = list; nil
+        end
+
+      )
+
+      nil
+    end
   end
 end
