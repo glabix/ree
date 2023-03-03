@@ -116,7 +116,7 @@ module Ree
             next if package.objects.any? { |o| o.klass == const }
             next if index_hsh[:classes].has_key?(demodulize(const.name))
 
-            const_abs_path = mod.const_source_location(const.name).first
+            const_abs_path = mod.const_source_location(const.name)&.first
             next if !const_abs_path
 
             rpath = Pathname.new(const_abs_path).relative_path_from(Ree.root_dir).to_s
