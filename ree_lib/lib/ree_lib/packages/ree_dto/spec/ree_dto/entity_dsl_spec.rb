@@ -137,5 +137,18 @@ TestDTO
       expect(dto.tasks.first.class).to eq(task_1.class)
       expect(dto.tasks.last.class).to eq(task_2.class)
     }
+
+    # TODO: throws error if method does not exist
+    # it {
+    #   dto = TestDTO.new(
+    #     id: 1,
+    #     name: 'John',
+    #     email: 'test@example.com',
+    #   )
+
+    #   expect { dto.users }.to raise_error(ReeDto::EntityDSL::NoSetError) do |e|
+    #     expect(e.message).to eq('variable not set')
+    #   end
+    # }
   end
 end

@@ -122,8 +122,9 @@ module ReeDto::EntityDSL
         def set_#{collection_name}(list)
           @#{collection_name} = list; nil
         end
-
       )
+
+      # TODO: raise NoSetError.new  (or Ree::Error.new) if !self.respond_to? collection_name.to_s - does not work
 
       nil
     end
