@@ -42,6 +42,8 @@ module ReeDto::EntityDSL
     include Ree::Contracts::Core
     include Ree::Contracts::ArgContracts
 
+    PropertyNotSetError = Class.new(StandardError)
+
     contract(Ksplat[RestKeys => Any] => nil)
     def properties(**args)
       args.each do |name, contract_class|
@@ -108,23 +110,18 @@ module ReeDto::EntityDSL
       nil
     end
 
-    contract(Symbol, Any => nil)
+    contract(Symbol, Any => nil).throws(PropertyNotSetError)
     def collection(collection_name, contract_class)
-      class_eval %Q(
-        instance_variable_set(:@#{collection_name}, nil)
+      define_method collection_name.to_s do
+        value = instance_variable_get("@#{collection_name}")
+        raise PropertyNotSetError.new if !value
 
-        contract None => #{contract_class}
-        def #{collection_name}
-          @#{collection_name}
-        end
+        value
+      end
 
-        contract #{contract_class} => nil
-        def set_#{collection_name}(list)
-          @#{collection_name} = list; nil
-        end
-      )
-
-      # TODO: raise NoSetError.new  (or Ree::Error.new) if !self.respond_to? collection_name.to_s - does not work
+      define_method "set_#{collection_name.to_s}" do |list|
+        instance_variable_set("@#{collection_name}", list); nil
+      end
 
       nil
     end

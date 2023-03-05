@@ -126,11 +126,13 @@ TestDTO
       )
 
       expect(dto.respond_to? "set_tasks").to eq(true)
+      expect(dto.respond_to? "tasks").to eq(true)
 
       task_1 = TestTaskDTO.new(id: 1, title: "new task")
       task_2 = TestTaskDTO.new(id: 2, title: "other task")
 
       dto.set_tasks([task_1, task_2])
+      dto.tasks
 
       expect(dto.tasks.class).to eq(Array)
       expect(dto.tasks.size).to eq(2)
@@ -138,17 +140,16 @@ TestDTO
       expect(dto.tasks.last.class).to eq(task_2.class)
     }
 
-    # TODO: throws error if method does not exist
-    # it {
-    #   dto = TestDTO.new(
-    #     id: 1,
-    #     name: 'John',
-    #     email: 'test@example.com',
-    #   )
+    context "collection does not set" do
+      it {
+        dto = TestDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
 
-    #   expect { dto.users }.to raise_error(ReeDto::EntityDSL::NoSetError) do |e|
-    #     expect(e.message).to eq('variable not set')
-    #   end
-    # }
+        expect { dto.tasks }.to raise_error(ReeDto::EntityDSL::ClassMethods::PropertyNotSetError)
+      }
+    end
   end
 end
