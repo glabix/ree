@@ -112,6 +112,8 @@ module ReeDto::EntityDSL
 
     contract(Symbol, Any => nil).throws(PropertyNotSetError)
     def collection(collection_name, contract_class)
+
+      contract None => contract_class
       define_method collection_name.to_s do
         value = instance_variable_get("@#{collection_name}")
         raise PropertyNotSetError.new if !value
@@ -119,6 +121,7 @@ module ReeDto::EntityDSL
         value
       end
 
+      contract contract_class => nil
       define_method "set_#{collection_name.to_s}" do |list|
         instance_variable_set("@#{collection_name}", list); nil
       end

@@ -151,5 +151,17 @@ TestDTO
         expect { dto.tasks }.to raise_error(ReeDto::EntityDSL::ClassMethods::PropertyNotSetError)
       }
     end
+
+    context "collection contract errors" do
+      it {
+        dto = TestDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect { dto.set_tasks([1,2,3]) }.to raise_error(Ree::Contracts::ContractError)
+      }
+    end
   end
 end
