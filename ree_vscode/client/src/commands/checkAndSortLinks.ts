@@ -1,6 +1,8 @@
+import { escape } from 'querystring'
 import * as vscode from 'vscode'
 import { Query } from 'web-tree-sitter'
 import { forest, asRegexp, mapLinkQueryMatches, Link } from '../utils/forest'
+import { escapeRegExp } from '../utils/stringUtils'
 const fs = require('fs')
 const lodash = require('lodash')
 
@@ -85,20 +87,33 @@ export function checkAndSortLinks(filePath: string) {
       `
         (
           (identifier) @call
-          (#match? @call "(${nameStrings.map(s => `${s}\\??\\s?`).join('|')})$")
+          (#match? @call "(?:${nameStrings.map(s => `${s}\\??\\s?`).join('|')})")
         )
         (
           (constant) @call
-          (#match? @call "(${importsStrings.map(s => `${s}\\??\\s?`).join("|")})$")
+          (#match? @call "(?:${importsStrings.map(s => `${s}\\??\\s?`).join("|")})")
         )
       `
     ).matches(tree.rootNode)
 
     linkUsageMatches.forEach(el => {
       let nodeText = el.captures[0].node.text
-      if (nameStrings.includes(nodeText)) {
-        nameStrings.splice(nameStrings.indexOf(nodeText), 1)
+      let escapedNodeText = escapeRegExp(nodeText)
+      let compareNodeText = nodeText
+      if (nodeText !== escapedNodeText) {
+        // add ? operator for special symbols
+        compareNodeText = escapedNodeText.replace(/\\[.*+?^${}()|[\]\\]/g, '$&?')
       }
+
+      let usedNameString
+      nameStrings.some(s => {
+        if (s.match(RegExp(`${compareNodeText}`))) {
+          usedNameString = s
+          return true
+        }
+      })
+      
+      if (usedNameString) { nameStrings.splice(nameStrings.indexOf(usedNameString), 1)}
 
       if (importsStrings.includes(nodeText)) {
         if (
