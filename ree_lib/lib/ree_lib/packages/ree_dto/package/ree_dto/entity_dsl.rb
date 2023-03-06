@@ -115,10 +115,9 @@ module ReeDto::EntityDSL
 
       contract None => contract_class
       define_method collection_name.to_s do
-        value = instance_variable_get("@#{collection_name}")
-        raise PropertyNotSetError.new if !value
+        raise PropertyNotSetError.new if !instance_variables.include? :"@#{collection_name}"
 
-        value
+        instance_variable_get("@#{collection_name}")
       end
 
       contract contract_class => nil

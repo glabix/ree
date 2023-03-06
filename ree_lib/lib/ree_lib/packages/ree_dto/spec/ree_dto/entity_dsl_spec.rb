@@ -22,7 +22,7 @@ RSpec.describe ReeDto::EntityDSL do
         email: Nilor[String]
       )
 
-      collection :tasks, ArrayOf[TestTaskDTO]
+      collection :tasks, Nilor[ArrayOf[TestTaskDTO]]
     end
 
     @test_dto = TestDTO.new(
@@ -149,6 +149,20 @@ TestDTO
         )
 
         expect { dto.tasks }.to raise_error(ReeDto::EntityDSL::ClassMethods::PropertyNotSetError)
+      }
+    end
+
+    context "collection set to nil" do
+      it {
+        dto = TestDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        dto.set_tasks(nil)
+
+        expect{ dto.tasks }.to_not raise_error
       }
     end
 
