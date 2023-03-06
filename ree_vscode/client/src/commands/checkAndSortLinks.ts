@@ -85,11 +85,11 @@ export function checkAndSortLinks(filePath: string) {
       `
         (
           (identifier) @call
-          (#match? @call "(${nameStrings.join('|')})$")
+          (#match? @call "(${nameStrings.map(s => `${s}\\??\\s?`).join('|')})$")
         )
         (
           (constant) @call
-          (#match? @call "(${importsStrings.join("|")})$")
+          (#match? @call "(${importsStrings.map(s => `${s}\\??\\s?`).join("|")})$")
         )
       `
     ).matches(tree.rootNode)
