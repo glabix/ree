@@ -41,8 +41,8 @@ RSpec.describe ReeEnum::DSL do
         include ReeMapper::DSL
 
         mapper :test_mapper do
-          link :types
           link :states
+          link :types
         end
 
         class Dto
@@ -118,6 +118,18 @@ RSpec.describe ReeEnum::DSL do
       mapper.cast({
         state: 'first',
         type: 'account',
+      })
+    ).to eq(
+      {
+        state: TestReeEnum::States.first,
+        type: TestReeEnum::Types.account
+      }
+    )
+
+    expect(
+      mapper.cast({
+        state: TestReeEnum::States.first,
+        type: TestReeEnum::Types.account,
       })
     ).to eq(
       {

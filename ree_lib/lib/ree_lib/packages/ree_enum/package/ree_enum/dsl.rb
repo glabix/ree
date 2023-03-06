@@ -69,6 +69,9 @@ module ReeEnum
 
                 enum_val
               else
+                enum_val = @enum.values.all.detect { |v| v == value }
+                return enum_val if enum_val
+
                 raise ReeMapper::CoercionError, "`#{name}` should be one of #{@enum.values.all.map(&:to_s).inspect}"
               end
             end
