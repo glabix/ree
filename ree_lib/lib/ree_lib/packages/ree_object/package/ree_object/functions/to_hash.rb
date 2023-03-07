@@ -6,7 +6,7 @@ class ReeObject::ToHash
   fn :to_hash do
     def_error { RecursiveObjectErr }
   end
-  
+
   BASIC_TYPES = [
     Date, Time, Numeric, String, FalseClass, TrueClass, NilClass, Symbol,
     Module, Class
@@ -57,8 +57,8 @@ class ReeObject::ToHash
       raise RecursiveObjectErr, "Recursive object found: #{obj}"
     end
 
-    cache[obj.object_id] = acc
-    
+    cache[obj.object_id] = true
+
     obj.instance_variables.each do |var|
       key_name = var.to_s.delete("@")
       key_sym = key_name.to_sym
@@ -68,6 +68,8 @@ class ReeObject::ToHash
 
       acc[key] = recursively_convert(value, {}, cache)
     end
+
+    cache.delete(obj.object_id)
 
     acc
   end
