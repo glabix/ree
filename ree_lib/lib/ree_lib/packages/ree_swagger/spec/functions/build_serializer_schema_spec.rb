@@ -11,16 +11,13 @@ RSpec.describe :build_serializer_schema do
 
     build_mapper_factory(
       strategies: strategies
-    ).register(
+    ).register_type(
       :unregistered_type,
-      ReeMapper::Mapper.build(
-        strategies,
-        Class.new(ReeMapper::AbstractType) do
-          def serialize(val, role: nil)
-            val
-          end
-        end.new
-      )
+      Class.new(ReeMapper::AbstractType) do
+        def serialize(val, role: nil)
+          val
+        end
+      end.new
     )
   }
 
@@ -118,10 +115,10 @@ RSpec.describe :build_serializer_schema do
           test_unregistered_type: {},
           partial_value: {
             type: 'object',
-            properties: { 
+            properties: {
               nested_partial_value: {
                 type: 'object',
-                properties: { 
+                properties: {
                   included: { type: 'string' }
                 }
               }

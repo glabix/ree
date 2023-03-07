@@ -32,11 +32,11 @@ RSpec.describe ReeMapper::MapperFactory do
     }
   end
 
-  describe '.register' do
+  describe '.register_mapper' do
     let(:serializer) { mapper_factory.call.use(:serialize) { integer :id } }
 
     it {
-      mapper_factory.register(:new_type, serializer)
+      mapper_factory.register_mapper(:new_type, serializer)
 
       expect(
         mapper_factory.call.use(:serialize) { new_type :val }.serialize({ val: { id: 1 } })
@@ -46,8 +46,8 @@ RSpec.describe ReeMapper::MapperFactory do
     it 'allow to register caster and serializer with same name' do
       caster = mapper_factory.call.use(:cast) { string :name }
 
-      mapper_factory.register(:new_type, serializer)
-      mapper_factory.register(:new_type, caster)
+      mapper_factory.register_mapper(:new_type, serializer)
+      mapper_factory.register_mapper(:new_type, caster)
 
       expect(
         mapper_factory.call.use(:serialize) { new_type :val }.serialize({ val: { id: 1 } })
@@ -59,22 +59,22 @@ RSpec.describe ReeMapper::MapperFactory do
     end
 
     it 'raise an error if the mapper is already registered' do
-      mapper_factory.register(:new_type, serializer)
+      mapper_factory.register_mapper(:new_type, serializer)
 
       expect {
-        mapper_factory.register(:new_type, serializer)
+        mapper_factory.register_mapper(:new_type, serializer)
       }.to raise_error(ArgumentError, 'type :new_type with `serialize` strategy already registered')
     end
 
     it 'raise an error if the mapper name is ended by ?' do
       expect {
-        mapper_factory.register(:new_type?, serializer)
+        mapper_factory.register_mapper(:new_type?, serializer)
       }.to raise_error(ArgumentError, 'name of mapper type should not end with `?`')
     end
 
     it 'raise an error if the mapper name is reserved' do
       expect {
-        mapper_factory.register(:array, serializer)
+        mapper_factory.register_mapper(:array, serializer)
       }.to raise_error(ArgumentError, 'method :array already defined')
     end
   end
@@ -93,7 +93,7 @@ RSpec.describe ReeMapper::MapperFactory do
         integer :my_field
       end
 
-      mapper_factory.register(:new_type, serializer)
+      mapper_factory.register_mapper(:new_type, serializer)
 
       expect {
         mapper_factory.call.use(:cast) do

@@ -36,7 +36,7 @@ class ReeMapper::MapperFactoryProxy
     mapper_factory.new(mapper).instance_exec(&blk)
     mapper.prepare_dto
 
-    mapper_factory.register(register_as, mapper) if register_as
+    mapper_factory.register_mapper(register_as, mapper) if register_as
 
     after_build&.call(mapper)
 

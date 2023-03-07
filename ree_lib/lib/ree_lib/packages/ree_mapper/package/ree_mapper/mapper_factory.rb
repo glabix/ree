@@ -12,14 +12,14 @@ class ReeMapper::MapperFactory
 
   contract(Symbol, ReeMapper::AbstractType, Kwargs[strategies: ArrayOf[ReeMapper::MapperStrategy]] => Class)
   def self.register_type(name, object_type, strategies: self.strategies)
-    register(
+    register_mapper(
       name,
       ReeMapper::Mapper.build(strategies, object_type)
     )
   end
 
   contract(Symbol, ReeMapper::Mapper => Class).throws(ArgumentError)
-  def self.register(name, type)
+  def self.register_mapper(name, type)
     raise ArgumentError, "name of mapper type should not end with `?`" if name.to_s.end_with?('?')
 
     defined_strategy_method = types[name]&.flat_map(&:strategy_methods)&.detect { type.find_strategy(_1) }
