@@ -127,5 +127,28 @@ module ReeDto::EntityDSL
 
       nil
     end
+
+    contract(
+      Symbol, Any, Kwargs[getter: Bool, setter: Bool] => nil
+    )
+    def property(property_name, contract_class, getter: true, setter: true)
+      if getter
+        contract None => contract_class
+        define_method property_name.to_s do
+          raise PropertyNotSetError.new if !instance_variable_defined? :"@#{property_name}"
+
+          instance_variable_get("@#{property_name}")
+        end
+      end
+
+      if setter
+        contract contract_class => nil
+        define_method "set_#{property_name.to_s}" do |value|
+          instance_variable_set("@#{property_name}", value); nil
+        end
+      end
+
+      nil
+    end
   end
 end

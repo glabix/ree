@@ -25,6 +25,24 @@ RSpec.describe ReeDto::EntityDSL do
       collection :tasks, Nilor[ArrayOf[TestTaskDTO]]
     end
 
+    class TestPropertyDTO
+      include ReeDto::EntityDSL
+
+      properties(
+        id: Nilor[Integer],
+        name: String,
+        email: Nilor[String]
+      )
+
+      collection :tasks, Nilor[ArrayOf[TestTaskDTO]]
+
+      property :email, String
+      property :user_id, Integer
+      property :age, Integer, setter: false
+    end
+
+
+
     @test_dto = TestDTO.new(
       id: 1,
       name: 'John',
@@ -175,6 +193,55 @@ TestDTO
         )
 
         expect { dto.set_tasks([1,2,3]) }.to raise_error(Ree::Contracts::ContractError)
+      }
+    end
+
+    context "property setter true" do
+      it {
+        dto = TestPropertyDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect(dto.respond_to? "set_email").to eq(true)
+      }
+    end
+
+    context "property setter false, getter true" do
+      it {
+        dto = TestPropertyDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect(dto.respond_to? "age").to eq(true)
+        expect(dto.respond_to? "set_age").to eq(false)
+      }
+    end
+
+    context "property contract error" do
+      it {
+        dto = TestPropertyDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect { dto.set_email(123) }.to raise_error(Ree::Contracts::ContractError)
+      }
+    end
+
+    context "getter true, property not set error" do
+      it {
+        dto = TestPropertyDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect { dto.user_id }.to raise_error(ReeDto::EntityDSL::ClassMethods::PropertyNotSetError)
       }
     end
   end
