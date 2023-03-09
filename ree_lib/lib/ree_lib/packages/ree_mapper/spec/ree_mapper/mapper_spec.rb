@@ -92,7 +92,7 @@ RSpec.describe ReeMapper::Mapper do
       )
     }
 
-    it { 
+    it {
       expect(mapper.cast({ my_field: 1, hsh: { nested_field: 1 } })).to be_a(Struct)
     }
   end
@@ -164,6 +164,30 @@ RSpec.describe ReeMapper::Mapper do
 
     it {
       expect { mapper.dto(:db_dump) }.to raise_error(ArgumentError, "there is no :db_dump strategy")
+    }
+  end
+
+  describe '#find_strategy' do
+    let(:mapper_factory) {
+      build_mapper_factory(
+        strategies: [
+          build_mapper_strategy(method: :cast),
+          build_mapper_strategy(method: :serialize),
+        ]
+      )
+    }
+    let(:mapper) {
+      mapper_factory.call.use(:cast) do
+        integer :my_field
+      end
+    }
+
+    it {
+      expect(mapper.find_strategy(:cast)).to be_a(ReeMapper::MapperStrategy)
+    }
+
+    it {
+      expect(mapper.find_strategy(:serialize)).to be_nil
     }
   end
 end
