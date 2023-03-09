@@ -2,7 +2,7 @@
   "name": "ree",
   "displayName": "Ree",
   "description": "A set of tools to simplify work with ree gem",
-  "version": "0.0.26",
+  "version": "0.0.27",
   "publisher": "Glabix",
   "repository": {
     "type": "git",

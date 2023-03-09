@@ -153,18 +153,18 @@ function updateObjectLinks(
     return editDocument(currentFile, lineNumber, endCharPos, linkText)
   }
 
-  if (links.length === 0) {
-    // block, don't have links
-    const isLinksBlock = text.split('\n').some((line, index) => {
-      let searchIndex = line.search(/(fn|bean|dao|mapper|async\_bean)\s\:[A-Za-z\_]+/)
-      if (searchIndex !== -1) { 
-        lineNumber = index
-        endCharPos = line.length
-        startCharPos = searchIndex
-        return true
-      }
-    })
+  const isLinksBlock = text.split('\n').some((line, index) => {
+    let searchIndex = line.search(/(fn|bean|dao|mapper|async\_bean)\s\:[A-Za-z\_]+/)
+    if (searchIndex !== -1) { 
+      lineNumber = index
+      endCharPos = line.length
+      startCharPos = searchIndex
+      return true
+    }
+  })
 
+  if (links.length === 0) {
+    // maybe a block and we don't have links
     offset = startCharPos === 0 ? (' '.repeat(TAB_LENGTH)) : (' '.repeat(startCharPos + TAB_LENGTH))
     
     if (text.split("\n")[lineNumber].match(/\sdo/)) {
@@ -181,7 +181,11 @@ function updateObjectLinks(
 
         const includeMatches = includeQuery.matches(tree.rootNode)
         if (includeMatches.length > 0) {
-          const lastIncludeNode = includeMatches[includeMatches.length - 1].captures[0].node
+          let lastIncludeNode = includeMatches[includeMatches.length - 1].captures[0].node
+          if (lastIncludeNode.text.match(/include\sRee\:\:LinkDSL/)) {
+            lastIncludeNode = includeMatches[includeMatches.length - 2].captures[0].node
+          }
+
           lineNumber = lastIncludeNode.startPosition.row
           endCharPos = lastIncludeNode.endPosition.column
           linkText = `\n${offset}include Ree::LinkDSL\n\n${offset}${linkText}`
@@ -198,79 +202,119 @@ function updateObjectLinks(
             linkText = `${linkText}\n`
           }
         }
-
-        
       } else {
         linkText = ` do\n${offset}${linkText}\n${' '.repeat(startCharPos)}end`
       }
     }
   } else {
-    // block, have links
-    lineNumber = queryMatches[0].captures[0].node.startPosition.row
-    startCharPos = queryMatches[0].captures[0].node.startPosition.column
-    endCharPos = queryMatches[0].captures[0].node.startPosition.column
-
-    offset = ' '.repeat(startCharPos) 
+    // maybe a block and we already *have* links
+    if (text.split("\n")[lineNumber].match(/\sdo/)) {
+      lineNumber = queryMatches[0].captures[0].node.startPosition.row
+      startCharPos = queryMatches[0].captures[0].node.startPosition.column
+      endCharPos = queryMatches[0].captures[0].node.startPosition.column
   
-    const symbolLinks = links.filter(l => l.isSymbol).sort(sortLinksByNameAsc)
-    const stringLinks = links.filter(l => !l.isSymbol).sort(sortLinksByNameAsc)
-
-    // TODO: refactor this block later!
-    if (isSymbol) {
-      if (symbolLinks.length > 0) {
-        let newLinkIndex = [...symbolLinks, { name: linkName } as Link].sort(sortLinksByNameAsc).findIndex(l => l.name === linkName)
-        if (newLinkIndex === 0) {
-          // if it must be first
-          lineNumber = symbolLinks[0].queryMatch.captures[0].node.startPosition.row
-          startCharPos = symbolLinks[0].queryMatch.captures[0].node.startPosition.column
-          endCharPos = symbolLinks[0].queryMatch.captures[0].node.startPosition.column
-          linkText = `${linkText}\n${offset}`
-        } else if (newLinkIndex === (symbolLinks.length)) {
-          // if it must be last
-          lineNumber = symbolLinks[symbolLinks.length - 1].queryMatch.captures[0].node.startPosition.row
-          startCharPos = symbolLinks[symbolLinks.length - 1].queryMatch.captures[0].node.endPosition.column
-          endCharPos = symbolLinks[symbolLinks.length - 1].queryMatch.captures[0].node.endPosition.column
-          linkText = `\n${offset}${linkText}`
+      offset = ' '.repeat(startCharPos) 
+    
+      const symbolLinks = links.filter(l => l.isSymbol).sort(sortLinksByNameAsc)
+      const stringLinks = links.filter(l => !l.isSymbol).sort(sortLinksByNameAsc)
+  
+      // TODO: refactor this block later!
+      if (isSymbol) {
+        if (symbolLinks.length > 0) {
+          let newLinkIndex = [...symbolLinks, { name: linkName } as Link].sort(sortLinksByNameAsc).findIndex(l => l.name === linkName)
+          if (newLinkIndex === 0) {
+            // if it must be first
+            lineNumber = symbolLinks[0].queryMatch.captures[0].node.startPosition.row
+            startCharPos = symbolLinks[0].queryMatch.captures[0].node.startPosition.column
+            endCharPos = symbolLinks[0].queryMatch.captures[0].node.startPosition.column
+            linkText = `${linkText}\n${offset}`
+          } else if (newLinkIndex === (symbolLinks.length)) {
+            // if it must be last
+            lineNumber = symbolLinks[symbolLinks.length - 1].queryMatch.captures[0].node.startPosition.row
+            startCharPos = symbolLinks[symbolLinks.length - 1].queryMatch.captures[0].node.endPosition.column
+            endCharPos = symbolLinks[symbolLinks.length - 1].queryMatch.captures[0].node.endPosition.column
+            linkText = `\n${offset}${linkText}`
+          } else {
+            // if it must be somewhere between
+            lineNumber = symbolLinks[newLinkIndex - 1].queryMatch.captures[0].node.startPosition.row
+            startCharPos = symbolLinks[newLinkIndex - 1].queryMatch.captures[0].node.endPosition.column
+            endCharPos = symbolLinks[newLinkIndex - 1].queryMatch.captures[0].node.endPosition.column
+            linkText = `\n${offset}${linkText}`
+          }
         } else {
-          // if it must be somewhere between
-          lineNumber = symbolLinks[newLinkIndex - 1].queryMatch.captures[0].node.startPosition.row
-          startCharPos = symbolLinks[newLinkIndex - 1].queryMatch.captures[0].node.endPosition.column
-          endCharPos = symbolLinks[newLinkIndex - 1].queryMatch.captures[0].node.endPosition.column
-          linkText = `\n${offset}${linkText}`
+          lineNumber = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.row
+          startCharPos = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.column
+          endCharPos = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.column
+          linkText = `${linkText}\n${offset}`
         }
       } else {
-        lineNumber = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.row - 1
-        startCharPos = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.column
-        endCharPos = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.column
-        linkText = `${linkText}\n${offset}`
+        if (stringLinks.length > 0) {
+          let newLinkIndex = [...stringLinks, { name: linkName } as Link].sort(sortLinksByNameAsc).findIndex(l => l.name === linkName)
+          if (newLinkIndex === 0) {
+            // if it must be first
+            lineNumber = stringLinks[0].queryMatch.captures[0].node.startPosition.row
+            startCharPos = stringLinks[0].queryMatch.captures[0].node.startPosition.column
+            endCharPos = stringLinks[0].queryMatch.captures[0].node.startPosition.column
+            linkText = `${linkText}\n${offset}`
+          } else if (newLinkIndex === (stringLinks.length)) {
+            // if it must be last
+            lineNumber = stringLinks[stringLinks.length - 1].queryMatch.captures[0].node.startPosition.row
+            startCharPos = stringLinks[stringLinks.length - 1].queryMatch.captures[0].node.endPosition.column
+            endCharPos = stringLinks[stringLinks.length - 1].queryMatch.captures[0].node.endPosition.column
+            linkText = `\n${offset}${linkText}`
+          } else {
+            // if it must be somewhere between
+            lineNumber = stringLinks[newLinkIndex - 1].queryMatch.captures[0].node.startPosition.row
+            startCharPos = stringLinks[newLinkIndex - 1].queryMatch.captures[0].node.endPosition.column
+            endCharPos = stringLinks[newLinkIndex - 1].queryMatch.captures[0].node.endPosition.column
+            linkText = `\n${offset}${linkText}`
+          }
+        } else {
+          lineNumber = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.row
+          startCharPos = queryMatches[queryMatches.length - 1].captures[0].node.endPosition.column
+          endCharPos = queryMatches[queryMatches.length - 1].captures[0].node.endPosition.column
+          linkText = `\n${offset}${linkText}`
+        }
       }
     } else {
-      if (stringLinks.length > 0) {
-        let newLinkIndex = [...stringLinks, { name: linkName } as Link].sort(sortLinksByNameAsc).findIndex(l => l.name === linkName)
-        if (newLinkIndex === 0) {
-          // if it must be first
-          lineNumber = stringLinks[0].queryMatch.captures[0].node.startPosition.row
-          startCharPos = stringLinks[0].queryMatch.captures[0].node.startPosition.column
-          endCharPos = stringLinks[0].queryMatch.captures[0].node.startPosition.column
-          linkText = `${linkText}\n${offset}`
-        } else if (newLinkIndex === (stringLinks.length)) {
-          // if it must be last
-          lineNumber = stringLinks[stringLinks.length - 1].queryMatch.captures[0].node.startPosition.row
-          startCharPos = stringLinks[stringLinks.length - 1].queryMatch.captures[0].node.endPosition.column
-          endCharPos = stringLinks[stringLinks.length - 1].queryMatch.captures[0].node.endPosition.column
-          linkText = `\n${offset}${linkText}`
+      if (!isLinksBlock) {
+        const includeQuery = forest.language.query(
+          `(
+            (call) @include
+            (#match? @include "^include")
+           )
+          `
+        ) as Query
+
+        const includeMatches = includeQuery.matches(tree.rootNode)
+        if (includeMatches.length > 0) {
+          let lastIncludeNode = includeMatches[includeMatches.length - 1].captures[0].node
+          if (lastIncludeNode.text.match(/include\sRee\:\:LinkDSL/)) {
+            lastIncludeNode = includeMatches[includeMatches.length - 2].captures[0].node
+          }
+
+          lineNumber = lastIncludeNode.startPosition.row
+          endCharPos = lastIncludeNode.endPosition.column
+          offset = ' '.repeat(lastIncludeNode.startPosition.column)
+          linkText = `\n${offset}include Ree::LinkDSL\n\n${offset}${linkText}`
         } else {
-          // if it must be somewhere between
-          lineNumber = stringLinks[newLinkIndex - 1].queryMatch.captures[0].node.startPosition.row
-          startCharPos = stringLinks[newLinkIndex - 1].queryMatch.captures[0].node.endPosition.column
-          endCharPos = stringLinks[newLinkIndex - 1].queryMatch.captures[0].node.endPosition.column
-          linkText = `\n${offset}${linkText}`
+          const classQuery = forest.language.query(`(class) @class`)
+          const classMatches = classQuery.matches(tree.rootNode)
+
+          if (classMatches.length > 0) {
+            const classNameNode = classMatches[0].captures[0].node.children[1]
+            lineNumber = classNameNode.startPosition.row
+            endCharPos = classNameNode.endPosition.column
+            offset = ' '.repeat(
+              classNameNode.startPosition.column === 0 ? TAB_LENGTH : classNameNode.startPosition.column * TAB_LENGTH
+            )
+            linkText = `\n${offset}include Ree::LinkDSL\n\n${offset}${linkText}`
+          } else {
+            linkText = `${linkText}\n`
+          }
         }
       } else {
-        lineNumber = queryMatches[queryMatches.length - 1].captures[0].node.startPosition.row
-        startCharPos = queryMatches[queryMatches.length - 1].captures[0].node.endPosition.column
-        endCharPos = queryMatches[queryMatches.length - 1].captures[0].node.endPosition.column
-        linkText = `\n${offset}${linkText}`
+        linkText = ` do\n${offset}${linkText}\n${' '.repeat(startCharPos)}end`
       }
     }
   }
