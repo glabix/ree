@@ -56,7 +56,9 @@ export function checkExceptions(filePath: string): void {
 
   if (throwsMatches) {
     let constantsNode = throwsMatches.captures.find(e => e.name === 'throws_args').node
-    throwsConstants = constantsNode ? constantsNode.text.replace(/\(|\)/g,'').trim().split(/(?:,|\s)+/).sort() : []
+    if (constantsNode && constantsNode.text !== "()") {
+      throwsConstants = constantsNode.text.replace(/\(|\)/g,'').trim().split(/(?:,|\s)+/).sort()
+    }
   }
 
   if (raiseMatches) {
@@ -70,7 +72,7 @@ export function checkExceptions(filePath: string): void {
     ).filter(e => e !== null).sort()
   }
 
-  if (!throwsMatches && raiseMatches.length === 0) { return }
+  if (!throwsMatches) { return }
 
   // If there are any raise error calls, but none for throws
   if (!throwsMatches && raiseMatches.length > 0) {
