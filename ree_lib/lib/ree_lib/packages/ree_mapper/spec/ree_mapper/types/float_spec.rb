@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'bigdecimal'
 
 RSpec.describe 'ReeMapper::Float' do
   link :build_mapper_factory, from: :ree_mapper
@@ -28,6 +29,10 @@ RSpec.describe 'ReeMapper::Float' do
 
     it {
       expect(mapper.cast({ float: '1.1' })).to eq({ float: 1.1 })
+    }
+
+    it {
+      expect(mapper.db_load({ float: BigDecimal("1.1") })).to eq({ float: 1.1 })
     }
 
     it {
@@ -86,6 +91,10 @@ RSpec.describe 'ReeMapper::Float' do
 
     it {
       expect(mapper.db_load({ float: '1.1' })).to eq({ float: 1.1 })
+    }
+
+    it {
+      expect(mapper.db_load({ float: BigDecimal("1.1") })).to eq({ float: 1.1 })
     }
 
     it {

@@ -20,6 +20,8 @@ class ReeMapper::Float < ReeMapper::AbstractType
       rescue ArgumentError => e
         raise ReeMapper::CoercionError, "`#{name}` is invalid float"
       end
+    elsif defined?(BigDecimal) && value.is_a?(BigDecimal)
+      value.to_f
     else
       raise ReeMapper::TypeError, "`#{name}` should be a float"
     end
