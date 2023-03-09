@@ -160,7 +160,7 @@ Create `mapper_factory.rb` file to declare `MapperFactory` class.
         build_mapper_strategy(method: :db_load,   dto: Object)
       ])
 
-      mapper_factory.register(:cart_user, user_caster)
+      mapper_factory.register_mapper(:cart_user, user_caster)
 
       mapper_factory
     end

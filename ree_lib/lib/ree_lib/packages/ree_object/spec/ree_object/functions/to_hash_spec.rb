@@ -167,6 +167,11 @@ RSpec.describe :to_hash do
           to_hash(obj)
         }.to raise_error(ReeObject::ToHash::RecursiveObjectErr, /Recursive object found: /)
       }
+
+      it {
+        obj = obj_klass.new
+        expect(to_hash([obj, obj])).to eq([{}, {}])
+      }
     end
   end
 end

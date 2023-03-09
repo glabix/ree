@@ -18,13 +18,13 @@ class ReeMapper::BuildMapperFactory
       @strategies = strategies
     }
 
-    klass.register(:bool, Mapper.build(strategies, ReeMapper::Bool.new))
-    klass.register(:date_time, Mapper.build(strategies, ReeMapper::DateTime.new))
-    klass.register(:time, Mapper.build(strategies, ReeMapper::Time.new))
-    klass.register(:date, Mapper.build(strategies, ReeMapper::Date.new))
-    klass.register(:float, Mapper.build(strategies, ReeMapper::Float.new))
-    klass.register(:integer, Mapper.build(strategies, ReeMapper::Integer.new))
-    klass.register(:string, Mapper.build(strategies, ReeMapper::String.new))
+    klass.register_type(:bool, ReeMapper::Bool.new)
+    klass.register_type(:date_time, ReeMapper::DateTime.new)
+    klass.register_type(:time, ReeMapper::Time.new)
+    klass.register_type(:date, ReeMapper::Date.new)
+    klass.register_type(:float, ReeMapper::Float.new)
+    klass.register_type(:integer, ReeMapper::Integer.new)
+    klass.register_type(:string, ReeMapper::String.new)
 
     klass
   end

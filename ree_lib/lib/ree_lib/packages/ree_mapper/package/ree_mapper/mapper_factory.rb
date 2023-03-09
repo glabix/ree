@@ -5,35 +5,42 @@ class ReeMapper::MapperFactory
     attr_reader :types, :strategies
   end
 
-  contract(Symbol, Any => Class).throws(ArgumentError)
-  def self.register_type(name, object_type)
-    register(
+  contract(Symbol => Nilor[ReeMapper::MapperStrategy])
+  def self.find_strategy(strategy_method)
+    strategies.detect { _1.method == strategy_method }
+  end
+
+  contract(Symbol, ReeMapper::AbstractType, Kwargs[strategies: ArrayOf[ReeMapper::MapperStrategy]] => Class)
+  def self.register_type(name, object_type, strategies: self.strategies)
+    register_mapper(
       name,
       ReeMapper::Mapper.build(strategies, object_type)
     )
   end
 
-  contract(Symbol, Any => Class).throws(ArgumentError)
-  def self.register(name, type)
-    raise ArgumentError, "name of mapper type should not include `?`" if name.to_s.end_with?('?')
-    raise ArgumentError, "type :#{name} already registered" if types.key?(name)
-    raise ArgumentError, "method :#{name} already defined" if method_defined?(name)
+  contract(Symbol, ReeMapper::Mapper => Class).throws(ArgumentError)
+  def self.register_mapper(name, type)
+    raise ArgumentError, "name of mapper type should not end with `?`" if name.to_s.end_with?('?')
+
+    defined_strategy_method = types[name]&.flat_map(&:strategy_methods)&.detect { type.find_strategy(_1) }
+    raise ArgumentError, "type :#{name} with `#{defined_strategy_method}` strategy already registered" if defined_strategy_method
+    raise ArgumentError, "method :#{name} already defined" if !types.key?(name) && method_defined?(name)
 
     type = type.dup
     type.name = name
     type.freeze
-    types[name] = type
+    types[name] ||= []
+    types[name] << type
 
     class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
       def #{name}(field_name = nil, optional: false, **opts)
         raise ReeMapper::Error, "invalid DSL usage" unless @mapper
         raise ArgumentError, "array item can't be optional" if field_name.nil? && optional
 
-        type = self.class.types.fetch(:#{name})
+        type = self.class.types.fetch(:#{name}).detect { (@mapper.strategy_methods - _1.strategy_methods).empty? }
 
-        @mapper.strategy_methods.each do |method|
-          next if type.respond_to?(method)
-          raise ReeMapper::UnsupportedTypeError, "type :#{name} should implement method `\#{method}`"
+        unless type
+          raise ReeMapper::UnsupportedTypeError, "type :#{name} should implement `\#{@mapper.strategy_methods.join(', ')}`"
         end
 
         return ReeMapper::Field.new(type, optional: optional, **opts) unless field_name

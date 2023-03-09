@@ -22,7 +22,7 @@ class ReeMapper::MapperFactoryProxy
     if strategy_or_method.is_a?(ReeMapper::MapperStrategy)
       strategy = strategy_or_method
     else
-      strategy = mapper_factory.strategies.detect { _1.method == strategy_or_method }
+      strategy = mapper_factory.find_strategy(strategy_or_method)
       raise ArgumentError, "MapperFactory strategy :#{strategy_or_method} not found" unless strategy
       strategy = strategy.dup
       strategy.dto = dto if dto
@@ -36,7 +36,7 @@ class ReeMapper::MapperFactoryProxy
     mapper_factory.new(mapper).instance_exec(&blk)
     mapper.prepare_dto
 
-    mapper_factory.register(register_as, mapper) if register_as
+    mapper_factory.register_mapper(register_as, mapper) if register_as
 
     after_build&.call(mapper)
 

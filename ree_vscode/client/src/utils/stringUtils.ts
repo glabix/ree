@@ -53,3 +53,7 @@ export function logDebugClientMessage(message: string, level: LogLevel) {
 export function logDebugServerMessage(message: string) {
   debugOutputServerChannel.appendLine(`${message}`)
 }
+
+export function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}

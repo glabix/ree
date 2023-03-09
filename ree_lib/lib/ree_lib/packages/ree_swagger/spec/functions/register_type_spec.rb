@@ -15,13 +15,8 @@ RSpec.describe :register_type do
       build_mapper_strategy(method: :serialize, dto: Hash),
     ]
 
-    build_mapper_factory(strategies: strategies).register(
-      :my_type,
-      ReeMapper::Mapper.build(
-        strategies,
-        ReeSwagger::MyType.new
-      )
-    )
+    build_mapper_factory(strategies: strategies)
+      .register_type(:my_type, ReeSwagger::MyType.new)
   }
 
   let(:mapper) {

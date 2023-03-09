@@ -7,7 +7,7 @@ class ReeMapper::Mapper
       strategies.each do |strategy|
         method = strategy.method
         next if type.respond_to?(method)
-        raise ReeMapper::UnsupportedTypeError, "type #{type.name} should implement method `#{method}`"
+        raise ReeMapper::UnsupportedTypeError, "type #{type.inspect} should implement method `#{method}`"
       end
     end
 
@@ -113,7 +113,7 @@ class ReeMapper::Mapper
 
   contract(Symbol => Class).throws(ArgumentError)
   def dto(strategy_method)
-    strategy = strategies.detect { _1.method == strategy_method }
+    strategy = find_strategy(strategy_method)
     raise ArgumentError, "there is no :#{strategy_method} strategy" unless strategy
     strategy.dto
   end
@@ -123,5 +123,10 @@ class ReeMapper::Mapper
     raise ReeMapper::ArgumentError, "mapper should contain at least one field" if fields.empty?
     strategies.each { _1.prepare_dto(fields.keys) }
     nil
+  end
+
+  contract(Symbol => Nilor[ReeMapper::MapperStrategy])
+  def find_strategy(strategy_method)
+    strategies.detect { _1.method == strategy_method }
   end
 end
