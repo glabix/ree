@@ -160,6 +160,8 @@ TestDTO
 
     context "collection does not set" do
       it {
+        ReeDto.enable_test_mode
+
         dto = TestDTO.new(
           id: 1,
           name: 'John',
@@ -235,6 +237,8 @@ TestDTO
 
     context "getter true, property not set error" do
       it {
+        ReeDto.enable_test_mode
+
         dto = TestPropertyDTO.new(
           id: 1,
           name: 'John',

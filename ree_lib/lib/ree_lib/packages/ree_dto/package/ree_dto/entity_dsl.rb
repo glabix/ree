@@ -86,7 +86,7 @@ module ReeDto::EntityDSL
           args.map do |arg|
             variable = ("@" + arg.to_s).to_sym
 
-            if !instance_variables.include?(variable)
+            if ReeDto.test_mode && !instance_variables.include?(variable)
               raise ArgumentError.new("variable :" + arg.to_s + " not found in dto")
             end
 
@@ -112,10 +112,11 @@ module ReeDto::EntityDSL
 
     contract(Symbol, Any => nil).throws(PropertyNotSetError)
     def collection(collection_name, contract_class)
-
       contract None => contract_class
       define_method collection_name.to_s do
-        raise PropertyNotSetError.new if !instance_variable_defined? :"@#{collection_name}"
+        if ReeDto.test_mode
+          raise PropertyNotSetError.new if !instance_variable_defined? :"@#{collection_name}"
+        end
 
         instance_variable_get("@#{collection_name}")
       end
@@ -135,7 +136,9 @@ module ReeDto::EntityDSL
       if getter
         contract None => contract_class
         define_method property_name.to_s do
-          raise PropertyNotSetError.new if !instance_variable_defined? :"@#{property_name}"
+          if ReeDto.test_mode
+            raise PropertyNotSetError.new if !instance_variable_defined? :"@#{property_name}"
+          end
 
           instance_variable_get("@#{property_name}")
         end
