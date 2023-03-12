@@ -1,0 +1,63 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.1",
+  "name": "build_swagger_from_actions",
+  "path": "packages/ree_roda/package/ree_roda/services/build_swagger_from_actions.rb",
+  "mount_as": "fn",
+  "class": "ReeRoda::BuildSwaggerFromActions",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Hash",
+      "args": [
+        {
+          "arg": "actions",
+          "arg_type": "req",
+          "type": "ArrayOf[ReeActions::Action]"
+        },
+        {
+          "arg": "title",
+          "arg_type": "req",
+          "type": "String"
+        },
+        {
+          "arg": "description",
+          "arg_type": "req",
+          "type": "String"
+        },
+        {
+          "arg": "version",
+          "arg_type": "req",
+          "type": "String"
+        },
+        {
+          "arg": "api_url",
+          "arg_type": "req",
+          "type": "String"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "build_action_errors",
+      "package_name": "ree_roda",
+      "as": "build_action_errors",
+      "imports": [
+
+      ]
+    },
+    {
+      "target": "build_schema",
+      "package_name": "ree_swagger",
+      "as": "build_schema",
+      "imports": [
+
+      ]
+    }
+  ]
+}

@@ -44,11 +44,16 @@ GEM
     pg (1.4.6)
     public_suffix (5.0.1)
     racc (1.6.2)
+    rack (3.0.5)
+    rack-test (2.0.2)
+      rack (>= 1.3)
     rainbow (3.1.1)
     rake (13.0.6)
     ree (1.0.26)
       commander (~> 4.6.0)
     rexml (3.2.5)
+    roda (3.58.0)
+      rack
     rollbar (3.3.3)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
@@ -81,8 +86,10 @@ PLATFORMS
 DEPENDENCIES
   bootsnap
   pg (~> 1.4.1)
+  rack-test
   rake (~> 13.0)
   ree_lib!
+  roda (~> 3.58.0)
   rollbar (~> 3.3.1)
   rspec
   sqlite3 (~> 1.4.4)

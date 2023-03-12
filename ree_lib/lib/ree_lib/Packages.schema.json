@@ -3,6 +3,10 @@
   "schema_type": "packages",
   "packages": [
     {
+      "name": "ree_actions",
+      "schema": "packages/ree_actions/Package.schema.json"
+    },
+    {
       "name": "ree_array",
       "schema": "packages/ree_array/Package.schema.json"
     },
@@ -65,6 +69,10 @@
     {
       "name": "ree_object",
       "schema": "packages/ree_object/Package.schema.json"
+    },
+    {
+      "name": "ree_roda",
+      "schema": "packages/ree_roda/Package.schema.json"
     },
     {
       "name": "ree_string",

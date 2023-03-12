@@ -1,0 +1,28 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.1",
+  "name": "build_action_errors",
+  "path": "packages/ree_roda/package/ree_roda/services/build_action_errors.rb",
+  "mount_as": "fn",
+  "class": "ReeRoda::BuildActionErrors",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "ArrayOf[ReeSwagger::ErrorDto]",
+      "args": [
+        {
+          "arg": "action",
+          "arg_type": "req",
+          "type": "ReeActions::Action"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

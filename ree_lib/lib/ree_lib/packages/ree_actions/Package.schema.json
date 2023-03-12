@@ -1,0 +1,20 @@
+{
+  "schema_type": "package",
+  "schema_version": "1.1",
+  "name": "ree_actions",
+  "entry_path": "packages/ree_actions/package/ree_actions.rb",
+  "tags": [
+    "ree_actions"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_mapper"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+
+  ]
+}

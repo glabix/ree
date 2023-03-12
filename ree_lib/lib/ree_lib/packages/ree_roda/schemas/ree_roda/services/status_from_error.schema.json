@@ -1,0 +1,28 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.1",
+  "name": "status_from_error",
+  "path": "packages/ree_roda/package/ree_roda/services/status_from_error.rb",
+  "mount_as": "fn",
+  "class": "ReeRoda::StatusFromError",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Nilor[Integer]",
+      "args": [
+        {
+          "arg": "error_type",
+          "arg_type": "req",
+          "type": "Symbol"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

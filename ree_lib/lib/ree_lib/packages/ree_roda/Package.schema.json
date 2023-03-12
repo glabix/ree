@@ -1,0 +1,58 @@
+{
+  "schema_type": "package",
+  "schema_version": "1.1",
+  "name": "ree_roda",
+  "entry_path": "packages/ree_roda/package/ree_roda.rb",
+  "tags": [
+    "ree_roda"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_actions"
+    },
+    {
+      "name": "ree_errors"
+    },
+    {
+      "name": "ree_hash"
+    },
+    {
+      "name": "ree_json"
+    },
+    {
+      "name": "ree_logger"
+    },
+    {
+      "name": "ree_object"
+    },
+    {
+      "name": "ree_swagger"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "build_action_errors",
+      "schema": "packages/ree_roda/schemas/ree_roda/services/build_action_errors.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
+      "name": "build_swagger_from_actions",
+      "schema": "packages/ree_roda/schemas/ree_roda/services/build_swagger_from_actions.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
+      "name": "status_from_error",
+      "schema": "packages/ree_roda/schemas/ree_roda/services/status_from_error.schema.json",
+      "tags": [
+        "fn"
+      ]
+    }
+  ]
+}
