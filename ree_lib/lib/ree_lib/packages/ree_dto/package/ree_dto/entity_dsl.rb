@@ -12,6 +12,24 @@ module ReeDto::EntityDSL
   end
 
   module InstanceMethods
+    include Ree::Contracts::Core
+    include Ree::Contracts::ArgContracts
+
+    contract Any => Bool
+    def ==(val)
+      return false unless val.is_a?(self.class)
+
+      vars = val.instance_variables | self.instance_variables
+
+      return false if vars.any? do |var|
+        result = self.instance_variable_defined?(var) && val.instance_variable_defined?(var)
+        result = result && (self.instance_variable_get(var) == val.instance_variable_get(var))
+        !result
+      end
+
+      true
+    end
+
     def to_s
       variables = self
         .instance_variables
@@ -46,108 +64,63 @@ module ReeDto::EntityDSL
 
     contract(Ksplat[RestKeys => Any] => nil)
     def properties(**args)
-      args.each do |name, contract_class|
-        contract None => contract_class
-        class_eval %Q(
-          def #{name}
-            @#{name}
-          end
-        )
+      args.each do |property_name, contract_class|
+        property(property_name, contract_class)
       end
 
-      contract Kwargs[**args] => Any
-      class_eval %Q(
-        def initialize(#{args.keys.map {|k| "#{k}: nil"}.join(',')})
-          #{
-            args.map {|k, v|
-              "@#{k} = #{k}"
-            }.join("\n")
-          }
+      define_method :initialize do |**kwargs|
+        kwargs.each do |name, var|
+          send("#{name}=", var)
         end
-
-        contract Any => Bool
-        def ==(val)
-          return false unless val.is_a?(self.class)
-
-          #{
-            args.map {|k, _|
-              "@#{k} == val.#{k}"
-            }.join(" && ")
-          }
-        end
-
-        def to_h
-          {
-            #{args.map {|k, _| "#{k}: #{k}" }.join(", ")}
-          }
-        end
-
-        def values_for(*args)
-          args.map do |arg|
-            variable = ("@" + arg.to_s).to_sym
-
-            if ReeDto.test_mode && !instance_variables.include?(variable)
-              raise ArgumentError.new("variable :" + arg.to_s + " not found in dto")
-            end
-
-            instance_variable_get(variable)
-          end
-        end
-
-        class << self
-          def import_from(other_dto)
-            self.new(
-              #{
-                args.map {|k, v|
-                  "#{k}: other_dto.#{k}"
-                }.join(",")
-              }
-            )
-          end
-        end
-      )
+      end
 
       nil
     end
 
     contract(Symbol, Any => nil).throws(PropertyNotSetError)
     def collection(collection_name, contract_class)
-      contract None => contract_class
-      define_method collection_name.to_s do
-        if ReeDto.test_mode
-          raise PropertyNotSetError.new if !instance_variable_defined? :"@#{collection_name}"
-        end
-
-        instance_variable_get("@#{collection_name}")
+      if !contract_class.is_a?(Ree::Contracts::ArgContracts::ArrayOf)
+        raise ArgumentError.new("collection contract class should be ArrayOf[...]")
       end
 
-      contract contract_class => nil
-      define_method "set_#{collection_name.to_s}" do |list|
+      contract(None => contract_class).throws(PropertyNotSetError)
+      define_method collection_name do
+        name = :"@#{collection_name}"
+
+        if ReeDto.strict_mode?
+          raise PropertyNotSetError.new if !instance_variable_defined?(name)
+        end
+
+        instance_variable_get(name)
+      end
+
+      contract(contract_class => nil)
+      define_method :"set_#{collection_name}" do |list|
         instance_variable_set("@#{collection_name}", list); nil
       end
 
       nil
     end
 
-    contract(
-      Symbol, Any, Kwargs[getter: Bool, setter: Bool] => nil
-    )
+    contract(Symbol, Any, Kwargs[getter: Bool, setter: Bool] => nil)
     def property(property_name, contract_class, getter: true, setter: true)
       if getter
-        contract None => contract_class
-        define_method property_name.to_s do
-          if ReeDto.test_mode
-            raise PropertyNotSetError.new if !instance_variable_defined? :"@#{property_name}"
+        contract(None => contract_class).throws(PropertyNotSetError)
+        define_method property_name do
+          name = :"@#{property_name}"
+
+          if ReeDto.strict_mode?
+            raise PropertyNotSetError.new if !instance_variable_defined?(name)
           end
 
-          instance_variable_get("@#{property_name}")
+          instance_variable_get(name)
         end
       end
 
       if setter
-        contract contract_class => nil
-        define_method "set_#{property_name.to_s}" do |value|
-          instance_variable_set("@#{property_name}", value); nil
+        contract(contract_class => contract_class)
+        define_method :"#{property_name}=" do |value|
+          instance_variable_set("@#{property_name}", value)
         end
       end
 

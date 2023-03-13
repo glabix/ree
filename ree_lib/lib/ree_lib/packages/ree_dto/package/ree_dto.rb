@@ -1,14 +1,15 @@
 module ReeDto
   include Ree::PackageDSL
 
-  package
-
-  def self.enable_test_mode
-    @test_mode = true
+  package do
   end
 
-  def self.test_mode
-    @test_mode
+  def self.enable_strict_mode
+    @strict_mode = true
+  end
+
+  def self.strict_mode?
+    !!@strict_mode
   end
 end
 
