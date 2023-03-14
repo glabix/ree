@@ -5,10 +5,11 @@ class ReeRoda::BuildRoutingTree
   end
 
   class RoutingTree
-    attr_accessor :children, :value, :depth, :actions
+    attr_accessor :children, :value, :depth, :actions, :parent
   
-    def initialize(value, depth, actions = [])
+    def initialize(value, depth, parent = nil, actions = [])
       @value = value
+      @parent = parent
       @depth = depth
       @actions = []
       @children = []
@@ -21,10 +22,27 @@ class ReeRoda::BuildRoutingTree
     )
       return tree if tree.depth == depth && tree.value == value
       if tree.depth < depth
-        tree.children.map do |c|
+        res = tree.children.map do |c|
           find_by_value(tree: c, value: value, depth: depth)
-        end.flatten.compact.first
+        end.flatten.compact
+
+        return res.size > 1 ? res : res.first
       end
+    end
+
+    def children_have_value?(value)
+      !!self.children.find { |c| c.value == value }
+    end
+
+    def add_child(value, depth)
+      new_child = self.class.new(value, depth, self.value)
+      self.children << new_child
+
+      return new_child
+    end
+
+    def add_action(action)
+      self.actions << action
     end
   end
 
@@ -33,28 +51,28 @@ class ReeRoda::BuildRoutingTree
     tree = nil
     actions.each do |action|
       splitted = action.path.split("/")
-      
-      parent = tree
+
       splitted.each_with_index do |v, j|
         if tree.nil?
           tree = RoutingTree.new(v, j)
-          parent = tree
           next
         end
 
         current = tree.find_by_value(value: v, depth: j)
         if current
-          parent = current
-          current.actions << action if j == (splitted.length - 1)
-          next
+          parent = tree.find_by_value(value: splitted[j-1], depth: j-1)
+          if parent && !parent.children_have_value?(current.value)
+            newTree = parent.add_child(v, j)
+            newTree.actions << action if j == (splitted.length - 1)
+            next
+          end
+
+          current.add_action(action) if j == (splitted.length - 1)
         else
           parent = tree.find_by_value(value: splitted[j-1], depth: j-1)
-          if parent && !parent.children.find { |c| c.value == v }
-            newTree = RoutingTree.new(v, j)
-            parent.children << newTree
-            parent = newTree
-
-            newTree.actions << action if j == (splitted.length - 1)
+          if parent && !parent.children_have_value?(v)
+            newTree = parent.add_child(v, j)
+            newTree.add_action(action) if j == (splitted.length - 1)
           end
         end
       end
