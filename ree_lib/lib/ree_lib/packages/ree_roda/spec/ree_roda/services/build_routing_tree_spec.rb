@@ -8,13 +8,13 @@ RSpec.describe :build_routing_tree do
   before :all do
     Ree.enable_irb_mode
 
-    module ReeRodaTest
+    module ReeRodaTestTree
       include Ree::PackageDSL
 
       package
     end
 
-    class ReeRodaTest::Cmd
+    class ReeRodaTestTree::Cmd
       include ReeActions::ActionDSL
 
       action :cmd
@@ -27,12 +27,12 @@ RSpec.describe :build_routing_tree do
       end
     end
 
-    class ReeRodaTest::TestActions
+    class ReeRodaTestTree::TestActions
       include ReeActions::DSL
 
       actions :test_actions do
         default_warden_scope :identity
-        opts = {from: :ree_roda_test}
+        opts = { from: :ree_roda_test_tree }
 
         get "api/actions/:id" do
           summary "Some action"
@@ -58,10 +58,10 @@ RSpec.describe :build_routing_tree do
       end
     end
 
-    class TestApp < ReeRoda::App
+    class TestTreeApp < ReeRoda::App
       plugin :ree_actions
 
-      ree_actions ReeRodaTest::TestActions.new
+      ree_actions ReeRodaTestTree::TestActions.new
 
       route do |r|
         r.get "health" do
@@ -77,7 +77,7 @@ RSpec.describe :build_routing_tree do
     Ree.disable_irb_mode
   end
 
-  let(:actions) { TestApp.instance_variable_get(:@ree_actions) }
+  let(:actions) { TestTreeApp.instance_variable_get(:@ree_actions) }
 
   let(:hsh_tree) {
     {

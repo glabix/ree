@@ -132,7 +132,7 @@ class Roda
             end
           end
 
-          opts[:ree_actions_proc]  = list
+          opts[:ree_actions_proc] = list
         end
       end
 
