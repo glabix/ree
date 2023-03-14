@@ -41,6 +41,13 @@
       ]
     },
     {
+      "name": "build_routing_tree",
+      "schema": "packages/ree_roda/schemas/ree_roda/services/build_routing_tree.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
       "name": "build_swagger_from_actions",
       "schema": "packages/ree_roda/schemas/ree_roda/services/build_swagger_from_actions.schema.json",
       "tags": [

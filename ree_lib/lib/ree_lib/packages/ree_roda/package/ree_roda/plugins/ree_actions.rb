@@ -2,6 +2,7 @@ class Roda
   module RodaPlugins
     module ReeActions
       def self.load_dependencies(app, opts = {})
+        package_require("ree_roda/services/build_routing_tree")
         package_require("ree_roda/services/build_swagger_from_actions")
         package_require("ree_json/functions/to_json")
         package_require("ree_hash/functions/transform_values")
@@ -56,6 +57,8 @@ class Roda
               end
             end
           end
+
+          # routing_tree = build_routing_tree(@ree_actions)
 
           @ree_actions.each do |action|
             route = []
