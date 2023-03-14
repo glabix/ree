@@ -58,7 +58,7 @@ class Roda
             end
           end
 
-          # routing_tree = build_routing_tree(@ree_actions)
+          routing_tree = ReeRoda::BuildRoutingTree.new.call(@ree_actions)
 
           @ree_actions.each do |action|
             route = []
@@ -133,6 +133,17 @@ class Roda
           end
 
           opts[:ree_actions_proc] = list
+        end
+
+        def traverse_tree(tree)
+          # TODO: here must be the logic for r.on is there is no action
+          # and r.get/r.post/r... if there are any actions for tree node
+          # puts "#{" " * (tree.depth + 1)}#{tree.value}"
+          if ReeObject::NotBlank.new.call(tree.children)
+            tree.children.each do |child|
+              traverse_tree(child)
+            end
+          end
         end
       end
 

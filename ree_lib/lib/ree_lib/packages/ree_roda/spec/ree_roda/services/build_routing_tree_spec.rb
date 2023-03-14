@@ -72,6 +72,16 @@ RSpec.describe :build_routing_tree do
           summary "Some action"
           action :cmd, **opts
         end
+
+        get "api/users/collection/:id" do
+          summary "Some action"
+          action :cmd, **opts
+        end
+
+        get "api/users/collection/:id/info" do
+          summary "Some action"
+          action :cmd, **opts
+        end
       end
     end
 
@@ -98,24 +108,24 @@ RSpec.describe :build_routing_tree do
 
   let(:hsh_tree) {
     {
-      value: 'api',
+      value: "api",
       depth: 0,
       parent: nil,
       children: [
         {
-          value: 'actions',
+          value: "actions",
           depth: 1,
-          parent: 'api',
+          parent: "api",
           children: [
             {
-              value: ':id',
+              value: ":id",
               depth: 2,
-              parent: 'actions',
+              parent: "actions",
               children: [
                 {
-                  value: 'types',
+                  value: "types",
                   depth: 3,
-                  parent: ':id',
+                  parent: ":id",
                   children: []
                 }
               ]
@@ -123,15 +133,42 @@ RSpec.describe :build_routing_tree do
           ]
         },
         {
-          value: 'tasks',
+          value: "tasks",
           depth: 1,
-          parent: 'api',
+          parent: "api",
           children: [
             {
-              value: ':id',
+              value: ":id",
               depth: 2,
-              parent: 'tasks',
+              parent: "tasks",
               children: []
+            }
+          ]
+        },
+        {
+          value: "users",
+          depth: 1,
+          parent: "api",
+          children: [
+            {
+              value: "collection",
+              depth: 2,
+              parent: "users",
+              children: [
+                {
+                  value: ":id",
+                  depth: 3,
+                  parent: "collection",
+                  children: [
+                    {
+                      value: "info",
+                      depth: 4,
+                      parent: ":id",
+                      children: []
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
@@ -144,10 +181,10 @@ RSpec.describe :build_routing_tree do
 
     # check that all end nodes have actions
     # and that not end nodes don't have actions
-    id_nodes = tree.find_by_value(value: ':id', depth: 2)
-    types_node = tree.find_by_value(value: 'types', depth: 3)
-    actions_node = tree.find_by_value(value: 'actions', depth: 1)
-    tasks_node = tree.find_by_value(value: 'tasks', depth: 1)
+    id_nodes = tree.find_by_value(value: ":id", depth: 2)
+    types_node = tree.find_by_value(value: "types", depth: 3)
+    actions_node = tree.find_by_value(value: "actions", depth: 1)
+    tasks_node = tree.find_by_value(value: "tasks", depth: 1)
 
 
     expect(is_blank(tree.actions)).to eq(true)
@@ -160,6 +197,8 @@ RSpec.describe :build_routing_tree do
 
 
     hsh = to_hash(tree)
+
+    binding.irb
     expect(except(hsh, global_except: [:actions])).to eq(hsh_tree)
   }
 end
