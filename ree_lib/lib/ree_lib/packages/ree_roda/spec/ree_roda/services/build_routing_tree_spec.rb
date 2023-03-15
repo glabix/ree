@@ -73,12 +73,22 @@ RSpec.describe :build_routing_tree do
           action :cmd, **opts
         end
 
+        get "api/users/:id" do
+          summary "Some action"
+          action :cmd, **opts
+        end
+
         get "api/users/collection/:id" do
           summary "Some action"
           action :cmd, **opts
         end
 
         get "api/users/collection/:id/info" do
+          summary "Some action"
+          action :cmd, **opts
+        end
+
+        get "api/accounts" do
           summary "Some action"
           action :cmd, **opts
         end
@@ -194,11 +204,7 @@ RSpec.describe :build_routing_tree do
     expect(not_blank(types_node.actions)).to eq(true)
     expect(types_node.actions.count).to eq(2)
 
-
-
     hsh = to_hash(tree)
-
-    binding.irb
     expect(except(hsh, global_except: [:actions])).to eq(hsh_tree)
-  }
+  }  
 end

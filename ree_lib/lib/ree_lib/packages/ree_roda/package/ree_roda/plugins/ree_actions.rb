@@ -60,88 +60,93 @@ class Roda
 
           routing_tree = ReeRoda::BuildRoutingTree.new.call(@ree_actions)
 
-          @ree_actions.each do |action|
-            route = []
-            route_args = []
-
-            action.path.split("/").each do |part|
-              if part.start_with?(":")
-                route << String
-                route_args << part.gsub(":", "")
-              else
-                route << part
-              end
-            end
-
-            list << Proc.new do |r|
-              r.send(action.request_method, *route) do |*args|
-                r.send(action.respond_to) do
-                  env["warden"].authenticate!(scope: action.warden_scope)
-
-                  if context.opts[:ree_actions_before]
-                    self.instance_exec(@_request, action.warden_scope, &scope.opts[:ree_actions_before])
-                  end
-
-                  # TODO: implement me when migration to roda DSL happens
-                  # if action.before; end
-
-                  route_args.each_with_index do |arg, index|
-                    r.params["#{arg}"] = args[index]
-                  end
-
-                  params = r.params
-
-                  if r.body
-                    body = begin
-                      JSON.parse(r.body.read)
-                    rescue => e
-                      {}
-                    end
-
-                    params = params.merge(body)
-                  end
-
-                  not_blank = ReeObject::NotBlank.new
-
-                  filtered_params = ReeHash::TransformValues.new.call(params) do |k, v|
-                    v.is_a?(Array) ? v.select { not_blank.call(_1) } : v
-                  end
-
-                  accessor = env["warden"].user(action.warden_scope)
-                  action_result = action.action.klass.new.call(accessor, filtered_params)
-
-                  if action.serializer
-                    serialized_result = action.serializer.klass.new.serialize(action_result)
-                  else
-                    serialized_result = {}
-                  end
-
-                  case action.request_method
-                  when :post
-                    response.status = 201
-                    ReeJson::ToJson.new.call(serialized_result)
-                  when :put, :delete, :patch
-                    response.status = 204
-                    ""
-                  else
-                    response.status = 200
-                    ReeJson::ToJson.new.call(serialized_result)
-                  end
-                end
-              end
-            end
+          list << Proc.new do |r|
+            # TODO: ???
+            self.roda_class.send(:traverse_tree, routing_tree, r).call
           end
 
           opts[:ree_actions_proc] = list
         end
 
-        def traverse_tree(tree)
-          # TODO: here must be the logic for r.on is there is no action
-          # and r.get/r.post/r... if there are any actions for tree node
-          # puts "#{" " * (tree.depth + 1)}#{tree.value}"
-          if ReeObject::NotBlank.new.call(tree.children)
-            tree.children.each do |child|
-              traverse_tree(child)
+        def traverse_tree(tree, r)
+          if tree.actions.length == 0
+            r.send(:on, tree.value) do
+              if tree.children.length > 0
+                tree.children.each do |child|
+                  r.roda_class.send(:traverse_tree, child, r).call
+                end
+              end
+            end
+          else
+            param = tree.value.start_with?(":") ? String : tree.value
+            r.send(:is, param) do
+              tree.actions.each do |action|
+                r.send(action.request_method) do |*args|
+                  r.send(action.respond_to) do
+                    # TODO: why env is empty???
+                    env["warden"].authenticate!(scope: action.warden_scope)
+  
+                    if context.opts[:ree_actions_before]
+                      self.instance_exec(@_request, action.warden_scope, &scope.opts[:ree_actions_before])
+                    end
+
+                    binding.irb
+  
+                    # TODO: implement me when migration to roda DSL happens
+                    # if action.before; end
+                    puts "ARGS:", args
+  
+                    # route_args.each_with_index do |arg, index|
+                    #   r.params["#{arg}"] = args[index]
+                    # end
+  
+                    # params = r.params
+  
+                    if r.body
+                      body = begin
+                        JSON.parse(r.body.read)
+                      rescue => e
+                        {}
+                      end
+  
+                      params = params.merge(body)
+                    end
+  
+                    not_blank = ReeObject::NotBlank.new
+  
+                    filtered_params = ReeHash::TransformValues.new.call(params) do |k, v|
+                      v.is_a?(Array) ? v.select { not_blank.call(_1) } : v
+                    end
+  
+                    accessor = env["warden"].user(action.warden_scope)
+                    action_result = action.action.klass.new.call(accessor, filtered_params)
+  
+                    if action.serializer
+                      serialized_result = action.serializer.klass.new.serialize(action_result)
+                    else
+                      serialized_result = {}
+                    end
+  
+                    case action.request_method
+                    when :post
+                      response.status = 201
+                      ReeJson::ToJson.new.call(serialized_result)
+                    when :put, :delete, :patch
+                      response.status = 204
+                      ""
+                    else
+                      response.status = 200
+                      ReeJson::ToJson.new.call(serialized_result)
+                    end
+                  end
+                end
+              end
+
+              if tree.children.length > 0
+                tree.children.each do |child|
+                  r.roda_class.send(:traverse_tree, child, r).call
+                end
+              end
             end
           end
         end
@@ -152,6 +157,8 @@ class Roda
           if scope.opts[:ree_actions_proc]
             scope.opts[:ree_actions_proc].each do |request_proc|
               self.instance_exec(self, &request_proc)
+            rescue => e
+              binding.irb
             end
           end
           nil

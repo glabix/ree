@@ -37,6 +37,7 @@ class ReeRoda::BuildRoutingTree
     def add_child(value, depth)
       new_child = self.class.new(value, depth, self.value)
       self.children << new_child
+      self.children = self.children.sort { _1.value.match?(/\:/) ? 1 : 0 }
 
       return new_child
     end
@@ -61,7 +62,7 @@ class ReeRoda::BuildRoutingTree
         current = tree.find_by_value(value: v, depth: j)
         if current
           parent = tree.find_by_value(value: splitted[j-1], depth: j-1)
-          if parent && !parent.children_have_value?(current.value)
+          if parent && !parent.children_have_value?(v)
             newTree = parent.add_child(v, j)
             newTree.actions << action if j == (splitted.length - 1)
             next
