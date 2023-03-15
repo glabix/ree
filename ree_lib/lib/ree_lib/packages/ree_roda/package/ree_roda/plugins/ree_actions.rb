@@ -62,35 +62,49 @@ class Roda
 
           list << Proc.new do |r|
             # TODO: ???
-            self.roda_class.send(:traverse_tree, routing_tree, r).call
+            traverse_tree(routing_tree, r)
           end
 
           opts[:ree_actions_proc] = list
         end
 
+        
+      end
+
+      module RequestMethods
+        def ree_actions
+          if scope.opts[:ree_actions_proc]
+            scope.opts[:ree_actions_proc].each do |request_proc|
+              self.instance_exec(self, &request_proc)
+            rescue => e
+              binding.irb
+            end
+          end
+          nil
+        end
+
+        private
+
         def traverse_tree(tree, r)
           if tree.actions.length == 0
-            r.send(:on, tree.value) do
+            r.on tree.value do
               if tree.children.length > 0
                 tree.children.each do |child|
-                  r.roda_class.send(:traverse_tree, child, r).call
+                  traverse_tree(child, r)
                 end
               end
             end
           else
             param = tree.value.start_with?(":") ? String : tree.value
-            r.send(:is, param) do
+            r.is param do |*param|
               tree.actions.each do |action|
                 r.send(action.request_method) do |*args|
                   r.send(action.respond_to) do
-                    # TODO: why env is empty???
                     env["warden"].authenticate!(scope: action.warden_scope)
   
                     if context.opts[:ree_actions_before]
                       self.instance_exec(@_request, action.warden_scope, &scope.opts[:ree_actions_before])
                     end
-
-                    binding.irb
   
                     # TODO: implement me when migration to roda DSL happens
                     # if action.before; end
@@ -144,24 +158,11 @@ class Roda
 
               if tree.children.length > 0
                 tree.children.each do |child|
-                  r.roda_class.send(:traverse_tree, child, r).call
+                  traverse_tree(child)
                 end
               end
             end
           end
-        end
-      end
-
-      module RequestMethods
-        def ree_actions
-          if scope.opts[:ree_actions_proc]
-            scope.opts[:ree_actions_proc].each do |request_proc|
-              self.instance_exec(self, &request_proc)
-            rescue => e
-              binding.irb
-            end
-          end
-          nil
         end
       end
     end

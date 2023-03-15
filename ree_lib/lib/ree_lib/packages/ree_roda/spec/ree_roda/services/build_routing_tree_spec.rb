@@ -206,5 +206,5 @@ RSpec.describe :build_routing_tree do
 
     hsh = to_hash(tree)
     expect(except(hsh, global_except: [:actions])).to eq(hsh_tree)
-  }  
+  }
 end
