@@ -73,6 +73,11 @@ RSpec.describe :build_routing_tree do
           action :cmd, **opts
         end
 
+        get "api/tasks/:id/types" do
+          summary "Some action"
+          action :cmd, **opts
+        end
+
         get "api/users/:id" do
           summary "Some action"
           action :cmd, **opts
@@ -151,7 +156,14 @@ RSpec.describe :build_routing_tree do
               value: ":id",
               depth: 2,
               parent: "tasks",
-              children: []
+              children: [
+                {
+                  value: "types",
+                  depth: 3,
+                  parent: ":id",
+                  children: []
+                }
+              ]
             }
           ]
         },
@@ -179,8 +191,20 @@ RSpec.describe :build_routing_tree do
                   ]
                 }
               ]
+            },
+            {
+              value: ":id",
+              depth: 2,
+              parent: "users",
+              children: []
             }
           ]
+        },
+        {
+          value: "accounts",
+          depth: 1,
+          parent: "api",
+          children: []
         }
       ]
     }
@@ -191,18 +215,26 @@ RSpec.describe :build_routing_tree do
 
     # check that all end nodes have actions
     # and that not end nodes don't have actions
-    id_nodes = tree.find_by_value(value: ":id", depth: 2)
+    id_nodes = [*tree.find_by_value(value: ":id", depth: 2), *tree.find_by_value(value: ":id", depth: 4)]
     types_node = tree.find_by_value(value: "types", depth: 3)
     actions_node = tree.find_by_value(value: "actions", depth: 1)
     tasks_node = tree.find_by_value(value: "tasks", depth: 1)
 
+    def count_tree_actions(tree, count = 0)
+      count += tree.actions.count
+      if tree.children.length > 0
+        return tree.children.map do |children|
+          count_tree_actions(children, count)
+        end.sum
+      end
+      return count
+    end
 
     expect(is_blank(tree.actions)).to eq(true)
     expect(not_blank(actions_node.actions)).to eq(true)
     expect(not_blank(tasks_node.actions)).to eq(true)
     expect(id_nodes.all? { not_blank(_1.actions) }).to eq(true)
-    expect(not_blank(types_node.actions)).to eq(true)
-    expect(types_node.actions.count).to eq(2)
+    expect(count_tree_actions(tree)).to eq(12)
 
     hsh = to_hash(tree)
     expect(except(hsh, global_except: [:actions])).to eq(hsh_tree)
