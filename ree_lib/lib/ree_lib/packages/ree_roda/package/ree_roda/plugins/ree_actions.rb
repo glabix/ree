@@ -62,7 +62,7 @@ class Roda
 
           list << Proc.new do |r|
             # TODO: ???
-            traverse_tree(routing_tree, r)
+            traverse_tree(routing_tree, r, context)
           end
 
           opts[:ree_actions_proc] = list
@@ -76,8 +76,6 @@ class Roda
           if scope.opts[:ree_actions_proc]
             scope.opts[:ree_actions_proc].each do |request_proc|
               self.instance_exec(self, &request_proc)
-            rescue => e
-              binding.irb
             end
           end
           nil
@@ -85,12 +83,12 @@ class Roda
 
         private
 
-        def traverse_tree(tree, r)
+        def traverse_tree(tree, r, context)
           if tree.actions.length == 0
             r.on tree.value do
               if tree.children.length > 0
-                tree.children.each do |child|
-                  traverse_tree(child, r)
+                tree.children.map do |child|
+                  traverse_tree(child, r, context)
                 end
               end
             end
@@ -108,13 +106,14 @@ class Roda
   
                     # TODO: implement me when migration to roda DSL happens
                     # if action.before; end
-                    puts "ARGS:", args
+
+                    route_args = action.path.split("/").select { _1.start_with?(":") }.map { _1.gsub(":", "") }
   
-                    # route_args.each_with_index do |arg, index|
-                    #   r.params["#{arg}"] = args[index]
-                    # end
+                    route_args.each_with_index do |arg, index|
+                      r.params["#{arg}"] = args[index]
+                    end
   
-                    # params = r.params
+                    params = r.params
   
                     if r.body
                       body = begin
@@ -158,7 +157,7 @@ class Roda
 
               if tree.children.length > 0
                 tree.children.each do |child|
-                  traverse_tree(child)
+                  traverse_tree(child, r, context)
                 end
               end
             end
