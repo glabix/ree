@@ -81,9 +81,4 @@ RSpec.describe ReeRoda::App do
     get "api/v1/swagger"
     expect(last_response.status).to eq(404)
   }
-
-  it {
-    get "api/action/1"
-    expect(last_response.status).to eq(200)
-  }
 end

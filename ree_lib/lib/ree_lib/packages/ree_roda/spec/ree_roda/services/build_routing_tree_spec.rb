@@ -23,6 +23,7 @@ RSpec.describe :build_routing_tree do
 
       ActionCaster = build_mapper.use(:cast) do
         integer :id
+        integer? :task_id
       end
 
       def call(access, attrs)
@@ -69,6 +70,11 @@ RSpec.describe :build_routing_tree do
         end
 
         get "api/tasks/:id" do
+          summary "Some action"
+          action :cmd, **opts
+        end
+
+        delete "api/tasks/:task_id" do
           summary "Some action"
           action :cmd, **opts
         end
@@ -126,21 +132,25 @@ RSpec.describe :build_routing_tree do
       value: "api",
       depth: 0,
       parent: nil,
+      type: :string,
       children: [
         {
           value: "actions",
           depth: 1,
           parent: "api",
+          type: :string,
           children: [
             {
               value: ":id",
               depth: 2,
               parent: "actions",
+              type: :param,
               children: [
                 {
                   value: "types",
                   depth: 3,
                   parent: ":id",
+                  type: :string,
                   children: []
                 }
               ]
@@ -151,16 +161,19 @@ RSpec.describe :build_routing_tree do
           value: "tasks",
           depth: 1,
           parent: "api",
+          type: :string,
           children: [
             {
               value: ":id",
               depth: 2,
               parent: "tasks",
+              type: :param,
               children: [
                 {
                   value: "types",
                   depth: 3,
                   parent: ":id",
+                  type: :string,
                   children: []
                 }
               ]
@@ -171,21 +184,25 @@ RSpec.describe :build_routing_tree do
           value: "users",
           depth: 1,
           parent: "api",
+          type: :string,
           children: [
             {
               value: "collection",
               depth: 2,
               parent: "users",
+              type: :string,
               children: [
                 {
                   value: ":id",
                   depth: 3,
                   parent: "collection",
+                  type: :param,
                   children: [
                     {
                       value: "info",
                       depth: 4,
                       parent: ":id",
+                      type: :string,
                       children: []
                     }
                   ]
@@ -196,6 +213,7 @@ RSpec.describe :build_routing_tree do
               value: ":id",
               depth: 2,
               parent: "users",
+              type: :param,
               children: []
             }
           ]
@@ -204,6 +222,7 @@ RSpec.describe :build_routing_tree do
           value: "accounts",
           depth: 1,
           parent: "api",
+          type: :string,
           children: []
         }
       ]
@@ -234,7 +253,7 @@ RSpec.describe :build_routing_tree do
     expect(not_blank(actions_node.actions)).to eq(true)
     expect(not_blank(tasks_node.actions)).to eq(true)
     expect(id_nodes.all? { not_blank(_1.actions) }).to eq(true)
-    expect(count_tree_actions(tree)).to eq(12)
+    expect(count_tree_actions(tree)).to eq(13)
 
     hsh = to_hash(tree)
     expect(except(hsh, global_except: [:actions])).to eq(hsh_tree)

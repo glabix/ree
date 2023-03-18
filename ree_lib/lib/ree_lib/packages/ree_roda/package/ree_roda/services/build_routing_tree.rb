@@ -4,12 +4,13 @@ class ReeRoda::BuildRoutingTree
   fn :build_routing_tree
 
   class RoutingTree
-    attr_accessor :children, :value, :depth, :actions, :parent
+    attr_accessor :children, :value, :depth, :actions, :type, :parent
   
-    def initialize(value, depth, parent = nil, actions = [])
+    def initialize(value, depth, type, parent = nil, actions = [])
       @value = value
       @depth = depth
       @parent = parent
+      @type = type
       @actions = []
       @children = []
     end
@@ -17,12 +18,13 @@ class ReeRoda::BuildRoutingTree
     def find_by_value(
       tree: self,
       value: nil,
+      type: :param,
       depth: 0
     )
       return tree if tree.depth == depth && tree.value == value
       if tree.depth < depth
         res = tree.children.map do |c|
-          find_by_value(tree: c, value: value, depth: depth)
+          find_by_value(tree: c, value: value, type: type, depth: depth)
         end.flatten.compact
 
         return res.size > 1 ? res : res.first
@@ -33,8 +35,8 @@ class ReeRoda::BuildRoutingTree
       !!self.children.find { |c| c.value == value }
     end
 
-    def add_child(value, depth)
-      new_child = self.class.new(value, depth, self.value)
+    def add_child(value, depth, type)
+      new_child = self.class.new(value, depth, type, self.value)
       self.children << new_child
       self.children = self.children.sort { _1.value.match?(/\:/) ? 1 : 0 }
 
@@ -50,6 +52,42 @@ class ReeRoda::BuildRoutingTree
       if tree.children.length > 0
         tree.children.each do |child|
           print_tree(child)
+        end
+      end
+
+      nil
+    end
+
+    def print_proc_tree(tree = self)
+      param_value = tree.value.start_with?(":") ? String : "\"#{tree.value}\""
+      if tree.actions.length == 0
+        if tree.children.length > 0
+          puts "#{get_offset(tree.depth)}r.on #{param_value} do"
+          tree.children.each do |child|
+            print_proc_tree(child)
+          end
+          puts "#{get_offset(tree.depth)}end"
+        end
+
+        nil
+      else
+        if tree.children.length > 0
+          puts "#{get_offset(tree.depth)}r.on #{param_value} do"
+          tree.children.each do |child|
+            print_proc_tree(child)
+          end
+          tree.actions.each do |action|
+            puts "#{get_offset(tree.depth + 1)}r.#{action.request_method} do"
+            puts "#{get_offset(tree.depth + 1)}end"
+          end
+          puts "#{get_offset(tree.depth)}end"
+        else
+          puts "#{get_offset(tree.depth)}r.is #{param_value} do"
+          tree.actions.each do |action|
+            puts "#{get_offset(tree.depth + 1)}r.#{action.request_method} do"
+            puts "#{get_offset(tree.depth + 1)}end"
+          end
+          puts "#{get_offset(tree.depth)}end"
         end
       end
 
@@ -72,7 +110,7 @@ class ReeRoda::BuildRoutingTree
       parentTree = tree
       splitted.each_with_index do |v, j|
         if tree.nil?
-          tree = RoutingTree.new(v, j)
+          tree = RoutingTree.new(v, j, :string)
           parentTree = tree
           next
         end
@@ -84,7 +122,13 @@ class ReeRoda::BuildRoutingTree
           current.add_action(action) if j == (splitted.length - 1)
         else
           if !parentTree.children_have_value?(v)
-            newTree = parentTree.add_child(v, j)
+            if parentTree.children.any? { |c| c.type == :param } && v.start_with?(":")
+              param_child = parentTree.children.find { |c| c.type == :param }
+              param_child.add_action(action) if j == (splitted.length - 1)
+              next
+            end
+
+            newTree = parentTree.add_child(v, j, v.start_with?(":") ? :param : :string)
             parentTree = newTree
           end
 
