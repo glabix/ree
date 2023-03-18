@@ -59,16 +59,112 @@ class Roda
           end
 
           routing_tree = ReeRoda::BuildRoutingTree.new.call(@ree_actions)
+          route_tree_proc = build_traverse_tree_proc(routing_tree, context) # return Proc
 
           list << Proc.new do |r|
-            # TODO: ???
-            traverse_tree(routing_tree, r, context)
+            route_tree_proc.call(r)
           end
 
           opts[:ree_actions_proc] = list
         end
 
-        
+        def action_proc(action, context, param, r = nil)
+          Proc.new do |r|
+            r.send(action.request_method) do
+              r.send(action.respond_to) do
+                r.env["warden"].authenticate!(scope: action.warden_scope)
+  
+                if context.opts[:ree_actions_before]
+                  r.instance_exec(@_request, action.warden_scope, &r.scope.opts[:ree_actions_before])
+                end
+  
+                # TODO: implement me when migration to roda DSL happens
+                # if action.before; end
+  
+                params = r.params
+  
+                if r.body
+                  body = begin
+                    JSON.parse(r.body.read)
+                  rescue => e
+                    {}
+                  end
+  
+                  params = params.merge(body)
+                end
+  
+                not_blank = ReeObject::NotBlank.new
+  
+                filtered_params = ReeHash::TransformValues.new.call(params) do |k, v|
+                  v.is_a?(Array) ? v.select { not_blank.call(_1) } : v
+                end
+  
+                accessor = r.env["warden"].user(action.warden_scope)
+                action_result = action.action.klass.new.call(accessor, filtered_params)
+  
+                if action.serializer
+                  serialized_result = action.serializer.klass.new.serialize(action_result)
+                else
+                  serialized_result = {}
+                end
+  
+                case action.request_method
+                when :post
+                  r.response.status = 201
+                  ReeJson::ToJson.new.call(serialized_result)
+                when :put, :delete, :patch
+                  r.response.status = 204
+                  ""
+                else
+                  r.response.status = 200
+                  ReeJson::ToJson.new.call(serialized_result)
+                end
+              end
+            end
+          end
+        end
+  
+        def build_traverse_tree_proc(tree, context, r = nil)
+          Proc.new do |r|
+            param_value = tree.value.start_with?(":") ? String : tree.value
+            param_name = tree.value.start_with?(":") ? tree.value.gsub(":", "") : tree.value
+            if tree.actions.length == 0
+              if tree.children.length > 0
+                r.on param_value do
+                  tree.children.each do |child|
+                    build_traverse_tree_proc(child, context).call(r)
+                  end
+
+                  nil
+                end
+              end
+
+              nil
+            else
+              if tree.children.length > 0
+                r.on param_value do
+                  tree.children.each do |child|
+                    build_traverse_tree_proc(child, context).call(r)
+                  end
+
+                  tree.actions.each do |action|
+                    action_proc(action, context, param_value).call(r)
+                  end
+  
+                  nil
+                end
+              else
+                r.is param_value do |**param_name|
+                  tree.actions.each do |action|
+                    action_proc(action, context, param_value).call(r)
+                  end
+  
+                  nil
+                end
+              end
+            end
+          end
+        end
       end
 
       module RequestMethods
@@ -79,89 +175,6 @@ class Roda
             end
           end
           nil
-        end
-
-        private
-
-        def traverse_tree(tree, r, context)
-          if tree.actions.length == 0
-            r.on tree.value do
-              if tree.children.length > 0
-                tree.children.map do |child|
-                  traverse_tree(child, r, context)
-                end
-              end
-            end
-          else
-            param = tree.value.start_with?(":") ? String : tree.value
-            r.is param do |*param|
-              tree.actions.each do |action|
-                r.send(action.request_method) do |*args|
-                  r.send(action.respond_to) do
-                    env["warden"].authenticate!(scope: action.warden_scope)
-  
-                    if context.opts[:ree_actions_before]
-                      self.instance_exec(@_request, action.warden_scope, &scope.opts[:ree_actions_before])
-                    end
-  
-                    # TODO: implement me when migration to roda DSL happens
-                    # if action.before; end
-
-                    route_args = action.path.split("/").select { _1.start_with?(":") }.map { _1.gsub(":", "") }
-  
-                    route_args.each_with_index do |arg, index|
-                      r.params["#{arg}"] = args[index]
-                    end
-  
-                    params = r.params
-  
-                    if r.body
-                      body = begin
-                        JSON.parse(r.body.read)
-                      rescue => e
-                        {}
-                      end
-  
-                      params = params.merge(body)
-                    end
-  
-                    not_blank = ReeObject::NotBlank.new
-  
-                    filtered_params = ReeHash::TransformValues.new.call(params) do |k, v|
-                      v.is_a?(Array) ? v.select { not_blank.call(_1) } : v
-                    end
-  
-                    accessor = env["warden"].user(action.warden_scope)
-                    action_result = action.action.klass.new.call(accessor, filtered_params)
-  
-                    if action.serializer
-                      serialized_result = action.serializer.klass.new.serialize(action_result)
-                    else
-                      serialized_result = {}
-                    end
-  
-                    case action.request_method
-                    when :post
-                      response.status = 201
-                      ReeJson::ToJson.new.call(serialized_result)
-                    when :put, :delete, :patch
-                      response.status = 204
-                      ""
-                    else
-                      response.status = 200
-                      ReeJson::ToJson.new.call(serialized_result)
-                    end
-                  end
-                end
-              end
-
-              if tree.children.length > 0
-                tree.children.each do |child|
-                  traverse_tree(child, r, context)
-                end
-              end
-            end
-          end
         end
       end
     end
