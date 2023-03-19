@@ -41,6 +41,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'roda', "~> 3.58.0"
   spec.add_development_dependency 'sqlite3', "~> 1.4.4"
   spec.add_development_dependency 'pg', "~> 1.4.1"
+  spec.add_development_dependency 'warden', "~> 1.2.9"
   spec.add_development_dependency 'timecop', "~> 0.9.5"
   spec.add_development_dependency "rollbar", "~> 3.3.1"
 end

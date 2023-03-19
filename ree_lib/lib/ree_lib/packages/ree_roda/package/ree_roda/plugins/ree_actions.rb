@@ -59,55 +59,55 @@ class Roda
           end
 
           routing_tree = ReeRoda::BuildRoutingTree.new.call(@ree_actions)
-          route_tree_proc = build_traverse_tree_proc(routing_tree, context) # return Proc
+          route_tree_proc = build_traverse_tree_proc(routing_tree, context)
 
           list << Proc.new do |r|
-            route_tree_proc.call(r)
+            r.instance_exec(r, &route_tree_proc)
           end
 
           opts[:ree_actions_proc] = list
         end
 
-        def action_proc(action, context, param, r = nil)
+        def action_proc(action, context)
           Proc.new do |r|
             r.send(action.request_method) do
               r.send(action.respond_to) do
                 r.env["warden"].authenticate!(scope: action.warden_scope)
-  
+
                 if context.opts[:ree_actions_before]
                   r.instance_exec(@_request, action.warden_scope, &r.scope.opts[:ree_actions_before])
                 end
-  
+
                 # TODO: implement me when migration to roda DSL happens
                 # if action.before; end
-  
+
                 params = r.params
-  
+
                 if r.body
                   body = begin
                     JSON.parse(r.body.read)
                   rescue => e
                     {}
                   end
-  
+
                   params = params.merge(body)
                 end
-  
+
                 not_blank = ReeObject::NotBlank.new
-  
+
                 filtered_params = ReeHash::TransformValues.new.call(params) do |k, v|
                   v.is_a?(Array) ? v.select { not_blank.call(_1) } : v
                 end
-  
+
                 accessor = r.env["warden"].user(action.warden_scope)
                 action_result = action.action.klass.new.call(accessor, filtered_params)
-  
+
                 if action.serializer
                   serialized_result = action.serializer.klass.new.serialize(action_result)
                 else
                   serialized_result = {}
                 end
-  
+
                 case action.request_method
                 when :post
                   r.response.status = 201
@@ -123,45 +123,79 @@ class Roda
             end
           end
         end
-  
-        def build_traverse_tree_proc(tree, context, r = nil)
-          Proc.new do |r|
-            param_value = tree.value.start_with?(":") ? String : tree.value
-            param_name = tree.value.start_with?(":") ? tree.value.gsub(":", "") : tree.value
-            if tree.actions.length == 0
-              if tree.children.length > 0
-                r.on param_value do
-                  tree.children.each do |child|
-                    build_traverse_tree_proc(child, context).call(r)
+
+        def build_traverse_tree_proc(tree, context)
+          has_arbitrary_param = tree.value.start_with?(":")
+          route_part = has_arbitrary_param ? tree.value.gsub(":", "") : tree.value
+          procs = []
+
+          child_procs = tree.children.map do |child|
+            build_traverse_tree_proc(child, context)
+          end
+
+          action_procs = tree.actions.map do |action|
+            action_proc(action, context)
+          end
+
+          procs << if tree.children.length > 0
+            if has_arbitrary_param
+              Proc.new do |r|
+                r.on String do |param_val|
+                  r.params[route_part] = param_val
+
+                  child_procs.each do |child_proc|
+                    r.instance_exec(r, &child_proc)
+                  end
+
+                  action_procs.each do |action_proc|
+                    r.instance_exec(r, &action_proc)
                   end
 
                   nil
                 end
               end
-
-              nil
             else
-              if tree.children.length > 0
-                r.on param_value do
-                  tree.children.each do |child|
-                    build_traverse_tree_proc(child, context).call(r)
+              Proc.new do |r|
+                r.on route_part do
+                  child_procs.each do |child_proc|
+                    r.instance_exec(r, &child_proc)
                   end
 
-                  tree.actions.each do |action|
-                    action_proc(action, context, param_value).call(r)
+                  action_procs.each do |action_proc|
+                    r.instance_exec(r, &action_proc)
                   end
-  
+
+                  nil
+                end
+              end
+            end
+          else
+            Proc.new do |r|
+              if has_arbitrary_param
+                r.is String do |param_val|
+                  r.params[route_part] = param_val
+
+                  action_procs.each do |action_proc|
+                    r.instance_exec(r, &action_proc)
+                  end
+
                   nil
                 end
               else
-                r.is param_value do |**param_name|
-                  tree.actions.each do |action|
-                    action_proc(action, context, param_value).call(r)
+                r.is route_part do
+                  action_procs.each do |action_proc|
+                    r.instance_exec(r, &action_proc)
                   end
-  
+
                   nil
                 end
               end
+            end
+          end
+
+          Proc.new do |r|
+            procs.each do |proc|
+              r.instance_exec(r, &proc)
             end
           end
         end

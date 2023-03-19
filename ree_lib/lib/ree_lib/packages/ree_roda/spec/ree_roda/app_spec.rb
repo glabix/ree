@@ -4,6 +4,8 @@ package_require("ree_roda/app")
 package_require("ree_actions/dsl")
 package_require("ree_roda/plugins/ree_actions")
 
+require "warden"
+
 RSpec.describe ReeRoda::App do
   include Rack::Test::Methods
 
@@ -26,6 +28,21 @@ RSpec.describe ReeRoda::App do
       end
 
       def call(access, attrs)
+        {result: "result"}
+      end
+    end
+
+    class ReeRodaTest::Serializer
+      include ReeMapper::DSL
+
+      mapper :serializer
+
+      build_mapper.use(:serialize) do
+        string :result
+      end
+
+      def call(access, attrs)
+        {result: "result"}
       end
     end
 
@@ -41,11 +58,56 @@ RSpec.describe ReeRoda::App do
           warden_scope :visitor
           sections "some_action"
           action :cmd, **opts
+          serializer :serializer, **opts
+        end
+
+        get "api/action/:id/subaction" do
+          summary "Subaction"
+          warden_scope :visitor
+          sections "some_action"
+          action :cmd, **opts
+          serializer :serializer, **opts
+        end
+
+        post "api/action/:id" do
+          summary "Some action"
+          warden_scope :visitor
+          sections "some_action"
+          action :cmd, **opts
+          serializer :serializer, **opts
         end
       end
     end
 
+    class VisitorStrategy < Warden::Strategies::Base
+      include Ree::LinkDSL
+
+      def valid?
+        true
+      end
+
+      def authenticate!
+        success!({user: "visitor"})
+      end
+    end
+
+    Warden::Strategies.add(:visitor, VisitorStrategy)
+
     class TestApp < ReeRoda::App
+      use Warden::Manager do |config|
+        config.default_strategies :visitor
+        config.default_scope = :visitor
+        config.scope_defaults :visitor, strategies: [:visitor], store: false
+
+        config.failure_app = -> (env) {
+          [
+            401,
+            {"Content-Type" => "text/plain"},
+            ["requires authentication"]
+          ]
+        }
+      end
+
       plugin :ree_actions
 
       ree_actions ReeRodaTest::TestActions.new,
@@ -80,5 +142,11 @@ RSpec.describe ReeRoda::App do
 
     get "api/v1/swagger"
     expect(last_response.status).to eq(404)
+  }
+
+  it {
+    get "api/action/1/subaction"
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq("{\"result\":\"result\"}")
   }
 end

@@ -73,6 +73,8 @@ GEM
     timecop (0.9.6)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
+    warden (1.2.9)
+      rack (>= 2.0.9)
     webmock (3.18.1)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
@@ -94,6 +96,7 @@ DEPENDENCIES
   rspec
   sqlite3 (~> 1.4.4)
   timecop (~> 0.9.5)
+  warden (~> 1.2.9)
   webmock
 
 BUNDLED WITH
