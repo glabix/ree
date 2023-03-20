@@ -27,7 +27,7 @@ class ReeSwagger::TypeDefinitionsRepo
         ReeMapper::Array => ->(type, build_serializer_schema) {
           {
             type: 'array',
-            items: build_serializer_schema.(type.of.type)
+            items: build_serializer_schema.(type.subject.type)
           }
         },
         ReeMapper::DateTime => ->(*) {
