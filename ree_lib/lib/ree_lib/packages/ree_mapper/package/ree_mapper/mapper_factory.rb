@@ -61,10 +61,7 @@ class ReeMapper::MapperFactory
   contract(Symbol, SubclassOf[ReeMapper::AbstractWrapper] => SubclassOf[self])
   def self.register_wrapper(name, wrapper)
     raise ArgumentError, "wrapper registration name should not end with `?`" if name.to_s.end_with?('?')
-
-    defined_strategy_method = wrappers[name]&.flat_map(&:strategy_methods)&.detect { wrapper.find_strategy(_1) }
-    raise ArgumentError, "wrapper :#{name} with `#{defined_strategy_method}` strategy already registered" if defined_strategy_method
-    raise ArgumentError, "method :#{name} already defined" if !types.key?(name) && !wrappers.key?(name) && method_defined?(name)
+    raise ArgumentError, "method :#{name} already defined" if !wrappers.key?(name) && method_defined?(name)
 
     wrappers[name] ||= []
     wrappers[name] << wrapper
