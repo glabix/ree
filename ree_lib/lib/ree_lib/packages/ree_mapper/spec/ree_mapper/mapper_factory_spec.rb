@@ -69,7 +69,7 @@ RSpec.describe ReeMapper::MapperFactory do
     it 'raise an error if the mapper name is ended by ?' do
       expect {
         mapper_factory.register_mapper(:new_type?, serializer)
-      }.to raise_error(ArgumentError, 'name of mapper type should not end with `?`')
+      }.to raise_error(ArgumentError, 'mapper registration name should not end with `?`')
     end
 
     it 'raise an error if the mapper name is reserved' do

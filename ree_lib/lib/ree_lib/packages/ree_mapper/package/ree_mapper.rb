@@ -22,6 +22,10 @@ module ReeMapper
   require_relative 'ree_mapper/fields_filter'
   require_relative 'ree_mapper/field'
 
+
+  require_relative 'ree_mapper/wrappers/abstract_wrapper'
+  require_relative 'ree_mapper/wrappers/array'
+
   require_relative 'ree_mapper/types/bool'
   require_relative 'ree_mapper/types/date_time'
   require_relative 'ree_mapper/types/time'
@@ -29,7 +33,6 @@ module ReeMapper
   require_relative 'ree_mapper/types/float'
   require_relative 'ree_mapper/types/integer'
   require_relative 'ree_mapper/types/string'
-  require_relative 'ree_mapper/types/array'
 
   require_relative 'ree_mapper/strategy_outputs/strategy_output'
   require_relative 'ree_mapper/strategy_outputs/object_output'

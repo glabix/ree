@@ -21,7 +21,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
         integer :x
         integer :y
         integer :z
-      } 
+      }
     }
 
     context 'with only' do
@@ -71,7 +71,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
             point :y, except: [:x, :z]
           end
 
-          array :points, each: point(only: [:x, :y])
+          array :points, point(only: [:x, :y])
         }
       }
 
@@ -169,7 +169,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
         integer :number
         integer? :opt_number
         integer :opt_number_long, optional: true
-        array? :opt_array, each: integer
+        array? :opt_array, integer
         array? :opt_array_with_blk do
           integer :id
         end
@@ -278,7 +278,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
           integer :for_all
           integer :for_admin, role: :admin
         }
-        
+
         mapper_factory.call.use(:cast) {
           nested_type :my_field
         }

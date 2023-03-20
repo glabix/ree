@@ -1,22 +1,15 @@
 # frozen_string_literal: true
 
-class ReeMapper::Array < ReeMapper::AbstractType
-  attr_reader :of
-
-  contract ReeMapper::Field => Any
-  def initialize(of)
-    @of = of
-  end
-
+class ReeMapper::Array < ReeMapper::AbstractWrapper
   contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]], fields_filters: ArrayOf[ReeMapper::FieldsFilter]] => Array)
     .throws(ReeMapper::TypeError)
   def serialize(value, name:, role: nil, fields_filters: [])
     if value.is_a?(Array)
       value.map.with_index {
-        if _1.nil? && of.null
+        if _1.nil? && subject.null
           _1
         else
-          of.type.serialize(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [of.fields_filter])
+          subject.type.serialize(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [subject.fields_filter])
         end
       }
     else
@@ -29,10 +22,10 @@ class ReeMapper::Array < ReeMapper::AbstractType
   def cast(value, name:, role: nil, fields_filters: [])
     if value.is_a?(Array)
       value.map.with_index {
-        if _1.nil? && of.null
+        if _1.nil? && subject.null
           _1
         else
-          of.type.cast(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [of.fields_filter])
+          subject.type.cast(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [subject.fields_filter])
         end
       }
     else
@@ -45,10 +38,10 @@ class ReeMapper::Array < ReeMapper::AbstractType
   def db_dump(value, name:, role: nil, fields_filters: [])
     if value.is_a?(Array)
       value.map.with_index {
-        if _1.nil? && of.null
+        if _1.nil? && subject.null
           _1
         else
-          of.type.db_dump(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [of.fields_filter])
+          subject.type.db_dump(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [subject.fields_filter])
         end
       }
     else
@@ -61,10 +54,10 @@ class ReeMapper::Array < ReeMapper::AbstractType
   def db_load(value, name:, role: nil, fields_filters: [])
     if value.is_a?(Array)
       value.map.with_index {
-        if _1.nil? && of.null
+        if _1.nil? && subject.null
           _1
         else
-          of.type.db_load(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [of.fields_filter])
+          subject.type.db_load(_1, name: "#{name}[#{_2}]", role: role, fields_filters: fields_filters + [subject.fields_filter])
         end
       }
     else
