@@ -2,7 +2,8 @@ require "rack/test"
 
 package_require("ree_roda/app")
 package_require("ree_actions/dsl")
-package_require("ree_roda/plugins/ree_actions")
+package_require("ree_routes/dsl")
+package_require("ree_roda/plugins/ree_routes")
 
 require "warden"
 
@@ -19,7 +20,7 @@ RSpec.describe ReeRoda::App do
     end
 
     class ReeRodaTest::Cmd
-      include ReeActions::ActionDSL
+      include ReeActions::DSL
 
       action :cmd
 
@@ -46,10 +47,10 @@ RSpec.describe ReeRoda::App do
       end
     end
 
-    class ReeRodaTest::TestActions
-      include ReeActions::DSL
+    class ReeRodaTest::TestRoutes
+      include ReeRoutes::DSL
 
-      actions :test_actions do
+      routes :test_routes do
         default_warden_scope :identity
         opts = {from: :ree_roda_test}
 
@@ -108,9 +109,9 @@ RSpec.describe ReeRoda::App do
         }
       end
 
-      plugin :ree_actions
+      plugin :ree_routes
 
-      ree_actions ReeRodaTest::TestActions.new,
+      ree_routes ReeRodaTest::TestRoutes.new,
         api_url: "http://some.api.url:1337",
         swagger_url: "swagger"
 
@@ -119,7 +120,7 @@ RSpec.describe ReeRoda::App do
           "success"
         end
 
-        r.ree_actions
+        r.ree_routes
       end
     end
   end

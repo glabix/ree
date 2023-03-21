@@ -3,7 +3,7 @@ class Roda
     module ReeRoutes
       def self.load_dependencies(app, opts = {})
         package_require("ree_roda/services/build_routing_tree")
-        package_require("ree_roda/services/build_swagger_from_actions")
+        package_require("ree_roda/services/build_swagger_from_routes")
         package_require("ree_json/functions/to_json")
         package_require("ree_hash/functions/transform_values")
         package_require("ree_object/functions/not_blank")
@@ -27,7 +27,7 @@ class Roda
           opts[:ree_routes_swagger_url] = swagger_url
           opts[:ree_routes_api_url] = api_url
 
-          opts[:ree_routes_swagger] = ReeRoda::BuildSwaggerFromActions.new.call(
+          opts[:ree_routes_swagger] = ReeRoda::BuildSwaggerFromRoutes.new.call(
             @ree_routes,
             opts[:ree_routes_swagger_title],
             opts[:ree_routes_swagger_description],
@@ -203,7 +203,7 @@ class Roda
 
       module RequestMethods
         @@_actions_cache = {}
-        @@_action_serializers_cache = {}
+        @@_route_serializers_cache = {}
 
         def ree_routes
           if scope.opts[:ree_routes_proc]
@@ -221,7 +221,7 @@ class Roda
         end
 
         def get_cached_serializer(route)
-          @@_action_serializers_cache[route.serializer.object_id] ||= route.serializer.klass.new
+          @@_route_serializers_cache[route.serializer.object_id] ||= route.serializer.klass.new
         end
       end
     end

@@ -4,14 +4,14 @@ class ReeRoda::BuildRoutingTree
   fn :build_routing_tree
 
   class RoutingTree
-    attr_accessor :children, :value, :depth, :actions, :type, :parent
+    attr_accessor :children, :value, :depth, :routes, :type, :parent
   
-    def initialize(value, depth, type, parent = nil, actions = [])
+    def initialize(value, depth, type, parent = nil, routes = [])
       @value = value
       @depth = depth
       @parent = parent
       @type = type
-      @actions = []
+      @routes = []
       @children = []
     end
   
@@ -43,8 +43,8 @@ class ReeRoda::BuildRoutingTree
       return new_child
     end
 
-    def add_action(action)
-      self.actions << action
+    def add_route(route)
+      self.routes << route
     end
 
     def print_tree(tree = self)
@@ -60,7 +60,7 @@ class ReeRoda::BuildRoutingTree
 
     def print_proc_tree(tree = self)
       param_value = tree.value.start_with?(":") ? String : "\"#{tree.value}\""
-      if tree.actions.length == 0
+      if tree.routess.length == 0
         if tree.children.length > 0
           puts "#{get_offset(tree.depth)}r.on #{param_value} do"
           tree.children.each do |child|
@@ -76,15 +76,15 @@ class ReeRoda::BuildRoutingTree
           tree.children.each do |child|
             print_proc_tree(child)
           end
-          tree.actions.each do |action|
-            puts "#{get_offset(tree.depth + 1)}r.#{action.request_method} do"
+          tree.routes.each do |route|
+            puts "#{get_offset(tree.depth + 1)}r.#{route.request_method} do"
             puts "#{get_offset(tree.depth + 1)}end"
           end
           puts "#{get_offset(tree.depth)}end"
         else
           puts "#{get_offset(tree.depth)}r.is #{param_value} do"
-          tree.actions.each do |action|
-            puts "#{get_offset(tree.depth + 1)}r.#{action.request_method} do"
+          tree.routes.each do |route|
+            puts "#{get_offset(tree.depth + 1)}r.#{route.request_method} do"
             puts "#{get_offset(tree.depth + 1)}end"
           end
           puts "#{get_offset(tree.depth)}end"
@@ -101,11 +101,11 @@ class ReeRoda::BuildRoutingTree
     end
   end
 
-  contract(ArrayOf[ReeActions::Action] => Nilor[RoutingTree])
-  def call(actions)
+  contract(ArrayOf[ReeRoutes::Route] => Nilor[RoutingTree])
+  def call(routes)
     tree = nil
-    actions.each do |action|
-      splitted = action.path.split("/")
+    routes.each do |route|
+      splitted = route.path.split("/")
 
       parentTree = tree
       splitted.each_with_index do |v, j|
@@ -119,12 +119,12 @@ class ReeRoda::BuildRoutingTree
         if current
           parentTree = current
 
-          current.add_action(action) if j == (splitted.length - 1)
+          current.add_route(route) if j == (splitted.length - 1)
         else
           if !parentTree.children_have_value?(v)
             if parentTree.children.any? { |c| c.type == :param } && v.start_with?(":")
               param_child = parentTree.children.find { |c| c.type == :param }
-              param_child.add_action(action) if j == (splitted.length - 1)
+              param_child.add_route(route) if j == (splitted.length - 1)
               next
             end
 
@@ -132,7 +132,7 @@ class ReeRoda::BuildRoutingTree
             parentTree = newTree
           end
 
-          parentTree.add_action(action) if j == (splitted.length - 1)
+          parentTree.add_route(route) if j == (splitted.length - 1)
         end
       end
     end

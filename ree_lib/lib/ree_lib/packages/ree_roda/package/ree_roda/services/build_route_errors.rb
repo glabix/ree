@@ -1,13 +1,13 @@
-class ReeRoda::BuildActionErrors
+class ReeRoda::BuildRouteErrors
   include Ree::FnDSL
 
-  fn :build_action_errors do
+  fn :build_route_errors do
     link "ree_swagger/dto/error_dto", -> { ErrorDto }
   end
 
-  contract(ReeActions::Action => ArrayOf[ErrorDto])
-  def call(action)
-    ree_object = action.action
+  contract(ReeRoutes::Route => ArrayOf[ErrorDto])
+  def call(route)
+    ree_object = route.action
     errors = recursively_extract_errors(ree_object)
 
     errors

@@ -1,101 +1,59 @@
-# frozen_string_literal: true
-
-require_relative "action_builder"
-require "uri"
-
 module ReeActions
   module DSL
     def self.included(base)
       base.extend(ClassMethods)
+      base.include(ReeMapper::DSL)
     end
 
     def self.extended(base)
       base.extend(ClassMethods)
-    end
-
-    module FactoryMethod
-      def build
-        self.class.instance_variable_get(:@actions) || []
-      end
+      base.include(ReeMapper::DSL)
     end
 
     module ClassMethods
       include Ree::Contracts::Core
       include Ree::Contracts::ArgContracts
 
-      def actions(name, &proc)
-        raise ArgumentError.new("block is required") if !block_given?
-
-        @dsl = Ree::ObjectDsl.new(
-          Ree.container.packages_facade, name, self, :object
+      def action(name, &proc)
+        dsl = Ree::ObjectDsl.new(
+          Ree.container.packages_facade, name, self, :fn
         )
 
-        @dsl.singleton
-        @dsl.factory(:build)
-        @dsl.tags(["actions"])
+        dsl.instance_exec(&proc) if block_given?
+        dsl.tags(["action"])
+        dsl.freeze(false)
+        dsl.object.set_as_compiled(false)
 
-        instance_exec(&proc)
-
-        klass = @dsl.object.klass
-        klass.send(:include, FactoryMethod)
-
-
-        Ree.container.compile(@dsl.package, name)
+        Ree.container.compile(dsl.package, name)
       end
 
-      def default_warden_scope(method_name)
-        @default_warden_scope = method_name
-      end
+      def method_added(method_name)
+        return super if method_name != :call
 
-      [:get, :post, :put, :delete, :patch, :head, :options].each do |request_method|
-        define_method request_method do |path, &proc|
-          define_action(request_method, path, &proc)
-        end
-      end
-
-      private
-
-      contract Symbol, String, Block => ReeActions::Action
-      def define_action(request_method, path, &proc)
-        raise ArgumentError.new("actions should be called") if !@dsl
-        raise ArgumentError.new("block is required") if !block_given?
-
-        @actions ||= []
-
-        builder = ReeActions::ActionBuilder.new
-        builder.instance_exec(&proc)
-
-        if @default_warden_scope && !builder.get_action.warden_scope
-          builder.warden_scope(@default_warden_scope)
+        if @__original_call_defined
+          remove_instance_variable(:@__original_call_defined)
+          return
         end
 
-        uri = URI.parse(path) rescue nil
+        @__original_call_defined = true
 
-        if uri.nil? || uri.path != path
-          raise ArgumentError.new("invalid path provided #{path}")
+        alias_method(:__original_call, :call)
+
+        define_method :call do |user_access, attrs|
+          if self.class.const_defined?(:ActionCaster)
+            caster = self.class.const_get(:ActionCaster)
+
+            if !caster.respond_to?(:cast)
+              raise ArgumentError.new("ActionCaster does not respond to `cast` method")
+            end
+
+            __original_call(user_access, caster.cast(attrs))
+          else
+            __original_call(user_access, attrs)
+          end
         end
 
-        if uri.query && !uri.query.empty?
-          raise ArgumentError.new("action path should not include query params: #{path}")
-        end
-
-        builder.get_action.path = path
-        builder.get_action.request_method = request_method
-
-        if !builder.get_action.valid?
-          raise ArgumentError.new("action, summary and auth scope should be provider for #{builder.get_action.inspect}")
-        end
-
-        action = builder.get_action
-
-        @dsl.link(action.action.name, from: action.action.package_name)
-
-        if action.serializer
-          @dsl.link(action.serializer.name, from: action.serializer.package_name)
-        end
-
-        @actions << action
-        action
+        nil
       end
     end
   end

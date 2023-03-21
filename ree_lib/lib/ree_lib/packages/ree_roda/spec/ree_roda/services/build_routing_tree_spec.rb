@@ -17,7 +17,7 @@ RSpec.describe :build_routing_tree do
     end
 
     class ReeRodaTestTree::Cmd
-      include ReeActions::ActionDSL
+      include ReeActions::DSL
 
       action :cmd
 
@@ -30,10 +30,10 @@ RSpec.describe :build_routing_tree do
       end
     end
 
-    class ReeRodaTestTree::TestActions
-      include ReeActions::DSL
+    class ReeRodaTestTree::TestRoutes
+      include ReeRoutes::DSL
 
-      actions :test_actions do
+      routes :test_routes do
         default_warden_scope :identity
         opts = { from: :ree_roda_test_tree }
 
@@ -107,16 +107,16 @@ RSpec.describe :build_routing_tree do
     end
 
     class TestTreeApp < ReeRoda::App
-      plugin :ree_actions
+      plugin :ree_routes
 
-      ree_actions ReeRodaTestTree::TestActions.new
+      ree_routes ReeRodaTestTree::TestRoutes.new
 
       route do |r|
         r.get "health" do
           "success"
         end
 
-        r.ree_actions
+        r.ree_routes
       end
     end
   end
@@ -125,7 +125,7 @@ RSpec.describe :build_routing_tree do
     Ree.disable_irb_mode
   end
 
-  let(:actions) { TestTreeApp.instance_variable_get(:@ree_actions) }
+  let(:routes) { TestTreeApp.instance_variable_get(:@ree_routes) }
 
   let(:hsh_tree) {
     {
@@ -230,32 +230,32 @@ RSpec.describe :build_routing_tree do
   }
 
   it {
-    tree = build_routing_tree(actions)
+    tree = build_routing_tree(routes)
 
-    # check that all end nodes have actions
-    # and that not end nodes don't have actions
+    # check that all end nodes have routes
+    # and that not end nodes don't have route
     id_nodes = [*tree.find_by_value(value: ":id", depth: 2), *tree.find_by_value(value: ":id", depth: 4)]
     types_node = tree.find_by_value(value: "types", depth: 3)
     actions_node = tree.find_by_value(value: "actions", depth: 1)
     tasks_node = tree.find_by_value(value: "tasks", depth: 1)
 
-    def count_tree_actions(tree, count = 0)
-      count += tree.actions.count
+    def count_tree_routes(tree, count = 0)
+      count += tree.routes.count
       if tree.children.length > 0
         return tree.children.map do |children|
-          count_tree_actions(children, count)
+          count_tree_routes(children, count)
         end.sum
       end
       return count
     end
 
-    expect(is_blank(tree.actions)).to eq(true)
-    expect(not_blank(actions_node.actions)).to eq(true)
-    expect(not_blank(tasks_node.actions)).to eq(true)
-    expect(id_nodes.all? { not_blank(_1.actions) }).to eq(true)
-    expect(count_tree_actions(tree)).to eq(13)
+    expect(is_blank(tree.routes)).to eq(true)
+    expect(not_blank(actions_node.routes)).to eq(true)
+    expect(not_blank(tasks_node.routes)).to eq(true)
+    expect(id_nodes.all? { not_blank(_1.routes) }).to eq(true)
+    expect(count_tree_routes(tree)).to eq(13)
 
     hsh = to_hash(tree)
-    expect(except(hsh, global_except: [:actions])).to eq(hsh_tree)
+    expect(except(hsh, global_except: [:routes])).to eq(hsh_tree)
   }
 end

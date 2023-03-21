@@ -15,9 +15,9 @@
       "return": "Nilor[ReeRoda::BuildRoutingTree::RoutingTree]",
       "args": [
         {
-          "arg": "actions",
+          "arg": "routes",
           "arg_type": "req",
-          "type": "ArrayOf[ReeActions::Action]"
+          "type": "ArrayOf[ReeRoutes::Route]"
         }
       ]
     }
