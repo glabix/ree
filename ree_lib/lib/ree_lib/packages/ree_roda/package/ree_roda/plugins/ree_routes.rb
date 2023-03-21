@@ -1,6 +1,6 @@
 class Roda
   module RodaPlugins
-    module ReeActions
+    module ReeRoutes
       def self.load_dependencies(app, opts = {})
         package_require("ree_roda/services/build_routing_tree")
         package_require("ree_roda/services/build_swagger_from_actions")
@@ -12,74 +12,74 @@ class Roda
       end
 
       def self.configure(app, opts = {})
-        app.opts[:ree_actions_before] = opts[:before] if opts[:before]
+        app.opts[:ree_routes_before] = opts[:before] if opts[:before]
       end
 
       module ClassMethods
-        def ree_actions(actions, swagger_title: "", swagger_description: "",
+        def ree_routes(routes, swagger_title: "", swagger_description: "",
                         swagger_version: "", swagger_url: "", api_url: "")
-          @ree_actions ||= []
-          @ree_actions += actions
+          @ree_routes ||= []
+          @ree_routes += routes
 
-          opts[:ree_actions_swagger_title] = swagger_title
-          opts[:ree_actions_swagger_description] = swagger_description
-          opts[:ree_actions_swagger_version] = swagger_version
-          opts[:ree_actions_swagger_url] = swagger_url
-          opts[:ree_actions_api_url] = api_url
+          opts[:ree_routes_swagger_title] = swagger_title
+          opts[:ree_routes_swagger_description] = swagger_description
+          opts[:ree_routes_swagger_version] = swagger_version
+          opts[:ree_routes_swagger_url] = swagger_url
+          opts[:ree_routes_api_url] = api_url
 
-          opts[:ree_actions_swagger] = ReeRoda::BuildSwaggerFromActions.new.call(
-            @ree_actions,
-            opts[:ree_actions_swagger_title],
-            opts[:ree_actions_swagger_description],
-            opts[:ree_actions_swagger_version],
-            opts[:ree_actions_api_url]
+          opts[:ree_routes_swagger] = ReeRoda::BuildSwaggerFromActions.new.call(
+            @ree_routes,
+            opts[:ree_routes_swagger_title],
+            opts[:ree_routes_swagger_description],
+            opts[:ree_routes_swagger_version],
+            opts[:ree_routes_api_url]
           )
 
-          build_actions_proc
+          build_routes_proc
           nil
         end
 
         private
 
-        def build_actions_proc
+        def build_routes_proc
           list = []
           context = self
 
-          return list if @ree_actions.nil? || @ree_actions.empty?
+          return list if @ree_routes.nil? || @ree_routes.empty?
 
-          if context.opts[:ree_actions_swagger_url]
+          if context.opts[:ree_routes_swagger_url]
             list << Proc.new do |r|
-              r.get context.opts[:ree_actions_swagger_url] do
+              r.get context.opts[:ree_routes_swagger_url] do
                 r.json do
                   response.status = 200
-                  ReeJson::ToJson.new.call(context.opts[:ree_actions_swagger])
+                  ReeJson::ToJson.new.call(context.opts[:ree_routes_swagger])
                 end
               end
             end
           end
 
-          routing_tree = ReeRoda::BuildRoutingTree.new.call(@ree_actions)
+          routing_tree = ReeRoda::BuildRoutingTree.new.call(@ree_routes)
           route_tree_proc = build_traverse_tree_proc(routing_tree, context)
 
           list << Proc.new do |r|
             r.instance_exec(r, &route_tree_proc)
           end
 
-          opts[:ree_actions_proc] = list
+          opts[:ree_routes_proc] = list
         end
 
-        def action_proc(action, context)
+        def route_proc(route, context)
           Proc.new do |r|
-            r.send(action.request_method) do
-              r.send(action.respond_to) do
-                r.env["warden"].authenticate!(scope: action.warden_scope)
+            r.send(route.request_method) do
+              r.send(route.respond_to) do
+                r.env["warden"].authenticate!(scope: route.warden_scope)
 
-                if context.opts[:ree_actions_before]
-                  r.instance_exec(@_request, action.warden_scope, &r.scope.opts[:ree_actions_before])
+                if context.opts[:ree_routes_before]
+                  r.instance_exec(@_request, route.warden_scope, &r.scope.opts[:ree_routes_before])
                 end
 
                 # TODO: implement me when migration to roda DSL happens
-                # if action.before; end
+                # if route.before; end
 
                 params = r.params
 
@@ -99,16 +99,16 @@ class Roda
                   v.is_a?(Array) ? v.select { not_blank.call(_1) } : v
                 end
 
-                accessor = r.env["warden"].user(action.warden_scope)
-                action_result = get_cached_action(action).call(accessor, filtered_params)
+                accessor = r.env["warden"].user(route.warden_scope)
+                action_result = get_cached_action(route).call(accessor, filtered_params)
 
-                if action.serializer
-                  serialized_result = get_cached_serializer(action).serialize(action_result)
+                if route.serializer
+                  serialized_result = get_cached_serializer(route).serialize(action_result)
                 else
                   serialized_result = {}
                 end
 
-                case action.request_method
+                case route.request_method
                 when :post
                   r.response.status = 201
                   ReeJson::ToJson.new.call(serialized_result)
@@ -133,8 +133,8 @@ class Roda
             build_traverse_tree_proc(child, context)
           end
 
-          action_procs = tree.actions.map do |action|
-            action_proc(action, context)
+          route_procs = tree.routes.map do |route|
+            route_proc(route, context)
           end
 
           procs << if tree.children.length > 0
@@ -147,8 +147,8 @@ class Roda
                     r.instance_exec(r, &child_proc)
                   end
 
-                  action_procs.each do |action_proc|
-                    r.instance_exec(r, &action_proc)
+                  route_procs.each do |route_proc|
+                    r.instance_exec(r, &route_proc)
                   end
 
                   nil
@@ -161,8 +161,8 @@ class Roda
                     r.instance_exec(r, &child_proc)
                   end
 
-                  action_procs.each do |action_proc|
-                    r.instance_exec(r, &action_proc)
+                  route_procs.each do |route_proc|
+                    r.instance_exec(r, &route_proc)
                   end
 
                   nil
@@ -175,16 +175,16 @@ class Roda
                 r.is String do |param_val|
                   r.params[route_part] = param_val
 
-                  action_procs.each do |action_proc|
-                    r.instance_exec(r, &action_proc)
+                  route_procs.each do |route_proc|
+                    r.instance_exec(r, &route_proc)
                   end
 
                   nil
                 end
               else
                 r.is route_part do
-                  action_procs.each do |action_proc|
-                    r.instance_exec(r, &action_proc)
+                  route_procs.each do |route_proc|
+                    r.instance_exec(r, &route_proc)
                   end
 
                   nil
@@ -205,9 +205,9 @@ class Roda
         @@_actions_cache = {}
         @@_action_serializers_cache = {}
 
-        def ree_actions
-          if scope.opts[:ree_actions_proc]
-            scope.opts[:ree_actions_proc].each do |request_proc|
+        def ree_routes
+          if scope.opts[:ree_routes_proc]
+            scope.opts[:ree_routes_proc].each do |request_proc|
               self.instance_exec(self, &request_proc)
             end
           end
@@ -216,16 +216,16 @@ class Roda
 
         private
 
-        def get_cached_action(action)
-          @@_actions_cache[action.action.object_id] ||= action.action.klass.new
+        def get_cached_action(route)
+          @@_actions_cache[route.action.object_id] ||= route.action.klass.new
         end
 
-        def get_cached_serializer(action)
-          @@_action_serializers_cache[action.serializer.object_id] ||= action.serializer.klass.new
+        def get_cached_serializer(route)
+          @@_action_serializers_cache[route.serializer.object_id] ||= route.serializer.klass.new
         end
       end
     end
 
-    register_plugin(:ree_actions, Roda::RodaPlugins::ReeActions)
+    register_plugin(:ree_routes, Roda::RodaPlugins::ReeRoutes)
   end
 end

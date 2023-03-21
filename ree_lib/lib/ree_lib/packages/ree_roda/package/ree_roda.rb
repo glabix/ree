@@ -15,5 +15,5 @@ module ReeRoda
 end
 
 package_require "ree_roda/plugins/ree_logger"
-package_require "ree_roda/plugins/ree_actions"
+package_require "ree_roda/plugins/ree_routes"
 package_require "ree_roda/app"
