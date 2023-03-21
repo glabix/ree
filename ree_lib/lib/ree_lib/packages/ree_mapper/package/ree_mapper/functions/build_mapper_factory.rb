@@ -25,6 +25,7 @@ class ReeMapper::BuildMapperFactory
     klass.register_type(:float, ReeMapper::Float.new)
     klass.register_type(:integer, ReeMapper::Integer.new)
     klass.register_type(:string, ReeMapper::String.new)
+    klass.register_type(:any, ReeMapper::Any.new)
 
     klass
   end

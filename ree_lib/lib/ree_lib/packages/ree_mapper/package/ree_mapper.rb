@@ -23,6 +23,7 @@ module ReeMapper
   require_relative 'ree_mapper/field'
 
   require_relative 'ree_mapper/types/bool'
+  require_relative 'ree_mapper/types/any'
   require_relative 'ree_mapper/types/date_time'
   require_relative 'ree_mapper/types/time'
   require_relative 'ree_mapper/types/date'
