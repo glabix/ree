@@ -39,17 +39,17 @@ RSpec.describe :build_serializer_schema do
     end
 
     mapper_factory.call.use(:serialize) do
-      integer   :id,            doc:  'Identificator'
+      integer   :id,            doc:    'Identificator'
       string    :name
       bool      :is_admin
       float     :free_space
-      array     :tags,          each: string
+      array     :tags,          string
       date_time :created_at
       date      :birth_day
       time      :updated_at
 
       setting   :one_setting
-      array     :many_settings, each: setting
+      array     :many_settings, setting
 
       hash      :cart do
         integer :size

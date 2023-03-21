@@ -30,7 +30,7 @@ RSpec.describe :build_parameters_spec do
 
   it {
     caster = mapper_factory.call.use(:cast) do
-      array :id, each: string
+      array :id, string
     end
 
     expect {

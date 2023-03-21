@@ -17,8 +17,8 @@ RSpec.describe 'ReeMapper::Array' do
 
   let(:mapper) {
     mapper_factory.call.use(:cast).use(:serialize).use(:db_dump).use(:db_load) {
-      array :tags, each: integer
-      array? :ary_of_ary, each: array(each: integer)
+      array :tags, integer
+      array? :ary_of_ary, array(integer)
     }
   }
 
@@ -73,7 +73,7 @@ RSpec.describe 'ReeMapper::Array' do
   context 'with array of array' do
     let(:mapper) {
       mapper_factory.call.use(:serialize) {
-        array :coords, each: array(each: integer)
+        array :coords, array(integer)
       }
     }
 
@@ -85,7 +85,7 @@ RSpec.describe 'ReeMapper::Array' do
   context 'with nullable element of array' do
     let(:mapper) {
       mapper_factory.call.use(:serialize) {
-        array :tags, each: integer(null: true)
+        array :tags, integer(null: true)
       }
     }
 
@@ -98,7 +98,7 @@ RSpec.describe 'ReeMapper::Array' do
     it {
       expect {
         mapper_factory.call.use(:serialize) {
-          array :tags, each: integer?
+          array :tags, integer?
         }
       }.to raise_error(ArgumentError)
     }
@@ -106,7 +106,7 @@ RSpec.describe 'ReeMapper::Array' do
     it {
       expect {
         mapper_factory.call.use(:serialize) {
-          array :tags, each: integer(optional: true)
+          array :tags, integer(optional: true)
         }
       }.to raise_error(ArgumentError)
     }
@@ -114,7 +114,7 @@ RSpec.describe 'ReeMapper::Array' do
     it {
       expect {
         mapper_factory.call.use(:serialize) {
-          array :tags, each: array(each: integer, optional: true)
+          array :tags, array(integer, optional: true)
         }
       }.to raise_error(ArgumentError)
     }

@@ -15,6 +15,7 @@ class ReeMapper::BuildMapperFactory
 
     klass.instance_eval {
       @types = {}
+      @wrappers = {}
       @strategies = strategies
     }
 
@@ -26,6 +27,8 @@ class ReeMapper::BuildMapperFactory
     klass.register_type(:integer, ReeMapper::Integer.new)
     klass.register_type(:string, ReeMapper::String.new)
     klass.register_type(:any, ReeMapper::Any.new)
+
+    klass.register_wrapper(:array, ReeMapper::Array)
 
     klass
   end

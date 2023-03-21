@@ -1,13 +1,17 @@
 # frozen_string_literal: true
 
 class ReeMapper::Mapper
-  contract(ArrayOf[ReeMapper::MapperStrategy], Nilor[ReeMapper::AbstractType] => Any).throws(ReeMapper::UnsupportedTypeError)
+  contract(
+    ArrayOf[ReeMapper::MapperStrategy],
+    Nilor[ReeMapper::AbstractType, ReeMapper::AbstractWrapper] => self
+  ).throws(ReeMapper::UnsupportedTypeError)
   def self.build(strategies, type = nil)
     if type
       strategies.each do |strategy|
         method = strategy.method
         next if type.respond_to?(method)
-        raise ReeMapper::UnsupportedTypeError, "type #{type.inspect} should implement method `#{method}`"
+
+        raise ReeMapper::UnsupportedTypeError, "#{type.class} should implement method `#{method}`"
       end
     end
 
@@ -20,11 +24,13 @@ class ReeMapper::Mapper
         if type
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
             def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: [])
-              if @type.is_a?(ReeMapper::Array)
-                @type.#{method}(obj, name: name, role: role, fields_filters: fields_filters)
-              else
-                @type.#{method}(obj, name: name, role: role)
-              end
+              #{
+                if type.is_a?(ReeMapper::AbstractWrapper)
+                  "@type.#{method}(obj, name: name, role: role, fields_filters: fields_filters)"
+                else
+                  "@type.#{method}(obj, name: name, role: role)"
+                end
+              }
             end
           RUBY
         else
@@ -95,9 +101,10 @@ class ReeMapper::Mapper
     end
   end
 
-  contract(Any, Symbol, Ksplat[RestKeys => Any] => nil)
-  def add_field(type, name, **opts)
-    @fields[name] = ReeMapper::Field.new(type, name, **opts)
+  contract(ReeMapper::Field => nil)
+  def add_field(field)
+    raise ArgumentError if field.name.nil?
+    @fields[field.name] = field
     nil
   end
 
