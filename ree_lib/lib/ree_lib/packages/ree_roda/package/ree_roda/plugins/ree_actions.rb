@@ -100,10 +100,10 @@ class Roda
                 end
 
                 accessor = r.env["warden"].user(action.warden_scope)
-                action_result = action.action.klass.new.call(accessor, filtered_params)
+                action_result = get_cached_action(action).call(accessor, filtered_params)
 
                 if action.serializer
-                  serialized_result = action.serializer.klass.new.serialize(action_result)
+                  serialized_result = get_cached_serializer(action).serialize(action_result)
                 else
                   serialized_result = {}
                 end
@@ -202,6 +202,9 @@ class Roda
       end
 
       module RequestMethods
+        @@_actions_cache = {}
+        @@_action_serializers_cache = {}
+
         def ree_actions
           if scope.opts[:ree_actions_proc]
             scope.opts[:ree_actions_proc].each do |request_proc|
@@ -209,6 +212,16 @@ class Roda
             end
           end
           nil
+        end
+
+        private
+
+        def get_cached_action(action)
+          @@_actions_cache[action.action.object_id] ||= action.action.klass.new
+        end
+
+        def get_cached_serializer(action)
+          @@_action_serializers_cache[action.serializer.object_id] ||= action.serializer.klass.new
         end
       end
     end
