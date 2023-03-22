@@ -75,6 +75,10 @@
       "schema": "packages/ree_roda/Package.schema.json"
     },
     {
+      "name": "ree_routes",
+      "schema": "packages/ree_routes/Package.schema.json"
+    },
+    {
       "name": "ree_string",
       "schema": "packages/ree_string/Package.schema.json"
     },

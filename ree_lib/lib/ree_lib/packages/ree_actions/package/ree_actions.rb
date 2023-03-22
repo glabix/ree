@@ -9,4 +9,3 @@ module ReeActions
 end
 
 require_relative "ree_actions/dsl"
-require_relative "ree_actions/action_dsl"

@@ -1,10 +1,10 @@
 {
   "schema_type": "object",
   "schema_version": "1.1",
-  "name": "build_swagger_from_actions",
-  "path": "packages/ree_roda/package/ree_roda/services/build_swagger_from_actions.rb",
+  "name": "build_swagger_from_routes",
+  "path": "packages/ree_roda/package/ree_roda/services/build_swagger_from_routes.rb",
   "mount_as": "fn",
-  "class": "ReeRoda::BuildSwaggerFromActions",
+  "class": "ReeRoda::BuildSwaggerFromRoutes",
   "factory": null,
   "methods": [
     {
@@ -15,9 +15,9 @@
       "return": "Hash",
       "args": [
         {
-          "arg": "actions",
+          "arg": "routes",
           "arg_type": "req",
-          "type": "ArrayOf[ReeActions::Action]"
+          "type": "ArrayOf[ReeRoutes::Route]"
         },
         {
           "arg": "title",
@@ -44,9 +44,9 @@
   ],
   "links": [
     {
-      "target": "build_action_errors",
+      "target": "build_route_errors",
       "package_name": "ree_roda",
-      "as": "build_action_errors",
+      "as": "build_route_errors",
       "imports": [
 
       ]

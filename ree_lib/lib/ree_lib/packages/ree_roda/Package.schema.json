@@ -8,9 +8,6 @@
   ],
   "depends_on": [
     {
-      "name": "ree_actions"
-    },
-    {
       "name": "ree_errors"
     },
     {
@@ -26,6 +23,9 @@
       "name": "ree_object"
     },
     {
+      "name": "ree_routes"
+    },
+    {
       "name": "ree_swagger"
     }
   ],
@@ -34,15 +34,22 @@
   ],
   "objects": [
     {
-      "name": "build_action_errors",
-      "schema": "packages/ree_roda/schemas/ree_roda/services/build_action_errors.schema.json",
+      "name": "build_route_errors",
+      "schema": "packages/ree_roda/schemas/ree_roda/services/build_route_errors.schema.json",
       "tags": [
         "fn"
       ]
     },
     {
-      "name": "build_swagger_from_actions",
-      "schema": "packages/ree_roda/schemas/ree_roda/services/build_swagger_from_actions.schema.json",
+      "name": "build_routing_tree",
+      "schema": "packages/ree_roda/schemas/ree_roda/services/build_routing_tree.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
+      "name": "build_swagger_from_routes",
+      "schema": "packages/ree_roda/schemas/ree_roda/services/build_swagger_from_routes.schema.json",
       "tags": [
         "fn"
       ]

@@ -2,7 +2,10 @@ require "rack/test"
 
 package_require("ree_roda/app")
 package_require("ree_actions/dsl")
-package_require("ree_roda/plugins/ree_actions")
+package_require("ree_routes/dsl")
+package_require("ree_roda/plugins/ree_routes")
+
+require "warden"
 
 RSpec.describe ReeRoda::App do
   include Rack::Test::Methods
@@ -17,7 +20,7 @@ RSpec.describe ReeRoda::App do
     end
 
     class ReeRodaTest::Cmd
-      include ReeActions::ActionDSL
+      include ReeActions::DSL
 
       action :cmd
 
@@ -26,13 +29,57 @@ RSpec.describe ReeRoda::App do
       end
 
       def call(access, attrs)
+        {result: "result"}
       end
     end
 
-    class ReeRodaTest::TestActions
+    class ReeRodaTest::AnotherCmd
       include ReeActions::DSL
 
-      actions :test_actions do
+      action :another_cmd
+
+      ActionCaster = build_mapper.use(:cast) do
+        integer :id
+      end
+
+      def call(access, attrs)
+        {result: "another_result"}
+      end
+    end
+
+    class ReeRodaTest::SubCmd
+      include ReeActions::DSL
+
+      action :sub_cmd
+
+      ActionCaster = build_mapper.use(:cast) do
+        integer :id
+        integer :sub_id
+      end
+
+      def call(access, attrs)
+        {result: "another_result"}
+      end
+    end
+
+    class ReeRodaTest::Serializer
+      include ReeMapper::DSL
+
+      mapper :serializer
+
+      build_mapper.use(:serialize) do
+        string :result
+      end
+
+      def call(access, attrs)
+        {result: "result"}
+      end
+    end
+
+    class ReeRodaTest::TestRoutes
+      include ReeRoutes::DSL
+
+      routes :test_routes do
         default_warden_scope :identity
         opts = {from: :ree_roda_test}
 
@@ -41,14 +88,83 @@ RSpec.describe ReeRoda::App do
           warden_scope :visitor
           sections "some_action"
           action :cmd, **opts
+          serializer :serializer, **opts
+        end
+
+        get "api/action/:id/subaction" do
+          summary "Subaction"
+          warden_scope :visitor
+          sections "some_action"
+          action :cmd, **opts
+          serializer :serializer, **opts
+        end
+
+        post "api/action/:id/subaction" do
+          summary "Some action"
+          warden_scope :visitor
+          sections "some_action"
+          action :cmd, **opts
+          serializer :serializer, **opts
+        end
+
+        post "api/action/:id/anotheraction" do
+          summary "Some action"
+          warden_scope :visitor
+          sections "some_action"
+          action :another_cmd, **opts
+          serializer :serializer, **opts
+        end
+
+        post "api/action/:id/subaction/:sub_id" do
+          summary "Some action"
+          warden_scope :visitor
+          sections "some_action"
+          action :sub_cmd, **opts
+          serializer :serializer, **opts
+        end
+
+        post "api/action/:id" do
+          summary "Some action"
+          warden_scope :visitor
+          sections "some_action"
+          action :cmd, **opts
+          serializer :serializer, **opts
         end
       end
     end
 
-    class TestApp < ReeRoda::App
-      plugin :ree_actions
+    class VisitorStrategy < Warden::Strategies::Base
+      include Ree::LinkDSL
 
-      ree_actions ReeRodaTest::TestActions.new,
+      def valid?
+        true
+      end
+
+      def authenticate!
+        success!({user: "visitor"})
+      end
+    end
+
+    Warden::Strategies.add(:visitor, VisitorStrategy)
+
+    class TestApp < ReeRoda::App
+      use Warden::Manager do |config|
+        config.default_strategies :visitor
+        config.default_scope = :visitor
+        config.scope_defaults :visitor, strategies: [:visitor], store: false
+
+        config.failure_app = -> (env) {
+          [
+            401,
+            {"Content-Type" => "text/plain"},
+            ["requires authentication"]
+          ]
+        }
+      end
+
+      plugin :ree_routes
+
+      ree_routes ReeRodaTest::TestRoutes.new,
         api_url: "http://some.api.url:1337",
         swagger_url: "swagger"
 
@@ -57,7 +173,7 @@ RSpec.describe ReeRoda::App do
           "success"
         end
 
-        r.ree_actions
+        r.ree_routes
       end
     end
   end
@@ -80,5 +196,23 @@ RSpec.describe ReeRoda::App do
 
     get "api/v1/swagger"
     expect(last_response.status).to eq(404)
+  }
+
+  it {
+    get "api/action/1/subaction"
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq("{\"result\":\"result\"}")
+  }
+
+  it {
+    post "api/action/1/subaction/2"
+    expect(last_response.status).to eq(201)
+    expect(last_response.body).to eq("{\"result\":\"another_result\"}")
+  }
+
+  it {
+    post "api/action/1/anotheraction"
+    expect(last_response.status).to eq(201)
+    expect(last_response.body).to eq("{\"result\":\"another_result\"}")
   }
 end
