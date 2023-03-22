@@ -107,32 +107,34 @@ class ReeRoda::BuildRoutingTree
     routes.each do |route|
       splitted = route.path.split("/")
 
-      parentTree = tree
+      parent_tree = tree
       splitted.each_with_index do |v, j|
         if tree.nil?
           tree = RoutingTree.new(v, j, :string)
-          parentTree = tree
+          parent_tree = tree
           next
         end
 
-        current = parentTree.find_by_value(value: v, depth: j)
+        current = parent_tree.find_by_value(value: v, depth: j)
         if current
-          parentTree = current
+          parent_tree = current
 
           current.add_route(route) if j == (splitted.length - 1)
         else
-          if !parentTree.children_have_value?(v)
-            if parentTree.children.any? { |c| c.type == :param } && v.start_with?(":")
-              param_child = parentTree.children.find { |c| c.type == :param }
+          if !parent_tree.children_have_value?(v)
+            if parent_tree.children.any? { |c| c.type == :param } && v.start_with?(":")
+              param_child = parent_tree.children.find { |c| c.type == :param }
               param_child.add_route(route) if j == (splitted.length - 1)
+              parent_tree = param_child
+
               next
             end
 
-            newTree = parentTree.add_child(v, j, v.start_with?(":") ? :param : :string)
-            parentTree = newTree
+            new_tree = parent_tree.add_child(v, j, v.start_with?(":") ? :param : :string)
+            parent_tree = new_tree
           end
 
-          parentTree.add_route(route) if j == (splitted.length - 1)
+          parent_tree.add_route(route) if j == (splitted.length - 1)
         end
       end
     end
