@@ -107,7 +107,7 @@ export function checkAndSortLinks(filePath: string) {
 
       let usedNameString
       nameStrings.some(s => {
-        if (s.match(RegExp(`${compareNodeText}`))) {
+        if (s.match(RegExp(`^${compareNodeText}$`))) {
           usedNameString = s
           return true
         }
