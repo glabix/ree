@@ -68,7 +68,7 @@ class ReeSwagger::TypeDefinitionsRepo
         ReeMapper::Array => ->(type, build_caster_schema) {
           {
             type: 'array',
-            items: build_caster_schema.(type.of.type)
+            items: build_caster_schema.(type.subject.type)
           }
         },
         ReeMapper::DateTime => ->(*) {
