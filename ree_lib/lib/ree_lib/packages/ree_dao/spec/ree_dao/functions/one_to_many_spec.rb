@@ -1,9 +1,9 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 RSpec.describe :one_to_many do
+  link :build_sqlite_connection, from: :ree_dao
   link :one_to_many, from: :ree_dao
   link :persist_assoc, from: :ree_dao
-  link :build_sqlite_connection, from: :ree_dao
 
   let(:connection) { build_sqlite_connection({database: 'sqlite_db'}) }
 

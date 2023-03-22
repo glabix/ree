@@ -1,4 +1,4 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 RSpec.describe :to_obj do
   link :to_obj, from: :ree_object
@@ -17,7 +17,7 @@ RSpec.describe :to_obj do
           @last_name = 'Doe'
           @pass = 'pass'
         end
-      end 
+      end
     end
   }
 
@@ -39,7 +39,7 @@ RSpec.describe :to_obj do
   context "Struct" do
     it {
       obj = to_obj(Struct.new(:id, :name).new(1, 'John'))
-      
+
       expect(obj.name).to eq('John')
       expect(obj.id).to eq(1)
     }
@@ -72,7 +72,7 @@ RSpec.describe :to_obj do
       expect(obj.settings.class).to be_a(Object)
       expect(obj2.name).to eq("John")
       expect(obj2.settings.class).to be_a(Object)
-    }    
+    }
   end
 
   context "custom object" do
@@ -87,7 +87,7 @@ RSpec.describe :to_obj do
       obj = klass.new(1, object)
 
       result = to_obj(obj)
-      
+
       expect(result.id).to eq(1)
       expect(result.object.list[0]).to eq(1)
       expect(result.object.list[1]).to eq('string')
@@ -113,7 +113,7 @@ RSpec.describe :to_obj do
 
       expect(obj.respond_to?(:name)).to be false
       expect(obj.respond_to?(:work)).to be true
-    } 
+    }
 
     it {
       obj = to_obj(klass.new, exclude: [:name, {settings: [:pass]}])
@@ -121,7 +121,7 @@ RSpec.describe :to_obj do
       expect(obj.respond_to?(:name)).to be false
       expect(obj.respond_to?(:work)).to be true
       expect(obj.settings.respond_to?(:pass)).to be false
-    }    
+    }
   end
 
   context "global exclude option" do
@@ -133,7 +133,7 @@ RSpec.describe :to_obj do
       expect(obj.settings.respond_to?(:name)).to be false
       expect(obj.array[3].last_name).to eq('Doe')
       expect(obj.array[3].respond_to?(:name)).to be false
-    }    
+    }
   end
 
   context "include option" do

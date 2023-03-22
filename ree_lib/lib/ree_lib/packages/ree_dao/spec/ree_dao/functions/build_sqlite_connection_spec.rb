@@ -1,4 +1,4 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 package_require('ree_dao')
 package_require('ree_dto/entity_dsl')

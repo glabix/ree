@@ -1,4 +1,4 @@
-#frozen_string_literal = true
+#frozen_string_literal: true
 
 package_require('ree_logger/appenders/file_appender')
 
@@ -20,7 +20,7 @@ RSpec.describe ReeLogger::FileAppender do
 
   before(:all) do
     tmp_file_log = ENV['LOG_FILE_PATH']
-      
+
     if !is_blank(tmp_file_log)
       File.open(tmp_file_log, 'w') {|file| file.truncate(0) }
     end
@@ -28,7 +28,7 @@ RSpec.describe ReeLogger::FileAppender do
 
   after(:all) do
     tmp_file_log = ENV['LOG_FILE_PATH']
-      
+
     if !is_blank(tmp_file_log)
       File.open(tmp_file_log, 'w') {|file| file.truncate(0) }
     end

@@ -1,4 +1,4 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 RSpec.describe :in_default_time_zone do
   link :in_default_time_zone, from: :ree_datetime

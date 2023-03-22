@@ -1,10 +1,10 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 package_require('ree_logger/beans/logger')
 
 RSpec.describe :logger do
-  link :logger, from: :ree_logger
   link :is_blank, from: :ree_object
+  link :logger, from: :ree_logger
 
   before(:all) do
     tmp_file_log = ENV['LOG_FILE_PATH']

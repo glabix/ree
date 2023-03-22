@@ -1,4 +1,4 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 RSpec.describe :OBJECT_NAME do
   link :OBJECT_NAME, from: :PACKAGE_NAME
