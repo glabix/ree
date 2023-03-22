@@ -10,7 +10,7 @@ const path = require('path')
 const fs = require('fs')
 
 const SPEC_REGEXP = /.*_spec.rb$/
-const SPEC_TEMPLATE = `# frozen_string_literal = true
+const SPEC_TEMPLATE = `# frozen_string_literal: true
 
 package_require('RELATIVE_FILE_PATH')
 
@@ -37,7 +37,7 @@ export function goToSpec() {
     goFromSpecFile(currentFilePath)
     return
   }
-  
+
   const specFilePath = getSpecFilePath(currentFilePath)
 
   if (!specFilePath) { return }
@@ -52,17 +52,17 @@ export function goToSpec() {
 
   if (fs.existsSync(specsFolder)) {
     const files = fs.readdirSync(specsFolder) as string[]
-    
+
     if (files.length) {
       const $promise = vscode.window.showQuickPick(
         files,
         {placeHolder: "Select spec file:"}
       )
-      
+
       $promise.then(
         (file: string | undefined) => {
           if (!file) { return }
-          
+
           openDocument(path.join(specsFolder, file))
         }
       )
@@ -77,7 +77,7 @@ export function goToSpec() {
 function goFromSpecFile(currentFilePath: string) {
   let filename = path.basename(currentFilePath)
   filename = filename.replace(SPEC_EXT, RUBY_EXT)
-  
+
   const filePath = path.join(
     path.dirname(currentFilePath), filename
   )
@@ -110,15 +110,15 @@ function goFromSpecFile(currentFilePath: string) {
 }
 
 function promptCreateSpecFile(projectDir: string, currentFilePath: string, specFilePath: string) {
-  const $promise = vscode.window.showQuickPick(['Yes', 'No'], { 
+  const $promise = vscode.window.showQuickPick(['Yes', 'No'], {
     placeHolder: 'Spec file was not found. Do you want to create new one?'
   })
-  
-  $promise.then((selection: string | undefined) => { 
+
+  $promise.then((selection: string | undefined) => {
     if (selection === 'Yes') {
       createSpecFile(projectDir, currentFilePath, specFilePath)
     }
-  })        
+  })
 }
 
 function createSpecFile(projectDir: string, currentFilePath: string, specFilePath: string) {
@@ -133,17 +133,17 @@ function createSpecFile(projectDir: string, currentFilePath: string, specFilePat
   const cb = () => {
     const variables = prepareVariables(currentFilePath)
     if (!variables) { return }
-  
+
     const templateContent = fs.readFileSync(specTemplatePath, { encoding: 'utf8' })
     const rPath = getRelativePackageFilePath(currentFilePath)?.replace(RUBY_EXT, '')
-  
+
     const actualTemplateContent = templateContent
       .replace(/CLASS_NAME/g, variables.className)
       .replace(/OBJECT_NAME/g, variables.objectName)
       .replace(/MODULE_NAME/g, variables.moduleName)
       .replace(/PACKAGE_NAME/g, variables.packageName)
-      .replace(/RELATIVE_FILE_PATH/g, rPath)    
-  
+      .replace(/RELATIVE_FILE_PATH/g, rPath)
+
     vscode.workspace.fs
       .createDirectory(vscode.Uri.parse(path.dirname(specFilePath)))
       .then(() => {

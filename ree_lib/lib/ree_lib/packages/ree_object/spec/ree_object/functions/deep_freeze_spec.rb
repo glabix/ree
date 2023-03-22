@@ -1,4 +1,4 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 RSpec.describe :deep_freeze do
   link :deep_freeze, from: :ree_object

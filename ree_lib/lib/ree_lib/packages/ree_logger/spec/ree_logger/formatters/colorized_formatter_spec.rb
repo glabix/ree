@@ -1,4 +1,4 @@
-#frozen_string_literal = true
+#frozen_string_literal: true
 
 require 'timecop'
 package_require('ree_logger/formatters/colorized_formatter')

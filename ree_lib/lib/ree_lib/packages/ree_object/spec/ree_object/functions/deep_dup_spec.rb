@@ -1,4 +1,4 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 RSpec.describe :deep_dup do
   link :deep_dup, from: :ree_object
@@ -15,7 +15,7 @@ RSpec.describe :deep_dup do
           @hash = {id: 1, 'test' => 2}
           @hash.default = "default"
           @object = Object.new
-        end  
+        end
       end
     }
 

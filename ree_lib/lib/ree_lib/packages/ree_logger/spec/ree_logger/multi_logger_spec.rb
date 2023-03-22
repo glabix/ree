@@ -1,4 +1,4 @@
-#frozen_string_literal = true
+#frozen_string_literal: true
 
 require 'rollbar'
 package_require('ree_logger/multi_logger')

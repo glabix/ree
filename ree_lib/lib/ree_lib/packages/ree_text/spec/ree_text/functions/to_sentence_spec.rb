@@ -1,4 +1,4 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 RSpec.describe :to_sentence do
   link :to_sentence, from: :ree_text

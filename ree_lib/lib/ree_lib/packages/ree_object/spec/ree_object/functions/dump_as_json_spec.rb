@@ -1,4 +1,4 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 RSpec.describe :dump_as_json do
   link :dump_as_json, from: :ree_object

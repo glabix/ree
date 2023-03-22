@@ -1,4 +1,4 @@
-# frozen_string_literal = true
+# frozen_string_literal: true
 
 RSpec.describe :migrate_db do
   link :migrate_db, from: :ree_migrator
