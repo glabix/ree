@@ -33,6 +33,21 @@ RSpec.describe ReeRoda::App do
       end
     end
 
+    class ReeRodaTest::AnotherCmd
+      include ReeActions::DSL
+
+      action :another_cmd
+
+      ActionCaster = build_mapper.use(:cast) do
+        integer :id
+        integer :sub_id
+      end
+
+      def call(access, attrs)
+        {result: "another_result"}
+      end
+    end
+
     class ReeRodaTest::Serializer
       include ReeMapper::DSL
 
@@ -67,6 +82,22 @@ RSpec.describe ReeRoda::App do
           warden_scope :visitor
           sections "some_action"
           action :cmd, **opts
+          serializer :serializer, **opts
+        end
+
+        post "api/action/:id/subaction" do
+          summary "Some action"
+          warden_scope :visitor
+          sections "some_action"
+          action :cmd, **opts
+          serializer :serializer, **opts
+        end
+
+        post "api/action/:id/subaction/:sub_id" do
+          summary "Some action"
+          warden_scope :visitor
+          sections "some_action"
+          action :another_cmd, **opts
           serializer :serializer, **opts
         end
 
@@ -149,5 +180,11 @@ RSpec.describe ReeRoda::App do
     get "api/action/1/subaction"
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq("{\"result\":\"result\"}")
+  }
+
+  it {
+    post "api/action/1/subaction/2"
+    expect(last_response.status).to eq(201)
+    expect(last_response.body).to eq("{\"result\":\"another_result\"}")
   }
 end
