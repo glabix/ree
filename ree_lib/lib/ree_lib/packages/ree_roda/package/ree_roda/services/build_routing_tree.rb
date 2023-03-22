@@ -60,7 +60,7 @@ class ReeRoda::BuildRoutingTree
 
     def print_proc_tree(tree = self)
       param_value = tree.value.start_with?(":") ? String : "\"#{tree.value}\""
-      if tree.routess.length == 0
+      if tree.routes.length == 0
         if tree.children.length > 0
           puts "#{get_offset(tree.depth)}r.on #{param_value} do"
           tree.children.each do |child|
