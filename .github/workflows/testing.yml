@@ -10,7 +10,7 @@ on:
 
 jobs:
   rspec:
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
