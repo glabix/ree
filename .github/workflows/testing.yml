@@ -30,4 +30,4 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
           working-directory: ${{ matrix.gemfile_folders }}
-      - run: cd ${{ matric.rspec_folder }} && bundle exec rspec
+      - run: cd ${{ matrix.rspec_folder }} && bundle exec rspec
