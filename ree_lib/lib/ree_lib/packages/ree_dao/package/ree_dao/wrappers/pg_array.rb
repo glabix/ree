@@ -25,7 +25,11 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
       )
     end
 
-    Sequel.pg_array(value)
+    if value.empty?
+      "{}"
+    else
+      Sequel.pg_array(value)
+    end
   end
 
   contract(
