@@ -19,9 +19,9 @@ jobs:
         gemfile_folders: ['ree', 'ree_lib']
         include:
           - gemfile_folders: 'ree'
-            rspec_folder: 'ree'
+            rspec_cmd: 'cd ree && bundle exec rspec'
           - gemfile_folders: 'ree_lib'
-            rspec_folder: 'ree_lib/lib/ree_lib'
+            rspec_cmd: 'cd ree_lib/lib/ree_lib && bundle exec ree spec'
 
     steps:
       - uses: actions/checkout@v3
@@ -30,4 +30,4 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
           working-directory: ${{ matrix.gemfile_folders }}
-      - run: cd ${{ matrix.rspec_folder }} && bundle exec rspec
+      - run: ${{ matrix.rspec_cmd }}
