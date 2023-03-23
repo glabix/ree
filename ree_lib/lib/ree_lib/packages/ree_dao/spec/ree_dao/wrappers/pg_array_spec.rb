@@ -36,6 +36,14 @@ RSpec.describe 'ReeDao::PgArray' do
     }
 
     it {
+      expect(mapper.db_dump({
+        tags: []
+      })).to eq({
+        tags: "{}"
+      })
+    }
+
+    it {
       expect {
         mapper.db_dump({ tags: 1 })
       }.to raise_error(ReeMapper::TypeError, "`tags` should be an array")
