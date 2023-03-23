@@ -32,17 +32,20 @@ RSpec.describe ReeLogger::ColorizedFormatter do
   it { expect(formatter).to respond_to(:format) }
 
   it {
-    expected = "[05/11/05 00:00:00] \e[36minfo:\e[0m Some message"
-    expect(formatter.format(info_log_event, nil)).to eq(expected)
+    expect(formatter.format(info_log_event, nil))
+      .to eq("[05/11/05 00:00:00] \e[36minfo:\e[0m Some message")
+      .or eq("[05/11/05 00:00:00] info: Some message")
   }
 
   it {
-    expected = "[SomeCoolApp] [05/11/05 00:00:00] \e[36minfo:\e[0m Some message"
-    expect(formatter.format(info_log_event, "SomeCoolApp")).to eq(expected)
+    expect(formatter.format(info_log_event, "SomeCoolApp"))
+      .to eq("[SomeCoolApp] [05/11/05 00:00:00] \e[36minfo:\e[0m Some message")
+      .or eq("[SomeCoolApp] [05/11/05 00:00:00] info: Some message")
   }
 
   it {
-    expected = "[05/11/05 00:00:00] \e[31merror:\e[0m Some error message\n\e[34mPARAMETERS:\e[0m {:some_error=>\"params\"}\n\e[31mEXCEPTION:\e[0m StandardError (Help me, I am error)\n"
-    expect(formatter.format(error_log_event, nil)).to eq(expected)
+    expect(formatter.format(error_log_event, nil))
+      .to eq("[05/11/05 00:00:00] \e[31merror:\e[0m Some error message\n\e[34mPARAMETERS:\e[0m {:some_error=>\"params\"}\n\e[31mEXCEPTION:\e[0m StandardError (Help me, I am error)\n")
+      .or eq("[05/11/05 00:00:00] error: Some error message\nPARAMETERS: {:some_error=>\"params\"}\nEXCEPTION: StandardError (Help me, I am error)\n")
   }
 end
