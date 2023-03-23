@@ -125,8 +125,8 @@ class Roda
         end
 
         def build_traverse_tree_proc(tree, context)
-          has_arbitrary_param = tree.value.start_with?(":")
-          route_part = has_arbitrary_param ? tree.value.gsub(":", "") : tree.value
+          has_arbitrary_param = tree.values[0].start_with?(":")
+          route_parts = has_arbitrary_param ? tree.values.map { _1.gsub(":", "") } : tree.values
           procs = []
 
           child_procs = tree.children.map do |child|
@@ -141,7 +141,9 @@ class Roda
             if has_arbitrary_param
               Proc.new do |r|
                 r.on String do |param_val|
-                  r.params[route_part] = param_val
+                  route_parts.each do |route_part|
+                    r.params[route_part] = param_val
+                  end
 
                   child_procs.each do |child_proc|
                     r.instance_exec(r, &child_proc)
@@ -156,7 +158,7 @@ class Roda
               end
             else
               Proc.new do |r|
-                r.on route_part do
+                r.on route_parts[0] do
                   child_procs.each do |child_proc|
                     r.instance_exec(r, &child_proc)
                   end
@@ -173,7 +175,9 @@ class Roda
             Proc.new do |r|
               if has_arbitrary_param
                 r.is String do |param_val|
-                  r.params[route_part] = param_val
+                  route_parts.each do |route_part|
+                    r.params[route_part] = param_val
+                  end
 
                   route_procs.each do |route_proc|
                     r.instance_exec(r, &route_proc)
@@ -182,7 +186,7 @@ class Roda
                   nil
                 end
               else
-                r.is route_part do
+                r.is route_parts[0] do
                   route_procs.each do |route_proc|
                     r.instance_exec(r, &route_proc)
                   end

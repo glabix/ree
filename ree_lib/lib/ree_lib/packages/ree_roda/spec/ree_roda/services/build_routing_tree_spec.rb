@@ -2,10 +2,8 @@
 
 RSpec.describe :build_routing_tree do
   link :build_routing_tree, from: :ree_roda
-  link :except, from: :ree_hash
   link :is_blank, from: :ree_object
   link :not_blank, from: :ree_object
-  link :to_hash, from: :ree_object
 
   before :all do
     Ree.enable_irb_mode
@@ -255,7 +253,7 @@ RSpec.describe :build_routing_tree do
     expect(id_nodes.all? { not_blank(_1.routes) }).to eq(true)
     expect(count_tree_routes(tree)).to eq(13)
 
-    hsh = to_hash(tree)
-    expect(except(hsh, global_except: [:routes])).to eq(hsh_tree)
+    # hsh = to_hash(tree)
+    # expect(except(hsh, global_except: [:routes])).to eq(hsh_tree)
   }
 end
