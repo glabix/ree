@@ -1,0 +1,33 @@
+name: Testing
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  rspec:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.1', '3.2']
+        gemfile_folders: ['ree', 'ree_lib']
+        include:
+          - gemfile_folders: 'ree'
+            rspec_cmd: 'cd ree && bundle exec rspec'
+          - gemfile_folders: 'ree_lib'
+            rspec_cmd: 'cd ree_lib/lib/ree_lib && bundle exec ree spec'
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+          working-directory: ${{ matrix.gemfile_folders }}
+      - run: ${{ matrix.rspec_cmd }}
