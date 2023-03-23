@@ -84,5 +84,11 @@ RSpec.describe 'ReeDao::PgJsonb' do
         mapper.db_load({ numbers: Sequel::Postgres::JSONBArray.new([1.1]) })
       }.to raise_error(ReeMapper::TypeError, "`numbers[0]` should be an integer")
     }
+
+    it {
+      expect {
+        mapper.db_load({ numbers: Object.new })
+      }.to raise_error(ReeMapper::TypeError, "`numbers` is not Sequel::Postgres::JSONB")
+    }
   end
 end

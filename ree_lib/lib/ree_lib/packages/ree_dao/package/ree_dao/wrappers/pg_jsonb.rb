@@ -57,8 +57,10 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
       ReeObject::ToHash.new.call(value.to_h)
     when Sequel::Postgres::JSONBArray
       ReeObject::ToHash.new.call(value.to_a)
-    else
+    when Numeric, String, TrueClass, FalseClass, NilClass
       value
+    else
+      raise ReeMapper::TypeError, "`#{name}` is not Sequel::Postgres::JSONB"
     end
 
     subject.type.db_load(
