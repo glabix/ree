@@ -140,7 +140,7 @@ RSpec.describe :build_sqlite_connection do
 
     expect(u).to be_a(ReeDaoTest::User)
 
-    state = u.instance_variable_get(:@persistence_state)
+    state = ReeDao::Cache.get_cache(u.object_id)
 
     expect(state).to be_a(Hash)
     expect(state[:id]).to eq(user.id)
@@ -156,14 +156,14 @@ RSpec.describe :build_sqlite_connection do
 
     u = dao.find(user.id, :read)
     expect(u).to be_a(ReeDaoTest::User)
-    expect(u.instance_variable_get(:@persistence_state)).to eq(nil)
+    expect(ReeDao::Cache.get_cache(u.object_id)).to eq(nil)
 
     all = dao.all
     expect(all.size).to eq(1)
     u = all.first
 
     expect(u).to be_a(ReeDaoTest::User)
-    expect(u.instance_variable_get(:@persistence_state)).to be_a(Hash)
+    expect(ReeDao::Cache.get_cache(u.object_id)).to be_a(Hash)
   }
 
   it {

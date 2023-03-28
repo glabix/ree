@@ -19,7 +19,6 @@ module ReeDao
     end
 
     module InstanceMethods
-      PERSISTENCE_STATE_VARIABLE = :@persistence_state
       IMPORT_BATCH_SIZE = 1000
 
       # override methods
@@ -49,7 +48,7 @@ module ReeDao
         key = insert(raw)
 
         set_entity_primary_key(entity, raw, key)
-        set_persistence_state(entity, raw)
+        set_entity_cache(entity, raw)
 
         entity
       end
@@ -73,7 +72,7 @@ module ReeDao
         key = insert_conflict(conflict_opts).insert(raw)
 
         set_entity_primary_key(entity, raw, key)
-        set_persistence_state(entity, raw)
+        set_entity_cache(entity, raw)
 
         where(primary_key => key).first
       end
@@ -104,7 +103,7 @@ module ReeDao
           raw_data = raw[entity]
 
           set_entity_primary_key(entity, raw_data, id)
-          set_persistence_state(entity, raw_data)
+          set_entity_cache(entity, raw_data)
         end
 
         nil
@@ -118,7 +117,7 @@ module ReeDao
         raw = extract_changes(hash_or_entity, raw)
 
         unless raw.empty?
-          update_persistence_state(hash_or_entity, raw)
+          update_entity_cache(hash_or_entity, raw)
           key_condition = prepare_key_condition_from_entity(hash_or_entity)
           where(key_condition).__original_update(raw)
         end
@@ -177,7 +176,7 @@ module ReeDao
               entity = m.db_load(hash)
 
               if mode == :write
-                self.set_persistence_state(entity, hash)
+                self.set_entity_cache(entity, hash)
               end
 
               entity
@@ -189,15 +188,15 @@ module ReeDao
       end
 
       def extract_changes(entity, hash)
-        return hash unless entity.instance_variable_defined?(PERSISTENCE_STATE_VARIABLE)
+        return hash unless ReeDao::Cache.get_cache(entity.object_id)
         changes = {}
 
-        persistence_state = entity.instance_variable_get(PERSISTENCE_STATE_VARIABLE)
+        cache = ReeDao::Cache.get_cache(entity.object_id)
 
         hash.each do |column, value|
-          previous_column_value = persistence_state[column]
+          previous_column_value = cache[column]
 
-          if persistence_state.has_key?(column) && previous_column_value != value
+          if cache.has_key?(column) && previous_column_value != value
             changes[column] = value
           end
         end
@@ -205,17 +204,17 @@ module ReeDao
         changes
       end
 
-      def set_persistence_state(entity, raw)
+      def set_entity_cache(entity, raw)
         if !entity.is_a?(Integer) && !entity.is_a?(Symbol)
-          entity.instance_variable_set(PERSISTENCE_STATE_VARIABLE, raw)
+          ReeDao::Cache.set_cache(entity.object_id, raw)
         end
       end
 
-      def update_persistence_state(entity, raw)
-        persistence_state = entity.instance_variable_get(PERSISTENCE_STATE_VARIABLE)
+      def update_entity_cache(entity, raw)
+        cache = ReeDao::Cache.get_cache(entity.object_id)
 
-        if persistence_state
-          persistence_state.merge!(raw)
+        if cache
+          ReeDao::Cache.set_cache(entity.object_id, cache.merge(raw))
         end
       end
 

@@ -40,6 +40,8 @@ module ReeActions
         alias_method(:__original_call, :call)
 
         define_method :call do |user_access, attrs|
+          ReeDao.init_cache(Thread.current)
+
           if self.class.const_defined?(:ActionCaster)
             caster = self.class.const_get(:ActionCaster)
 
@@ -51,6 +53,8 @@ module ReeActions
           else
             __original_call(user_access, attrs)
           end
+        ensure
+          ReeDao.drop_cache(Thread.current)
         end
 
         nil
