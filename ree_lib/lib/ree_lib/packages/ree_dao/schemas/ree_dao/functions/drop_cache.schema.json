@@ -1,0 +1,31 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.1",
+  "name": "drop_cache",
+  "path": "packages/ree_dao/package/ree_dao/functions/drop_cache.rb",
+  "mount_as": "fn",
+  "class": "ReeDao::DropCache",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+
+      ]
+    }
+  ],
+  "links": [
+    {
+      "target": "dao_cache",
+      "package_name": "ree_dao",
+      "as": "dao_cache",
+      "imports": [
+
+      ]
+    }
+  ]
+}

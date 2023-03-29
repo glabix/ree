@@ -22,24 +22,26 @@ module ReeDao
       IMPORT_BATCH_SIZE = 1000
 
       # override methods
-      def find(id, mode = :write, mapper: nil)
-        where(primary_key => id).first(mode, mapper: mapper)
+      def find(id, mapper: nil)
+        where(primary_key => id).first(mapper: mapper)
       end
 
-      def first(mode = :write, mapper: nil)
-        with_mapper(mode, mapper).__original_first
+      def first(mapper: nil)
+        with_mapper(mapper).__original_first
       end
 
-      def last(mode = :write, mapper: nil)
-        with_mapper(mode, mapper).__original_last
+      def last(mapper: nil)
+        with_mapper(mapper).__original_last
       end
 
-      def all(mode = :write, mapper: nil)
-        with_mapper(mode, mapper).__original_all
+      def all(mapper: nil)
+        with_mapper(mapper).__original_all
       end
 
       def delete_all
         where({}).__original_delete
+      ensure
+        __ree_dao_cache.drop_table_cache(table_name)
       end
 
       def put(entity)
@@ -147,8 +149,17 @@ module ReeDao
 
       private
 
+      # TODO
+      def __ree_dao_cache
+        ReeDao::DaoCache.new
+      end
+
       def primary_key
         opts[:primary_key] || :id
+      end
+
+      def table_name
+        first_source_table
       end
 
       def remove_null_primary_key(raw)
@@ -165,9 +176,9 @@ module ReeDao
         end
       end
 
-      def with_mapper(mode, mapper)
+      def with_mapper(mapper)
         clone(
-          mode: mode, schema_mapper: mapper || opts[:schema_mapper],
+          schema_mapper: mapper || opts[:schema_mapper],
         ).with_row_proc(
           Proc.new { |hash|
             m = mapper || opts[:schema_mapper]
@@ -175,9 +186,7 @@ module ReeDao
             if m
               entity = m.db_load(hash)
 
-              if mode == :write
-                self.set_entity_cache(entity, hash)
-              end
+              self.set_entity_cache(entity, hash)
 
               entity
             else
@@ -188,15 +197,14 @@ module ReeDao
       end
 
       def extract_changes(entity, hash)
-        return hash unless ReeDao::Cache.get_cache(entity.object_id)
+        cached = __ree_dao_cache.get(table_name, extract_primary_key(entity))
+        return hash unless cached
         changes = {}
 
-        cache = ReeDao::Cache.get_cache(entity.object_id)
-
         hash.each do |column, value|
-          previous_column_value = cache[column]
+          previous_column_value = cached[column]
 
-          if cache.has_key?(column) && previous_column_value != value
+          if cached.has_key?(column) && previous_column_value != value
             changes[column] = value
           end
         end
@@ -204,17 +212,27 @@ module ReeDao
         changes
       end
 
+      def extract_primary_key(entity)
+        if primary_key.is_a?(Array)
+          primary_key.map do |key|
+            entity.send(key)
+          end.join("_")
+        else
+          entity.send(primary_key)
+        end
+      end
+
       def set_entity_cache(entity, raw)
         if !entity.is_a?(Integer) && !entity.is_a?(Symbol)
-          ReeDao::Cache.set_cache(entity.object_id, raw)
+          __ree_dao_cache.set(table_name, extract_primary_key(entity), raw)
         end
       end
 
       def update_entity_cache(entity, raw)
-        cache = ReeDao::Cache.get_cache(entity.object_id)
+        cache = __ree_dao_cache.get(table_name, extract_primary_key(entity))
 
         if cache
-          ReeDao::Cache.set_cache(entity.object_id, cache.merge(raw))
+          __ree_dao_cache.set(table_name, extract_primary_key(entity), cache.merge(raw))
         end
       end
 

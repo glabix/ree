@@ -14,7 +14,6 @@ module ReeDao
   end
 
   require_relative "./ree_dao/dsl"
-  require_relative "./ree_dao/cache"
 
   def self.init_cache(thread)
     ReeDao::Cache.init_cache(thread)

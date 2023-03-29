@@ -5,6 +5,7 @@ package_require('ree_dto/entity_dsl')
 
 RSpec.describe :build_sqlite_connection do
   link :build_sqlite_connection, from: :ree_dao
+  link :dao_cache, from: :ree_dao
 
   after do
     Ree.disable_irb_mode
@@ -140,7 +141,7 @@ RSpec.describe :build_sqlite_connection do
 
     expect(u).to be_a(ReeDaoTest::User)
 
-    state = ReeDao::Cache.get_cache(u.object_id)
+    state = dao_cache.get(:users, u.id)
 
     expect(state).to be_a(Hash)
     expect(state[:id]).to eq(user.id)
@@ -154,16 +155,16 @@ RSpec.describe :build_sqlite_connection do
     user = ReeDaoTest::User.new(name: 'John', age: 30)
     dao.put(user)
 
-    u = dao.find(user.id, :read)
+    u = dao.find(user.id)
     expect(u).to be_a(ReeDaoTest::User)
-    expect(ReeDao::Cache.get_cache(u.object_id)).to eq(nil)
+    expect(dao_cache.get(:users, u.id)).to_not eq(nil)
 
     all = dao.all
     expect(all.size).to eq(1)
     u = all.first
 
     expect(u).to be_a(ReeDaoTest::User)
-    expect(ReeDao::Cache.get_cache(u.object_id)).to be_a(Hash)
+    expect(dao_cache.get(:users, u.id)).to be_a(Hash)
   }
 
   it {
@@ -246,7 +247,7 @@ RSpec.describe :build_sqlite_connection do
     }
   end
 
-  context "uodate by entity" do
+  context "update by entity" do
     it {
       dao.delete_all
 
