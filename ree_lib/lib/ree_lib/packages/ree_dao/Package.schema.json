@@ -84,13 +84,6 @@
       ]
     },
     {
-      "name": "extract_primary_key",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/extract_primary_key.schema.json",
-      "tags": [
-        "fn"
-      ]
-    },
-    {
       "name": "init_cache",
       "schema": "packages/ree_dao/schemas/ree_dao/functions/init_cache.schema.json",
       "tags": [

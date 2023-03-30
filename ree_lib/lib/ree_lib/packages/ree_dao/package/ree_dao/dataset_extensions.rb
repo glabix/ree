@@ -21,6 +21,8 @@ module ReeDao
     module InstanceMethods
       IMPORT_BATCH_SIZE = 1000
 
+      package_require("ree_dao/functions/extract_changes")
+
       # override methods
       def find(id, mapper: nil)
         where(primary_key => id).first(mapper: mapper)
@@ -116,7 +118,7 @@ module ReeDao
         return __original_update(hash_or_entity) if hash_or_entity.is_a?(Hash)
 
         raw = opts[:schema_mapper].db_dump(hash_or_entity)
-        raw = extract_changes(hash_or_entity, raw)
+        raw = ReeDao::ExtractChanges.new.call(table_name, extract_primary_key(hash_or_entity), raw)
 
         unless raw.empty?
           update_entity_cache(hash_or_entity, raw)
@@ -194,22 +196,6 @@ module ReeDao
             end
           }
         )
-      end
-
-      def extract_changes(entity, hash)
-        cached = __ree_dao_cache.get(table_name, extract_primary_key(entity))
-        return hash unless cached
-        changes = {}
-
-        hash.each do |column, value|
-          previous_column_value = cached[column]
-
-          if cached.has_key?(column) && previous_column_value != value
-            changes[column] = value
-          end
-        end
-
-        changes
       end
 
       def extract_primary_key(entity)
