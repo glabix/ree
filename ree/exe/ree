@@ -326,7 +326,7 @@ class ReeCliRunner
           project_path: options_hash[:project_path] || File.expand_path(Dir.pwd)
         }
 
-        puts Ree::CLI::IndexProject.run(**default_options)
+        puts Ree::CLI::Indexing::IndexProject.run(**default_options)
       end
     end
 
@@ -349,7 +349,7 @@ class ReeCliRunner
           project_path: options_hash[:project_path] || File.expand_path(Dir.pwd)
         }
 
-        puts Ree::CLI::IndexFile.run(**default_options)
+        puts Ree::CLI::Indexing::IndexFile.run(**default_options)
       end
     end
 
@@ -372,7 +372,7 @@ class ReeCliRunner
           project_path: options_hash[:project_path] || File.expand_path(Dir.pwd)
         }
 
-        puts Ree::CLI::IndexPackage.run(**default_options)
+        puts Ree::CLI::Indexing::IndexPackage.run(**default_options)
       end
     end
 
