@@ -1,4 +1,4 @@
-RSpec.describe Ree::CLI::IndexProject do
+RSpec.describe Ree::CLI::Indexing::IndexProject do
   subject { described_class }
 
   let(:project_dir) { sample_project_dir }

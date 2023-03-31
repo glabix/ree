@@ -9,9 +9,7 @@ module Ree
     autoload :DeleteObjectSchema, 'ree/cli/delete_object_schema'
     autoload :GeneratePackage, 'ree/cli/generate_package'
     autoload :GenerateTemplate, 'ree/cli/generate_template'
-    autoload :IndexProject, 'ree/cli/indexing/index_project'
-    autoload :IndexFile, 'ree/cli/indexing/index_file'
-    autoload :IndexPackage, 'ree/cli/indexing/index_package'
+    autoload :Indexing, 'ree/cli/indexing'
     autoload :SpecRunner, 'ree/cli/spec_runner'
   end
 end
