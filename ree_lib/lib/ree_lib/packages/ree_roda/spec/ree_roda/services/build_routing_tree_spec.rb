@@ -11,7 +11,10 @@ RSpec.describe :build_routing_tree do
     module ReeRodaTestTree
       include Ree::PackageDSL
 
-      package
+      package do
+        depends_on :ree_actions
+        depends_on :ree_dao
+      end
     end
 
     class ReeRodaTestTree::Cmd

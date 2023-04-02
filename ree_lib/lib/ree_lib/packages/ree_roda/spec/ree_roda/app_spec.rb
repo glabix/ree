@@ -16,7 +16,10 @@ RSpec.describe ReeRoda::App do
     module ReeRodaTest
       include Ree::PackageDSL
 
-      package
+      package do
+        depends_on :ree_actions
+        depends_on :ree_dao
+      end
     end
 
     class ReeRodaTest::Cmd
