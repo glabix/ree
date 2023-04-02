@@ -1,6 +1,29 @@
 package_require("ree_actions/dsl")
 
 RSpec.describe ReeActions::DSL, type: [:autoclean] do
+  link :build_sqlite_connection, from: :ree_dao
+
+  before(:all) do
+    connection = build_sqlite_connection({database: 'sqlite_db'})
+
+    if connection.table_exists?(:users)
+      connection.drop_table(:users)
+    end
+
+    if connection.table_exists?(:products)
+      connection.drop_table(:products)
+    end
+
+    connection.create_table :users do
+      primary_key :id
+
+      column  :name, 'varchar(256)'
+      column  :age, :integer
+    end
+
+    connection.disconnect
+  end
+
   before do
     Ree.enable_irb_mode
   end
