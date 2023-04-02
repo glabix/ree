@@ -15,8 +15,8 @@ export const BASIC_TYPES = [
   'NilClass', 'Symbol', 'Module', 'Class', 'Hash'
 ]
 
-const ARG_REGEXP = /(?<key>(\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(?<value>(\w*)?(\[(.*?)\])?)/
-const ARG_REGEXP_GLOBAL = /(?<key>(\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(?<value>(\w*)?(\[(.*?)\])?)/g
+const ARG_REGEXP = /(?<key>(\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(?<value>((\w*(\:{2}\w*)*)?|((\w*)?\[\{?.*\}?\])?|(\{.*\}))?)/
+const ARG_REGEXP_GLOBAL = /(?<key>(\:[A-Za-z_]*\??)|(\"[A-Za-z_]*\"))\s\=\>\s(?<value>((\w*(\:{2}\w*)*)?|((\w*)?\[\{?.*\}?\])?|(\{.*\}))?)/g
 
 let cachedIndex: ICachedIndex
 let getNewIndexRetryCount: number = 0
@@ -602,7 +602,7 @@ export function updateFileIndex(uri: string) {
                 index.classes[classConst][oldIndex].methods = newIndexForFile[classConst].methods
                 index.classes[classConst][oldIndex].package = newIndexForFile[classConst].package
               } else {
-                index.classes[classConst].push(newIndexForFile)
+                index.classes[classConst].push(newIndexForFile[classConst])
               }
             }
             getFileIndexSemaphore = Semaphore.open
