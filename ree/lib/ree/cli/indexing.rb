@@ -77,7 +77,7 @@ module Ree
             arg_type = arg.type
 
             type = if object_is_action && action_caster && arg.name == :attrs
-              map_mapper_fields(action_caster.fields)
+              map_mapper_fields(action_caster.fields).to_s.gsub(/\\*\"/, "").gsub(/\=\>/, ' => ')
             else 
               if validator
                 validator.to_s
@@ -225,7 +225,7 @@ module Ree
 
         def map_mapper_fields(fields, acc = {})
           fields.keys.each do |key|
-            acc_key = fields[key].optional ? ":#{key}?" : ":#{key.to_s}"
+            acc_key = fields[key].optional ? "#{key}?".to_sym : key
             acc[acc_key] = map_field(fields[key], {})
           end
 
@@ -248,7 +248,7 @@ module Ree
                 "ArrayOf[#{demodulize(field.type.type.subject.type.type.class)}]"
               end
             when %w(Any Bool DateTime Date Float Integer String Time).include?(type)
-              type
+              field.null ? "Nilor[#{type}]" : type
             else
               field_type = field.type.type
               field_type.instance_variables.length > 0 ? field_type.instance_variable_get(field_type.instance_variables.first)&.to_s : type
