@@ -66,6 +66,7 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
       include Ree::PackageDSL
 
       package do
+        depends_on :ree_mapper
         depends_on :ree_dao
       end
 
@@ -90,6 +91,7 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
       include Ree::PackageDSL
 
       package do
+        depends_on :ree_mapper
         depends_on :ree_dao
       end
 
