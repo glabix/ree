@@ -23,6 +23,23 @@ jobs:
           - gemfile_folders: 'ree_lib'
             rspec_cmd: 'cd ree_lib/lib/ree_lib && bundle exec ree spec'
 
+    services:
+      postgres:
+        image: postgres
+
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
