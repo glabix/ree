@@ -30,7 +30,7 @@ RSpec.describe :build_pg_connection do
 
   Ree.enable_irb_mode
 
-  module ReeDaoTest
+  module ReeDaoTestPg
     include Ree::PackageDSL
 
     package do
@@ -69,7 +69,7 @@ RSpec.describe :build_pg_connection do
   require "sequel/extensions/pg_json_ops"
   require "sequel/extensions/pg_array_ops"
 
-  class ReeDaoTest::Db
+  class ReeDaoTestPg::Db
     include Ree::BeanDSL
 
     bean :db do
@@ -87,7 +87,7 @@ RSpec.describe :build_pg_connection do
     end
   end
 
-  class ReeDaoTest::Product
+  class ReeDaoTestPg::Product
     include ReeDto::EntityDSL
 
     properties(
@@ -100,14 +100,14 @@ RSpec.describe :build_pg_connection do
     attr_accessor :title, :info
   end
 
-  class ReeDaoTest::ProductsDao
+  class ReeDaoTestPg::ProductsDao
     include ReeDao::DSL
 
     dao :products_dao do
       link :db
     end
 
-    schema ReeDaoTest::Product do
+    schema ReeDaoTestPg::Product do
       integer :id, null: true
       string :title
       pg_jsonb :info, any
@@ -115,12 +115,12 @@ RSpec.describe :build_pg_connection do
     end
   end
 
-  let(:products_dao) { ReeDaoTest::ProductsDao.new }
+  let(:products_dao) { ReeDaoTestPg::ProductsDao.new }
 
   it {
     products_dao.delete_all
 
-    product = ReeDaoTest::Product.new(title: "Product", info: { price: 1337, count: 200 }, labels: ["Sale"])
+    product = ReeDaoTestPg::Product.new(title: "Product", info: { price: 1337, count: 200 }, labels: ["Sale"])
     products_dao.put(product)
 
     product.info[:price] = 1440

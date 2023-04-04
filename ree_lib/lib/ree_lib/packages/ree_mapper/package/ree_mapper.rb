@@ -82,7 +82,11 @@ module ReeMapper
     pckg_name = ReeString::Underscore.new.call(mod.name)
     factory_path = "#{pckg_name}/mapper_factory"
 
-    mapper_factory_klass = if (package_file_exists?(factory_path) || Ree.irb_mode?) && mod != self
+    if Ree.irb_mode? && Object.const_defined?("#{mod.name}::MapperFactory")
+      return Object.const_get("#{mod.name}::MapperFactory").new
+    end
+
+    mapper_factory_klass = if package_file_exists?(factory_path) && mod != self
       package_require(factory_path)
       Object.const_get("#{mod.name}::MapperFactory")
     else
