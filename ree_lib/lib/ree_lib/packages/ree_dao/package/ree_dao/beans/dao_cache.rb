@@ -2,6 +2,8 @@ class ReeDao::DaoCache
   include Ree::BeanDSL
 
   bean :dao_cache do
+    link :deep_dup, from: :ree_object
+
     singleton
     after_init :setup
   end
@@ -30,7 +32,7 @@ class ReeDao::DaoCache
     add_table_name(table_name)
     add_primary_key(table_name, primary_key)
    
-    @thread_groups[current_thread_group.object_id][table_name][primary_key] = data
+    @thread_groups[current_thread_group.object_id][table_name][primary_key] = deep_dup(data)
   end
 
   def drop_table_cache(table_name)
@@ -49,6 +51,6 @@ class ReeDao::DaoCache
   end
 
   def add_primary_key(thread_group = Thread.current.group, table_name, primary_key)
-     @thread_groups[thread_group.object_id][table_name][primary_key] ||= {}
+    @thread_groups[thread_group.object_id][table_name][primary_key] ||= {}
   end
 end

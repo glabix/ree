@@ -10,6 +10,13 @@
 
   ],
   "links": [
+    {
+      "target": "deep_dup",
+      "package_name": "ree_object",
+      "as": "deep_dup",
+      "imports": [
 
+      ]
+    }
   ]
 }

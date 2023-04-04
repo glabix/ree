@@ -20,6 +20,9 @@
       "name": "ree_mapper"
     },
     {
+      "name": "ree_object"
+    },
+    {
       "name": "ree_string"
     }
   ],

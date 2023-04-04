@@ -11,6 +11,7 @@ module ReeDao
     depends_on :ree_enum
     depends_on :ree_mapper
     depends_on :ree_string
+    depends_on :ree_object
   end
 
   require_relative "./ree_dao/dsl"
