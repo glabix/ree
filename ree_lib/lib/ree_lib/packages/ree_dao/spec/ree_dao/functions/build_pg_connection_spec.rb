@@ -7,10 +7,8 @@ RSpec.describe :build_pg_connection do
   link :build_pg_connection, from: :ree_dao
 
   DB_CONFIG = {
-    database: "postgres",
-    user: "postgres",
-    port: "5432",
-    password: "postgres",
+    host: "localhost",
+    password: "",
     adapter: "postgres"
   }.freeze
 

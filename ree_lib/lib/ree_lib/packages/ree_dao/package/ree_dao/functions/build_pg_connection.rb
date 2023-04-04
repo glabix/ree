@@ -16,7 +16,7 @@ class ReeDao::BuildPgConnection
       user?: String,
       password?: String,
       host?: String,
-      port?: String,
+      port?: Or[String, Integer],
       convert_infinite_timestamps?: Or[:string, :nil, :float],
       connect_timeout?: Integer,
       driver_options?: Hash,
