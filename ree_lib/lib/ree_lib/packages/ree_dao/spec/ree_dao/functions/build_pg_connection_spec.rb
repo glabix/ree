@@ -8,6 +8,8 @@ RSpec.describe :build_pg_connection do
 
   DB_CONFIG = {
     host: "localhost",
+    user: "postgres",
+    database: "postgres",
     password: "password",
     adapter: "postgres"
   }.freeze
