@@ -6,12 +6,23 @@ package_require("ree_dao/wrappers/pg_array")
 RSpec.describe :build_pg_connection do
   link :build_pg_connection, from: :ree_dao
 
+  DB_CONFIG = {
+    database: "postgres",
+    user: "postgres",
+    port: "5432",
+    password: "postgres",
+    adapter: "postgres"
+  }.freeze
+
   after do
     Ree.disable_irb_mode
   end
 
   before :all do
-    connection = build_pg_connection({adapter: 'postgres'}, **{extensions: [:pg_array, :pg_json]})
+    connection = build_pg_connection(
+      DB_CONFIG,
+      **{extensions: [:pg_array, :pg_json]}
+    )
 
     if connection.table_exists?(:products)
       connection.drop_table(:products)
@@ -37,32 +48,32 @@ RSpec.describe :build_pg_connection do
       depends_on :ree_dao
       depends_on :ree_mapper
     end
+  end
 
-    class MapperFactory
-      include Ree::BeanDSL
+  class ReeDaoTestPg::MapperFactory
+    include Ree::BeanDSL
 
-      bean :mapper_factory do
-        factory :build
-        singleton
+    bean :mapper_factory do
+      factory :build
+      singleton
 
-        link :build_mapper_factory, from: :ree_mapper
-        link :build_mapper_strategy, from: :ree_mapper
-      end
+      link :build_mapper_factory, from: :ree_mapper
+      link :build_mapper_strategy, from: :ree_mapper
+    end
 
-      def build
-        factory = build_mapper_factory(strategies: [
-          build_mapper_strategy(method: :cast, dto: Hash),
-          build_mapper_strategy(method: :serialize, dto: Hash),
-          build_mapper_strategy(method: :db_dump, dto: Hash),
-          build_mapper_strategy(method: :db_load, dto: Object, always_optional: true)
-        ])
+    def build
+      factory = build_mapper_factory(strategies: [
+        build_mapper_strategy(method: :cast, dto: Hash),
+        build_mapper_strategy(method: :serialize, dto: Hash),
+        build_mapper_strategy(method: :db_dump, dto: Hash),
+        build_mapper_strategy(method: :db_load, dto: Object, always_optional: true)
+      ])
 
-        factory
-          .register_wrapper(:pg_jsonb, ReeDao::PgJsonb)
-          .register_wrapper(:pg_array, ReeDao::PgArray)
+      factory
+        .register_wrapper(:pg_jsonb, ReeDao::PgJsonb)
+        .register_wrapper(:pg_array, ReeDao::PgArray)
 
-        factory
-      end
+      factory
     end
   end
 
@@ -83,7 +94,10 @@ RSpec.describe :build_pg_connection do
       Sequel.extension :pg_json_ops
       Sequel.extension :pg_array_ops
 
-      build_pg_connection({adapter: 'postgres'}, **{extensions: [:pg_array, :pg_json]})
+      build_pg_connection(
+        DB_CONFIG,
+        **{extensions: [:pg_array, :pg_json]}
+      )
     end
   end
 
