@@ -167,7 +167,7 @@ module Ree::LinkDSL
 
       if dep_package.nil?
         raise Ree::Error.new(
-          "Package :#{package_name} is not added as dependency for :#{current_package_name} package\npackage path: #{File.join(Ree.root_dir, current_package.entry_rpath)}\nclass:#{self.name}",
+          "Package :#{package_name} is not added as dependency for :#{current_package_name} package\npackage path: #{File.join(Ree.root_dir, current_package.entry_rpath || "")}\nclass:#{self.name}",
           :invalid_dsl_usage
         )
       end

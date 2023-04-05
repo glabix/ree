@@ -5,6 +5,7 @@ module ReeActions
 
   package do
     depends_on :ree_mapper
+    depends_on :ree_dao
   end
 end
 

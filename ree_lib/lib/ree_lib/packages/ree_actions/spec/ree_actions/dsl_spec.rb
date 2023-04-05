@@ -1,6 +1,29 @@
 package_require("ree_actions/dsl")
 
 RSpec.describe ReeActions::DSL, type: [:autoclean] do
+  link :build_sqlite_connection, from: :ree_dao
+
+  before(:all) do
+    connection = build_sqlite_connection({database: 'sqlite_db'})
+
+    if connection.table_exists?(:users)
+      connection.drop_table(:users)
+    end
+
+    if connection.table_exists?(:products)
+      connection.drop_table(:products)
+    end
+
+    connection.create_table :users do
+      primary_key :id
+
+      column  :name, 'varchar(256)'
+      column  :age, :integer
+    end
+
+    connection.disconnect
+  end
+
   before do
     Ree.enable_irb_mode
   end
@@ -15,6 +38,7 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
 
       package do
         depends_on :ree_mapper
+        depends_on :ree_dao
       end
 
       class TestAction
@@ -42,6 +66,8 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
       include Ree::PackageDSL
 
       package do
+        depends_on :ree_mapper
+        depends_on :ree_dao
       end
 
       class TestAction2
@@ -58,5 +84,89 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
 
     result = ReeActionsTest::TestAction2.new.call('user_access', {user_id: 1})
     expect(result).to eq(1)
+  }
+
+  it {
+    module ReeActionsTest
+      include Ree::PackageDSL
+
+      package do
+        depends_on :ree_mapper
+        depends_on :ree_dao
+      end
+
+      class Db
+        include Ree::BeanDSL
+
+        bean :db do
+          singleton
+          factory :build
+
+          link :build_sqlite_connection, from: :ree_dao
+        end
+
+        def build
+          build_sqlite_connection({database: 'sqlite_db'})
+        end
+      end
+
+      class User
+        include ReeDto::EntityDSL
+
+        properties(
+          id: Nilor[Integer],
+          name: String,
+          age: Integer,
+        )
+
+        attr_accessor :name
+      end
+
+      class UsersDao
+        include ReeDao::DSL
+
+        dao :users_dao do
+          link :db
+        end
+
+        table :users
+
+        schema ReeActionsTest::User do
+          integer :id, null: true
+          string :name
+          integer :age
+        end
+      end
+
+      class TestAction3
+        include ReeActions::DSL
+
+        action :test_action3 do
+          link :users_dao
+        end
+
+        contract Any, Hash => Integer
+        def call(user_access, attrs)
+          user = ReeActionsTest::User.new(name: 'John', age: 30)
+          users_dao.put(user)
+
+          thr = Thread.new {
+            user2 = ReeActionsTest::User.new(name: 'Alex', age: 33)
+            users_dao.put(user2)
+          }
+
+          thr.join
+          
+          $thread_group_cache = ReeDao::DaoCache.new.instance_variable_get(:@thread_groups)
+                                                   .dig(Thread.current.group.object_id, :users)
+
+          attrs[:user_id]
+        end
+      end
+    end
+
+    ReeActionsTest::TestAction3.new.call('user_access', {user_id: 1})
+    expect($thread_group_cache.keys.count).to_not eq(0)
+    expect($thread_group_cache.keys.count).to eq(2)
   }
 end
