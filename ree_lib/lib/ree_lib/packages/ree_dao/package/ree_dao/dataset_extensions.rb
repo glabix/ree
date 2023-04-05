@@ -200,14 +200,18 @@ module ReeDao
           primary_key.map do |key|
             entity.send(key)
           end.join("_")
-        else
+        elsif entity.instance_variable_defined?(:"@#{primary_key}")
           entity.send(primary_key)
         end
       end
 
       def set_entity_cache(entity, raw)
         if !entity.is_a?(Integer) && !entity.is_a?(Symbol)
-          __ree_dao_cache.set(table_name, extract_primary_key(entity), raw)
+          p_key = extract_primary_key(entity)
+
+          if p_key
+            __ree_dao_cache.set(table_name, p_key, raw)
+          end
         end
       end
 
