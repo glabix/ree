@@ -42,8 +42,6 @@ module ReeDao
 
       def delete_all
         where({}).__original_delete
-      ensure
-        __ree_dao_cache.drop_table_cache(table_name)
       end
 
       def put(entity)
