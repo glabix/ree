@@ -149,7 +149,6 @@ module ReeDao
 
       private
 
-      # TODO
       def __ree_dao_cache
         ReeDao::DaoCache.new
       end
