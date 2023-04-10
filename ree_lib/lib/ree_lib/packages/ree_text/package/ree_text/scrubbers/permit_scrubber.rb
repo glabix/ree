@@ -3,6 +3,10 @@
 require 'set'
 
 class ReeText::PermitScrubber < Loofah::Scrubber
+  include Ree::LinkDSL
+
+  link :unescape_html
+
   attr_reader :tags, :attributes, :prune
 
   contract Kwargs[
@@ -11,7 +15,6 @@ class ReeText::PermitScrubber < Loofah::Scrubber
     attributes: Set,
   ] => Any
   def initialize(prune: false, tags: nil, attributes: nil)
-    @unescape_html = ReeText::UnescapeHtml.new
     @prune = prune
     @direction = @prune ? :top_down : :bottom_up
     @tags = tags
@@ -26,7 +29,7 @@ class ReeText::PermitScrubber < Loofah::Scrubber
 
       return CONTINUE
     end
-    
+
     return CONTINUE if node.text?
 
     unless (node.element? || node.comment?) && allowed_node?(node)
@@ -37,7 +40,7 @@ class ReeText::PermitScrubber < Loofah::Scrubber
   end
 
   protected
-  
+
   def allowed_node?(node)
     @tags.include?(node.name)
   end
@@ -74,8 +77,7 @@ class ReeText::PermitScrubber < Loofah::Scrubber
 
     if Loofah::HTML5::SafeList::ATTR_VAL_IS_URI.include?(attr_name)
       # this block lifted nearly verbatim from HTML5 sanitization
-      val_unescaped = @unescape_html
-        .call(attr_node.value)
+      val_unescaped = unescape_html(attr_node.value)
         .gsub(Loofah::HTML5::Scrub::CONTROL_CHARACTERS,'')
         .downcase
 
