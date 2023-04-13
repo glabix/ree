@@ -54,7 +54,7 @@ class ReeDao::DaoCache
       @thread_groups[thread_group.object_id] ||= {}
     end
 
-    if !thread_groups[thread_group.object_id][table_name]
+    if !@thread_groups[thread_group.object_id][table_name]
       @thread_groups[thread_group.object_id][table_name] ||= {}
     end
 
