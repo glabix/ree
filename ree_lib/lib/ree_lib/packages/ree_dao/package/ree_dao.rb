@@ -16,6 +16,8 @@ module ReeDao
 
   require_relative "./ree_dao/dsl"
   require_relative "./ree_dao/thread_parents"
+  require_relative "./ree_dao/aggregate_dsl"
+  require_relative "./ree_dao/associations"
 
   def self.init_cache(thread)
     ReeDao::Cache.init_cache(thread)

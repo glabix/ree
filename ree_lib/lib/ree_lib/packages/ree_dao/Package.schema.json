@@ -94,6 +94,13 @@
       ]
     },
     {
+      "name": "load_agg",
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/load_agg.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
       "name": "one_to_many",
       "schema": "packages/ree_dao/schemas/ree_dao/functions/one_to_many.schema.json",
       "tags": [

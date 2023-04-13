@@ -16,7 +16,7 @@ module ReeDao::DSL
   module InstanceMethods
     def build
       dataset_class = db.dataset_class
-      klass = Class.new(dataset_class)
+      klass = self.class.const_set(:Dao, Class.new(dataset_class))
       filters = self.class.instance_variable_get(:@filters) || []
 
       filters.each do |filter|
