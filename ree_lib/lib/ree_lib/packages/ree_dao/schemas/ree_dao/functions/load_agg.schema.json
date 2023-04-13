@@ -1,0 +1,43 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.1",
+  "name": "load_agg",
+  "path": "packages/ree_dao/package/ree_dao/functions/load_agg.rb",
+  "mount_as": "fn",
+  "class": "ReeDao::LoadAgg",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "ids_or_scope",
+          "arg_type": "req",
+          "type": "Or[Sequel::Dataset, ArrayOf[Integer], Integer]"
+        },
+        {
+          "arg": "dao",
+          "arg_type": "req",
+          "type": "Sequel::Dataset"
+        },
+        {
+          "arg": "opts",
+          "arg_type": "keyrest",
+          "type": "Ksplat[\"RestKeys\" => Any]"
+        },
+        {
+          "arg": "block",
+          "arg_type": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}
