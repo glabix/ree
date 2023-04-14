@@ -38,11 +38,11 @@ class ReeDao::DaoCache
   private
 
   def get_thread_object_id(thread)
-    thread == Thread.main ? thread.object_id : get_parent_thread(thread)
+    thread.parent == Thread.main ? thread.object_id : get_parent_thread(thread)
   end
 
   def get_parent_thread(thread)
-    return thread.object_id if thread == Thread.main
+    return thread.object_id if thread.parent == Thread.main || thread == Thread.main
 
     get_parent_thread(thread.parent)
   end

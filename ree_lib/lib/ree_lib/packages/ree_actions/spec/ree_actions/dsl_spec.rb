@@ -170,7 +170,9 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
       end
     end
 
-    ReeActionsTest::TestAction3.new.call('user_access', {user_id: 1})
+    Thread.new do
+      ReeActionsTest::TestAction3.new.call('user_access', {user_id: 1})
+    end.join
     expect($thread_cache.keys.count).to_not eq(0)
     expect($thread_cache.keys.count).to eq(4)
   }
