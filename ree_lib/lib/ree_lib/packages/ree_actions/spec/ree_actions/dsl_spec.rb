@@ -159,7 +159,7 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
 
             Thread.new do
               users_dao.put(ReeActionsTest::User.new(name: 'Sam', age: 19))
-            end
+            end.join
           end.join
           
           $thread_cache = ReeDao::DaoCache.new.instance_variable_get(:@threads)
