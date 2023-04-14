@@ -9,55 +9,69 @@ class ReeDao::DaoCache
   end
 
   def setup
-    @thread_groups = {}
+    @threads = {}
   end
 
-  def add_thread_group_cache(thread_group)
-    @thread_groups[thread_group.object_id] ||= {}
+  def add_thread_cache(thread)
+    @threads[get_thread_object_id(thread)] ||= {}
   end
 
-  def drop_thread_group_cache(thread_group)
-    @thread_groups.delete(thread_group.object_id)
+  def drop_thread_cache(thread)
+    @threads.delete(get_thread_object_id(thread))
   end
 
   def get(table_name, primary_key)
-    add_thread_group_cache(current_thread_group)
+    add_thread_cache(current_thread)
     add_table_name(table_name)
 
-    @thread_groups[current_thread_group.object_id][table_name][primary_key] 
+    @threads[current_thread_object_id][table_name][primary_key] 
   end
 
   def set(table_name, primary_key, data)
-    add_thread_group_cache(current_thread_group)
+    add_thread_cache(current_thread)
     add_table_name(table_name)
     add_primary_key(table_name, primary_key)
    
-    @thread_groups[current_thread_group.object_id][table_name][primary_key] = deep_dup(data)
+    @threads[current_thread_object_id][table_name][primary_key] = deep_dup(data)
   end
 
   private
 
-  def current_thread_group
-    Thread.current.group
+  def get_thread_object_id(thread)
+    thread == Thread.main ? thread.object_id : get_parent_thread(thread)
   end
 
-  def add_table_name(thread_group = Thread.current.group, table_name)
-    if !@thread_groups[thread_group.object_id]
-      @thread_groups[thread_group.object_id] ||= {}
-    end
+  def get_parent_thread(thread)
+    return thread.object_id if thread == Thread.main
 
-    @thread_groups[thread_group.object_id][table_name] ||= {}
+    get_parent_thread(thread.parent)
   end
 
-  def add_primary_key(thread_group = Thread.current.group, table_name, primary_key)
-    if !@thread_groups[thread_group.object_id]
-      @thread_groups[thread_group.object_id] ||= {}
+  def current_thread
+    Thread.current
+  end
+
+  def current_thread_object_id
+    get_thread_object_id(current_thread)
+  end
+
+  def add_table_name(table_name)
+    if !@threads[current_thread_object_id]
+      @threads[current_thread_object_id] ||= {}
     end
 
-    if !@thread_groups[thread_group.object_id][table_name]
-      @thread_groups[thread_group.object_id][table_name] ||= {}
+    @threads[current_thread_object_id][table_name] ||= {}
+  end
+
+  def add_primary_key(table_name, primary_key)
+    if !@threads[current_thread_object_id]
+      @threads[current_thread_object_id] ||= {}
     end
 
-    @thread_groups[thread_group.object_id][table_name][primary_key] ||= {}
+    if !@threads[current_thread_object_id][table_name]
+      @threads[current_thread_object_id][table_name] ||= {}
+    end
+
+    @threads[current_thread_object_id][table_name][primary_key] ||= {}
   end
 end
