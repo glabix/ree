@@ -18,6 +18,7 @@ RSpec.describe :load_agg do
     connection.drop_table(:chapters) if connection.table_exists?(:chapters)
     connection.drop_table(:authors) if connection.table_exists?(:authors)
     connection.drop_table(:reviews) if connection.table_exists?(:reviews)
+    connection.drop_table(:review_authors) if connection.table_exists?(:review_authors)
 
     connection.create_table :organizations do
       primary_key :id
@@ -61,6 +62,13 @@ RSpec.describe :load_agg do
       column  :rating, :integer
     end
 
+    connection.create_table :review_authors do
+      primary_key :id
+
+      foreign_key :review_id, :reviews, null: false, on_delete: :cascade
+      column :name, 'varchar(256)'
+    end
+
     connection.create_table :authors do
       primary_key :id
 
@@ -71,43 +79,51 @@ RSpec.describe :load_agg do
     connection.disconnect
   end
 
-  require_relative 'ree_dao_test'
+  require_relative 'ree_dao_load_agg_test'
 
-  class ReeDaoTest::UsersAgg
+  class ReeDaoLoadAggTest::UsersAgg
     include ReeDao::AggregateDSL
 
     aggregate :users_agg do
-      link :users, from: :ree_dao_test
-      link :organizations, from: :ree_dao_test
-      link :user_passports, from: :ree_dao_test
-      link :books, from: :ree_dao_test
-      link :chapters, from: :ree_dao_test
-      link :authors, from: :ree_dao_test
-      link :reviews, from: :ree_dao_test
+      link :users, from: :ree_dao_load_agg_test
+      link :organizations, from: :ree_dao_load_agg_test
+      link :user_passports, from: :ree_dao_load_agg_test
+      link :books, from: :ree_dao_load_agg_test
+      link :chapters, from: :ree_dao_load_agg_test
+      link :authors, from: :ree_dao_load_agg_test
+      link :reviews, from: :ree_dao_load_agg_test
+      link :review_authors, from: :ree_dao_load_agg_test
       link :load_agg, from: :ree_dao
     end
 
     def call
       load_agg(users.by_name("John"), users) do |list|
         belongs_to :organization, list: list
-        has_one :passport, foreign_key: :user_id, assoc_dao: user_passports, list: list
 
         has_many :books, list: list do |list|
+          has_one :author, list: list
+          
+          has_many :reviews, list: list do |list|
+            has_one :review_author, list: list
+          end
+
           has_many :chapters, list: list
-          has_many :reviews, list: list
         end
+
+        has_one :passport, foreign_key: :user_id, assoc_dao: user_passports, list: list
       end
     end
   end
 
-  let(:users_agg) { ReeDaoTest::UsersAgg.new }
-  let(:organizations) { ReeDaoTest::Organizations.new }
-  let(:users) { ReeDaoTest::Users.new }
-  let(:user_passports) { ReeDaoTest::UserPassports.new }
-  let(:books) { ReeDaoTest::Books.new }
-  let(:chapters) { ReeDaoTest::Chapters.new }
-  let(:authors) { ReeDaoTest::Authors.new }
-  let(:reviews) { ReeDaoTest::Reviews.new }
+  let(:users_agg) { ReeDaoLoadAggTest::UsersAgg.new }
+  let(:organizations) { ReeDaoLoadAggTest::Organizations.new }
+  let(:users) { ReeDaoLoadAggTest::Users.new }
+  let(:user_passports) { ReeDaoLoadAggTest::UserPassports.new }
+  let(:books) { ReeDaoLoadAggTest::Books.new }
+  let(:chapters) { ReeDaoLoadAggTest::Chapters.new }
+  let(:authors) { ReeDaoLoadAggTest::Authors.new }
+  let(:reviews) { ReeDaoLoadAggTest::Reviews.new }
+  let(:review_authors) { ReeDaoLoadAggTest::ReviewAuthors.new }
 
   it {
     organizations.delete_all
@@ -116,52 +132,59 @@ RSpec.describe :load_agg do
     books.delete_all
     chapters.delete_all
 
-    organization = ReeDaoTest::Organization.new(name: "Test Org")
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
     organizations.put(organization)
 
-    user_1 = ReeDaoTest::User.new(name: "John", age: 33, organization_id: organization.id)
-    user_2 = ReeDaoTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user_2 = ReeDaoLoadAggTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
     users.put(user_1)
     users.put(user_2)
 
-    passport_1 = ReeDaoTest::UserPassport.new(user_id: user_1.id, info: "some info")
+    passport_1 = ReeDaoLoadAggTest::UserPassport.new(user_id: user_1.id, info: "some info")
     user_passports.put(passport_1)
-    user_passports.put(ReeDaoTest::UserPassport.new(user_id: user_2.id, info: "another info"))
+    user_passports.put(ReeDaoLoadAggTest::UserPassport.new(user_id: user_2.id, info: "another info"))
 
-    book_1 = ReeDaoTest::Book.new(user_id: user_1.id, title: "1984")
-    book_2 = ReeDaoTest::Book.new(user_id: user_1.id, title: "1984")
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
+    book_2 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1408")
 
     books.put(book_1)
     books.put(book_2)
 
-    chapters.put(ReeDaoTest::Chapter.new(book_id: book_1.id, title: "beginning"))
-    chapters.put(ReeDaoTest::Chapter.new(book_id: book_1.id, title: "interlude"))
-    chapters.put(ReeDaoTest::Chapter.new(book_id: book_1.id, title: "tragic ending"))
-    chapters.put(ReeDaoTest::Chapter.new(book_id: book_2.id, title: "beginning"))
-    chapters.put(ReeDaoTest::Chapter.new(book_id: book_2.id, title: "ending"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "beginning"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "interlude"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "tragic ending"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "beginning"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "ending"))
 
 
-    authors.put(ReeDaoTest::Author.new(book_id: book_1.id, name: "George Orwell"))
-    reviews.put(ReeDaoTest::Review.new(book_id: book_1.id, rating: 10))
-    reviews.put(ReeDaoTest::Review.new(book_id: book_1.id, rating: 7))
+    authors.put(ReeDaoLoadAggTest::Author.new(book_id: book_1.id, name: "George Orwell"))
+    review = ReeDaoLoadAggTest::Review.new(book_id: book_1.id, rating: 10)
+    reviews.put(review)
+    reviews.put(ReeDaoLoadAggTest::Review.new(book_id: book_1.id, rating: 7))
+    review_authors.put(ReeDaoLoadAggTest::ReviewAuthor.new(review_id: review.id, name: "John Review"))
 
-    # TODO: move this test to aggregate dsl spec
     res = users_agg.call()
 
-    expect(res[0].organization).to eq(organization)
-    expect(res[0].passport).to eq(passport_1)
-    expect(res[0].passport.info).to eq("some info")
+    res_user = res[0]
+    expect(res_user.id).to eq(user_1.id)
+    expect(res_user.organization).to eq(organization)
+    expect(res_user.passport).to eq(passport_1)
+    expect(res_user.passport.info).to eq("some info")
+    expect(res_user.books.count).to eq(2)
+    expect(res_user.books[0].author.name).to eq("George Orwell")
+    expect(res_user.books[0].chapters.count).to eq(3)
+    expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review")
   }
 
   it {
     organizations.delete_all
     users.delete_all
 
-    organization = ReeDaoTest::Organization.new(name: "Test Org")
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
     organizations.put(organization)
 
-    user_1 = ReeDaoTest::User.new(name: "John", age: 33, organization_id: organization.id)
-    user_2 = ReeDaoTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user_2 = ReeDaoLoadAggTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
     users.put(user_1)
     users.put(user_2)
 
@@ -175,10 +198,10 @@ RSpec.describe :load_agg do
     organizations.delete_all
     users.delete_all
 
-    organization = ReeDaoTest::Organization.new(name: "Test Org")
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
     organizations.put(organization)
 
-    user_1 = ReeDaoTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
     users.put(user_1)
 
     res = load_agg(user_1.id, users)
@@ -189,15 +212,15 @@ RSpec.describe :load_agg do
     organizations.delete_all
     users.delete_all
 
-    organization = ReeDaoTest::Organization.new(name: "Test Org")
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
     organizations.put(organization)
 
-    user_1 = ReeDaoTest::User.new(name: "John", age: 33, organization_id: organization.id)
-    user_2 = ReeDaoTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user_2 = ReeDaoLoadAggTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
     users.put(user_1)
     users.put(user_2)
 
-    res = load_agg(users.where(name: "John"), users)
-    expect(res.count).to eq(1)
+    res = load_agg(users.where(organization_id: organization.id), users)
+    expect(res.count).to eq(2)
   }
 end

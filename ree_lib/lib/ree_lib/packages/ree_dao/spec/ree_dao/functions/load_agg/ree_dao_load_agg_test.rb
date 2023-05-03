@@ -1,6 +1,6 @@
 Ree.enable_irb_mode
 
-module ReeDaoTest
+module ReeDaoLoadAggTest
   include Ree::PackageDSL
 
   package do
@@ -10,7 +10,7 @@ module ReeDaoTest
   end
 end
 
-class ReeDaoTest::Db
+class ReeDaoLoadAggTest::Db
   include Ree::BeanDSL
 
   bean :db do
@@ -25,7 +25,7 @@ class ReeDaoTest::Db
   end
 end
 
-class ReeDaoTest::Organization
+class ReeDaoLoadAggTest::Organization
   include ReeDto::EntityDSL
 
   properties(
@@ -33,11 +33,19 @@ class ReeDaoTest::Organization
     name: String
   )
 
+  def set_users(users)
+    @users = users
+  end
+
+  def users
+    @users
+  end
+
   attr_accessor :name
 end
 
 
-class ReeDaoTest::User
+class ReeDaoLoadAggTest::User
   include ReeDto::EntityDSL
 
   properties(
@@ -75,7 +83,7 @@ class ReeDaoTest::User
 end
 
 
-class ReeDaoTest::UserPassport
+class ReeDaoLoadAggTest::UserPassport
   include ReeDto::EntityDSL
 
   properties(
@@ -87,7 +95,7 @@ class ReeDaoTest::UserPassport
   attr_accessor :info, :user_id
 end
 
-class ReeDaoTest::Book
+class ReeDaoLoadAggTest::Book
   include ReeDto::EntityDSL
 
   properties(
@@ -113,7 +121,7 @@ class ReeDaoTest::Book
   end
 
   def set_reviews(reviews)
-    @reviews = reviews
+    @reviews = reviews; nil
   end
 
   def reviews
@@ -123,7 +131,7 @@ class ReeDaoTest::Book
   attr_accessor :title, :user_id
 end
 
-class ReeDaoTest::Chapter
+class ReeDaoLoadAggTest::Chapter
   include ReeDto::EntityDSL
 
   properties(
@@ -135,7 +143,7 @@ class ReeDaoTest::Chapter
   attr_accessor :title, :book_id
 end
 
-class ReeDaoTest::Author
+class ReeDaoLoadAggTest::Author
   include ReeDto::EntityDSL
 
   properties(
@@ -147,7 +155,7 @@ class ReeDaoTest::Author
   attr_accessor :name, :book_id
 end
 
-class ReeDaoTest::Review
+class ReeDaoLoadAggTest::Review
   include ReeDto::EntityDSL
 
   properties(
@@ -156,10 +164,28 @@ class ReeDaoTest::Review
     rating: Nilor[Integer]
   )
 
+  def set_review_author(review_author)
+    @review_author = review_author
+  end
+
+  def review_author
+    @review_author
+  end
+
   attr_accessor :rating, :book_id
 end
 
-class ReeDaoTest::Users
+class ReeDaoLoadAggTest::ReviewAuthor
+  include ReeDto::EntityDSL
+
+  properties(
+    id: Nilor[Integer],
+    review_id: Integer,
+    name: String
+  )
+end
+
+class ReeDaoLoadAggTest::Users
   include ReeDao::DSL
 
   dao :users do
@@ -168,7 +194,7 @@ class ReeDaoTest::Users
 
   table :users
 
-  schema ReeDaoTest::User do
+  schema ReeDaoLoadAggTest::User do
     integer :id, null: true
     integer :organization_id
     string :name
@@ -178,7 +204,7 @@ class ReeDaoTest::Users
   filter :by_name, -> (name) { where(name: name) }
 end
 
-class ReeDaoTest::Organizations
+class ReeDaoLoadAggTest::Organizations
   include ReeDao::DSL
 
   dao :organizations do
@@ -187,7 +213,7 @@ class ReeDaoTest::Organizations
 
   table :organizations
 
-  schema ReeDaoTest::Organization do
+  schema ReeDaoLoadAggTest::Organization do
     integer :id, null: true
     string :name
   end
@@ -195,7 +221,7 @@ class ReeDaoTest::Organizations
   filter :by_name, -> (name) { where(name: name) }
 end
 
-class ReeDaoTest::UserPassports
+class ReeDaoLoadAggTest::UserPassports
   include ReeDao::DSL
 
   dao :user_passports do
@@ -204,14 +230,14 @@ class ReeDaoTest::UserPassports
 
   table :user_passports
 
-  schema ReeDaoTest::UserPassport do
+  schema ReeDaoLoadAggTest::UserPassport do
     integer :id, null: true
     integer :user_id
     string :info
   end
 end
 
-class ReeDaoTest::Books
+class ReeDaoLoadAggTest::Books
   include ReeDao::DSL
 
   dao :books do
@@ -220,14 +246,14 @@ class ReeDaoTest::Books
 
   table :books
 
-  schema ReeDaoTest::Book do
+  schema ReeDaoLoadAggTest::Book do
     integer :id, null: true
     integer :user_id
     string :title
   end
 end
 
-class ReeDaoTest::Chapters
+class ReeDaoLoadAggTest::Chapters
   include ReeDao::DSL
 
   dao :chapters do
@@ -236,14 +262,14 @@ class ReeDaoTest::Chapters
 
   table :chapters
 
-  schema ReeDaoTest::Chapter do
+  schema ReeDaoLoadAggTest::Chapter do
     integer :id, null: true
     integer :book_id
     string :title
   end
 end
 
-class ReeDaoTest::Authors
+class ReeDaoLoadAggTest::Authors
   include ReeDao::DSL
 
   dao :authors do
@@ -252,14 +278,14 @@ class ReeDaoTest::Authors
 
   table :authors
 
-  schema ReeDaoTest::Author do
+  schema ReeDaoLoadAggTest::Author do
     integer :id, null: true
     integer :book_id
     string :name
   end
 end
 
-class ReeDaoTest::Reviews
+class ReeDaoLoadAggTest::Reviews
   include ReeDao::DSL
 
   dao :reviews do
@@ -268,9 +294,25 @@ class ReeDaoTest::Reviews
 
   table :reviews
 
-  schema ReeDaoTest::Review do
+  schema ReeDaoLoadAggTest::Review do
     integer :id, null: true
     integer :book_id
     integer :rating
+  end
+end
+
+class ReeDaoLoadAggTest::ReviewAuthors
+  include ReeDao::DSL
+
+  dao :review_authors do
+    link :db
+  end
+
+  table :review_authors
+
+  schema ReeDaoLoadAggTest::ReviewAuthor do
+    integer :id, null: true
+    integer :review_id
+    string :name
   end
 end

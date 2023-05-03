@@ -28,13 +28,17 @@ module ReeDao
         foreign_key?: Symbol,
         assoc_dao?: Sequel::Dataset, # TODO: change to ReeDao::Dao class?,
         list?: Or[Sequel::Dataset, Array]
-      ] => Any
-      def belongs_to(assoc_name, **opts)
+      ], Optblock => Any
+      def belongs_to(assoc_name, **opts, &block)
         if !instance_variable_get(:@threads)
           instance_variable_set(:@threads, []) 
         end
 
-        @threads << Thread.new do
+        if !instance_variable_get("@thread_store_#{Thread.current.object_id}".to_sym)
+          instance_variable_set("@thread_store_#{Thread.current.object_id}".to_sym, {})
+        end
+
+        t = Thread.new do
           list = opts[:list]
           return if list.empty?
   
@@ -51,11 +55,33 @@ module ReeDao
           end
   
           root_ids = list.map(&:"#{foreign_key}")
+
+          items = assoc_dao.where(foreign_key => root_ids).all
+
+          if block_given?
+            nested_assoc = block.call(items)
+
+            items.each do |item|
+              nested_assoc.keys.each do |attr_name|
+                setter = "set_#{attr_name}"
+                value = nested_assoc[attr_name][item.id]
+                item.send(setter, value)
+              end
+            end
+          end
   
-          { assoc_name => index_by(assoc_dao.where(foreign_key => root_ids).all) { _1.send(foreign_key) } }
+          store = instance_variable_get("@thread_store_#{Thread.current.parent.object_id}")
+          store.merge!({ assoc_name => index_by(items) { _1.send(foreign_key) } })
+          store
         end
 
-        @threads
+        if @threads.include?(find_parent_thread(t))
+          t.join
+          t.value
+        else
+          @threads << t
+          @threads
+        end
       end
     
       contract Symbol, Ksplat[
@@ -63,13 +89,17 @@ module ReeDao
         primary_key?: Symbol,
         assoc_dao?: Sequel::Dataset, # TODO: change to ReeDao::Dao class?
         list?: Or[Sequel::Dataset, Array]
-      ] => Any
-      def has_one(assoc_name, **opts)
+      ], Optblock => Any
+      def has_one(assoc_name, **opts, &block)
         if !instance_variable_get(:@threads)
           instance_variable_set(:@threads, [])
         end
 
-        @threads << Thread.new do
+        if !instance_variable_get("@thread_store_#{Thread.current.object_id}".to_sym)
+          instance_variable_set("@thread_store_#{Thread.current.object_id}".to_sym, {})
+        end
+
+        t = Thread.new do
           list = opts[:list]
           return if list.empty?
   
@@ -93,11 +123,33 @@ module ReeDao
           end
   
           root_ids = list.map(&:id)
+
+          items = assoc_dao.where(foreign_key => root_ids).all
+
+          if block_given?
+            nested_assoc = block.call(items)
+
+            items.each do |item|
+              nested_assoc.keys.each do |attr_name|
+                setter = "set_#{attr_name}"
+                value = nested_assoc[attr_name][item.id]
+                item.send(setter, value)
+              end
+            end
+          end
   
-          { assoc_name => index_by(assoc_dao.where(foreign_key => root_ids).all) { _1.send(foreign_key) } }
+          store = instance_variable_get("@thread_store_#{Thread.current.parent.object_id}".to_sym)
+          store.merge!({ assoc_name => index_by(items) { _1.send(foreign_key) } })
+          store
         end
 
-        @threads
+        if @threads.include?(find_parent_thread(t))
+          t.join
+          t.value
+        else
+          @threads << t
+          @threads
+        end
       end
     
       contract Symbol, Ksplat[
@@ -111,11 +163,14 @@ module ReeDao
           instance_variable_set(:@threads, [])
         end
 
+        if !instance_variable_get("@thread_store_#{Thread.current.object_id}".to_sym)
+          instance_variable_set("@thread_store_#{Thread.current.object_id}".to_sym, {})
+        end
+
         t = Thread.new do
           list = opts[:list]
-
           return if list.empty?
-  
+
           assoc_dao = if !opts[:assoc_dao]
             self.instance_variable_get("@#{assoc_name}")
           else
@@ -130,27 +185,25 @@ module ReeDao
           end
 
           root_ids = list.map(&:id)
-
           items = assoc_dao.where(foreign_key => root_ids).all
 
-          nested_assoc = if block_given?
-            block.call(items)
-          end
-
-          if nested_assoc
-            attr = nested_assoc.keys.first
-
+          if block_given?
+            nested_assoc = block.call(items)
             items.each do |item|
-              setter = "set_#{attr}"
-              value = nested_assoc[attr][item.id]
-              item.send(setter, value)
+              nested_assoc.keys.each do |attr_name|
+                setter = "set_#{attr_name}"
+                value = nested_assoc[attr_name][item.id]
+                ss = item.send(setter, value)
+              end
             end
           end
           
-          { assoc_name => group_by(items) { _1.send(foreign_key) } }
+          store = instance_variable_get("@thread_store_#{Thread.current.parent.object_id}".to_sym)
+          store.merge!({ assoc_name => group_by(items) { _1.send(foreign_key) }})
+          store
         end
 
-        if !block_given?
+        if @threads.include?(find_parent_thread(t))
           t.join
           t.value
         else
@@ -161,6 +214,14 @@ module ReeDao
     
       def field(name, **opts)
         # TODO
+      end
+
+      private
+
+      def find_parent_thread(thr)
+        return thr if thr.parent == Thread.main
+
+        find_parent_thread(thr.parent)
       end
     end
   end
