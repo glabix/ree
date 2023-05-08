@@ -29,7 +29,7 @@ class ReeDao::LoadAgg
       load_associations(list, opts, &block)
     end
     
-    populate_associations(list, associations, opts)
+    populate_associations(list, associations)
 
     if ids_or_scope.is_a?(Array)
       list.sort_by { ids_or_scope.index(_1.id) }
@@ -41,7 +41,7 @@ class ReeDao::LoadAgg
   private
 
   def load_associations(list, opts, &block)
-    threads = block.call(list)
+    threads = block.call(list, opts)
 
     threads.map do |t|
       t.join
@@ -49,7 +49,7 @@ class ReeDao::LoadAgg
     end.reduce(&:merge)
   end
 
-  def populate_associations(list, associations, opts)
+  def populate_associations(list, associations)
     return if !associations
 
     attrs = associations.keys

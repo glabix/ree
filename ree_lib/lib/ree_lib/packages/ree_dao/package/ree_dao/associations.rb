@@ -38,6 +38,10 @@ module ReeDao
           instance_variable_set("@thread_store_#{Thread.current.object_id}".to_sym, {})
         end
 
+        if !instance_variable_get(:@thread_store)
+          instance_variable_set(:@thread_store, {})
+        end
+
         t = Thread.new do
           list = opts[:list]
           return if list.empty?
@@ -70,7 +74,8 @@ module ReeDao
             end
           end
   
-          store = instance_variable_get("@thread_store_#{Thread.current.parent.object_id}")
+          @thread_store[Thread.current.parent.object_id] ||= {}
+          store = @thread_store[Thread.current.parent.object_id]
           store.merge!({ assoc_name => index_by(items) { _1.send(foreign_key) } })
           store
         end
@@ -95,8 +100,8 @@ module ReeDao
           instance_variable_set(:@threads, [])
         end
 
-        if !instance_variable_get("@thread_store_#{Thread.current.object_id}".to_sym)
-          instance_variable_set("@thread_store_#{Thread.current.object_id}".to_sym, {})
+        if !instance_variable_get(:@thread_store)
+          instance_variable_set(:@thread_store, {})
         end
 
         t = Thread.new do
@@ -138,7 +143,8 @@ module ReeDao
             end
           end
   
-          store = instance_variable_get("@thread_store_#{Thread.current.parent.object_id}".to_sym)
+          @thread_store[Thread.current.parent.object_id] ||= {}
+          store = @thread_store[Thread.current.parent.object_id]
           store.merge!({ assoc_name => index_by(items) { _1.send(foreign_key) } })
           store
         end
@@ -163,8 +169,8 @@ module ReeDao
           instance_variable_set(:@threads, [])
         end
 
-        if !instance_variable_get("@thread_store_#{Thread.current.object_id}".to_sym)
-          instance_variable_set("@thread_store_#{Thread.current.object_id}".to_sym, {})
+        if !instance_variable_get(:@thread_store)
+          instance_variable_set(:@thread_store, {})
         end
 
         t = Thread.new do
@@ -198,7 +204,8 @@ module ReeDao
             end
           end
           
-          store = instance_variable_get("@thread_store_#{Thread.current.parent.object_id}".to_sym)
+          @thread_store[Thread.current.parent.object_id] ||= {}
+          store = @thread_store[Thread.current.parent.object_id]
           store.merge!({ assoc_name => group_by(items) { _1.send(foreign_key) }})
           store
         end
@@ -212,8 +219,18 @@ module ReeDao
         end
       end
     
-      def field(name, **opts)
-        # TODO
+      contract(
+        Symbol,
+        Ksplat[
+          assoc_dao?: Sequel::Dataset, # TODO: change to ReeDao::Dao class?
+          list?: Or[Sequel::Dataset, Array]
+        ], Optblock => Any
+      )
+      def field(name, **opts, &block)
+        list = opts[:list]
+        return if list.empty?
+
+
       end
 
       private

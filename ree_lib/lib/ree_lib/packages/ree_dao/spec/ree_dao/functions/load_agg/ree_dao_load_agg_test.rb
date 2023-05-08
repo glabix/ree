@@ -71,13 +71,88 @@ class ReeDaoLoadAggTest::User
     @passport
   end
 
-  def set_books(books)
-    @books = books
+  # def set_books(books)
+  #   @books = books
+  # end
+
+  # def books
+  #   @books
+  # end
+
+  [
+    :books,
+    :movies,
+    :videogames,
+    :hobbies,
+    :vinyls,
+    :pets,
+    :skills,
+    :dreams
+  ].each do |attr|
+    define_method("set_#{attr}") do |*args|
+      instance_variable_set("@#{attr}", *args)
+    end
+
+    define_method("#{attr}") do
+      instance_variable_get("@#{attr}")
+    end
   end
 
-  def books
-    @books
-  end
+  # def set_books(books)
+  #   @books = books
+  # end
+
+  # def books
+  #   @books
+  # end
+
+  # def set_books(books)
+  #   @books = books
+  # end
+
+  # def books
+  #   @books
+  # end
+
+  # def set_books(books)
+  #   @books = books
+  # end
+
+  # def books
+  #   @books
+  # end
+
+  # def set_books(books)
+  #   @books = books
+  # end
+
+  # def books
+  #   @books
+  # end
+
+  # def set_books(books)
+  #   @books = books
+  # end
+
+  # def books
+  #   @books
+  # end
+
+  # def set_books(books)
+  #   @books = books
+  # end
+
+  # def books
+  #   @books
+  # end
+
+  # def set_books(books)
+  #   @books = books
+  # end
+
+  # def books
+  #   @books
+  # end
 
   attr_accessor :name, :age, :organization_id
 end
@@ -93,6 +168,76 @@ class ReeDaoLoadAggTest::UserPassport
   )
 
   attr_accessor :info, :user_id
+end
+
+class ReeDaoLoadAggTest::Movie
+  include ReeDto::EntityDSL
+
+  properties(
+    id: Nilor[Integer],
+    user_id: Integer,
+    title: Nilor[String]
+  )
+end
+
+class ReeDaoLoadAggTest::Videogame
+  include ReeDto::EntityDSL
+
+  properties(
+    id: Nilor[Integer],
+    user_id: Integer,
+    title: Nilor[String]
+  )
+end
+
+class ReeDaoLoadAggTest::Hobby
+  include ReeDto::EntityDSL
+
+  properties(
+    id: Nilor[Integer],
+    user_id: Integer,
+    title: Nilor[String]
+  )
+end
+
+class ReeDaoLoadAggTest::Vinyl
+  include ReeDto::EntityDSL
+
+  properties(
+    id: Nilor[Integer],
+    user_id: Integer,
+    title: Nilor[String]
+  )
+end
+
+class ReeDaoLoadAggTest::Pet
+  include ReeDto::EntityDSL
+
+  properties(
+    id: Nilor[Integer],
+    user_id: Integer,
+    name: Nilor[String]
+  )
+end
+
+class ReeDaoLoadAggTest::Skill
+  include ReeDto::EntityDSL
+
+  properties(
+    id: Nilor[Integer],
+    user_id: Integer,
+    title: Nilor[String]
+  )
+end
+
+class ReeDaoLoadAggTest::Dream
+  include ReeDto::EntityDSL
+
+  properties(
+    id: Nilor[Integer],
+    user_id: Integer,
+    description: Nilor[String]
+  )
 end
 
 class ReeDaoLoadAggTest::Book
@@ -234,6 +379,118 @@ class ReeDaoLoadAggTest::UserPassports
     integer :id, null: true
     integer :user_id
     string :info
+  end
+end
+
+class ReeDaoLoadAggTest::Movies
+  include ReeDao::DSL
+
+  dao :movies do
+    link :db
+  end
+
+  table :movies
+
+  schema ReeDaoLoadAggTest::Movie do
+    integer :id, null: true
+    integer :user_id
+    string :title
+  end
+end
+
+class ReeDaoLoadAggTest::Videogames
+  include ReeDao::DSL
+
+  dao :videogames do
+    link :db
+  end
+
+  table :videogames
+
+  schema ReeDaoLoadAggTest::Videogame do
+    integer :id, null: true
+    integer :user_id
+    string :title
+  end
+end
+
+class ReeDaoLoadAggTest::Hobbies
+  include ReeDao::DSL
+
+  dao :hobbies do
+    link :db
+  end
+
+  table :hobbies
+
+  schema ReeDaoLoadAggTest::Hobby do
+    integer :id, null: true
+    integer :user_id
+    string :title
+  end
+end
+
+class ReeDaoLoadAggTest::Vinyls
+  include ReeDao::DSL
+
+  dao :vinyls do
+    link :db
+  end
+
+  table :vinyls
+
+  schema ReeDaoLoadAggTest::Vinyl do
+    integer :id, null: true
+    integer :user_id
+    string :title
+  end
+end
+
+class ReeDaoLoadAggTest::Pets
+  include ReeDao::DSL
+
+  dao :pets do
+    link :db
+  end
+
+  table :pets
+
+  schema ReeDaoLoadAggTest::Pet do
+    integer :id, null: true
+    integer :user_id
+    string :name
+  end
+end
+
+class ReeDaoLoadAggTest::Skills
+  include ReeDao::DSL
+
+  dao :skills do
+    link :db
+  end
+
+  table :skills
+
+  schema ReeDaoLoadAggTest::Skill do
+    integer :id, null: true
+    integer :user_id
+    string :title
+  end
+end
+
+class ReeDaoLoadAggTest::Dreams
+  include ReeDao::DSL
+
+  dao :dreams do
+    link :db
+  end
+
+  table :dreams
+
+  schema ReeDaoLoadAggTest::Dream do
+    integer :id, null: true
+    integer :user_id
+    string :description
   end
 end
 
