@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+require 'faker'
+require 'benchmark'
 
 RSpec.describe :load_agg do
   link :build_sqlite_connection, from: :ree_dao
@@ -102,12 +104,11 @@ RSpec.describe :load_agg do
 
         has_many :books, list: list do |list|
           has_one :author, list: list
+          has_many :chapters, list: list
           
           has_many :reviews, list: list do |list|
             has_one :review_author, list: list
           end
-
-          has_many :chapters, list: list
         end
 
         has_one :passport, foreign_key: :user_id, assoc_dao: user_passports, list: list
