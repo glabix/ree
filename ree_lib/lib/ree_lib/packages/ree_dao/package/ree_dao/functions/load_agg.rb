@@ -41,6 +41,13 @@ class ReeDao::LoadAgg
   private
 
   def load_associations(list, opts, &block)
+    dto_class = list.first.class
+    block.binding.eval("@nested_store = {}")
+    block.binding.eval("@nested_store[0] = {}")
+    block.binding.eval("@nested_store[0][:dto_class] = #{dto_class}")
+    block.binding.eval("@nested_store[0][:list] = #{list.map(&:to_h)}")
+    block.binding.eval("@current_level = 0")
+    
     threads = block.call(list, opts)
 
     threads.map do |t|

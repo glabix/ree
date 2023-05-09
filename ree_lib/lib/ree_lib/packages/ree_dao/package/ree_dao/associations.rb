@@ -26,16 +26,11 @@ module ReeDao
   
       contract Symbol, Ksplat[
         foreign_key?: Symbol,
-        assoc_dao?: Sequel::Dataset, # TODO: change to ReeDao::Dao class?,
-        list?: Or[Sequel::Dataset, Array]
+        assoc_dao?: Sequel::Dataset, # TODO: change to ReeDao::Dao class?
       ], Optblock => Any
       def belongs_to(assoc_name, **opts, &block)
         if !instance_variable_get(:@threads)
           instance_variable_set(:@threads, []) 
-        end
-
-        if !instance_variable_get("@thread_store_#{Thread.current.object_id}".to_sym)
-          instance_variable_set("@thread_store_#{Thread.current.object_id}".to_sym, {})
         end
 
         if !instance_variable_get(:@thread_store)
@@ -43,9 +38,16 @@ module ReeDao
         end
 
         t = Thread.new do
-          list = opts[:list]
+          dto = current_level_store_dto
+          list = if current_level_store_list.first.is_a?(Hash)
+            current_level_store_list.map do |v|
+              dto.new(**v)
+            end
+          else
+            current_level_store_list
+          end
           return if list.empty?
-  
+
           assoc_dao = if !opts[:assoc_dao]
              self.instance_variable_get("@#{assoc_name}s")
           else
@@ -63,7 +65,12 @@ module ReeDao
           items = assoc_dao.where(foreign_key => root_ids).all
 
           if block_given?
-            nested_assoc = block.call(items)
+            @current_level += 1
+            @nested_store[@current_level] = {}
+            @nested_store[@current_level][:dto] = items.first.class
+            @nested_store[@current_level][:list] = items
+
+            nested_assoc = block.call
 
             items.each do |item|
               nested_assoc.keys.each do |attr_name|
@@ -72,6 +79,8 @@ module ReeDao
                 item.send(setter, value)
               end
             end
+
+            @current_level -= 1
           end
   
           @thread_store[Thread.current.parent.object_id] ||= {}
@@ -93,7 +102,6 @@ module ReeDao
         foreign_key?: Symbol,
         primary_key?: Symbol,
         assoc_dao?: Sequel::Dataset, # TODO: change to ReeDao::Dao class?
-        list?: Or[Sequel::Dataset, Array]
       ], Optblock => Any
       def has_one(assoc_name, **opts, &block)
         if !instance_variable_get(:@threads)
@@ -105,7 +113,14 @@ module ReeDao
         end
 
         t = Thread.new do
-          list = opts[:list]
+          dto = current_level_store_dto
+          list = if current_level_store_list.first.is_a?(Hash)
+            current_level_store_list.map do |v|
+              dto.new(**v)
+            end
+          else
+            current_level_store_list
+          end
           return if list.empty?
   
           assoc_dao = if !opts[:assoc_dao]
@@ -132,6 +147,11 @@ module ReeDao
           items = assoc_dao.where(foreign_key => root_ids).all
 
           if block_given?
+            @current_level += 1
+            @nested_store[@current_level] = {}
+            @nested_store[@current_level][:dto] = items.first.class
+            @nested_store[@current_level][:list] = items
+
             nested_assoc = block.call(items)
 
             items.each do |item|
@@ -141,6 +161,8 @@ module ReeDao
                 item.send(setter, value)
               end
             end
+
+            @current_level -= 1
           end
   
           @thread_store[Thread.current.parent.object_id] ||= {}
@@ -174,7 +196,14 @@ module ReeDao
         end
 
         t = Thread.new do
-          list = opts[:list]
+          dto = current_level_store_dto
+          list = if current_level_store_list.first.is_a?(Hash)
+            current_level_store_list.map do |v|
+              dto.new(**v)
+            end
+          else
+            current_level_store_list
+          end
           return if list.empty?
 
           assoc_dao = if !opts[:assoc_dao]
@@ -194,6 +223,11 @@ module ReeDao
           items = assoc_dao.where(foreign_key => root_ids).all
 
           if block_given?
+            @current_level += 1
+            @nested_store[@current_level] = {}
+            @nested_store[@current_level][:dto] = items.first.class
+            @nested_store[@current_level][:list] = items
+
             nested_assoc = block.call(items)
             items.each do |item|
               nested_assoc.keys.each do |attr_name|
@@ -202,6 +236,8 @@ module ReeDao
                 ss = item.send(setter, value)
               end
             end
+
+            @current_level -= 1
           end
           
           @thread_store[Thread.current.parent.object_id] ||= {}
@@ -239,6 +275,14 @@ module ReeDao
         return thr if thr.parent == Thread.main
 
         find_parent_thread(thr.parent)
+      end
+
+      def current_level_store_list
+        @nested_store[@current_level][:list]
+      end
+
+      def current_level_store_dto
+        @nested_store[@current_level][:dto_class]
       end
     end
   end
