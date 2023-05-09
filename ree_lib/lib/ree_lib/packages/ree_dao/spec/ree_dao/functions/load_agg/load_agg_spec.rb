@@ -99,19 +99,19 @@ RSpec.describe :load_agg do
     end
 
     def call
-      load_agg(users.by_name("John"), users) do |list|
-        belongs_to :organization, list: list
+      load_agg(users.by_name("John"), users) do
+        belongs_to :organization
 
-        has_many :books, list: list do |list|
-          has_one :author, list: list
-          has_many :chapters, list: list
+        has_many :books do 
+          has_one :author
+          has_many :chapters
           
-          has_many :reviews, list: list do |list|
-            has_one :review_author, list: list
+          has_many :reviews do
+            has_one :review_author
           end
         end
 
-        has_one :passport, foreign_key: :user_id, assoc_dao: user_passports, list: list
+        has_one :passport, foreign_key: :user_id, assoc_dao: user_passports
       end
     end
   end
