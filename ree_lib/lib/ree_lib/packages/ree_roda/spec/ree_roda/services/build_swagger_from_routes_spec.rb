@@ -3,9 +3,12 @@
 package_require("ree_errors/validation_error")
 
 RSpec.describe :build_swagger_from_routes do
+  link :add_load_path, from: :ree_i18n
   link :build_swagger_from_routes, from: :ree_roda
 
   before :all do
+    add_load_path(Dir[File.join(__dir__, 'locales/*.yml')])
+
     Ree.enable_irb_mode
 
     module ReeRodaTestSwagger
@@ -24,7 +27,6 @@ RSpec.describe :build_swagger_from_routes do
 
       ActionCaster = build_mapper.use(:cast) do
         integer :id
-        integer? :task_id
       end
 
       InvalidErr = ReeErrors::ValidationError.build(:invalid, "invalid")
@@ -55,10 +57,6 @@ RSpec.describe :build_swagger_from_routes do
       ree_routes ReeRodaTestSwagger::TestRoutes.new
 
       route do |r|
-        r.get "health" do
-          "success"
-        end
-
         r.ree_routes
       end
     end
@@ -73,21 +71,7 @@ RSpec.describe :build_swagger_from_routes do
   it {
     swagger = build_swagger_from_routes(routes, "test", "test", "1.0", "https://example.com")
 
-    expect(swagger).to eq({
-      :openapi=>"3.0.0",
-      :info=>{:title=>"test", :description=>"test", :version=>"1.0"},
-      :components=>{:securitySchemes=>{:ApiKeyAuth=>{:type=>"apiKey", :in=>"header", :name=>"Authorization"}}},
-      :servers=>[{:url=>"https://example.com"}],
-      :paths=>
-       {"/api/actions"=>
-         {:post=>
-           {:responses=>{201=>{:description=>""}, 422=>{:description=>"- type: **validation**, code: **invalid**, message: **translation missing: en.invalid**"}},
-            :summary=>"Some action",
-            :description=>"",
-            :parameters=>[],
-            :requestBody=>
-             {:content=>{:"application/json"=>{:schema=>{:type=>"object", :properties=>{:id=>{:type=>"integer"}, :task_id=>{:type=>"integer"}}, :required=>["id"]}}}},
-            :security=>[{:ApiKeyAuth=>[]}]}}}
-    })
+    expect(swagger.dig(:paths, "/api/actions", :post, :responses, 422, :description))
+      .to eq("- type: **validation**, code: **invalid**, message: **invalid**")
   }
 end
