@@ -42,14 +42,6 @@
       ]
     },
     {
-      "target": "slice",
-      "package_name": "ree_hash",
-      "as": "slice",
-      "imports": [
-
-      ]
-    },
-    {
       "target": "to_json",
       "package_name": "ree_json",
       "as": "to_json",

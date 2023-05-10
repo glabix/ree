@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'webmock/rspec'
+require "tempfile"
 
 RSpec.describe :http_post do
   link :http_post, from: :ree_http
@@ -69,6 +70,26 @@ RSpec.describe :http_post do
         query: {"a"=>200, "q"=> 100, "s"=> "simple"},
         body: "abc"
       )
+
+      http_post(
+        host,
+        body: { foo: "bar" }
+      )
+      expect(WebMock).to have_requested(:post, host).with(body: "{\"foo\":\"bar\"}")
+
+      begin
+        tempfile = Tempfile.new
+        tempfile.write("hello world")
+        tempfile.rewind
+
+        http_post(
+          host,
+          body: File.open(tempfile.path)
+        )
+        expect(WebMock).to have_requested(:post, host).with(body: "hello world")
+      ensure
+        tempfile&.close!
+      end
 
       # works !
       # response = http_post(
