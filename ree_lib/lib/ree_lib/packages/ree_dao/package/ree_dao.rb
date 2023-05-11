@@ -26,4 +26,8 @@ module ReeDao
   def self.drop_cache(thread)
     ReeDao::Cache.delete_cache(thread)
   end
+
+  def self.load_sync_associations_enabled?
+    ENV.has_key?("REE_DAO_SYNC_ASSOCIATIONS") && ENV["REE_DAO_SYNC_ASSOCIATIONS"] == "true"
+  end
 end
