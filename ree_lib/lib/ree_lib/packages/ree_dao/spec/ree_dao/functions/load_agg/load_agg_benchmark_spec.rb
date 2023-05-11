@@ -130,19 +130,19 @@ RSpec.describe :load_agg do
     end
 
     def call
-      load_agg(users.by_name("John"), users) do |list|
-        belongs_to :organization, list: list
+      load_agg(users.all.map(&:id), users) do
+        belongs_to :organization
 
-        has_many :books, list: list
-        has_many :movies, list: list
-        has_many :videogames, list: list
-        has_many :hobbies, list: list
-        has_many :vinyls, list: list
-        has_many :pets, list: list
-        has_many :skills, list: list
-        has_many :dreams, list: list
+        has_many :books
+        has_many :movies
+        has_many :videogames
+        has_many :hobbies
+        has_many :vinyls
+        has_many :pets
+        has_many :skills
+        has_many :dreams
 
-        has_one :passport, foreign_key: :user_id, assoc_dao: user_passports, list: list
+        has_one :passport, foreign_key: :user_id, assoc_dao: user_passports
       end
     end
   end
@@ -251,7 +251,7 @@ RSpec.describe :load_agg do
     organizations.put(organization)
 
     _users = []
-    100.times do
+    1000.times do
       u = ReeDaoLoadAggTest::User.new(
         name: Faker::Name.name,
         age: rand(18..50),
@@ -347,13 +347,20 @@ RSpec.describe :load_agg do
 
     res1 = nil
     res2 = nil
+    res3 = nil
 
     b1 = Benchmark.measure("load_agg") do
-      res1 = load_agg(users.all.map(&:id), users)
+      res1 = users_agg.call()
     end
 
-    b2 = Benchmark.measure("sync_fetcher") do
-      res2 = users_sync_fetcher.call(
+    b2 = Benchmark.measure("sync_load_agg") do
+      ENV['REE_DAO_SYNC_ASSOCIATIONS'] = "true"
+      res2 = users_agg.call()
+      ENV.delete('REE_DAO_SYNC_ASSOCIATIONS')
+    end
+
+    b3 = Benchmark.measure("sync_fetcher") do
+      res3 = users_sync_fetcher.call(
         users.all.map(&:id),
         include: [
           :organization,
@@ -372,9 +379,12 @@ RSpec.describe :load_agg do
 
     puts b1
     puts b2
+    puts b3
 
-    expect(res1).to eq(res2)
-    expect(b1.real).to be < b2.real    
+    expect(res1).to eq(res3)
+    expect(res2).to eq(res3)
+    expect(b1.real).to be < b2.real
+    expect(b1.real).to be < b3.real
   }
 
 end

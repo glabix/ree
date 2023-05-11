@@ -42,18 +42,22 @@ class ReeDao::LoadAgg
 
   def load_associations(list, opts, &block)
     dto_class = list.first.class
-    block.binding.eval("@nested_store = {}")
-    block.binding.eval("@nested_store[0] = {}")
-    block.binding.eval("@nested_store[0][:dto_class] = #{dto_class}")
-    block.binding.eval("@nested_store[0][:list] = #{list.map(&:to_h)}")
+    block.binding.eval("@nested_list_store = {}")
+    block.binding.eval("@nested_list_store[0] = {}")
+    block.binding.eval("@nested_list_store[0][:dto_class] = #{dto_class}")
+    block.binding.eval("@nested_list_store[0][:list] = #{list.map(&:to_h)}")
     block.binding.eval("@current_level = 0")
-    
-    threads = block.call(list, opts)
 
-    threads.map do |t|
-      t.join
-      t.value
-    end.reduce(&:merge)
+    if ReeDao.load_sync_associations_enabled?
+      block.call.reduce(&:merge)
+    else
+      threads = block.call
+  
+      threads.map do |t|
+        t.join
+        t.value
+      end.reduce(&:merge)
+    end
   end
 
   def populate_associations(list, associations)
@@ -65,7 +69,7 @@ class ReeDao::LoadAgg
         setter = get_setter_name(attr)
         value = associations[attr][item.id]
         item.send(setter, value)
-      end      
+      end
     end
   end
 
