@@ -17,7 +17,7 @@
         {
           "arg": "conn_opts",
           "arg_type": "req",
-          "type": "{:database => String, :readonly? => Bool, :timeout? => Integer, :max_connections? => Integer}"
+          "type": "{:database => String, :readonly? => Bool, :timeout? => Integer, :max_connections? => Integer, :pool_timeout? => Integer}"
         },
         {
           "arg": "opts",

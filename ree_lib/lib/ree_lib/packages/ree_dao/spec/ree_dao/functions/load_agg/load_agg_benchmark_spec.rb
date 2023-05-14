@@ -129,8 +129,8 @@ RSpec.describe :load_agg do
       link :load_agg, from: :ree_dao
     end
 
-    def call
-      load_agg(users.all.map(&:id), users) do
+    def call(ids_or_scope)
+      load_agg(ids_or_scope, users) do
         belongs_to :organization
 
         has_many :books
@@ -203,8 +203,8 @@ RSpec.describe :load_agg do
         one_to_many(list, hobbies.order(:id), assoc_setter: :set_hobbies)
       end
 
-      if include.include?(:books)
-        one_to_many(list, books.order(:id))
+      if include.include?(:skills)
+        one_to_many(list, skills.order(:id))
       end
 
       if include.include?(:vinyls)
@@ -251,7 +251,7 @@ RSpec.describe :load_agg do
     organizations.put(organization)
 
     _users = []
-    1000.times do
+    100.times do
       u = ReeDaoLoadAggTest::User.new(
         name: Faker::Name.name,
         age: rand(18..50),
@@ -350,12 +350,12 @@ RSpec.describe :load_agg do
     res3 = nil
 
     b1 = Benchmark.measure("load_agg") do
-      res1 = users_agg.call()
+      res1 = users_agg.call(users.all.map(&:id))
     end
 
     b2 = Benchmark.measure("sync_load_agg") do
       ENV['REE_DAO_SYNC_ASSOCIATIONS'] = "true"
-      res2 = users_agg.call()
+      res2 = users_agg.call(users.all.map(&:id))
       ENV.delete('REE_DAO_SYNC_ASSOCIATIONS')
     end
 

@@ -26,6 +26,7 @@ class ReeDao::BuildPgConnection
       search_path?: String,
       use_iso_date_format?: Bool,
       max_connections?: Integer,
+      pool_timeout?: Integer
     },
     Ksplat[
       RestKeys => Any # inherited from `build_connection` opts
