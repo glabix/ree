@@ -17,6 +17,9 @@
       "name": "ree_enum"
     },
     {
+      "name": "ree_hash"
+    },
+    {
       "name": "ree_mapper"
     },
     {

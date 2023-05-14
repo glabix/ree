@@ -4,6 +4,7 @@ class ReeDao::LoadAgg
   include Ree::FnDSL
 
   fn :load_agg do
+    link :merge, from: :ree_hash
   end
 
   contract(
@@ -49,12 +50,12 @@ class ReeDao::LoadAgg
     block.binding.eval("@current_level = 0")
 
     if ReeDao.load_sync_associations_enabled?
-      block.call.reduce(&:merge)
+      associations = block.call
+      associations.reduce { |a,b| merge(a, b, deep: true) }
     else
       threads = block.call
   
       threads.map do |t|
-        t.join
         t.value
       end.reduce(&:merge)
     end
@@ -69,11 +70,43 @@ class ReeDao::LoadAgg
         setter = get_setter_name(attr)
         value = associations[attr][item.id]
         item.send(setter, value)
+        # check if we have nested associations in hash
+        if associations[attr].keys.any? { _1.is_a?(Symbol) }
+          nested_keys = associations[attr].keys.select { _1.is_a?(Symbol) }
+          if value.is_a?(Array)
+            value.each do |v|
+              set_nested_associations(nested_keys, associations[attr], v)
+            end
+          else
+            set_nested_associations(nested_keys, associations[attr], value)
+          end
+        end
       end
     end
   end
 
   def get_setter_name(attribute)
     "set_#{attribute}"
+  end
+
+  def set_nested_associations(keys, assocs, item)
+    return unless item
+
+    keys.each do |attr|
+      setter = get_setter_name(attr)
+      value = assocs[attr][item.id]
+      item.send(setter, value)
+
+      if assocs[attr].keys.any? { _1.is_a?(Symbol) }
+        nested_keys = assocs[attr].keys.select { _1.is_a?(Symbol) }
+        if value.is_a?(Array)
+          value.each do |v|
+            set_nested_associations(nested_keys, assocs[attr], v)
+          end
+        else
+          set_nested_associations(nested_keys, assocs[attr], value)
+        end
+      end
+    end
   end
 end

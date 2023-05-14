@@ -102,11 +102,13 @@ RSpec.describe :load_agg do
       load_agg(users.by_name("John"), users) do
         belongs_to :organization
 
-        has_many :books do 
+        has_many :books do
           has_one :author
           has_many :chapters
           
-          has_many :reviews
+          has_many :reviews do
+            has_one :review_author
+          end
         end
 
         has_one :passport, foreign_key: :user_id, assoc_dao: user_passports
@@ -172,7 +174,7 @@ RSpec.describe :load_agg do
     expect(res_user.books.count).to eq(2)
     expect(res_user.books[0].author.name).to eq("George Orwell")
     expect(res_user.books[0].chapters.count).to eq(3)
-    # expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review") # TODO: nested sync
+    expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review") # TODO: nested sync
   }
 
   it {

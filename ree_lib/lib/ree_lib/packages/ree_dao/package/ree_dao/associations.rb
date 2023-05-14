@@ -38,29 +38,41 @@ module ReeDao
             instance_variable_set(:@sync_store, [])
           end
 
-          assoc = { 
-            assoc_name => one_to_one(
-              assoc_name,
-              foreign_key: opts[:foreign_key],
-              assoc_dao: opts[:assoc_dao],
-              reverse: false,
-              block: block
-            ) 
-          }
+          assoc = one_to_one(
+            assoc_name,
+            foreign_key: opts[:foreign_key],
+            assoc_dao: opts[:assoc_dao],
+            reverse: false
+          )
+
+          if block_given?
+            items = assoc.values.flatten
+            @current_level += 1
+            @nested_list_store[@current_level] ||= {}
+            @nested_list_store[@current_level][:dto] = items.first.class
+            @nested_list_store[@current_level][:list] = items
+            @nested_list_store[@current_level][:parent_assoc] ||= []
+
+            previous_parent_assoc = @nested_list_store.dig(@current_level - 1, :parent_assoc)
+
+            if previous_parent_assoc && previous_parent_assoc.size > 0
+              @nested_list_store[@current_level][:parent_assoc].push(*previous_parent_assoc)
+            end
+            
+            @nested_list_store[@current_level][:parent_assoc] << assoc_name
+            
+            yield
+
+            @nested_list_store[@current_level][:parent_assoc] = []
+            @current_level -= 1
+          end
 
           if @current_level == 0
-            @store = {}
-            @sync_store << assoc
+            @sync_store << { assoc_name => assoc }
             @sync_store
           else
-            if block
-              @store[block.object_id] ||= {}
-              @store[block.object_id].merge!(assoc)
-              @store[block.object_id]
-            else
-              @store.merge!(assoc)
-              @store
-            end
+            @sync_store << [*@nested_list_store[@current_level][:parent_assoc], assoc_name].reverse.inject(assoc) { |assigned_value, key| { key => assigned_value } }
+            @sync_store
           end
         else
           if !instance_variable_get(:@threads)
@@ -83,7 +95,6 @@ module ReeDao
           end
   
           if @threads.include?(find_parent_thread(t))
-            t.join
             t.value
           else
             @threads << t
@@ -106,23 +117,41 @@ module ReeDao
             instance_variable_set(:@sync_store, [])
           end
           
-          assoc = { 
-            assoc_name => one_to_one(
-              assoc_name,
-              foreign_key: opts[:foreign_key],
-              assoc_dao: opts[:assoc_dao],
-              reverse: true,
-              block: block
-            )
-          }
+          assoc = one_to_one(
+            assoc_name,
+            foreign_key: opts[:foreign_key],
+            assoc_dao: opts[:assoc_dao],
+            reverse: true
+          )
+
+          if block_given?
+            items = assoc.values.flatten
+            @current_level += 1
+            @nested_list_store[@current_level] ||= {}
+            @nested_list_store[@current_level][:dto] = items.first.class
+            @nested_list_store[@current_level][:list] = items
+            @nested_list_store[@current_level][:parent_assoc] ||= []
+
+            previous_parent_assoc = @nested_list_store.dig(@current_level - 1, :parent_assoc)
+
+            if previous_parent_assoc && previous_parent_assoc.size > 0
+              @nested_list_store[@current_level][:parent_assoc].push(*previous_parent_assoc)
+            end
+            
+            @nested_list_store[@current_level][:parent_assoc] << assoc_name
+            
+            yield
+            
+            @nested_list_store[@current_level][:parent_assoc] = []
+            @current_level -= 1
+          end
 
           if @current_level == 0
-            @store = {}
-            @sync_store << assoc
+            @sync_store << { assoc_name => assoc }
             @sync_store
           else
-            @store.merge!(assoc)
-            @store
+            @sync_store << [*@nested_list_store[@current_level][:parent_assoc], assoc_name].reverse.inject(assoc) { |assigned_value, key| { key => assigned_value } }
+            @sync_store
           end
         else
           if !instance_variable_get(:@threads)
@@ -138,14 +167,13 @@ module ReeDao
               block: block
             )
 
-            @store[Thread.current.parent.object_id] ||= {}
+            @store[Thread.current.object_id] ||= {}
             store = @store[Thread.current.parent.object_id]
             store.merge!({ assoc_name => items })
             store
           end
   
           if @threads.include?(find_parent_thread(t))
-            t.join
             t.value
           else
             @threads << t
@@ -168,28 +196,40 @@ module ReeDao
             instance_variable_set(:@sync_store, [])
           end
 
-          assoc = {
-            assoc_name => one_to_many(
-              assoc_name,
-              foreign_key: opts[:foreign_key],
-              assoc_dao: opts[:assoc_dao],
-              block: block
-            )
-          }
+          assoc = one_to_many(
+            assoc_name,
+            foreign_key: opts[:foreign_key],
+            assoc_dao: opts[:assoc_dao]
+          )
+
+          if block_given?
+            items = assoc.values.flatten
+            @current_level += 1
+            @nested_list_store[@current_level] ||= {}
+            @nested_list_store[@current_level][:dto] = items.first.class
+            @nested_list_store[@current_level][:list] = items
+            @nested_list_store[@current_level][:parent_assoc] ||= []
+            previous_parent_assoc = @nested_list_store.dig(@current_level - 1, :parent_assoc)
+
+            if previous_parent_assoc && previous_parent_assoc.size > 0
+              @nested_list_store[@current_level][:parent_assoc].push(*previous_parent_assoc)
+            end
+            
+            @nested_list_store[@current_level][:parent_assoc] << assoc_name
+            
+            yield
+
+            @nested_list_store[@current_level][:parent_assoc] = []
+            
+            @current_level -= 1
+          end
 
           if @current_level == 0
-            @store = {}
-            @sync_store << assoc
+            @sync_store << { assoc_name => assoc }
             @sync_store
           else
-            if block
-              @store[block.object_id] ||= {}
-              @store[block.object_id].merge!(assoc)
-              @store[block.object_id]
-            else
-              @store.merge!(assoc)
-              @store
-            end
+            @sync_store << [*@nested_list_store[@current_level][:parent_assoc], assoc_name].reverse.inject(assoc) { |assigned_value, key| { key => assigned_value } }
+            @sync_store
           end
         else
           if !instance_variable_get(:@threads)
@@ -211,7 +251,6 @@ module ReeDao
           end
   
           if @threads.include?(find_parent_thread(t))
-            t.join
             t.value
           else
             @threads << t
@@ -267,25 +306,6 @@ module ReeDao
         end
 
         items = assoc_dao.where(foreign_key => root_ids).all
-
-        if block
-          @current_level += 1
-          @nested_list_store[@current_level] ||= {}
-          @nested_list_store[@current_level][:dto] = items.first.class
-          @nested_list_store[@current_level][:list] = items
-
-          nested_assoc = block.call(items)
-          items.each do |item|
-            nested_assoc.keys.each do |attr_name|
-              setter = "set_#{attr_name}"
-              value = nested_assoc[attr_name][item.id]
-              ss = item.send(setter, value)
-            end
-          end
-
-          @current_level -= 1
-        end
-
         index_by(items) { _1.send(foreign_key) }
       end
 
@@ -306,24 +326,6 @@ module ReeDao
 
         root_ids = list.map(&:id)
         items = assoc_dao.where(foreign_key => root_ids).all
-
-        if block
-          @current_level += 1
-          @nested_list_store[@current_level] = {}
-          @nested_list_store[@current_level][:dto] = items.first.class
-          @nested_list_store[@current_level][:list] = items
-
-          nested_assoc = block.call(items)
-          items.each do |item|
-            nested_assoc.keys.each do |attr_name|
-              setter = "set_#{attr_name}"
-              value = nested_assoc[attr_name][item.id]
-              ss = item.send(setter, value)
-            end
-          end
-
-          @current_level -= 1
-        end
 
         group_by(items) { _1.send(foreign_key) }
       end

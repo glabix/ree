@@ -21,7 +21,7 @@ class ReeDaoLoadAggTest::Db
   end
 
   def build
-    build_sqlite_connection({database: 'sqlite_db'})
+    build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30})
   end
 end
 

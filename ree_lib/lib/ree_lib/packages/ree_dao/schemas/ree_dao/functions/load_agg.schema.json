@@ -38,6 +38,13 @@
     }
   ],
   "links": [
+    {
+      "target": "merge",
+      "package_name": "ree_hash",
+      "as": "merge",
+      "imports": [
 
+      ]
+    }
   ]
 }
