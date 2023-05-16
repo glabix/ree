@@ -50,14 +50,9 @@ class ReeDao::LoadAgg
     block.binding.eval("@current_level = 0")
 
     if ReeDao.load_sync_associations_enabled?
-      associations = block.call
-      associations.reduce { |a,b| merge(a, b, deep: true) }
+      block.call.reduce { |a,b| merge(a, b, deep: true) }
     else
-      threads = block.call
-  
-      threads.map do |t|
-        t.value
-      end.reduce(&:merge)
+      block.call.map(&:value).reduce { |a,b| merge(a, b, deep: true) }
     end
   end
 

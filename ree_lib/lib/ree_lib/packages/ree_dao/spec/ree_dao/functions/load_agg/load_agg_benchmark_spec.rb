@@ -11,7 +11,7 @@ RSpec.describe :load_agg do
   end
 
   before :all do
-    connection = build_sqlite_connection({database: 'sqlite_db'})
+    connection = build_sqlite_connection({database: 'sqlite_db',  pool_timeout: 30, max_connections: 100})
 
     connection.drop_table(:organizations) if connection.table_exists?(:organizations)
     connection.drop_table(:users) if connection.table_exists?(:users)
@@ -107,10 +107,10 @@ RSpec.describe :load_agg do
 
   require_relative 'ree_dao_load_agg_test'
 
-  class ReeDaoLoadAggTest::UsersAgg
+  class ReeDaoLoadAggTest::UsersAggBenchmark
     include ReeDao::AggregateDSL
 
-    aggregate :users_agg do
+    aggregate :users_agg_benchmark do
       link :users, from: :ree_dao_load_agg_test
       link :organizations, from: :ree_dao_load_agg_test
       link :user_passports, from: :ree_dao_load_agg_test
@@ -122,10 +122,6 @@ RSpec.describe :load_agg do
       link :pets, from: :ree_dao_load_agg_test
       link :skills, from: :ree_dao_load_agg_test
       link :dreams, from: :ree_dao_load_agg_test
-      # link :chapters, from: :ree_dao_load_agg_test
-      # link :authors, from: :ree_dao_load_agg_test
-      # link :reviews, from: :ree_dao_load_agg_test
-      # link :review_authors, from: :ree_dao_load_agg_test
       link :load_agg, from: :ree_dao
     end
 
@@ -231,7 +227,7 @@ RSpec.describe :load_agg do
     end
   end
 
-  let(:users_agg) { ReeDaoLoadAggTest::UsersAgg.new }
+  let(:users_agg) { ReeDaoLoadAggTest::UsersAggBenchmark.new }
   let(:users_sync_fetcher) { ReeDaoLoadAggTest::UsersSyncFetcher.new }
 
   let(:organizations) { ReeDaoLoadAggTest::Organizations.new }
