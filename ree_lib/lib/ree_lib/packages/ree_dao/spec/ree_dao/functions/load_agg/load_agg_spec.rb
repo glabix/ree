@@ -11,7 +11,7 @@ RSpec.describe :load_agg do
   end
 
   before :all do
-    connection = build_sqlite_connection({database: 'sqlite_db'})
+    connection = build_sqlite_connection({database: 'sqlite_db',  pool_timeout: 30, max_connections: 100})
 
     connection.drop_table(:organizations) if connection.table_exists?(:organizations)
     connection.drop_table(:users) if connection.table_exists?(:users)
@@ -112,6 +112,8 @@ RSpec.describe :load_agg do
         end
 
         has_one :passport, foreign_key: :user_id, assoc_dao: user_passports
+
+        # field :custom_field, scope: books.where(title: "1984")
       end
     end
   end
@@ -174,7 +176,8 @@ RSpec.describe :load_agg do
     expect(res_user.books.count).to eq(2)
     expect(res_user.books[0].author.name).to eq("George Orwell")
     expect(res_user.books[0].chapters.count).to eq(3)
-    expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review") # TODO: nested sync
+    expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review")
+    # expect(res_user.custom_field).to_not eq(nil)
   }
 
   it {

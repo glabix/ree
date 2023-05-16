@@ -18,6 +18,7 @@ module ReeDao
       base.link :group_by, from: :ree_array
       base.link :underscore, from: :ree_string
       base.link :demodulize, from: :ree_string
+      base.link :merge, from: :ree_hash
     end
   
     module InstanceMethods
@@ -60,7 +61,7 @@ module ReeDao
             end
             
             @nested_list_store[@current_level][:parent_assoc] << assoc_name
-            
+
             yield
 
             @nested_list_store[@current_level][:parent_assoc] = []
@@ -80,7 +81,7 @@ module ReeDao
           end
   
           t = Thread.new do
-            items = one_to_one(
+            assoc = one_to_one(
               assoc_name,
               foreign_key: opts[:foreign_key],
               assoc_dao: opts[:assoc_dao],
@@ -88,10 +89,22 @@ module ReeDao
               block: block
             )
 
+            if block_given?
+              items = assoc.values.flatten
+              @current_level += 1
+              @nested_list_store[@current_level] ||= {}
+              @nested_list_store[@current_level][:dto] = items.first.class
+              @nested_list_store[@current_level][:list] = items
+              
+              nested = yield
+              assoc = merge(assoc, nested, deep: true)
+              
+              @current_level -= 1
+            end
+
             @store[Thread.current.parent.object_id] ||= {}
-            store = @store[Thread.current.parent.object_id]
-            store.merge!({ assoc_name => items })
-            store
+            @store[Thread.current.parent.object_id].merge!({ assoc_name => assoc })
+            @store[Thread.current.parent.object_id]
           end
   
           if @threads.include?(find_parent_thread(t))
@@ -141,7 +154,7 @@ module ReeDao
             @nested_list_store[@current_level][:parent_assoc] << assoc_name
             
             yield
-            
+
             @nested_list_store[@current_level][:parent_assoc] = []
             @current_level -= 1
           end
@@ -159,7 +172,7 @@ module ReeDao
           end
   
           t = Thread.new do
-            items = one_to_one(
+            assoc = one_to_one(
               assoc_name,
               foreign_key: opts[:foreign_key],
               assoc_dao: opts[:assoc_dao],
@@ -167,10 +180,22 @@ module ReeDao
               block: block
             )
 
-            @store[Thread.current.object_id] ||= {}
-            store = @store[Thread.current.parent.object_id]
-            store.merge!({ assoc_name => items })
-            store
+            if block_given?
+              items = assoc.values.flatten
+              @current_level += 1
+              @nested_list_store[@current_level] ||= {}
+              @nested_list_store[@current_level][:dto] = items.first.class
+              @nested_list_store[@current_level][:list] = items
+              
+              nested = yield
+              assoc = merge(assoc, nested, deep: true)
+
+              @current_level -= 1
+            end
+
+            @store[Thread.current.parent.object_id] ||= {}
+            @store[Thread.current.parent.object_id].merge!({ assoc_name => assoc })
+            @store[Thread.current.parent.object_id]
           end
   
           if @threads.include?(find_parent_thread(t))
@@ -220,7 +245,6 @@ module ReeDao
             yield
 
             @nested_list_store[@current_level][:parent_assoc] = []
-            
             @current_level -= 1
           end
 
@@ -237,17 +261,29 @@ module ReeDao
           end
   
           t = Thread.new do
-            items = one_to_many(
+            assoc = one_to_many(
               assoc_name,
               foreign_key: opts[:foreign_key],
               assoc_dao: opts[:assoc_dao],
               block: block
             )
 
+            if block_given?
+              items = assoc.values.flatten
+              @current_level += 1
+              @nested_list_store[@current_level] ||= {}
+              @nested_list_store[@current_level][:dto] = items.first.class
+              @nested_list_store[@current_level][:list] = items
+              
+              nested = yield
+              assoc = merge(assoc, nested, deep: true)
+
+              @current_level -= 1
+            end
+
             @store[Thread.current.parent.object_id] ||= {}
-            store = @store[Thread.current.parent.object_id]
-            store.merge!({ assoc_name => items })
-            store
+            @store[Thread.current.parent.object_id].merge!({ assoc_name => assoc })
+            @store[Thread.current.parent.object_id]
           end
   
           if @threads.include?(find_parent_thread(t))

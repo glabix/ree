@@ -7,6 +7,7 @@ module ReeDaoLoadAggTest
     depends_on :ree_dao
     depends_on :ree_array
     depends_on :ree_string
+    depends_on :ree_hash
   end
 end
 
@@ -21,7 +22,7 @@ class ReeDaoLoadAggTest::Db
   end
 
   def build
-    build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30})
+    build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100})
   end
 end
 
@@ -71,15 +72,9 @@ class ReeDaoLoadAggTest::User
     @passport
   end
 
-  # def set_books(books)
-  #   @books = books
-  # end
-
-  # def books
-  #   @books
-  # end
-
   [
+    :organization,
+    :passport,
     :books,
     :movies,
     :videogames,
@@ -87,7 +82,8 @@ class ReeDaoLoadAggTest::User
     :vinyls,
     :pets,
     :skills,
-    :dreams
+    :dreams,
+    :custom_field
   ].each do |attr|
     define_method("set_#{attr}") do |*args|
       instance_variable_set("@#{attr}", *args)
@@ -97,62 +93,6 @@ class ReeDaoLoadAggTest::User
       instance_variable_get("@#{attr}")
     end
   end
-
-  # def set_books(books)
-  #   @books = books
-  # end
-
-  # def books
-  #   @books
-  # end
-
-  # def set_books(books)
-  #   @books = books
-  # end
-
-  # def books
-  #   @books
-  # end
-
-  # def set_books(books)
-  #   @books = books
-  # end
-
-  # def books
-  #   @books
-  # end
-
-  # def set_books(books)
-  #   @books = books
-  # end
-
-  # def books
-  #   @books
-  # end
-
-  # def set_books(books)
-  #   @books = books
-  # end
-
-  # def books
-  #   @books
-  # end
-
-  # def set_books(books)
-  #   @books = books
-  # end
-
-  # def books
-  #   @books
-  # end
-
-  # def set_books(books)
-  #   @books = books
-  # end
-
-  # def books
-  #   @books
-  # end
 
   attr_accessor :name, :age, :organization_id
 end
