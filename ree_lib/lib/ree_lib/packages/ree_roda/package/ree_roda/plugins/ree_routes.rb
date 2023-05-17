@@ -78,9 +78,6 @@ class Roda
                   r.instance_exec(@_request, route.warden_scope, &r.scope.opts[:ree_routes_before])
                 end
 
-                # TODO: implement me when migration to roda DSL happens
-                # if route.before; end
-
                 params = r.params
 
                 if r.body
@@ -149,8 +146,10 @@ class Roda
                     r.instance_exec(r, &child_proc)
                   end
 
-                  route_procs.each do |route_proc|
-                    r.instance_exec(r, &route_proc)
+                  r.is do
+                    route_procs.each do |route_proc|
+                      r.instance_exec(r, &route_proc)
+                    end
                   end
 
                   nil
@@ -163,8 +162,10 @@ class Roda
                     r.instance_exec(r, &child_proc)
                   end
 
-                  route_procs.each do |route_proc|
-                    r.instance_exec(r, &route_proc)
+                  r.is do
+                    route_procs.each do |route_proc|
+                      r.instance_exec(r, &route_proc)
+                    end
                   end
 
                   nil
@@ -179,16 +180,20 @@ class Roda
                     r.params[route_part] = param_val
                   end
 
-                  route_procs.each do |route_proc|
-                    r.instance_exec(r, &route_proc)
+                  r.is do
+                    route_procs.each do |route_proc|
+                      r.instance_exec(r, &route_proc)
+                    end
                   end
 
                   nil
                 end
               else
                 r.is route_parts[0] do
-                  route_procs.each do |route_proc|
-                    r.instance_exec(r, &route_proc)
+                  r.is do
+                    route_procs.each do |route_proc|
+                      r.instance_exec(r, &route_proc)
+                    end
                   end
 
                   nil
