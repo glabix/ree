@@ -100,6 +100,7 @@ RSpec.describe :load_agg do
 
     def call
       load_agg(users.by_name("John"), users) do
+        field :custom_field, books.where(title: "1984")
         belongs_to :organization
 
         has_many :books do
@@ -112,8 +113,6 @@ RSpec.describe :load_agg do
         end
 
         has_one :passport, foreign_key: :user_id, assoc_dao: user_passports
-
-        # field :custom_field, scope: books.where(title: "1984")
       end
     end
   end
@@ -177,7 +176,7 @@ RSpec.describe :load_agg do
     expect(res_user.books[0].author.name).to eq("George Orwell")
     expect(res_user.books[0].chapters.count).to eq(3)
     expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review")
-    # expect(res_user.custom_field).to_not eq(nil)
+    expect(res_user.custom_field).to_not eq(nil)
   }
 
   it {

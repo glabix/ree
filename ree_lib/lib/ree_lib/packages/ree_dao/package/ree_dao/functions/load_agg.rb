@@ -43,16 +43,25 @@ class ReeDao::LoadAgg
 
   def load_associations(list, opts, &block)
     dto_class = list.first.class
-    block.binding.eval("@nested_list_store = {}")
-    block.binding.eval("@nested_list_store[0] = {}")
-    block.binding.eval("@nested_list_store[0][:dto_class] = #{dto_class}")
-    block.binding.eval("@nested_list_store[0][:list] = #{list.map(&:to_h)}")
-    block.binding.eval("@current_level = 0")
+
+    block.binding.eval(<<-CODE, __FILE__, __LINE__ + 1)
+      if ReeDao.load_sync_associations_enabled?
+        @nested_list_store = {}
+        @nested_list_store[0] = {}
+        @nested_list_store[0][:dto_class] = #{dto_class}
+        @nested_list_store[0][:list] = #{list.map(&:to_h)}
+        @current_level = 0
+      else
+        Thread.current[:list] = #{list.map(&:to_h)}
+        Thread.current[:dto_class] = #{dto_class}
+      end
+    CODE
 
     if ReeDao.load_sync_associations_enabled?
       block.call.reduce { |a,b| merge(a, b, deep: true) }
     else
-      block.call.map(&:value).reduce { |a,b| merge(a, b, deep: true) }
+      thr = block.call.map(&:value)
+      thr.reduce { |a,b| merge(a, b, deep: true) }
     end
   end
 
