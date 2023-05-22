@@ -12,7 +12,7 @@
       "throws": [
 
       ],
-      "return": "Any",
+      "return": "ArrayOf[Any]",
       "args": [
         {
           "arg": "ids_or_scope",
@@ -21,8 +21,8 @@
         },
         {
           "arg": "dao",
-          "arg_type": "req",
-          "type": "Sequel::Dataset"
+          "arg_type": "opt",
+          "type": "Nilor[Proc#call]"
         },
         {
           "arg": "opts",

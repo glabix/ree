@@ -11,7 +11,7 @@ RSpec.describe :load_agg do
   end
 
   before :all do
-    connection = build_sqlite_connection({database: 'sqlite_db',  pool_timeout: 30, max_connections: 100})
+    connection = build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100}, single_threaded: false)
 
     connection.drop_table(:organizations) if connection.table_exists?(:organizations)
     connection.drop_table(:users) if connection.table_exists?(:users)
@@ -98,21 +98,20 @@ RSpec.describe :load_agg do
       link :load_agg, from: :ree_dao
     end
 
-    def call
+    def call()
       load_agg(users.by_name("John"), users) do
-        field :custom_field, books.where(title: "1984")
         belongs_to :organization
-
-        has_many :books do
+        has_many :books, books do
           has_one :author
           has_many :chapters
-          
+        
           has_many :reviews do
             has_one :review_author
           end
         end
-
+        
         has_one :passport, foreign_key: :user_id, assoc_dao: user_passports
+        field :custom_field, books.where(title: "1984")
       end
     end
   end
