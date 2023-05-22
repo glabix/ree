@@ -22,7 +22,7 @@ class ReeDaoLoadAggTest::Db
   end
 
   def build
-    build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100})
+    build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100}, single_threaded: false)
   end
 end
 

@@ -2,12 +2,10 @@ module ReeDao
   module AggregateDSL
     def self.included(base)
       base.extend(ClassMethods)
-      base.include(ReeDao::Associations)
     end
 
     def self.extended(base)
       base.extend(ClassMethods)
-      base.include(ReeDao::Associations)
     end
 
     module ClassMethods
