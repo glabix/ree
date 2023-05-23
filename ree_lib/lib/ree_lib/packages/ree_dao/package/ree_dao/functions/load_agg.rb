@@ -4,7 +4,6 @@ class ReeDao::LoadAgg
   include Ree::FnDSL
 
   fn :load_agg do
-    link :merge, from: :ree_hash
     link "ree_dao/associations", -> { Associations }
   end
 
@@ -30,11 +29,8 @@ class ReeDao::LoadAgg
 
     list = scope.all
 
-    if block_given?
-      associations = load_associations(list, opts, &block)
-      list = populate_associations(list, associations)
-    end
-    
+    load_associations(list, opts, &block) if block_given?
+
     if ids_or_scope.is_a?(Array)
       list.sort_by { ids_or_scope.index(_1.id) }
     else
@@ -52,73 +48,10 @@ class ReeDao::LoadAgg
         .reduce({}) { |hsh, var| hsh[var] = self.instance_variable_get(var); hsh }
     CODE
 
-    if ReeDao.load_sync_associations_enabled?
-      Associations.new(list, dao).instance_exec(&block)
-      # block.call.reduce { |a,b| merge(a, b, deep: true) }
+    if !ReeDao.load_sync_associations_enabled?
+      Associations.new(list, dao).instance_exec(&block).map(&:join)
     else
-      thr = block.call.map(&:value)
-      thr.reduce { |a,b| merge(a, b, deep: true) }
+      Associations.new(list, dao).instance_exec(&block)
     end
-  end
-
-  def populate_associations(list, associations)
-    return if !associations
-
-    attrs = associations.keys
-    list.each do |item|
-      attrs.each do |attr_name|
-        setter = get_setter_name(attr_name)
-        value = associations[attr_name][item.id]
-        item.send(setter, value)
-      end
-    end
-
-    list
-    # list.each do |item|
-    #   if ReeDao.load_sync_associations_enabled?
-    #     attrs.each do |attr|
-    #       setter = get_setter_name(attr)
-    #       value = associations[attr][item.id]
-    #       item.send(setter, value)
-    #       # check if we have nested associations in hash
-    #       if associations[attr].keys.any? { _1.is_a?(Symbol) }
-    #         nested_keys = associations[attr].keys.select { _1.is_a?(Symbol) }
-    #         if value.is_a?(Array)
-    #           value.each do |v|
-    #             set_nested_associations(nested_keys, associations[attr], v)
-    #           end
-    #         else
-    #           set_nested_associations(nested_keys, associations[attr], value)
-    #         end
-    #       end
-    #     end
-    #   else
-    #     threads = []
-    #     attrs.each do |attr|
-    #       threads << Thread.new do
-    #         setter = get_setter_name(attr)
-    #         value = associations[attr][item.id]
-    #         item.send(setter, value)
-    #         # check if we have nested associations in hash
-    #         if associations[attr].keys.any? { _1.is_a?(Symbol) }
-    #           nested_keys = associations[attr].keys.select { _1.is_a?(Symbol) }
-    #           if value.is_a?(Array)
-    #             value.each do |v|
-    #               set_nested_associations(nested_keys, associations[attr], v)
-    #             end
-    #           else
-    #             set_nested_associations(nested_keys, associations[attr], value)
-    #           end
-    #         end
-    #       end
-    #     end
-
-    #     threads.map(&:join)
-    #   end
-    # end
-  end
-
-  def get_setter_name(attribute)
-    "set_#{attribute}"
   end
 end
