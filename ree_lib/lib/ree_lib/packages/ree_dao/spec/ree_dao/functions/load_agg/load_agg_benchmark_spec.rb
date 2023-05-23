@@ -6,12 +6,14 @@ RSpec.describe :load_agg do
   link :build_sqlite_connection, from: :ree_dao
   link :load_agg, from: :ree_dao
 
+  NUM_OF_USERS = 100
+
   after do
     Ree.disable_irb_mode
   end
 
   before :all do
-    connection = build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100}, single_threaded: false)
+    connection = build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100})
 
     connection.drop_table(:organizations) if connection.table_exists?(:organizations)
     connection.drop_table(:users) if connection.table_exists?(:users)
@@ -247,7 +249,9 @@ RSpec.describe :load_agg do
     organizations.put(organization)
   
     _users = []
-    100.times do
+    st_time = Time.now
+    puts "Starting to seed #{NUM_OF_USERS} users..."
+    NUM_OF_USERS.times do
       u = ReeDaoLoadAggTest::User.new(
         name: Faker::Name.name,
         age: rand(18..50),
@@ -340,25 +344,28 @@ RSpec.describe :load_agg do
         )
       end
     end
+
+    puts "Seeding is complete! #{Time.now - st_time}"
   end
 
   it {
-    # res1 = nil
+    res1 = nil
     res2 = nil
     res3 = nil
 
-    # b1 = Benchmark.measure("load_agg") do
-    #   res1 = users_agg.call(users.all.map(&:id))
-    # end
+    benchmark_res = Benchmark.bm do |x|
+      x.report("async_load_agg") do
+        res1 = users_agg.call(users.all.map(&:id))
+      end
 
-    b2 = Benchmark.measure("sync_load_agg") do
-      ENV['REE_DAO_SYNC_ASSOCIATIONS'] = "true"
-      res2 = users_agg.call(users.all.map(&:id))
-      ENV.delete('REE_DAO_SYNC_ASSOCIATIONS')
-    end
+      x.report("sync_load_agg ") do
+        ENV['REE_DAO_SYNC_ASSOCIATIONS'] = "true"
+        res2 = users_agg.call(users.all.map(&:id))
+        ENV.delete('REE_DAO_SYNC_ASSOCIATIONS')
+      end
 
-    b3 = Benchmark.measure("sync_fetcher") do
-      res3 = users_sync_fetcher.call(
+      x.report("sync_fetcher  ") do
+        res3 = users_sync_fetcher.call(
         users.all.map(&:id),
         include: [
           :organization,
@@ -373,16 +380,13 @@ RSpec.describe :load_agg do
           :passport
         ]
       )
+      end
     end
 
-    # puts b1
-    puts b2
-    puts b3
-
-    # expect(res1).to eq(res3)
+    expect(res1).to eq(res3)
     expect(res2).to eq(res3)
-    # expect(b1.real).to be < b2.real
-    # expect(b1.real).to be < b3.real
+    expect(benchmark_res[0].real).to be < benchmark_res[1].real
+    expect(benchmark_res[0].real).to be < benchmark_res[2].real
   }
 
 end

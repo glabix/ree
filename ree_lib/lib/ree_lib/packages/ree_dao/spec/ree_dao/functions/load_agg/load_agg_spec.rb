@@ -11,7 +11,7 @@ RSpec.describe :load_agg do
   end
 
   before :all do
-    connection = build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100}, single_threaded: false)
+    connection = build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100})
 
     connection.drop_table(:organizations) if connection.table_exists?(:organizations)
     connection.drop_table(:users) if connection.table_exists?(:users)
