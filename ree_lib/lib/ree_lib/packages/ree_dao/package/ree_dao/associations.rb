@@ -9,12 +9,13 @@ module ReeDao
     link :index_by, from: :ree_array
     link :underscore, from: :ree_string
 
-    attr_reader :list, :dao
+    attr_reader :list, :dao, :global_opts
 
-    def initialize(list, dao)
+    def initialize(list, dao, **opts)
       @list = list
       @dao = dao
-      @threads = []
+      @threads = [] if !sync_mode?
+      @global_opts = opts
 
       dao.each do |k, v|
         instance_variable_set(k, v)
@@ -77,6 +78,14 @@ module ReeDao
       association(__method__, assoc_name, scope, **opts, &block)
     end
 
+    contract(
+      Sequel::Dataset,
+      Ksplat[RestKeys => Any] => Any
+    ) 
+    def build_scope(scope, **opts)
+      # TODO
+    end
+
     private
 
     contract(
@@ -96,14 +105,31 @@ module ReeDao
       Optblock => Any
     )
     def association(assoc_type, assoc_name, scope = nil, **opts, &block)
-      scope = opts[assoc_name] if opts[assoc_name]
-      if ReeDao.load_sync_associations_enabled?
+      scope = opts[assoc_name] if opts[assoc_name] && !global_opts[assoc_name]
+      scope = global_opts[assoc_name] if !opts[assoc_name] && global_opts[assoc_name]
+
+      if sync_mode?
         load_association(assoc_type, assoc_name, scope, **opts, &block)
       else
         @threads << Thread.new do
           load_association(assoc_type, assoc_name, scope, **opts, &block)
         end
       end
+    end
+
+    def load_association(assoc_type, assoc_name, scope, **opts, &block)
+      assoc = load_association_by_type(
+        assoc_type,
+        assoc_name,
+        scope,
+        **opts
+      )
+
+      process_block(assoc, &block) if block_given?
+      
+      populate_association(list, assoc, assoc_name)
+
+      list
     end
 
     def load_association_by_type(type, assoc_name, scope, **opts)
@@ -145,6 +171,15 @@ module ReeDao
       end
     end
 
+    def process_block(assoc, &block)
+      assoc_list = assoc.values.flatten
+      if sync_mode?
+        ReeDao::Associations.new(assoc_list, dao, **global_opts).instance_exec(&block)
+      else
+        ReeDao::Associations.new(assoc_list, dao, **global_opts).instance_exec(&block).map(&:join)
+      end
+    end
+
     def one_to_one(assoc_name, list, scope, foreign_key: nil, assoc_dao: nil, reverse: true)
       return if list.empty?
 
@@ -163,12 +198,18 @@ module ReeDao
         list.map(&:"#{foreign_key}")
       end
 
-      if scope
-        items = scope.is_a?(Sequel::Dataset) ? scope.all : scope
-      else
-        items = assoc_dao.where(foreign_key => root_ids).all
-      end
+      default_scope = assoc_dao&.where(foreign_key => root_ids)
 
+      items = if scope
+        if scope.is_a?(Sequel::Dataset)
+          scope.all
+        else
+          scope.call(default_scope).all
+        end
+      else
+        default_scope.all
+      end
+      
       index_by(items) { _1.send(foreign_key) }
     end
 
@@ -181,37 +222,19 @@ module ReeDao
 
       root_ids = list.map(&:id)
 
-      if scope
-        items = scope.is_a?(Sequel::Dataset) ? scope.all : scope
+      default_scope = assoc_dao&.where(foreign_key => root_ids)
+
+      items = if scope
+        if scope.is_a?(Sequel::Dataset)
+          scope.all
+        else
+          scope.call(default_scope).all
+        end
       else
-        items = assoc_dao.where(foreign_key => root_ids).all
+        default_scope.all
       end
 
       group_by(items) { _1.send(foreign_key) }
-    end
-
-    def process_block(assoc, &block)
-      assoc_list = assoc.values.flatten
-      if ReeDao.load_sync_associations_enabled?
-        ReeDao::Associations.new(assoc_list, dao).instance_exec(&block)
-      else
-        ReeDao::Associations.new(assoc_list, dao).instance_exec(&block).map(&:join)
-      end
-    end
-
-    def load_association(assoc_type, assoc_name, scope, **opts, &block)
-      assoc = load_association_by_type(
-        assoc_type,
-        assoc_name,
-        scope,
-        **opts
-      )
-
-      process_block(assoc, &block) if block_given?
-      
-      populate_association(list, assoc, assoc_name)
-
-      list
     end
 
     def populate_association(list, assoc, assoc_name)
@@ -220,6 +243,10 @@ module ReeDao
         value = assoc[item.id]
         item.send(setter, value)
       end
+    end
+
+    def sync_mode?
+      ReeDao.load_sync_associations_enabled?
     end
   end
 end

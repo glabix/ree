@@ -7,6 +7,7 @@ RSpec.describe :load_agg do
   link :load_agg, from: :ree_dao
 
   NUM_OF_USERS = 100
+  ASSOC_COUNT = 10
 
   after do
     Ree.disable_irb_mode
@@ -263,7 +264,7 @@ RSpec.describe :load_agg do
     end
   
     _users.each do |user|
-      10.times do
+      ASSOC_COUNT.times do
         books.put(
           ReeDaoLoadAggTest::Book.new(
             title: Faker::Book.title,
@@ -272,7 +273,7 @@ RSpec.describe :load_agg do
         )
       end
   
-      10.times do
+      ASSOC_COUNT.times do
         movies.put(
           ReeDaoLoadAggTest::Movie.new(
             user_id: user.id,
@@ -281,7 +282,7 @@ RSpec.describe :load_agg do
         )
       end
   
-      10.times do
+      ASSOC_COUNT.times do
         videogames.put(
           ReeDaoLoadAggTest::Videogame.new(
             user_id: user.id,
@@ -290,7 +291,7 @@ RSpec.describe :load_agg do
         )
       end
   
-      10.times do
+      ASSOC_COUNT.times do
         hobbies.put(
           ReeDaoLoadAggTest::Hobby.new(
             user_id: user.id,
@@ -299,7 +300,7 @@ RSpec.describe :load_agg do
         )
       end
   
-      10.times do
+      ASSOC_COUNT.times do
         vinyls.put(
           ReeDaoLoadAggTest::Vinyl.new(
             user_id: user.id,
@@ -308,7 +309,7 @@ RSpec.describe :load_agg do
         )
       end
   
-      10.times do
+      ASSOC_COUNT.times do
         pets.put(
           ReeDaoLoadAggTest::Pet.new(
             user_id: user.id,
@@ -317,7 +318,7 @@ RSpec.describe :load_agg do
         )
       end
   
-      10.times do
+      ASSOC_COUNT.times do
         skills.put(
           ReeDaoLoadAggTest::Skill.new(
             user_id: user.id,
@@ -326,7 +327,7 @@ RSpec.describe :load_agg do
         )
       end
   
-      10.times do
+      ASSOC_COUNT.times do
         dreams.put(
           ReeDaoLoadAggTest::Dream.new(
             user_id: user.id,
@@ -335,7 +336,7 @@ RSpec.describe :load_agg do
         )
       end
   
-      10.times do
+      ASSOC_COUNT.times do
         user_passports.put(
           ReeDaoLoadAggTest::UserPassport.new(
             user_id: user.id,
@@ -384,7 +385,29 @@ RSpec.describe :load_agg do
     end
 
     expect(res1).to eq(res3)
+    expect(res1[0].organization).to eq(res3[0].organization)
+    expect(res1[0].passport).to eq(res3[0].passport)
+    expect(res1[0].books).to eq(res3[0].books)
+    expect(res1[0].movies).to eq(res3[0].movies)
+    expect(res1[0].books).to eq(res3[0].books)
+    expect(res1[0].videogames).to eq(res3[0].videogames)
+    expect(res1[0].hobbies).to eq(res3[0].hobbies)
+    expect(res1[0].vinyls).to eq(res3[0].vinyls)
+    expect(res1[0].pets).to eq(res3[0].pets)
+    expect(res1[0].skills).to eq(res3[0].skills)
+    expect(res1[0].dreams).to eq(res3[0].dreams)
+
     expect(res2).to eq(res3)
+    expect(res2[0].organization).to eq(res3[0].organization)
+    expect(res2[0].books).to eq(res3[0].books)
+    expect(res2[0].movies).to eq(res3[0].movies)
+    expect(res2[0].videogames).to eq(res3[0].videogames)
+    expect(res2[0].hobbies).to eq(res3[0].hobbies)
+    expect(res2[0].vinyls).to eq(res3[0].vinyls)
+    expect(res2[0].pets).to eq(res3[0].pets)
+    expect(res2[0].skills).to eq(res3[0].skills)
+    expect(res2[0].dreams).to eq(res3[0].dreams)
+
     expect(benchmark_res[0].real).to be < benchmark_res[1].real
     expect(benchmark_res[0].real).to be < benchmark_res[2].real
   }

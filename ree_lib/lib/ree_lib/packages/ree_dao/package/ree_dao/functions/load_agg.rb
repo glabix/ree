@@ -5,16 +5,18 @@ class ReeDao::LoadAgg
 
   fn :load_agg do
     link "ree_dao/associations", -> { Associations }
+    link "ree_dao/contract/dao_dataset_contract", -> { DaoDatasetContract }
+    link "ree_dao/contract/entity_contract", -> { EntityContract }
   end
 
   contract(
-    Or[Sequel::Dataset, ArrayOf[Integer], Integer],
-    Nilor[-> (v) { v.class.ancestors.include?(ReeDao::DatasetExtensions::InstanceMethods) }],
+    Or[Sequel::Dataset, ArrayOf[Integer], ArrayOf[EntityContract], Integer],
+    Nilor[DaoDatasetContract],
     Ksplat[RestKeys => Any],
     Optblock => ArrayOf[Any]
   )
   def call(ids_or_scope, dao = nil, **opts, &block)
-    scope = if ids_or_scope.is_a?(Array)
+    scope = if ids_or_scope.is_a?(Array) && ids_or_scope.any? { _1.is_a?(Integer) }
       raise ArgumentError.new("Dao should be provided") if dao.nil?
       return [] if ids_or_scope.empty?
 
@@ -27,9 +29,9 @@ class ReeDao::LoadAgg
       ids_or_scope
     end
 
-    list = scope.all
+    list = scope.is_a?(Sequel::Dataset) ? scope.all : scope
 
-    load_associations(list, opts, &block) if block_given?
+    load_associations(list, **opts, &block) if block_given?
 
     if ids_or_scope.is_a?(Array)
       list.sort_by { ids_or_scope.index(_1.id) }
@@ -40,7 +42,7 @@ class ReeDao::LoadAgg
 
   private
 
-  def load_associations(list, opts, &block)
+  def load_associations(list, **opts, &block)
     dao = block.binding.eval(<<-CODE, __FILE__, __LINE__ + 1)
       vars = self.instance_variables
       vars
@@ -48,10 +50,10 @@ class ReeDao::LoadAgg
         .reduce({}) { |hsh, var| hsh[var] = self.instance_variable_get(var); hsh }
     CODE
 
-    if !ReeDao.load_sync_associations_enabled?
-      Associations.new(list, dao).instance_exec(&block).map(&:join)
+    if ReeDao.load_sync_associations_enabled?
+      Associations.new(list, dao, **opts).instance_exec(&block)
     else
-      Associations.new(list, dao).instance_exec(&block)
+      Associations.new(list, dao, **opts).instance_exec(&block).map(&:join)
     end
   end
 end

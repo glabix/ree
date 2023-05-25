@@ -17,12 +17,12 @@
         {
           "arg": "ids_or_scope",
           "arg_type": "req",
-          "type": "Or[Sequel::Dataset, ArrayOf[Integer], Integer]"
+          "type": "Or[Sequel::Dataset, ArrayOf[Integer], ArrayOf[PackageName::Entity], Integer]"
         },
         {
           "arg": "dao",
           "arg_type": "opt",
-          "type": "Nilor[Proc#call]"
+          "type": "Nilor[PackageName::DaoName::Dao: \"SELECT * FROM `table`\"]"
         },
         {
           "arg": "opts",
