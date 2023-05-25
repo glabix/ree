@@ -98,8 +98,8 @@ RSpec.describe :load_agg do
       link :load_agg, from: :ree_dao
     end
 
-    def call()
-      load_agg(users.by_name("John"), users) do
+    def call(ids_or_scope, dao, **opts)
+      load_agg(ids_or_scope, dao, **opts) do
         belongs_to :organization
         has_many :books, books do
           has_one :author
@@ -164,7 +164,11 @@ RSpec.describe :load_agg do
     reviews.put(ReeDaoLoadAggTest::Review.new(book_id: book_1.id, rating: 7))
     review_authors.put(ReeDaoLoadAggTest::ReviewAuthor.new(review_id: review.id, name: "John Review"))
 
-    res = users_agg.call()
+    res = users_agg.call(
+      users.all,
+      users,
+      chapters: -> (scope) { scope.where(title: "beginning") }
+    )
 
     res_user = res[0]
     expect(res_user.id).to eq(user_1.id)
@@ -173,7 +177,7 @@ RSpec.describe :load_agg do
     expect(res_user.passport.info).to eq("some info")
     expect(res_user.books.count).to eq(2)
     expect(res_user.books[0].author.name).to eq("George Orwell")
-    expect(res_user.books[0].chapters.count).to eq(3)
+    expect(res_user.books.flat_map { _1.chapters }.map(&:title).uniq).to eq(["beginning"])
     expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review")
     expect(res_user.custom_field).to_not eq(nil)
   }
