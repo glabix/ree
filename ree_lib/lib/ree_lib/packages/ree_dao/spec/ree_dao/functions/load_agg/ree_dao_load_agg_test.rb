@@ -14,15 +14,24 @@ end
 class ReeDaoLoadAggTest::Db
   include Ree::BeanDSL
 
+  DB_CONFIG = {
+    host: "localhost",
+    user: "postgres",
+    database: "postgres",
+    password: "password",
+    adapter: "postgres",
+    max_connections: 100
+  }.freeze
+
   bean :db do
     singleton
     factory :build
 
-    link :build_sqlite_connection, from: :ree_dao
+    link :build_pg_connection, from: :ree_dao
   end
 
   def build
-    build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100})
+    build_pg_connection(DB_CONFIG)
   end
 end
 
