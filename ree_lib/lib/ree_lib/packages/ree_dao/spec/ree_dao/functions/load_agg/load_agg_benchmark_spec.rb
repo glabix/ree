@@ -3,7 +3,7 @@ require 'faker'
 require 'benchmark'
 
 RSpec.describe :load_agg do
-  link :build_sqlite_connection, from: :ree_dao
+  link :build_pg_connection, from: :ree_dao
   link :load_agg, from: :ree_dao
 
   NUM_OF_USERS = 100
@@ -14,19 +14,28 @@ RSpec.describe :load_agg do
   end
 
   before :all do
-    connection = build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100})
+    DB_CONFIG = {
+      host: "localhost",
+      user: "postgres",
+      database: "postgres",
+      password: "password",
+      adapter: "postgres",
+      max_connections: 100
+    }.freeze
 
-    connection.drop_table(:organizations) if connection.table_exists?(:organizations)
-    connection.drop_table(:users) if connection.table_exists?(:users)
-    connection.drop_table(:user_passports) if connection.table_exists?(:user_passports)
-    connection.drop_table(:books) if connection.table_exists?(:books)
-    connection.drop_table(:movies) if connection.table_exists?(:movies)
-    connection.drop_table(:videogames) if connection.table_exists?(:videogames)
-    connection.drop_table(:hobbies) if connection.table_exists?(:hobbies)
-    connection.drop_table(:vinyls) if connection.table_exists?(:vinyls)
-    connection.drop_table(:pets) if connection.table_exists?(:pets)
-    connection.drop_table(:skills) if connection.table_exists?(:skills)
-    connection.drop_table(:dreams) if connection.table_exists?(:dreams)
+    connection = build_pg_connection(DB_CONFIG)
+
+    connection.drop_table(:organizations, cascade: true) if connection.table_exists?(:organizations)
+    connection.drop_table(:users, cascade: true) if connection.table_exists?(:users)
+    connection.drop_table(:user_passports, cascade: true) if connection.table_exists?(:user_passports)
+    connection.drop_table(:books, cascade: true) if connection.table_exists?(:books)
+    connection.drop_table(:movies, cascade: true) if connection.table_exists?(:movies)
+    connection.drop_table(:videogames, cascade: true) if connection.table_exists?(:videogames)
+    connection.drop_table(:hobbies, cascade: true) if connection.table_exists?(:hobbies)
+    connection.drop_table(:vinyls, cascade: true) if connection.table_exists?(:vinyls)
+    connection.drop_table(:pets, cascade: true) if connection.table_exists?(:pets)
+    connection.drop_table(:skills, cascade: true) if connection.table_exists?(:skills)
+    connection.drop_table(:dreams, cascade: true) if connection.table_exists?(:dreams)
 
     connection.create_table :organizations do
       primary_key :id

@@ -3,7 +3,7 @@ require 'faker'
 require 'benchmark'
 
 RSpec.describe :load_agg do
-  link :build_sqlite_connection, from: :ree_dao
+  link :build_pg_connection, from: :ree_dao
   link :load_agg, from: :ree_dao
 
   after do
@@ -11,16 +11,25 @@ RSpec.describe :load_agg do
   end
 
   before :all do
-    connection = build_sqlite_connection({database: 'sqlite_db', pool_timeout: 30, max_connections: 100})
+    DB_CONFIG = {
+      host: "localhost",
+      user: "postgres",
+      database: "postgres",
+      password: "password",
+      adapter: "postgres",
+      max_connections: 100
+    }.freeze
 
-    connection.drop_table(:organizations) if connection.table_exists?(:organizations)
-    connection.drop_table(:users) if connection.table_exists?(:users)
-    connection.drop_table(:user_passports) if connection.table_exists?(:user_passports)
-    connection.drop_table(:books) if connection.table_exists?(:books)
-    connection.drop_table(:chapters) if connection.table_exists?(:chapters)
-    connection.drop_table(:authors) if connection.table_exists?(:authors)
-    connection.drop_table(:reviews) if connection.table_exists?(:reviews)
-    connection.drop_table(:review_authors) if connection.table_exists?(:review_authors)
+    connection = build_pg_connection(DB_CONFIG)
+
+    connection.drop_table(:organizations, cascade: true) if connection.table_exists?(:organizations)
+    connection.drop_table(:users, cascade: true) if connection.table_exists?(:users)
+    connection.drop_table(:user_passports, cascade: true) if connection.table_exists?(:user_passports)
+    connection.drop_table(:books, cascade: true) if connection.table_exists?(:books)
+    connection.drop_table(:chapters, cascade: true) if connection.table_exists?(:chapters)
+    connection.drop_table(:authors, cascade: true) if connection.table_exists?(:authors)
+    connection.drop_table(:reviews, cascade: true) if connection.table_exists?(:reviews)
+    connection.drop_table(:review_authors, cascade: true) if connection.table_exists?(:review_authors)
 
     connection.create_table :organizations do
       primary_key :id
