@@ -12,7 +12,11 @@ class ReeDao::LoadAgg
   contract(
     Or[Sequel::Dataset, ArrayOf[Integer], ArrayOf[EntityContract], Integer],
     Nilor[DaoDatasetContract],
-    Ksplat[RestKeys => Any],
+    Ksplat[
+      only?: ArrayOf[Symbol],
+      except?: ArrayOf[Symbol],
+      RestKeys => Any
+    ],
     Optblock => ArrayOf[Any]
   )
   def call(ids_or_scope, dao = nil, **opts, &block)

@@ -9,13 +9,17 @@ module ReeDao
     link :index_by, from: :ree_array
     link :underscore, from: :ree_string
 
-    attr_reader :list, :dao, :global_opts
+    attr_reader :list, :dao, :only, :except, :global_opts
 
     def initialize(list, dao, **opts)
       @list = list
       @dao = dao
       @threads = [] if !sync_mode?
       @global_opts = opts
+      @only = opts[:only] if opts[:only]
+      @except = opts[:except] if opts[:except]
+
+      raise ArgumentError.new("you can't use both :only and :except arguments at the same time") if @only && @except
 
       dao.each do |k, v|
         instance_variable_set(k, v)
@@ -30,8 +34,9 @@ module ReeDao
       Symbol,
       Nilor[Sequel::Dataset, Array],
       Ksplat[
-        foreign_key?: Symbol,
-        assoc_dao?: Sequel::Dataset, # TODO: change to ReeDao::Dao class?
+        assoc_dao?: Sequel::Dataset,
+        assoc_setter?: Symbol,
+        foreign_key?: Symbol
       ],
       Optblock => Any
     )
@@ -43,8 +48,9 @@ module ReeDao
       Symbol,
       Nilor[Sequel::Dataset, Array],
       Ksplat[
-        foreign_key?: Symbol,
         assoc_dao?: Sequel::Dataset,
+        assoc_setter?: Symbol,
+        foreign_key?: Symbol,
       ],
       Optblock => Any
     )
@@ -56,8 +62,9 @@ module ReeDao
       Symbol,
       Nilor[Sequel::Dataset, Array],
       Ksplat[
+        assoc_dao?: Sequel::Dataset,
+        assoc_setter?: Symbol,
         foreign_key?: Symbol,
-        assoc_dao?: Sequel::Dataset # TODO: change to ReeDao::Dao class?
       ],
       Optblock => Any
     )
@@ -69,8 +76,8 @@ module ReeDao
       Symbol,
       Or[Sequel::Dataset, Array],
       Ksplat[
-        assoc_dao?: Sequel::Dataset, # TODO: change to ReeDao::Dao class?
-        list?: Or[Sequel::Dataset, Array]
+        assoc_dao?: Sequel::Dataset,
+        assoc_setter?: Symbol
       ],
       Optblock => Any
     )
@@ -100,13 +107,13 @@ module ReeDao
       Ksplat[
         foreign_key?: Symbol,
         assoc_dao?: Sequel::Dataset,
+        assoc_setter?: Symbol,
         polymorphic?: Bool
       ],
       Optblock => Any
     )
     def association(assoc_type, assoc_name, scope = nil, **opts, &block)
-      scope = opts[assoc_name] if opts[assoc_name] && !global_opts[assoc_name]
-      scope = global_opts[assoc_name] if !opts[assoc_name] && global_opts[assoc_name]
+      return if association_is_not_included?(assoc_name)
 
       if sync_mode?
         load_association(assoc_type, assoc_name, scope, **opts, &block)
@@ -126,8 +133,6 @@ module ReeDao
       )
 
       process_block(assoc, &block) if block_given?
-      
-      populate_association(list, assoc, assoc_name)
 
       list
     end
@@ -141,6 +146,7 @@ module ReeDao
           scope,
           foreign_key: opts[:foreign_key],
           assoc_dao: opts[:assoc_dao],
+          assoc_setter: opts[:assoc_setter],
           reverse: false
         )
       when :has_one
@@ -150,6 +156,7 @@ module ReeDao
           scope,
           foreign_key: opts[:foreign_key],
           assoc_dao: opts[:assoc_dao],
+          assoc_setter: opts[:assoc_setter],
           reverse: true
         )
       when :has_many
@@ -158,7 +165,8 @@ module ReeDao
           list,
           scope,
           foreign_key: opts[:foreign_key],
-          assoc_dao: opts[:assoc_dao]
+          assoc_dao: opts[:assoc_dao],
+          assoc_setter: opts[:assoc_setter]
         )
       else
         one_to_many(
@@ -166,7 +174,8 @@ module ReeDao
           list,
           scope,
           foreign_key: opts[:foreign_key],
-          assoc_dao: opts[:assoc_dao]
+          assoc_dao: opts[:assoc_dao],
+          assoc_setter: opts[:assoc_setter]
         )
       end
     end
@@ -180,7 +189,7 @@ module ReeDao
       end
     end
 
-    def one_to_one(assoc_name, list, scope, foreign_key: nil, assoc_dao: nil, reverse: true)
+    def one_to_one(assoc_name, list, scope, foreign_key: nil, assoc_dao: nil, assoc_setter: nil, reverse: true)
       return if list.empty?
 
       assoc_dao ||= self.instance_variable_get("@#{assoc_name}s")
@@ -200,20 +209,16 @@ module ReeDao
 
       default_scope = assoc_dao&.where(foreign_key => root_ids)
 
-      items = if scope
-        if scope.is_a?(Sequel::Dataset)
-          scope.all
-        else
-          scope.call(default_scope).all
-        end
-      else
-        default_scope.all
-      end
-      
-      index_by(items) { _1.send(foreign_key) }
+      items = add_scopes(assoc_name, default_scope, scope, global_opts)
+
+      assoc = index_by(items) { _1.send(foreign_key) }
+
+      populate_association(list, assoc, assoc_name, assoc_setter)
+
+      assoc
     end
 
-    def one_to_many(assoc_name, list, scope, foreign_key: nil, assoc_dao: nil)
+    def one_to_many(assoc_name, list, scope, foreign_key: nil, assoc_dao: nil, assoc_setter: nil)
       return if list.empty?
 
       assoc_dao ||= self.instance_variable_get("@#{assoc_name}")
@@ -224,24 +229,54 @@ module ReeDao
 
       default_scope = assoc_dao&.where(foreign_key => root_ids)
 
-      items = if scope
-        if scope.is_a?(Sequel::Dataset)
-          scope.all
-        else
-          scope.call(default_scope).all
-        end
-      else
-        default_scope.all
-      end
+      items = add_scopes(assoc_name, default_scope, scope, global_opts)
 
-      group_by(items) { _1.send(foreign_key) }
+      assoc = group_by(items) { _1.send(foreign_key) }
+
+      populate_association(list, assoc, assoc_name, assoc_setter)
+
+      assoc
     end
 
-    def populate_association(list, assoc, assoc_name)
+    def populate_association(list, association_items, assoc_name, assoc_setter)
+      setter = if assoc_setter
+        assoc_setter
+      else
+        "set_#{assoc_name}"
+      end
+
       list.each do |item|
-        setter = "set_#{assoc_name}"
-        value = assoc[item.id]
+        value = association_items[item.id]
         item.send(setter, value)
+      end
+    end
+
+    def add_scopes(assoc_name, default_scope, scope, opts = {})
+      res = default_scope
+
+      if scope
+        scope_ids = scope.select(:id).all.map(&:id)
+        res = res ? res.where(id: scope_ids) : scope
+      end
+
+      if opts[assoc_name]
+        res = opts[assoc_name].call(res)
+      end
+
+      res.all
+    end
+
+    def association_is_not_included?(assoc_name)
+      return false if !only && !except
+
+      if only
+        return false if only && only.include?(assoc_name)
+        return true if only && !only.include?(assoc_name)
+      end
+
+      if except
+        return true if except && except.include?(assoc_name)
+        return false if except && !except.include?(assoc_name)
       end
     end
 

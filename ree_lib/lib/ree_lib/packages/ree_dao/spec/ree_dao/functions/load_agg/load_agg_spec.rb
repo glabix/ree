@@ -110,7 +110,7 @@ RSpec.describe :load_agg do
     def call(ids_or_scope, dao, **opts)
       load_agg(ids_or_scope, dao, **opts) do
         belongs_to :organization
-        has_many :books, books do
+        has_many :books do
           has_one :author
           has_many :chapters
         
