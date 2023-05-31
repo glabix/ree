@@ -47,17 +47,15 @@ class ReeDao::LoadAgg
   private
 
   def load_associations(list, **opts, &block)
-    dao = block.binding.eval(<<-CODE, __FILE__, __LINE__ + 1)
+    local_vars = block.binding.eval(<<-CODE, __FILE__, __LINE__ + 1)
       vars = self.instance_variables
-      vars
-        .filter { |v| self.instance_variable_get(v).class.ancestors.include?(ReeDao::DatasetExtensions::InstanceMethods) }
-        .reduce({}) { |hsh, var| hsh[var] = self.instance_variable_get(var); hsh }
+      vars.reduce({}) { |hsh, var| hsh[var] = self.instance_variable_get(var); hsh }
     CODE
 
     if ReeDao.load_sync_associations_enabled?
-      Associations.new(list, dao, **opts).instance_exec(&block)
+      Associations.new(list, local_vars, **opts).instance_exec(&block)
     else
-      Associations.new(list, dao, **opts).instance_exec(&block).map(&:join)
+      Associations.new(list, local_vars, **opts).instance_exec(&block).map(&:join)
     end
   end
 end
