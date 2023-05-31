@@ -113,11 +113,13 @@ module ReeDao
       Optblock => Any
     )
     def association(assoc_type, assoc_name, scope = nil, **opts, &block)
-      return if association_is_not_included?(assoc_name)
-
       if sync_mode?
+        return if association_is_not_included?(assoc_name)
+
         load_association(assoc_type, assoc_name, scope, **opts, &block)
       else
+        return @threads if association_is_not_included?(assoc_name)
+
         @threads << Thread.new do
           load_association(assoc_type, assoc_name, scope, **opts, &block)
         end

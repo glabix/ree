@@ -107,8 +107,8 @@ RSpec.describe :load_agg do
       link :load_agg, from: :ree_dao
     end
 
-    def call(ids_or_scope, dao, **opts)
-      load_agg(ids_or_scope, dao, **opts) do
+    def call(ids_or_scope, **opts)
+      load_agg(ids_or_scope, users, **opts) do
         belongs_to :organization
         has_many :books do
           has_one :author
@@ -175,7 +175,6 @@ RSpec.describe :load_agg do
 
     res = users_agg.call(
       users.all,
-      users,
       chapters: -> (scope) { scope.where(title: "beginning") }
     )
 
@@ -189,6 +188,78 @@ RSpec.describe :load_agg do
     expect(res_user.books.flat_map { _1.chapters }.map(&:title).uniq).to eq(["beginning"])
     expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review")
     expect(res_user.custom_field).to_not eq(nil)
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+    user_passports.delete_all
+    books.delete_all
+    chapters.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    users.put(user_1)
+
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
+    book_2 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1408")
+
+    books.put(book_1)
+    books.put(book_2)
+
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "beginning"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "interlude"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "tragic ending"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "beginning"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "ending"))
+
+    res = users_agg.call(
+      users.all,
+      only: [:books, :chapters]
+    )
+
+    u = res[0]
+    expect(u.books.count).to eq(2)
+    expect(u.books[0].chapters.count).to_not eq(0)
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+    user_passports.delete_all
+    books.delete_all
+    chapters.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    users.put(user_1)
+
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
+    book_2 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1408")
+
+    books.put(book_1)
+    books.put(book_2)
+
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "beginning"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "interlude"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "tragic ending"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "beginning"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "ending"))
+
+    res = users_agg.call(
+      users.all,
+      except: [:organization, :passport, :custom_field]
+    )
+
+    u = res[0]
+    expect(u.books.count).to eq(2)
+    expect(u.passport).to eq(nil)
+    expect(u.organization).to eq(nil)
+    expect(u.custom_field).to eq(nil)
   }
 
   it {
