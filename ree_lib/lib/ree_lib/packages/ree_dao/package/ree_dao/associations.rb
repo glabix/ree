@@ -9,11 +9,11 @@ module ReeDao
     link :index_by, from: :ree_array
     link :underscore, from: :ree_string
 
-    attr_reader :list, :dao, :only, :except, :global_opts
+    attr_reader :list, :local_vars, :only, :except, :global_opts
 
-    def initialize(list, dao, **opts)
+    def initialize(list, local_vars, **opts)
       @list = list
-      @dao = dao
+      @local_vars = local_vars
       @threads = [] if !sync_mode?
       @global_opts = opts
       @only = opts[:only] if opts[:only]
@@ -21,7 +21,7 @@ module ReeDao
 
       raise ArgumentError.new("you can't use both :only and :except arguments at the same time") if @only && @except
 
-      dao.each do |k, v|
+      local_vars.each do |k, v|
         instance_variable_set(k, v)
 
         self.class.define_method k.to_s.gsub('@', '') do
@@ -183,9 +183,9 @@ module ReeDao
     def process_block(assoc, &block)
       assoc_list = assoc.values.flatten
       if sync_mode?
-        ReeDao::Associations.new(assoc_list, dao, **global_opts).instance_exec(&block)
+        ReeDao::Associations.new(assoc_list, local_vars, **global_opts).instance_exec(&block)
       else
-        ReeDao::Associations.new(assoc_list, dao, **global_opts).instance_exec(&block).map(&:join)
+        ReeDao::Associations.new(assoc_list, local_vars, **global_opts).instance_exec(&block).map(&:join)
       end
     end
 
