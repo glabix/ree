@@ -33,10 +33,11 @@ class ReeMapper::MapperFactoryProxy
     return self unless blk
 
     mapper = ReeMapper::Mapper.build(strategies)
+    
+    mapper_factory.register_mapper(register_as, mapper) if register_as
+    
     mapper_factory.new(mapper).instance_exec(&blk)
     mapper.prepare_dto
-
-    mapper_factory.register_mapper(register_as, mapper) if register_as
 
     after_build&.call(mapper)
 
