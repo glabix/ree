@@ -315,11 +315,23 @@ module ReeDao
     end
 
     def add_scopes(assoc_name, default_scope, scope, opts = {})
-      res = default_scope
+      if default_scope && !scope
+        res = default_scope
+      end
 
-      if scope
-        scope_ids = scope.select(:id).all.map(&:id)
-        res = res ? res.where(id: scope_ids) : scope
+      if default_scope && scope
+        if scope.empty?
+          res = default_scope
+        else
+          scope_ids = scope.select(:id).all.map(&:id)
+          res = default_scope.where(id: scope_ids)
+        end
+      end
+
+      if !default_scope && scope
+        return [] if scope.empty?
+
+        res = scope
       end
 
       if opts[assoc_name]
