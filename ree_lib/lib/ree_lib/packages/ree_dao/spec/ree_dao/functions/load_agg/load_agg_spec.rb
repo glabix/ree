@@ -125,7 +125,32 @@ RSpec.describe :load_agg do
     end
   end
 
+  class ReeDaoLoadAggTest::UsersAggBlockTest
+    include ReeDao::AggregateDSL
+
+    aggregate :users_agg_block_test do
+      link :users, from: :ree_dao_load_agg_test
+      link :organizations, from: :ree_dao_load_agg_test
+      link :books, from: :ree_dao_load_agg_test
+      link :load_agg, from: :ree_dao
+    end
+
+    def call(ids_or_scope, **opts)
+      load_agg(ids_or_scope, users, **opts) do
+        belongs_to :organization
+        has_many :books, setter_proc: -> (item, setter, assoc_items) {
+          item.send(setter, [1337, 1337])
+        }
+        # has_many :books, setter_block: do
+        #   val = association_items[item.id]
+        #   item.send(setter, val)
+        # end
+      end
+    end
+  end
+
   let(:users_agg) { ReeDaoLoadAggTest::UsersAgg.new }
+  let(:users_agg_block) { ReeDaoLoadAggTest::UsersAggBlockTest.new }
   let(:organizations) { ReeDaoLoadAggTest::Organizations.new }
   let(:users) { ReeDaoLoadAggTest::Users.new }
   let(:user_passports) { ReeDaoLoadAggTest::UserPassports.new }
@@ -223,6 +248,28 @@ RSpec.describe :load_agg do
     u = res[0]
     expect(u.books.count).to eq(2)
     expect(u.books[0].chapters.count).to_not eq(0)
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+    user_passports.delete_all
+    books.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    users.put(user_1)
+
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
+
+    books.put(book_1)
+
+    res = users_agg_block.call(user_1.id)
+
+    u = res[0]
+    expect(u.books).to eq([1337, 1337])
   }
 
   it {

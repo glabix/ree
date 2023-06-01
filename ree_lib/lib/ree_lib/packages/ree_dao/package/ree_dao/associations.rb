@@ -36,6 +36,7 @@ module ReeDao
       Ksplat[
         assoc_dao?: Sequel::Dataset,
         assoc_setter?: Symbol,
+        setter_proc?: Proc,
         foreign_key?: Symbol
       ],
       Optblock => Any
@@ -50,6 +51,7 @@ module ReeDao
       Ksplat[
         assoc_dao?: Sequel::Dataset,
         assoc_setter?: Symbol,
+        setter_proc?: Proc,
         foreign_key?: Symbol,
       ],
       Optblock => Any
@@ -64,7 +66,8 @@ module ReeDao
       Ksplat[
         assoc_dao?: Sequel::Dataset,
         assoc_setter?: Symbol,
-        foreign_key?: Symbol,
+        setter_proc?: Proc,
+        foreign_key?: Symbol
       ],
       Optblock => Any
     )
@@ -77,7 +80,8 @@ module ReeDao
       Or[Sequel::Dataset, Array],
       Ksplat[
         assoc_dao?: Sequel::Dataset,
-        assoc_setter?: Symbol
+        assoc_setter?: Symbol,
+        setter_proc?: Proc
       ],
       Optblock => Any
     )
@@ -108,6 +112,7 @@ module ReeDao
         foreign_key?: Symbol,
         assoc_dao?: Sequel::Dataset,
         assoc_setter?: Symbol,
+        setter_proc?: Proc,
         polymorphic?: Bool
       ],
       Optblock => Any
@@ -149,6 +154,7 @@ module ReeDao
           foreign_key: opts[:foreign_key],
           assoc_dao: opts[:assoc_dao],
           assoc_setter: opts[:assoc_setter],
+          setter_proc: opts[:setter_proc],
           reverse: false
         )
       when :has_one
@@ -159,6 +165,7 @@ module ReeDao
           foreign_key: opts[:foreign_key],
           assoc_dao: opts[:assoc_dao],
           assoc_setter: opts[:assoc_setter],
+          setter_proc: opts[:setter_proc],
           reverse: true
         )
       when :has_many
@@ -168,7 +175,8 @@ module ReeDao
           scope,
           foreign_key: opts[:foreign_key],
           assoc_dao: opts[:assoc_dao],
-          assoc_setter: opts[:assoc_setter]
+          assoc_setter: opts[:assoc_setter],
+          setter_proc: opts[:setter_proc]
         )
       else
         one_to_many(
@@ -177,7 +185,8 @@ module ReeDao
           scope,
           foreign_key: opts[:foreign_key],
           assoc_dao: opts[:assoc_dao],
-          assoc_setter: opts[:assoc_setter]
+          assoc_setter: opts[:assoc_setter],
+          setter_proc: opts[:setter_proc]
         )
       end
     end
@@ -191,7 +200,16 @@ module ReeDao
       end
     end
 
-    def one_to_one(assoc_name, list, scope, foreign_key: nil, assoc_dao: nil, assoc_setter: nil, reverse: true)
+    def one_to_one(
+      assoc_name,
+      list,
+      scope,
+      foreign_key: nil,
+      assoc_dao: nil,
+      assoc_setter: nil,
+      setter_proc: nil,
+      reverse: true
+    )
       return if list.empty?
 
       assoc_dao ||= self.instance_variable_get("@#{assoc_name}s")
@@ -204,9 +222,15 @@ module ReeDao
       end
 
       root_ids = if reverse
-        list.map(&:id)
+        list.map(&:id).uniq
       else
-        list.map(&:"#{foreign_key}")
+        dto_class = assoc_dao
+          .opts[:schema_mapper]
+          .dto(:db_load)
+
+        name = underscore(demodulize(dto_class.name))
+        
+        list.map(&:"#{"#{name}_id".to_sym}").uniq
       end
 
       default_scope = assoc_dao&.where(foreign_key => root_ids)
@@ -215,12 +239,27 @@ module ReeDao
 
       assoc = index_by(items) { _1.send(foreign_key) }
 
-      populate_association(list, assoc, assoc_name, assoc_setter)
+      populate_association(
+        list,
+        assoc,
+        assoc_name,
+        assoc_setter: assoc_setter,
+        reverse: reverse,
+        setter_proc: setter_proc
+      )
 
       assoc
     end
 
-    def one_to_many(assoc_name, list, scope, foreign_key: nil, assoc_dao: nil, assoc_setter: nil)
+    def one_to_many(
+      assoc_name,
+      list,
+      scope,
+      foreign_key: nil,
+      assoc_dao: nil,
+      assoc_setter: nil,
+      setter_proc: nil
+    )
       return if list.empty?
 
       assoc_dao ||= self.instance_variable_get("@#{assoc_name}")
@@ -235,12 +274,25 @@ module ReeDao
 
       assoc = group_by(items) { _1.send(foreign_key) }
 
-      populate_association(list, assoc, assoc_name, assoc_setter)
+      populate_association(
+        list,
+        assoc,
+        assoc_name,
+        assoc_setter: assoc_setter,
+        setter_proc: setter_proc
+      )
 
       assoc
     end
 
-    def populate_association(list, association_items, assoc_name, assoc_setter)
+    def populate_association(
+      list,
+      association_items,
+      assoc_name,
+      assoc_setter: nil,
+      reverse: nil,
+      setter_proc: nil
+    )
       setter = if assoc_setter
         assoc_setter
       else
@@ -248,8 +300,17 @@ module ReeDao
       end
 
       list.each do |item|
-        value = association_items[item.id]
-        item.send(setter, value)
+        if setter_proc
+          self.instance_exec(item, setter, association_items, &setter_proc)
+        else
+          key = if reverse.nil?
+            :id
+          else
+            reverse ? :id : "#{assoc_name}_id"
+          end
+          value = association_items[item.send(key)]
+          item.send(setter, value)
+        end
       end
     end
 
