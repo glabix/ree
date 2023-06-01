@@ -309,6 +309,8 @@ module ReeDao
             reverse ? :id : "#{assoc_name}_id"
           end
           value = association_items[item.send(key)]
+          next if value.nil?
+
           item.send(setter, value)
         end
       end
