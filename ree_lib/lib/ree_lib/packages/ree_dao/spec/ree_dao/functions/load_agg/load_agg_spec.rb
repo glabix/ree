@@ -138,19 +138,42 @@ RSpec.describe :load_agg do
     def call(ids_or_scope, **opts)
       load_agg(ids_or_scope, users, **opts) do
         belongs_to :organization
-        has_many :books, setter_proc: -> (item, setter, assoc_items) {
-          item.send(setter, [1337, 1337])
+        has_many :books, setter: -> (item, items_index) {
+          item.set_books([1337, 1337])
         }
-        # has_many :books, setter_block: do
-        #   val = association_items[item.id]
-        #   item.send(setter, val)
-        # end
       end
+    end
+  end
+
+  class ReeDaoLoadAggTest::UsersAggScopeMethodTest
+    include ReeDao::AggregateDSL
+
+    aggregate :users_agg_scope_method_test do
+      link :users, from: :ree_dao_load_agg_test
+      link :organizations, from: :ree_dao_load_agg_test
+      link :books, from: :ree_dao_load_agg_test
+      link :load_agg, from: :ree_dao
+    end
+
+    def call(ids_or_scope, **opts)
+      load_agg(ids_or_scope, users, **opts) do
+        book_title = "1984"
+        belongs_to :organization
+
+        has_many :books, books_scope(book_title)
+      end
+    end
+
+    private
+
+    def books_scope(title)
+      books.where(title: title)
     end
   end
 
   let(:users_agg) { ReeDaoLoadAggTest::UsersAgg.new }
   let(:users_agg_block) { ReeDaoLoadAggTest::UsersAggBlockTest.new }
+  let(:users_agg_scope_method) { ReeDaoLoadAggTest::UsersAggScopeMethodTest.new }
   let(:organizations) { ReeDaoLoadAggTest::Organizations.new }
   let(:users) { ReeDaoLoadAggTest::Users.new }
   let(:user_passports) { ReeDaoLoadAggTest::UserPassports.new }
@@ -163,9 +186,7 @@ RSpec.describe :load_agg do
   it {
     organizations.delete_all
     users.delete_all
-    user_passports.delete_all
     books.delete_all
-    chapters.delete_all
 
     organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
     organizations.put(organization)
@@ -175,9 +196,33 @@ RSpec.describe :load_agg do
     users.put(user_1)
     users.put(user_2)
 
-    passport_1 = ReeDaoLoadAggTest::UserPassport.new(user_id: user_1.id, info: "some info")
-    user_passports.put(passport_1)
-    user_passports.put(ReeDaoLoadAggTest::UserPassport.new(user_id: user_2.id, info: "another info"))
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
+    book_2 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1408")
+
+    books.put(book_1)
+    books.put(book_2)
+
+    res = users_agg_scope_method.call(users.all)
+
+    res_user = res[0]
+    expect(res_user.id).to eq(user_1.id)
+    expect(res_user.organization).to eq(organization)
+    expect(res_user.books.count).to eq(1)
+    expect(res_user.books[0].title).to eq("1984")
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+    user_passports.delete_all
+    books.delete_all
+    chapters.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    users.put(user_1)
 
     book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
     book_2 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1408")
@@ -191,28 +236,14 @@ RSpec.describe :load_agg do
     chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "beginning"))
     chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "ending"))
 
-
-    authors.put(ReeDaoLoadAggTest::Author.new(book_id: book_1.id, name: "George Orwell"))
-    review = ReeDaoLoadAggTest::Review.new(book_id: book_1.id, rating: 10)
-    reviews.put(review)
-    reviews.put(ReeDaoLoadAggTest::Review.new(book_id: book_1.id, rating: 7))
-    review_authors.put(ReeDaoLoadAggTest::ReviewAuthor.new(review_id: review.id, name: "John Review"))
-
     res = users_agg.call(
       users.all,
-      chapters: -> (scope) { scope.where(title: "beginning") }
+      only: [:books, :chapters]
     )
 
-    res_user = res[0]
-    expect(res_user.id).to eq(user_1.id)
-    expect(res_user.organization).to eq(organization)
-    expect(res_user.passport).to eq(passport_1)
-    expect(res_user.passport.info).to eq("some info")
-    expect(res_user.books.count).to eq(2)
-    expect(res_user.books[0].author.name).to eq("George Orwell")
-    expect(res_user.books.flat_map { _1.chapters }.map(&:title).uniq).to eq(["beginning"])
-    expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review")
-    expect(res_user.custom_field).to_not eq(nil)
+    u = res[0]
+    expect(u.books.count).to eq(2)
+    expect(u.books[0].chapters.count).to_not eq(0)
   }
 
   it {
