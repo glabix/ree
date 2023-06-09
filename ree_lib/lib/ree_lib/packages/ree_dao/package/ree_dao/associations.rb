@@ -1,20 +1,16 @@
 # frozen_string_literal: true
 
 module ReeDao
-  class ReeDao::Associations
+  class Associations
     include Ree::LinkDSL
 
-    link :demodulize, from: :ree_string
-    link :group_by, from: :ree_array
-    link :index_by, from: :ree_array
-    link :underscore, from: :ree_string
+    attr_reader :agg_caller, :list, :local_vars, :only, :except, :global_opts
 
-    attr_reader :list, :local_vars, :only, :except, :global_opts
-
-    def initialize(list, local_vars, **opts)
+    def initialize(agg_caller, list, local_vars, **opts)
+      @agg_caller = agg_caller
       @list = list
       @local_vars = local_vars
-      @threads = [] if !sync_mode?
+      @threads = [] if !self.class.sync_mode?
       @global_opts = opts
       @only = opts[:only] if opts[:only]
       @except = opts[:except] if opts[:except]
@@ -30,13 +26,16 @@ module ReeDao
       end
     end
 
+    def self.sync_mode?
+      ReeDao.load_sync_associations_enabled?
+    end
+
     contract(
       Symbol,
       Nilor[Sequel::Dataset, Array],
       Ksplat[
         assoc_dao?: Sequel::Dataset,
-        assoc_setter?: Symbol,
-        setter_proc?: Proc,
+        setter?: Or[Symbol, Proc],
         foreign_key?: Symbol
       ],
       Optblock => Any
@@ -50,9 +49,8 @@ module ReeDao
       Nilor[Sequel::Dataset, Array],
       Ksplat[
         assoc_dao?: Sequel::Dataset,
-        assoc_setter?: Symbol,
-        setter_proc?: Proc,
-        foreign_key?: Symbol,
+        setter?: Or[Symbol, Proc],
+        foreign_key?: Symbol
       ],
       Optblock => Any
     )
@@ -65,8 +63,7 @@ module ReeDao
       Nilor[Sequel::Dataset, Array],
       Ksplat[
         assoc_dao?: Sequel::Dataset,
-        assoc_setter?: Symbol,
-        setter_proc?: Proc,
+        setter?: Or[Symbol, Proc],
         foreign_key?: Symbol
       ],
       Optblock => Any
@@ -80,8 +77,7 @@ module ReeDao
       Or[Sequel::Dataset, Array],
       Ksplat[
         assoc_dao?: Sequel::Dataset,
-        assoc_setter?: Symbol,
-        setter_proc?: Proc
+        setter?: Or[Symbol, Proc]
       ],
       Optblock => Any
     )
@@ -111,238 +107,27 @@ module ReeDao
       Ksplat[
         foreign_key?: Symbol,
         assoc_dao?: Sequel::Dataset,
-        assoc_setter?: Symbol,
-        setter_proc?: Proc,
-        polymorphic?: Bool
+        setter?: Or[Symbol, Proc],
       ],
       Optblock => Any
     )
-    def association(assoc_type, assoc_name, scope = nil, **opts, &block)
-      if sync_mode?
+    def association(assoc_type, assoc_name, scope = nil, **assoc_opts, &block)
+      if self.class.sync_mode?
         return if association_is_not_included?(assoc_name)
 
-        load_association(assoc_type, assoc_name, scope, **opts, &block)
+        association = ReeDao::Association.new(self, list, **global_opts)
+        association.load(assoc_type, assoc_name, scope, **assoc_opts, &block)
       else
         return @threads if association_is_not_included?(assoc_name)
 
         @threads << Thread.new do
-          load_association(assoc_type, assoc_name, scope, **opts, &block)
+          association = ReeDao::Association.new(self, list, **global_opts)
+          association.load(assoc_type, assoc_name, scope, **assoc_opts, &block)
         end
       end
     end
 
-    def load_association(assoc_type, assoc_name, scope, **opts, &block)
-      assoc = load_association_by_type(
-        assoc_type,
-        assoc_name,
-        scope,
-        **opts
-      )
-
-      process_block(assoc, &block) if block_given?
-
-      list
-    end
-
-    def load_association_by_type(type, assoc_name, scope, **opts)
-      case type
-      when :belongs_to
-        one_to_one(
-          assoc_name,
-          list,
-          scope,
-          foreign_key: opts[:foreign_key],
-          assoc_dao: opts[:assoc_dao],
-          assoc_setter: opts[:assoc_setter],
-          setter_proc: opts[:setter_proc],
-          reverse: false
-        )
-      when :has_one
-        one_to_one(
-          assoc_name,
-          list,
-          scope,
-          foreign_key: opts[:foreign_key],
-          assoc_dao: opts[:assoc_dao],
-          assoc_setter: opts[:assoc_setter],
-          setter_proc: opts[:setter_proc],
-          reverse: true
-        )
-      when :has_many
-        one_to_many(
-          assoc_name,
-          list,
-          scope,
-          foreign_key: opts[:foreign_key],
-          assoc_dao: opts[:assoc_dao],
-          assoc_setter: opts[:assoc_setter],
-          setter_proc: opts[:setter_proc]
-        )
-      else
-        one_to_many(
-          assoc_name,
-          list,
-          scope,
-          foreign_key: opts[:foreign_key],
-          assoc_dao: opts[:assoc_dao],
-          assoc_setter: opts[:assoc_setter],
-          setter_proc: opts[:setter_proc]
-        )
-      end
-    end
-
-    def process_block(assoc, &block)
-      assoc_list = assoc.values.flatten
-      if sync_mode?
-        ReeDao::Associations.new(assoc_list, local_vars, **global_opts).instance_exec(&block)
-      else
-        ReeDao::Associations.new(assoc_list, local_vars, **global_opts).instance_exec(&block).map(&:join)
-      end
-    end
-
-    def one_to_one(
-      assoc_name,
-      list,
-      scope,
-      foreign_key: nil,
-      assoc_dao: nil,
-      assoc_setter: nil,
-      setter_proc: nil,
-      reverse: true
-    )
-      return if list.empty?
-
-      assoc_dao ||= self.instance_variable_get("@#{assoc_name}s")
-
-      foreign_key ||= if reverse
-        name = underscore(demodulize(list.first.class.name))
-        "#{name}_id".to_sym
-      else
-        :id
-      end
-
-      root_ids = if reverse
-        list.map(&:id).uniq
-      else
-        dto_class = assoc_dao
-          .opts[:schema_mapper]
-          .dto(:db_load)
-
-        name = underscore(demodulize(dto_class.name))
-        
-        list.map(&:"#{"#{name}_id".to_sym}").uniq
-      end
-
-      default_scope = assoc_dao&.where(foreign_key => root_ids)
-
-      items = add_scopes(assoc_name, default_scope, scope, global_opts)
-
-      assoc = index_by(items) { _1.send(foreign_key) }
-
-      populate_association(
-        list,
-        assoc,
-        assoc_name,
-        assoc_setter: assoc_setter,
-        reverse: reverse,
-        setter_proc: setter_proc
-      )
-
-      assoc
-    end
-
-    def one_to_many(
-      assoc_name,
-      list,
-      scope,
-      foreign_key: nil,
-      assoc_dao: nil,
-      assoc_setter: nil,
-      setter_proc: nil
-    )
-      return if list.empty?
-
-      assoc_dao ||= self.instance_variable_get("@#{assoc_name}")
-
-      foreign_key ||= "#{underscore(demodulize(list.first.class.name))}_id".to_sym
-
-      root_ids = list.map(&:id)
-
-      default_scope = assoc_dao&.where(foreign_key => root_ids)
-
-      items = add_scopes(assoc_name, default_scope, scope, global_opts)
-
-      assoc = group_by(items) { _1.send(foreign_key) }
-
-      populate_association(
-        list,
-        assoc,
-        assoc_name,
-        assoc_setter: assoc_setter,
-        setter_proc: setter_proc
-      )
-
-      assoc
-    end
-
-    def populate_association(
-      list,
-      association_items,
-      assoc_name,
-      assoc_setter: nil,
-      reverse: nil,
-      setter_proc: nil
-    )
-      setter = if assoc_setter
-        assoc_setter
-      else
-        "set_#{assoc_name}"
-      end
-
-      list.each do |item|
-        if setter_proc
-          self.instance_exec(item, setter, association_items, &setter_proc)
-        else
-          key = if reverse.nil?
-            :id
-          else
-            reverse ? :id : "#{assoc_name}_id"
-          end
-          value = association_items[item.send(key)]
-          next if value.nil?
-
-          item.send(setter, value)
-        end
-      end
-    end
-
-    def add_scopes(assoc_name, default_scope, scope, opts = {})
-      if default_scope && !scope
-        res = default_scope
-      end
-
-      if default_scope && scope
-        if scope.empty?
-          res = default_scope
-        else
-          scope_ids = scope.select(:id).all.map(&:id)
-          res = default_scope.where(id: scope_ids)
-        end
-      end
-
-      if !default_scope && scope
-        return [] if scope.empty?
-
-        res = scope
-      end
-
-      if opts[assoc_name]
-        res = opts[assoc_name].call(res)
-      end
-
-      res.all
-    end
-
+    contract(Symbol => Bool)
     def association_is_not_included?(assoc_name)
       return false if !only && !except
 
@@ -357,8 +142,11 @@ module ReeDao
       end
     end
 
-    def sync_mode?
-      ReeDao.load_sync_associations_enabled?
+    contract(Symbol, SplatOf[Any], Optblock => Any)
+    def method_missing(method, *args, &block)
+      return if !agg_caller.private_methods(false).include?(method)
+
+      agg_caller.send(method, *args, &block)
     end
   end
 end

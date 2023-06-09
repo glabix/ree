@@ -52,10 +52,12 @@ class ReeDao::LoadAgg
       vars.reduce({}) { |hsh, var| hsh[var] = self.instance_variable_get(var); hsh }
     CODE
 
+    agg_caller = block.binding.eval("self")
+
     if ReeDao.load_sync_associations_enabled?
-      Associations.new(list, local_vars, **opts).instance_exec(&block)
+      Associations.new(agg_caller, list, local_vars, **opts).instance_exec(&block)
     else
-      Associations.new(list, local_vars, **opts).instance_exec(&block).map(&:join)
+      Associations.new(agg_caller, list, local_vars, **opts).instance_exec(&block).map(&:join)
     end
   end
 end
