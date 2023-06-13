@@ -11,16 +11,7 @@ RSpec.describe :load_agg do
   end
 
   before :all do
-    DB_CONFIG = {
-      host: "localhost",
-      user: "postgres",
-      database: "postgres",
-      password: "password",
-      adapter: "postgres",
-      max_connections: 100
-    }.freeze
-
-    connection = build_pg_connection(DB_CONFIG)
+    connection = build_pg_connection(ReeDaoLoadAggTest::Db::DB_CONFIG)
 
     connection.drop_table(:organizations, cascade: true) if connection.table_exists?(:organizations)
     connection.drop_table(:users, cascade: true) if connection.table_exists?(:users)

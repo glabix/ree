@@ -144,7 +144,7 @@ module ReeDao
 
     contract(Symbol, SplatOf[Any], Optblock => Any)
     def method_missing(method, *args, &block)
-      return if !agg_caller.private_methods(false).include?(method)
+      return super if !agg_caller.private_methods(false).include?(method)
 
       agg_caller.send(method, *args, &block)
     end
