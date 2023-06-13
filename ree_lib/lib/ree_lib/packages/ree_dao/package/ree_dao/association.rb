@@ -141,23 +141,26 @@ module ReeDao
 
       assoc_dao ||= parent.instance_variable_get("@#{assoc_name}s")
 
-      foreign_key ||= if reverse
-        name = underscore(demodulize(list.first.class.name))
-        "#{name}_id".to_sym
-      else
-        :id
-      end
+      if reverse
+        if !foreign_key
+          name = underscore(demodulize(list.first.class.name))
+          foreign_key = "#{name}_id".to_sym
+        end
 
-      root_ids = if reverse
-        list.map(&:id).uniq
+        root_ids = list.map(&:id).uniq
       else
-        dto_class = assoc_dao
-          .opts[:schema_mapper]
-          .dto(:db_load)
-
-        name = underscore(demodulize(dto_class.name))
-        
-        list.map(&:"#{"#{name}_id".to_sym}").uniq
+        if !foreign_key
+          dto_class = assoc_dao
+            .opts[:schema_mapper]
+            .dto(:db_load)
+  
+          name = underscore(demodulize(dto_class.name))
+          
+          root_ids = list.map(&:"#{"#{name}_id".to_sym}").uniq
+          foreign_key = :id
+        else
+          root_ids = list.map(&:"#{foreign_key}")
+        end
       end
 
       default_scope = assoc_dao&.where(foreign_key => root_ids)
