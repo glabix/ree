@@ -32,7 +32,7 @@ module ReeDao
       Symbol,
       Nilor[Sequel::Dataset, Array],
       Ksplat[RestKeys => Any],
-      Optblock => Array
+      Optblock => Nilor[Array]
     )
     def load_association(assoc_type, assoc_name, scope, **opts, &block)
       assoc_index = load_association_by_type(
@@ -126,7 +126,7 @@ module ReeDao
         assoc_dao: Nilor[Sequel::Dataset],
         setter: Nilor[Or[Symbol, Proc]],
         reverse: Bool
-      ] => Nilor[Hash]
+      ] => Hash
     )
     def one_to_one(
       assoc_name,
@@ -137,7 +137,7 @@ module ReeDao
       setter: nil,
       reverse: true
     )
-      return if list.empty?
+      return {} if list.empty?
 
       assoc_dao ||= parent.instance_variable_get("@#{assoc_name}s")
 
@@ -162,7 +162,7 @@ module ReeDao
 
       default_scope = assoc_dao&.where(foreign_key => root_ids)
 
-      items = add_scopes(assoc_name, default_scope, scope, global_opts[assoc_name])
+      items = add_scopes(default_scope, scope, global_opts[assoc_name])
 
       assoc = index_by(items) { _1.send(foreign_key) }
 
@@ -185,7 +185,7 @@ module ReeDao
         foreign_key: Nilor[Symbol],
         assoc_dao: Nilor[Sequel::Dataset],
         setter: Nilor[Or[Symbol, Proc]]
-      ] => Nilor[Hash]
+      ] => Hash
     )
     def one_to_many(
       assoc_name,
@@ -195,7 +195,7 @@ module ReeDao
       assoc_dao: nil,
       setter: nil
     )
-      return if list.empty?
+      return {} if list.empty?
 
       assoc_dao ||= parent.instance_variable_get("@#{assoc_name}")
 
@@ -205,7 +205,7 @@ module ReeDao
 
       default_scope = assoc_dao&.where(foreign_key => root_ids)
 
-      items = add_scopes(assoc_name, default_scope, scope, global_opts[assoc_name])
+      items = add_scopes(default_scope, scope, global_opts[assoc_name])
 
       assoc = group_by(items) { _1.send(foreign_key) }
 
@@ -258,18 +258,17 @@ module ReeDao
       end
     end
 
-    contract(Symbol, Nilor[Sequel::Dataset], Nilor[Sequel::Dataset], Nilor[Proc] => Array)
-    def add_scopes(assoc_name, default_scope, scope, named_scope)
+    contract(Nilor[Sequel::Dataset], Nilor[Sequel::Dataset], Nilor[Proc] => Array)
+    def add_scopes(default_scope, scope, named_scope)
       if default_scope && !scope
         res = default_scope
       end
 
       if default_scope && scope
-        if scope.empty?
+        if scope == []
           res = default_scope
         else
-          scope_ids = scope.select(:id).all.map(&:id)
-          res = default_scope.where(id: scope_ids)
+          res = merge_scopes(default_scope, scope)
         end
       end
 
@@ -284,6 +283,18 @@ module ReeDao
       end
 
       res.all
+    end
+
+    def merge_scopes(s1, s2)
+      if s2.opts[:where]
+        s1 = s1.where(s2.opts[:where])
+      end
+
+      if s2.opts[:order]
+        s1 = s1.order(*s2.opts[:order])
+      end
+
+      s1
     end
   end
 end
