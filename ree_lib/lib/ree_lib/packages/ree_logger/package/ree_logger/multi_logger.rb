@@ -60,7 +60,7 @@ class ReeLogger::MultiLogger < Logger
   contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
   def debug(message = nil, parameters = {}, exception = nil, log_args = false, progname = nil, &block)
     if block_given?
-      log(:debug, yield, parameters, nil, log_args)
+      log_block(:debug, parameters, log_args, yield)
     else
       msg = get_message(message)
       log(:debug, msg, parameters, nil, log_args)
@@ -68,9 +68,9 @@ class ReeLogger::MultiLogger < Logger
   end
 
   contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
-  def info(message = nil, parameters = {}, exception = nil, log_args = false, progname = nil,  &block)
+  def info(message = nil, parameters = {}, exception = nil, log_args = false, progname = nil, &block)
     if block_given?
-      log(:info, yield, parameters, nil, log_args)
+      log_block(:info, parameters, log_args, yield)
     else
       msg = get_message(message)
       log(:info, msg, parameters, nil)
@@ -78,9 +78,9 @@ class ReeLogger::MultiLogger < Logger
   end
 
   contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
-  def warn(message = nil, parameters = {}, exception = nil, log_args = false, progname = nil,  &block)
+  def warn(message = nil, parameters = {}, exception = nil, log_args = false, progname = nil, &block)
     if block_given?
-      log(:warn, yield, parameters, nil, log_args)
+      log_block(:warn, parameters, log_args, yield)
     else
       msg = get_message(message)
       log(:warn, msg, parameters, nil)
@@ -90,7 +90,7 @@ class ReeLogger::MultiLogger < Logger
   contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
   def error(message = nil, parameters = {}, exception = nil, log_args = true, progname = nil,  &block)
     if block_given?
-      log(:error, yield, parameters, exception, log_args)
+      log_block(:error, parameters, log_args, yield)
     else
       msg = get_message(message)
       log(:error, msg, parameters, exception, log_args)
@@ -98,22 +98,31 @@ class ReeLogger::MultiLogger < Logger
   end
 
   contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
-  def fatal(message = nil, parameters = {}, exception = nil, log_args = true, progname = nil,  &block)
+  def fatal(message = nil, parameters = {}, exception = nil, log_args = true, progname = nil, &block)
     if block_given?
-      log(:error, yield, parameters, exception, log_args)
+      log_block(:fatal, parameters, log_args, yield)
     else
       msg = get_message(message)
-      log(:error, msg, parameters, exception, log_args)
+      log(:fatal, msg, parameters, exception, log_args)
     end
   end
 
   contract(Nilor[String], Hash, Nilor[Exception], Bool, Nilor[String], Optblock => nil)
   def unknown(message = nil, parameters = {}, exception = nil, log_args = true, progname = nil,  &block)
     if block_given?
-      log(:unknown, yield, parameters, exception, log_args)
+      log_block(:unknown, parameters, log_args, yield)
     else
       msg = get_message(message)
       log(:unknown, msg, parameters, exception, log_args)
+    end
+  end
+
+  contract(Symbol, Hash, Bool, Or[Hash, String] => nil)
+  def log_block(error, parameters, log_args, block_parameters)
+    if block_parameters.is_a?(Hash)
+      log(error, "", block_parameters.merge(parameters), nil, log_args)
+    else
+      log(error, block_parameters, parameters, nil, log_args)
     end
   end
 
