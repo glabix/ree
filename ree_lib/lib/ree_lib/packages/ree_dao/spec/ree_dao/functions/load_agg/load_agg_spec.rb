@@ -110,8 +110,36 @@ RSpec.describe :load_agg do
           end
         end
         
-        has_one :passport, foreign_key: :user_id, assoc_dao: user_passports
-        field :custom_field, books.where(title: "1984")
+        has_one :passport, foreign_key: :user_id, scope: user_passports
+        field :custom_field, scope: books.where(title: "1984")
+      end
+    end
+  end
+
+  class ReeDaoLoadAggTest::UsersAggAutoloadChildren
+    include ReeDao::AggregateDSL
+
+    aggregate :users_agg_autoload_children do
+      link :users, from: :ree_dao_load_agg_test
+      link :books, from: :ree_dao_load_agg_test
+      link :chapters, from: :ree_dao_load_agg_test
+      link :authors, from: :ree_dao_load_agg_test
+      link :reviews, from: :ree_dao_load_agg_test
+      link :review_authors, from: :ree_dao_load_agg_test
+      link :load_agg, from: :ree_dao
+    end
+
+    def call(ids_or_scope, **opts)
+      load_agg(ids_or_scope, users, **opts) do
+        belongs_to :organization
+        has_many :books, autoload_children: true do
+          has_one :author
+          has_many :chapters
+        
+          has_many :reviews do
+            has_one :review_author
+          end
+        end
       end
     end
   end
@@ -148,23 +176,23 @@ RSpec.describe :load_agg do
 
     def call(ids_or_scope, **opts)
       load_agg(ids_or_scope, users, **opts) do
-        book_title = "1984"
         belongs_to :organization
 
-        has_many :books, books_scope(book_title)
+        has_many :books, scope: books_scope
       end
     end
 
     private
 
-    def books_scope(title)
-      books.where(title: title)
+    def books_scope
+      books.ids([1,2])
     end
   end
 
   let(:users_agg) { ReeDaoLoadAggTest::UsersAgg.new }
   let(:users_agg_block) { ReeDaoLoadAggTest::UsersAggBlockTest.new }
   let(:users_agg_scope_method) { ReeDaoLoadAggTest::UsersAggScopeMethodTest.new }
+  let(:users_agg_autoload_children) { ReeDaoLoadAggTest::UsersAggAutoloadChildren.new }
   let(:organizations) { ReeDaoLoadAggTest::Organizations.new }
   let(:users) { ReeDaoLoadAggTest::Users.new }
   let(:user_passports) { ReeDaoLoadAggTest::UserPassports.new }
@@ -198,8 +226,7 @@ RSpec.describe :load_agg do
     res_user = res[0]
     expect(res_user.id).to eq(user_1.id)
     expect(res_user.organization).to eq(organization)
-    expect(res_user.books.count).to eq(1)
-    expect(res_user.books[0].title).to eq("1984")
+    expect(res_user.books.count).to eq(2)
   }
 
   it {
@@ -270,6 +297,45 @@ RSpec.describe :load_agg do
     u = res[0]
     expect(u.books.count).to eq(2)
     expect(u.books[0].chapters.count).to_not eq(0)
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+    user_passports.delete_all
+    books.delete_all
+    chapters.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    users.put(user)
+
+    book = ReeDaoLoadAggTest::Book.new(user_id: user.id, title: "1984")
+    books.put(book)
+
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book.id, title: "beginning"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book.id, title: "interlude"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book.id, title: "tragic ending"))
+
+    authors.put(ReeDaoLoadAggTest::Author.new(book_id: book.id, name: "George Orwell"))
+
+    review = ReeDaoLoadAggTest::Review.new(book_id: book.id, rating: 5)
+    reviews.put(review)
+    review_authors.put(ReeDaoLoadAggTest::ReviewAuthor.new(review_id: review.id, name: "John"))
+
+    res = users_agg_autoload_children.call(
+      users.all,
+      only: [:books]
+    )
+
+    u = res[0]
+    expect(u.books).to_not eq(nil)
+    expect(u.books[0].chapters).to_not eq(nil)
+    expect(u.books[0].author).to_not eq(nil)
+    expect(u.books[0].reviews).to_not eq(nil)
+    expect(u.books[0].reviews[0].review_author).to eq(nil)
   }
 
   it {
