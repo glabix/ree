@@ -160,6 +160,7 @@ module ReeDao
           foreign_key = :id
         else
           root_ids = list.map(&:"#{foreign_key}")
+          foreign_key = :id
         end
       end
 
