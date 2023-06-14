@@ -48,7 +48,7 @@ class ReeDaoLoadAggTest::Organization
   end
 
   def users
-    @users
+    @users ||= []
   end
 
   attr_accessor :name

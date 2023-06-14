@@ -19,30 +19,27 @@ module ReeDao
     contract(
       Or[:belongs_to, :has_one, :has_many, :field],
       Symbol,
-      Nilor[Sequel::Dataset, Array],
       Ksplat[RestKeys => Any],
       Optblock => Array
     )
-    def load(assoc_type, assoc_name, scope, **opts, &block)
-      load_association(assoc_type, assoc_name, scope, **opts, &block)
+    def load(assoc_type, assoc_name, **opts, &block)
+      load_association(assoc_type, assoc_name, **opts, &block)
     end
 
     contract(
       Or[:belongs_to, :has_one, :has_many, :field],
       Symbol,
-      Nilor[Sequel::Dataset, Array],
       Ksplat[RestKeys => Any],
       Optblock => Nilor[Array]
     )
-    def load_association(assoc_type, assoc_name, scope, **opts, &block)
+    def load_association(assoc_type, assoc_name, **opts, &block)
       assoc_index = load_association_by_type(
         assoc_type,
         assoc_name,
-        scope,
         **opts
       )
 
-      process_block(assoc_index, &block) if block_given?
+      process_block(assoc_index, opts[:autoload_children] ||= false, &block) if block_given?
 
       list
     end
@@ -50,18 +47,16 @@ module ReeDao
     contract(
       Or[:belongs_to, :has_one, :has_many, :field],
       Symbol,
-      Nilor[Sequel::Dataset, Array],
       Ksplat[RestKeys => Any] => Any
     )
-    def load_association_by_type(type, assoc_name, scope, **opts)
+    def load_association_by_type(type, assoc_name, **opts)
       case type
       when :belongs_to
         one_to_one(
           assoc_name,
           list,
-          scope,
+          scope: opts[:scope],
           foreign_key: opts[:foreign_key],
-          assoc_dao: opts[:assoc_dao],
           setter: opts[:setter],
           reverse: false
         )
@@ -69,9 +64,8 @@ module ReeDao
         one_to_one(
           assoc_name,
           list,
-          scope,
+          scope: opts[:scope],
           foreign_key: opts[:foreign_key],
-          assoc_dao: opts[:assoc_dao],
           setter: opts[:setter],
           reverse: true
         )
@@ -79,25 +73,23 @@ module ReeDao
         one_to_many(
           assoc_name,
           list,
-          scope,
+          scope: opts[:scope],
           foreign_key: opts[:foreign_key],
-          assoc_dao: opts[:assoc_dao],
           setter: opts[:setter]
         )
       else
         one_to_many(
           assoc_name,
           list,
-          scope,
+          scope: opts[:scope],
           foreign_key: opts[:foreign_key],
-          assoc_dao: opts[:assoc_dao],
           setter: opts[:setter]
         )
       end
     end
 
-    contract(Hash, Block => Any)
-    def process_block(assoc, &block)
+    contract(Hash, Bool, Block => Any)
+    def process_block(assoc, autoload_children, &block)
       assoc_list = assoc.values.flatten
 
       if ReeDao::Associations.sync_mode?
@@ -105,6 +97,7 @@ module ReeDao
           parent.agg_caller,
           assoc_list,
           parent.local_vars,
+          autoload_children,
           **global_opts
         ).instance_exec(&block)
       else
@@ -112,6 +105,7 @@ module ReeDao
           parent.agg_caller,
           assoc_list,
           parent.local_vars,
+          autoload_children,
           **global_opts
         ).instance_exec(&block).map(&:join)
       end
@@ -119,11 +113,10 @@ module ReeDao
 
     contract(
       Symbol,
-      Array,
-      Nilor[Sequel::Dataset],
+      Array,      
       Kwargs[
         foreign_key: Nilor[Symbol],
-        assoc_dao: Nilor[Sequel::Dataset],
+        scope: Nilor[Sequel::Dataset],
         setter: Nilor[Or[Symbol, Proc]],
         reverse: Bool
       ] => Hash
@@ -131,9 +124,8 @@ module ReeDao
     def one_to_one(
       assoc_name,
       list,
-      scope,
+      scope: nil,
       foreign_key: nil,
-      assoc_dao: nil,
       setter: nil,
       reverse: true
     )
@@ -184,19 +176,17 @@ module ReeDao
     contract(
       Symbol,
       Array,
-      Nilor[Sequel::Dataset],
       Kwargs[
         foreign_key: Nilor[Symbol],
-        assoc_dao: Nilor[Sequel::Dataset],
+        scope: Nilor[Sequel::Dataset],
         setter: Nilor[Or[Symbol, Proc]]
       ] => Hash
     )
     def one_to_many(
       assoc_name,
       list,
-      scope,
       foreign_key: nil,
-      assoc_dao: nil,
+      scope: nil,
       setter: nil
     )
       return {} if list.empty?

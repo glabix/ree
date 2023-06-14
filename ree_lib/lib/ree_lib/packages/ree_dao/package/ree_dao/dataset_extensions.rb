@@ -111,6 +111,10 @@ module ReeDao
         nil
       end
 
+      def ids(ids_list)
+        where(id: ids_list)
+      end
+
       def update(hash_or_entity)
         return __original_update(hash_or_entity) if !opts[:schema_mapper]
         return __original_update(hash_or_entity) if hash_or_entity.is_a?(Hash)

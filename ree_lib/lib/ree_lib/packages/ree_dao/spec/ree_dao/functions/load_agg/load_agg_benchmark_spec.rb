@@ -141,7 +141,7 @@ RSpec.describe :load_agg do
         has_many :skills
         has_many :dreams
 
-        has_one :passport, foreign_key: :user_id, assoc_dao: user_passports
+        has_one :passport, foreign_key: :user_id, scope: user_passports
       end
     end
   end
