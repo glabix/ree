@@ -131,7 +131,7 @@ module ReeDao
     )
       return {} if list.empty?
 
-      assoc_dao ||= parent.instance_variable_get("@#{assoc_name}s")
+      assoc_dao = find_dao(assoc_name, parent, scope)
 
       if reverse
         if !foreign_key
@@ -191,7 +191,7 @@ module ReeDao
     )
       return {} if list.empty?
 
-      assoc_dao ||= parent.instance_variable_get("@#{assoc_name}")
+      assoc_dao = find_dao(assoc_name, parent, scope)
 
       foreign_key ||= "#{underscore(demodulize(list.first.class.name))}_id".to_sym
 
@@ -289,6 +289,19 @@ module ReeDao
       end
 
       s1
+    end
+
+    def find_dao(assoc_name, parent, scope)
+      dao_from_name = parent.instance_variable_get("@#{assoc_name}") || parent.instance_variable_get("@#{assoc_name}s")
+      return dao_from_name if dao_from_name
+
+      raise ArgumentError, "can't find DAO for :#{assoc_name}, provide correct scope or association name" if scope.nil?
+
+      table_name = scope.first_source_table
+      dao_from_scope = parent.instance_variable_get("@#{table_name}")
+      return dao_from_scope if dao_from_scope
+
+      raise ArgumentError, "can't find DAO for :#{assoc_name}, provide correct scope or association name"
     end
   end
 end

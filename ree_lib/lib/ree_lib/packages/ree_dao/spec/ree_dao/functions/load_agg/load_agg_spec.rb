@@ -116,10 +116,10 @@ RSpec.describe :load_agg do
     end
   end
 
-  class ReeDaoLoadAggTest::UsersAggAutoloadChildren
+  class ReeDaoLoadAggTest::UsersAggAutoloadBooksChildren
     include ReeDao::AggregateDSL
 
-    aggregate :users_agg_autoload_children do
+    aggregate :users_agg_autoload_books_children do
       link :users, from: :ree_dao_load_agg_test
       link :books, from: :ree_dao_load_agg_test
       link :chapters, from: :ree_dao_load_agg_test
@@ -137,6 +137,34 @@ RSpec.describe :load_agg do
           has_many :chapters
         
           has_many :reviews do
+            has_one :review_author
+          end
+        end
+      end
+    end
+  end
+
+  class ReeDaoLoadAggTest::UsersAggAutoloadReviewsChildren
+    include ReeDao::AggregateDSL
+
+    aggregate :users_agg_autoload_reviews_children do
+      link :users, from: :ree_dao_load_agg_test
+      link :books, from: :ree_dao_load_agg_test
+      link :chapters, from: :ree_dao_load_agg_test
+      link :authors, from: :ree_dao_load_agg_test
+      link :reviews, from: :ree_dao_load_agg_test
+      link :review_authors, from: :ree_dao_load_agg_test
+      link :load_agg, from: :ree_dao
+    end
+
+    def call(ids_or_scope, **opts)
+      load_agg(ids_or_scope, users, **opts) do
+        belongs_to :organization
+        has_many :books do
+          has_one :author
+          has_many :chapters
+        
+          has_many :reviews, autoload_children: true do
             has_one :review_author
           end
         end
@@ -176,23 +204,43 @@ RSpec.describe :load_agg do
 
     def call(ids_or_scope, **opts)
       load_agg(ids_or_scope, users, **opts) do
+        title = "1984"
         belongs_to :organization
 
-        has_many :books, scope: books_scope
+        has_many :books, scope: books_scope(title)
       end
     end
 
     private
 
-    def books_scope
-      books.ids([1,2])
+    def books_scope(title)
+      books.where(title: title)
+    end
+  end
+
+  class ReeDaoLoadAggTest::UsersAggWithoutDao
+    include ReeDao::AggregateDSL
+
+    aggregate :users_agg_without_dao do
+      link :users, from: :ree_dao_load_agg_test
+      link :organizations, from: :ree_dao_load_agg_test
+      link :books, from: :ree_dao_load_agg_test
+      link :load_agg, from: :ree_dao
+    end
+
+    def call(ids_or_scope, **opts)
+      load_agg(ids_or_scope, users, **opts) do
+        has_many :something
+      end
     end
   end
 
   let(:users_agg) { ReeDaoLoadAggTest::UsersAgg.new }
   let(:users_agg_block) { ReeDaoLoadAggTest::UsersAggBlockTest.new }
   let(:users_agg_scope_method) { ReeDaoLoadAggTest::UsersAggScopeMethodTest.new }
-  let(:users_agg_autoload_children) { ReeDaoLoadAggTest::UsersAggAutoloadChildren.new }
+  let(:users_agg_autoload_books_children) { ReeDaoLoadAggTest::UsersAggAutoloadBooksChildren.new }
+  let(:users_agg_autoload_reviews_children) { ReeDaoLoadAggTest::UsersAggAutoloadReviewsChildren.new }
+  let(:users_agg_without_dao) { ReeDaoLoadAggTest::UsersAggWithoutDao.new }
   let(:organizations) { ReeDaoLoadAggTest::Organizations.new }
   let(:users) { ReeDaoLoadAggTest::Users.new }
   let(:user_passports) { ReeDaoLoadAggTest::UserPassports.new }
@@ -201,6 +249,77 @@ RSpec.describe :load_agg do
   let(:authors) { ReeDaoLoadAggTest::Authors.new }
   let(:reviews) { ReeDaoLoadAggTest::Reviews.new }
   let(:review_authors) { ReeDaoLoadAggTest::ReviewAuthors.new }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    users.put(user)
+
+    expect {
+      users_agg_without_dao.call(users.all)
+    }.to raise_error(ArgumentError)
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+    user_passports.delete_all
+    books.delete_all
+    chapters.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user_2 = ReeDaoLoadAggTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
+    users.put(user_1)
+    users.put(user_2)
+
+    passport_1 = ReeDaoLoadAggTest::UserPassport.new(user_id: user_1.id, info: "some info")
+    user_passports.put(passport_1)
+    user_passports.put(ReeDaoLoadAggTest::UserPassport.new(user_id: user_2.id, info: "another info"))
+
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
+    book_2 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1408")
+
+    books.put(book_1)
+    books.put(book_2)
+
+    chapter = ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "beginning")
+    chapters.put(chapter)
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "interlude"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "tragic ending"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "beginning"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "ending"))
+
+
+    authors.put(ReeDaoLoadAggTest::Author.new(book_id: book_1.id, name: "George Orwell"))
+    review = ReeDaoLoadAggTest::Review.new(book_id: book_1.id, rating: 10)
+    reviews.put(review)
+    reviews.put(ReeDaoLoadAggTest::Review.new(book_id: book_1.id, rating: 7))
+    review_authors.put(ReeDaoLoadAggTest::ReviewAuthor.new(review_id: review.id, name: "John Review"))
+
+    res = users_agg.call(
+      users.all,
+      chapters: -> (scope) { scope.ids(chapter.id) }
+    )
+
+    res_user = res[0]
+    expect(res_user.id).to eq(user_1.id)
+    expect(res_user.organization).to eq(organization)
+    expect(res_user.passport).to eq(passport_1)
+    expect(res_user.passport.info).to eq("some info")
+    expect(res_user.books.count).to eq(2)
+    expect(res_user.books[0].author.name).to eq("George Orwell")
+    expect(res_user.books[0].chapters.map(&:title)).to eq(["beginning"])
+    expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review")
+    expect(res_user.custom_field).to_not eq(nil)
+  }
 
   it {
     organizations.delete_all
@@ -226,7 +345,7 @@ RSpec.describe :load_agg do
     res_user = res[0]
     expect(res_user.id).to eq(user_1.id)
     expect(res_user.organization).to eq(organization)
-    expect(res_user.books.count).to eq(2)
+    expect(res_user.books.count).to eq(1)
   }
 
   it {
@@ -325,7 +444,7 @@ RSpec.describe :load_agg do
     reviews.put(review)
     review_authors.put(ReeDaoLoadAggTest::ReviewAuthor.new(review_id: review.id, name: "John"))
 
-    res = users_agg_autoload_children.call(
+    res = users_agg_autoload_books_children.call(
       users.all,
       only: [:books]
     )
@@ -336,6 +455,45 @@ RSpec.describe :load_agg do
     expect(u.books[0].author).to_not eq(nil)
     expect(u.books[0].reviews).to_not eq(nil)
     expect(u.books[0].reviews[0].review_author).to eq(nil)
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+    user_passports.delete_all
+    books.delete_all
+    chapters.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    users.put(user)
+
+    book = ReeDaoLoadAggTest::Book.new(user_id: user.id, title: "1984")
+    books.put(book)
+
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book.id, title: "beginning"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book.id, title: "interlude"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book.id, title: "tragic ending"))
+
+    authors.put(ReeDaoLoadAggTest::Author.new(book_id: book.id, name: "George Orwell"))
+
+    review = ReeDaoLoadAggTest::Review.new(book_id: book.id, rating: 5)
+    reviews.put(review)
+    review_authors.put(ReeDaoLoadAggTest::ReviewAuthor.new(review_id: review.id, name: "John"))
+
+    res = users_agg_autoload_reviews_children.call(
+      users.all,
+      only: [:books, :reviews]
+    )
+
+    u = res[0]
+    expect(u.books).to_not eq(nil)
+    expect(u.books[0].chapters).to eq(nil)
+    expect(u.books[0].author).to eq(nil)
+    expect(u.books[0].reviews).to_not eq(nil)
+    expect(u.books[0].reviews[0].review_author).to_not eq(nil)
   }
 
   it {
