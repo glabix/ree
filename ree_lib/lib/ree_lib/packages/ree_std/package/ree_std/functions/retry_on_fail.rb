@@ -8,17 +8,24 @@ class ReeStd::RetryOnFail
   end
 
   doc(<<~DOC)
-    Execute provided block of code and retry it in case of specific exception
-    ```ruby
-      x = 0
+    ## **Ruby Function: retry_on_fail**
 
-      retry_on_fail(
-        max: 2,
-        retry_block: ->(attempt, e) { x += 1 }
-      ) { 1 / x }
-    ```
+    This function allows you to execute a provided block of code and automatically retry it in case a specific exception occurs.
+
+    rubyCopy code
+
+    `x = 0 retry_on_fail(max: 2, retry_block: ->(attempt, e) { x += 1 } ) { 1 / x }`
+
+    ## **Parameters**
+
+    *   **max** (Integer, required): Specifies the maximum number of retry attempts.
+    *   **interval** (Integer, optional, default: 1): Sets the base delay between retry attempts in seconds.
+    *   **max_interval** (Integer, optional, default: Float::INFINITY): Defines the upper limit for the delay between retry attempts.
+    *   **backoff_factor** (Integer, optional, default: 1): Determines the increasing factor for the delay based on the attempt number.
+    *   **exceptions** (StandardError[], optional, default: [StandardError]): Specifies a list of exceptions that should trigger a retry.
+    *   **retry_block** (Proc, optional, default: **Proc.new {|attempt_number, exception|}**): Allows you to provide a custom block of code to be executed after a failed attempt.
+    *   **retry_if** (Proc, optional, default: **Proc.new { |exception| true }**): Provides an additional condition that must be satisfied before initiating a new retry attempt.
   DOC
-
   contract(
     Kwargs[
       max: Integer,
