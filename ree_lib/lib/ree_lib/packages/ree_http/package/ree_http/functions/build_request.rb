@@ -4,10 +4,8 @@ class ReeHttp::BuildRequest
   include Ree::FnDSL
 
   fn :build_request do
-    link :to_json, from: :ree_json
-    link :slice, from: :ree_hash
     link :not_blank, from: :ree_object
-
+    link :to_json, from: :ree_json
     link 'ree_http/constants', -> {
       HTTPS & HTTP & HTTPS_PORT & HTTP_PORT & DEFAULT_FORCE_SSL
     }
@@ -84,8 +82,8 @@ class ReeHttp::BuildRequest
 
     unless opts[:body].nil?
       request.body =
-        case request[:body]
-        when Hash then to_json[opts[:body]]
+        case opts[:body]
+        when Hash then to_json(opts[:body])
         when File then opts[:body].read
         else
           opts[:body]

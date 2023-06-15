@@ -52,7 +52,11 @@ class ReeRoda::BuildRouteErrors
       klass, :call, scope: :instance
     )
 
-    method_decorator&.errors || []
+    original_method_decorator = Ree::Contracts.get_method_decorator(
+      klass, :__original_call, scope: :instance
+    )
+
+    method_decorator&.errors || original_method_decorator&.errors || []
   end
 
   def status_from_error(error)

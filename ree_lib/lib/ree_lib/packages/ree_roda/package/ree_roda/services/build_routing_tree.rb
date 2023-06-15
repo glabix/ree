@@ -93,19 +93,23 @@ class ReeRoda::BuildRoutingTree
             print_proc_tree(child)
           end
 
+          puts "#{get_offset(tree.depth + 1)}r.is do"
           tree.routes.each do |route|
-            puts "#{get_offset(tree.depth + 1)}r.#{route.request_method} do"
-            puts "#{get_offset(tree.depth + 1)}end"
+            puts "#{get_offset(tree.depth + 2)}r.#{route.request_method} do"
+            puts "#{get_offset(tree.depth + 2)}end"
           end
+          puts "#{get_offset(tree.depth + 1)}end"
 
           puts "#{get_offset(tree.depth)}end"
         else
           puts "#{get_offset(tree.depth)}r.is #{param_value} do"
 
+          puts "#{get_offset(tree.depth + 1)}r.is do"
           tree.routes.each do |route|
-            puts "#{get_offset(tree.depth + 1)}r.#{route.request_method} do"
-            puts "#{get_offset(tree.depth + 1)}end"
+            puts "#{get_offset(tree.depth + 2)}r.#{route.request_method} do"
+            puts "#{get_offset(tree.depth + 2)}end"
           end
+          puts "#{get_offset(tree.depth + 1)}end"
 
           puts "#{get_offset(tree.depth)}end"
         end

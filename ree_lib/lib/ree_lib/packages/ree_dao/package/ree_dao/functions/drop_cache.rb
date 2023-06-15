@@ -9,7 +9,7 @@ class ReeDao::DropCache
 
   contract(None => nil)
   def call
-    dao_cache.drop_thread_group_cache(Thread.current.group)
+    dao_cache.drop_thread_cache(Thread.current)
     nil
   end
 end

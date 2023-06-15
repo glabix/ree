@@ -18,6 +18,7 @@ RSpec.describe ReeMapper::DSL do
       build_mapper(register_as: :user).use(:cast) do
         integer :id
         string  :name
+        user    :created_by, null: true
       end
     end
 
@@ -42,11 +43,29 @@ RSpec.describe ReeMapper::DSL do
           title: 'Product',
           creator: {
             id: 1,
-            name: 'John'
+            name: 'John',
+            created_by: {
+              id: 2,
+              name: 'Jane',
+              created_by: nil
+            }
           }
         }
       )
     )
-    expect(result).to eq({id: 1, title: 'Product', creator: { id: 1, name: 'John' }})
+
+    expect(result).to eq({
+      id: 1, 
+      title: 'Product', 
+      creator: { 
+        id: 1, 
+        name: 'John',
+        created_by: {
+          id: 2,
+          name: 'Jane',
+          created_by: nil
+        }
+      }
+    })
   }
 end

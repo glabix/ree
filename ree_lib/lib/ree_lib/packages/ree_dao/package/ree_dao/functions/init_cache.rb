@@ -9,7 +9,7 @@ class ReeDao::InitCache
 
   contract(None => nil)
   def call
-    dao_cache.add_thread_group_cache(Thread.current.group)
+    dao_cache.add_thread_cache(Thread.current)
     nil
   end
 end

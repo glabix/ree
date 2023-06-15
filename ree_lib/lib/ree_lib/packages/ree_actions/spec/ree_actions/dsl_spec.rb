@@ -150,23 +150,30 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
           user = ReeActionsTest::User.new(name: 'John', age: 30)
           users_dao.put(user)
 
-          thr = Thread.new {
-            user2 = ReeActionsTest::User.new(name: 'Alex', age: 33)
-            users_dao.put(user2)
-          }
+          Thread.new do
+            users_dao.put(ReeActionsTest::User.new(name: 'Alex', age: 33))
+          end.join
 
-          thr.join
+          Thread.new do
+            users_dao.put(ReeActionsTest::User.new(name: 'David', age: 21))
+
+            Thread.new do
+              users_dao.put(ReeActionsTest::User.new(name: 'Sam', age: 19))
+            end.join
+          end.join
           
-          $thread_group_cache = ReeDao::DaoCache.new.instance_variable_get(:@thread_groups)
-                                                   .dig(Thread.current.group.object_id, :users)
+          $thread_cache = ReeDao::DaoCache.new.instance_variable_get(:@threads)
+                                              .dig(Thread.current.object_id, :users)
 
           attrs[:user_id]
         end
       end
     end
 
-    ReeActionsTest::TestAction3.new.call('user_access', {user_id: 1})
-    expect($thread_group_cache.keys.count).to_not eq(0)
-    expect($thread_group_cache.keys.count).to eq(2)
+    Thread.new do
+      ReeActionsTest::TestAction3.new.call('user_access', {user_id: 1})
+    end.join
+    expect($thread_cache.keys.count).to_not eq(0)
+    expect($thread_cache.keys.count).to eq(4)
   }
 end
