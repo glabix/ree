@@ -55,9 +55,9 @@ class ReeDao::LoadAgg
     agg_caller = block.binding.eval("self")
 
     if ReeDao.load_sync_associations_enabled?
-      Associations.new(agg_caller, list, local_vars, **opts).instance_exec(&block)
+      Associations.new(agg_caller, list, local_vars, **opts).instance_exec(list, &block)
     else
-      Associations.new(agg_caller, list, local_vars, **opts).instance_exec(&block).map(&:join)
+      Associations.new(agg_caller, list, local_vars, **opts).instance_exec(list, &block).map(&:join)
     end
   end
 end

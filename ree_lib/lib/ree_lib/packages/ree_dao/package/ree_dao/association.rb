@@ -99,7 +99,7 @@ module ReeDao
           parent.local_vars,
           autoload_children,
           **global_opts
-        ).instance_exec(&block)
+        ).instance_exec(assoc_list, &block)
       else
         ReeDao::Associations.new(
           parent.agg_caller,
@@ -107,7 +107,7 @@ module ReeDao
           parent.local_vars,
           autoload_children,
           **global_opts
-        ).instance_exec(&block).map(&:join)
+        ).instance_exec(assoc_list, &block).map(&:join)
       end
     end
 
