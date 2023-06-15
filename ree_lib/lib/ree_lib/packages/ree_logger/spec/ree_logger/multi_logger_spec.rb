@@ -142,4 +142,14 @@ RSpec.describe ReeLogger::MultiLogger do
       end
     }.to_not output.to_stdout
   }
+
+  it {
+    expect {
+      logger_with_appenders.info("some info message", { email: 'some@email.com }'}) do
+        {
+          name: "John"
+        }
+      end
+    }.to output(/John/).to_stdout
+  }
 end
