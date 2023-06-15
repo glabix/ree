@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module ReeDao
   class Associations
     include Ree::LinkDSL
@@ -78,6 +76,7 @@ module ReeDao
       Ksplat[
         scope?: Sequel::Dataset,
         setter?: Or[Symbol, Proc],
+        foreign_key?: Symbol,
         autoload_children?: Bool
       ],
       Optblock => Any
@@ -108,13 +107,13 @@ module ReeDao
       if self.class.sync_mode?
         return if association_is_not_included?(assoc_name)
 
-        association = ReeDao::Association.new(self, list, **global_opts)
+        association = Association.new(self, list, **global_opts)
         association.load(assoc_type, assoc_name, **assoc_opts, &block)
       else
         return @threads if association_is_not_included?(assoc_name)
 
         @threads << Thread.new do
-          association = ReeDao::Association.new(self, list, **global_opts)
+          association = Association.new(self, list, **global_opts)
           association.load(assoc_type, assoc_name, **assoc_opts, &block)
         end
       end
