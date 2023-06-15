@@ -83,7 +83,8 @@ module ReeDao
           list,
           scope: opts[:scope],
           foreign_key: opts[:foreign_key],
-          setter: opts[:setter]
+          setter: opts[:setter],
+          skip_dao: true
         )
       end
     end
@@ -179,7 +180,8 @@ module ReeDao
       Kwargs[
         foreign_key: Nilor[Symbol],
         scope: Nilor[Sequel::Dataset],
-        setter: Nilor[Or[Symbol, Proc]]
+        setter: Nilor[Or[Symbol, Proc]],
+        skip_dao: Bool
       ] => Hash
     )
     def one_to_many(
@@ -187,11 +189,13 @@ module ReeDao
       list,
       foreign_key: nil,
       scope: nil,
-      setter: nil
+      setter: nil,
+      skip_dao: false
     )
       return {} if list.empty?
 
-      assoc_dao = find_dao(assoc_name, parent, scope)
+      assoc_dao = nil
+      assoc_dao = find_dao(assoc_name, parent, scope) if !skip_dao
 
       foreign_key ||= "#{underscore(demodulize(list.first.class.name))}_id".to_sym
 
