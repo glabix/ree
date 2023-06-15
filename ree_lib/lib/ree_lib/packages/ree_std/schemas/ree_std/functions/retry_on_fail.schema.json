@@ -1,0 +1,38 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.1",
+  "name": "retry_on_fail",
+  "path": "packages/ree_std/package/ree_std/functions/retry_on_fail.rb",
+  "mount_as": "fn",
+  "class": "ReeStd::RetryOnFail",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "Execute provided block of code and retry it in case of specific exception\n```ruby\n  x = 0\n\n  retry_on_fail(\n    max: 2,\n    retry_block: ->(attempt, e) { x += 1 }\n  ) { 1 / x }\n```",
+      "throws": [
+
+      ],
+      "return": "Any",
+      "args": [
+        {
+          "arg": "max",
+          "arg_type": "keyreq",
+          "type": "Integer"
+        },
+        {
+          "arg": "opts",
+          "arg_type": "keyrest",
+          "type": "Ksplat[:interval? => Integer, :max_interval? => Integer, :backoff_factor? => Integer, :exceptions? => ArrayOf[SubclassOf[StandardError]], :retry_block? => Proc, :retry_if? => Proc]"
+        },
+        {
+          "arg": "block",
+          "arg_type": "block",
+          "type": "Block"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

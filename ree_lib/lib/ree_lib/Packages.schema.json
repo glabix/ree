@@ -79,6 +79,10 @@
       "schema": "packages/ree_routes/Package.schema.json"
     },
     {
+      "name": "ree_std",
+      "schema": "packages/ree_std/Package.schema.json"
+    },
+    {
       "name": "ree_string",
       "schema": "packages/ree_string/Package.schema.json"
     },
