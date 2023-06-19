@@ -89,7 +89,7 @@ PLATFORMS
 
 DEPENDENCIES
   bootsnap
-  faker
+  faker (~> 3.2)
   pg (~> 1.4.1)
   rack-test
   rake (~> 13.0)
