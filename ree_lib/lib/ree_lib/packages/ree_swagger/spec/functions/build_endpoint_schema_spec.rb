@@ -44,8 +44,9 @@ RSpec.describe :build_endpoint_schema do
 
     ReeSwaggerTest::Locales.register_as_swagger_type
 
-    serializer = mapper_factory.call.use(:serialize) do
+    serializer = mapper_factory.call(register_as: :obj).use(:serialize) do
       integer :id
+      obj     :prev_obj, null: true
     end
 
     _tag_caster = mapper_factory.call(register_as: :tag).use(:cast) do
@@ -133,7 +134,8 @@ RSpec.describe :build_endpoint_schema do
                   schema: {
                     type: 'object',
                     properties: {
-                      id: { type: 'integer' }
+                      id: { type: 'integer' },
+                      prev_obj: {}
                     }
                   }
                 }

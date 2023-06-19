@@ -14,10 +14,11 @@ RSpec.describe :build_request_body_schema_spec do
   }
 
   it {
-    caster = mapper_factory.call.use(:cast) do
+    caster = mapper_factory.call(register_as: :user).use(:cast) do
       string :name
       string :email
       string? :last_name
+      user :friend
     end
 
     schema = {
@@ -25,7 +26,8 @@ RSpec.describe :build_request_body_schema_spec do
       properties: {
         name: { type: "string" },
         email: { type: "string" },
-        last_name: { type: "string" }
+        last_name: { type: "string" },
+        friend: {}
       },
       required: ["name", "email"]
     }

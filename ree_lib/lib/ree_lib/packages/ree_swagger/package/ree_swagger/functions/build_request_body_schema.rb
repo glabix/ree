@@ -24,6 +24,11 @@ class ReeSwagger::BuildRequestBodySchema
 
       next if path_params.include?(field.name)
 
+      if field.type == mapper
+        acc[field.name] = {}
+        next
+      end
+
       swagger_field = {}
 
       required_fields << field.name.to_s if !field.optional

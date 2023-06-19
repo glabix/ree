@@ -16,6 +16,11 @@ class ReeSwagger::BuildSerializerSchema
     properties = mapper.fields.each_with_object({}) do |(_name, field), acc|
       next unless fields_filters.all? { _1.allow?(field.name) }
 
+      if field.type == mapper
+        acc[field.name] = {}
+        next
+      end
+
       swagger_field = {}
 
       field_mapper = field.type
