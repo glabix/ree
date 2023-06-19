@@ -17,7 +17,7 @@
         {
           "arg": "conn_opts",
           "arg_type": "req",
-          "type": "{:conn_str? => String, :adapter => String, :database? => String, :encoding? => String, :user? => String, :password? => String, :host? => String, :port? => Or[String, Integer], :convert_infinite_timestamps? => Or[string, nil, float], :connect_timeout? => Integer, :driver_options? => Hash, :notice_receiver? => Proc, :sslmode? => Or[disable, allow, prefer, require, verify-ca, verify-full...], :sslrootcert? => String, :search_path? => String, :use_iso_date_format? => Bool, :max_connections? => Integer}"
+          "type": "{:conn_str? => String, :adapter => String, :database? => String, :encoding? => String, :user? => String, :password? => String, :host? => String, :port? => Or[String, Integer], :convert_infinite_timestamps? => Or[string, nil, float], :connect_timeout? => Integer, :driver_options? => Hash, :notice_receiver? => Proc, :sslmode? => Or[disable, allow, prefer, require, verify-ca, verify-full...], :sslrootcert? => String, :search_path? => String, :use_iso_date_format? => Bool, :max_connections? => Integer, :pool_timeout? => Integer}"
         },
         {
           "arg": "opts",
