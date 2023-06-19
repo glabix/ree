@@ -105,12 +105,12 @@ module ReeDao
     )
     def association(assoc_type, assoc_name, **assoc_opts, &block)
       if self.class.sync_mode?
-        return if association_is_not_included?(assoc_name)
+        return if association_is_not_included?(assoc_name) || list.empty?
 
         association = Association.new(self, list, **global_opts)
         association.load(assoc_type, assoc_name, **assoc_opts, &block)
       else
-        return @threads if association_is_not_included?(assoc_name)
+        return @threads if association_is_not_included?(assoc_name) || list.empty?
 
         @threads << Thread.new do
           association = Association.new(self, list, **global_opts)
