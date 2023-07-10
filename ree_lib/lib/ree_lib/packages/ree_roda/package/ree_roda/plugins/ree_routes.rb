@@ -117,6 +117,8 @@ class Roda
                   ReeJson::ToJson.new.call(serialized_result)
                 end
               end
+
+              nil
             end
           end
         end
