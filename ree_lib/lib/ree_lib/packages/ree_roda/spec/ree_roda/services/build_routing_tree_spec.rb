@@ -259,4 +259,18 @@ RSpec.describe :build_routing_tree do
     # hsh = to_hash(tree)
     # expect(except(hsh, global_except: [:routes])).to eq(hsh_tree)
   }
+
+  it {
+    class TestErrorApp < TestTreeApp
+      error do |e|
+        response["Content-Type"] = "text/plain"
+        response.status = 500
+        response.write(e.inspect)
+        response.finish
+      end
+    end
+    env = { "REQUEST_METHOD" => "GET", "PATH_INFO" => "/api/actions", "SCRIPT_NAME" => "" }
+    res = TestErrorApp.app.call(env)
+    expect(res).to eq [404, {"content-length"=>"0", "content-type"=>"text/html"}, []]
+  }
 end
