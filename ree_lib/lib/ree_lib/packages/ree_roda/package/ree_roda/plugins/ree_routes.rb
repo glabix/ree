@@ -152,6 +152,8 @@ class Roda
                     route_procs.each do |route_proc|
                       r.instance_exec(r, &route_proc)
                     end
+                    
+                    nil
                   end
 
                   nil
@@ -168,6 +170,8 @@ class Roda
                     route_procs.each do |route_proc|
                       r.instance_exec(r, &route_proc)
                     end
+
+                    nil
                   end
 
                   nil
@@ -186,6 +190,8 @@ class Roda
                     route_procs.each do |route_proc|
                       r.instance_exec(r, &route_proc)
                     end
+
+                    nil
                   end
 
                   nil
@@ -196,6 +202,8 @@ class Roda
                     route_procs.each do |route_proc|
                       r.instance_exec(r, &route_proc)
                     end
+
+                    nil
                   end
 
                   nil
