@@ -1,4 +1,3 @@
-import { escape } from 'querystring'
 import * as vscode from 'vscode'
 import { Query } from 'web-tree-sitter'
 import { forest, asRegexp, mapLinkQueryMatches, Link } from '../utils/forest'
@@ -36,6 +35,7 @@ export function checkAndSortLinks(filePath: string) {
 
   const isMapper = !!content[firstLinkLineNumber - 1]?.match(/mapper/)?.length
   const isDao = !!content[firstLinkLineNumber - 1]?.match(/dao/)?.length
+  const isAggregate = !!content[firstLinkLineNumber - 1]?.match(/aggregate/)?.length
 
   const linksWithFileName = lodash.cloneDeep(links).filter(l => !l.isSymbol)
   const linksWithSymbolName = lodash.cloneDeep(links).filter(l => l.isSymbol)
@@ -73,7 +73,7 @@ export function checkAndSortLinks(filePath: string) {
     allSorted = allSorted.filter(el => el !== null)
   }
 
-  if (!isMapper && !isDao) {
+  if (!isMapper && !isDao && !isAggregate) {
     let importsStrings = []
     let nameStrings = []
     allSorted.forEach(el => {
