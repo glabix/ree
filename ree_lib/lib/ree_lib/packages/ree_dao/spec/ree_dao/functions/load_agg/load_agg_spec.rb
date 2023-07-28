@@ -111,7 +111,7 @@ RSpec.describe :load_agg do
         end
         
         has_one :passport, foreign_key: :user_id, scope: user_passports
-        field :custom_field, scope: books.where(title: "1984")
+        has_one :custom_field, scope: books.where(title: "1984")
       end
     end
   end
@@ -186,7 +186,8 @@ RSpec.describe :load_agg do
       load_agg(ids_or_scope, users, **opts) do
         belongs_to :organization
         has_many :books, setter: -> (item, items_index) {
-          item.set_books([1337, 1337])
+          b = items_index[item.id].each { |b| b.title = "Changed" }
+          item.set_books(b)
         }
       end
     end
@@ -540,7 +541,7 @@ RSpec.describe :load_agg do
     res = users_agg_block.call(user_1.id)
 
     u = res[0]
-    expect(u.books).to eq([1337, 1337])
+    expect(u.books.map(&:title)).to eq(["Changed"])
   }
 
   it {

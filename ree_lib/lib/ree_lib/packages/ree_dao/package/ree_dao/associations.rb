@@ -32,8 +32,9 @@ module ReeDao
     contract(
       Symbol,
       Ksplat[
-        scope?: Sequel::Dataset,
+        scope?: Or[Sequel::Dataset, Array],
         setter?: Or[Symbol, Proc],
+        primary_key?: Symbol,
         foreign_key?: Symbol,
         autoload_children?: Bool
       ],
@@ -46,8 +47,9 @@ module ReeDao
     contract(
       Symbol,
       Ksplat[
-        scope?: Sequel::Dataset,
+        scope?: Or[Sequel::Dataset, Array],
         setter?: Or[Symbol, Proc],
+        primary_key?: Symbol,
         foreign_key?: Symbol,
         autoload_children?: Bool
       ],
@@ -60,8 +62,9 @@ module ReeDao
     contract(
       Symbol,
       Ksplat[
-        scope?: Sequel::Dataset,
+        scope?: Or[Sequel::Dataset, Array],
         setter?: Or[Symbol, Proc],
+        primary_key?: Symbol,
         foreign_key?: Symbol,
         autoload_children?: Bool
       ],
@@ -74,8 +77,9 @@ module ReeDao
     contract(
       Symbol,
       Ksplat[
-        scope?: Sequel::Dataset,
+        scope?: Or[Sequel::Dataset, Array],
         setter?: Or[Symbol, Proc],
+        primary_key?: Symbol,
         foreign_key?: Symbol,
         autoload_children?: Bool
       ],
@@ -96,8 +100,9 @@ module ReeDao
       ],
       Symbol,
       Ksplat[
-        scope?: Sequel::Dataset,
+        scope?: Or[Sequel::Dataset, Array],
         setter?: Or[Symbol, Proc],
+        primary_key?: Symbol,
         foreign_key?: Symbol,
         autoload_children?: Bool
       ],

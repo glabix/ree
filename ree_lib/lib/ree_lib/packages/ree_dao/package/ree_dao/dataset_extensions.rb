@@ -151,6 +151,26 @@ module ReeDao
         for_update
       end
 
+      def with_mapper(mapper)
+        clone(
+          schema_mapper: mapper || opts[:schema_mapper],
+        ).with_row_proc(
+          Proc.new { |hash|
+            m = mapper || opts[:schema_mapper]
+
+            if m
+              entity = m.db_load(hash)
+
+              self.set_entity_cache(entity, hash)
+
+              entity
+            else
+              hash
+            end
+          }
+        )
+      end
+
       private
 
       def __ree_dao_cache
@@ -177,26 +197,6 @@ module ReeDao
             raw.delete(str_key)
           end
         end
-      end
-
-      def with_mapper(mapper)
-        clone(
-          schema_mapper: mapper || opts[:schema_mapper],
-        ).with_row_proc(
-          Proc.new { |hash|
-            m = mapper || opts[:schema_mapper]
-
-            if m
-              entity = m.db_load(hash)
-
-              self.set_entity_cache(entity, hash)
-
-              entity
-            else
-              hash
-            end
-          }
-        )
       end
 
       def extract_primary_key(entity)

@@ -35,25 +35,45 @@ class ReeDaoLoadAggTest::Db
   end
 end
 
-class ReeDaoLoadAggTest::Organization
+class ReeDaoLoadAggTest::Book
   include ReeDto::EntityDSL
 
   properties(
     id: Nilor[Integer],
-    name: String
+    user_id: Integer,
+    title: Nilor[String]
   )
 
-  def set_users(users)
-    @users = users
+  def set_chapters(chapters)
+    @chapters = chapters; nil
   end
 
-  def users
-    @users ||= []
+  def chapters
+    @chapters
   end
 
-  attr_accessor :name
+  def set_author(author)
+    @author = author
+  end
+
+  def author
+    @author
+  end
+
+  def set_reviews(reviews)
+    @reviews = reviews; nil
+  end
+
+  def reviews
+    @reviews
+  end
+
+  def title=(t)
+    @title = t
+  end
+
+  attr_accessor :title, :user_id
 end
-
 
 class ReeDaoLoadAggTest::User
   include ReeDto::EntityDSL
@@ -81,10 +101,18 @@ class ReeDaoLoadAggTest::User
     @passport
   end
 
+  def books
+    @books
+  end
+
+  contract(ArrayOf[ReeDaoLoadAggTest::Book] => nil)
+  def set_books(books)
+    @books = books; nil
+  end
+
   [
     :organization,
     :passport,
-    :books,
     :movies,
     :videogames,
     :hobbies,
@@ -104,6 +132,26 @@ class ReeDaoLoadAggTest::User
   end
 
   attr_accessor :name, :age, :organization_id
+end
+
+class ReeDaoLoadAggTest::Organization
+  include ReeDto::EntityDSL
+
+  properties(
+    id: Nilor[Integer],
+    name: String
+  )
+  
+  contract(Array[ReeDaoLoadAggTest::User] => nil)
+  def set_users(users)
+    @users = users; nil
+  end
+
+  def users
+    @users ||= []
+  end
+
+  attr_accessor :name
 end
 
 
@@ -187,42 +235,6 @@ class ReeDaoLoadAggTest::Dream
     user_id: Integer,
     description: Nilor[String]
   )
-end
-
-class ReeDaoLoadAggTest::Book
-  include ReeDto::EntityDSL
-
-  properties(
-    id: Nilor[Integer],
-    user_id: Integer,
-    title: Nilor[String]
-  )
-
-  def set_chapters(chapters)
-    @chapters = chapters; nil
-  end
-
-  def chapters
-    @chapters
-  end
-
-  def set_author(author)
-    @author = author
-  end
-
-  def author
-    @author
-  end
-
-  def set_reviews(reviews)
-    @reviews = reviews; nil
-  end
-
-  def reviews
-    @reviews
-  end
-
-  attr_accessor :title, :user_id
 end
 
 class ReeDaoLoadAggTest::Chapter
