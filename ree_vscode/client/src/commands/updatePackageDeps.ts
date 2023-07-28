@@ -154,7 +154,7 @@ function updateObjectLinks(
   }
 
   const isLinksBlock = text.split('\n').some((line, index) => {
-    let searchIndex = line.search(/(fn|action|bean|async\_bean|dao|mapper)\s\:[A-Za-z\_]+/)
+    let searchIndex = line.search(/(fn|action|bean|async\_bean|dao|mapper|aggregate)\s\:[A-Za-z\_]+/)
     if (searchIndex !== -1) { 
       lineNumber = index
       endCharPos = line.length
