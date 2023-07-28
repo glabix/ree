@@ -56,6 +56,7 @@ module ReeDao
           assoc_name,
           list,
           scope: opts[:scope],
+          primary_key: opts[:primary_key],
           foreign_key: opts[:foreign_key],
           setter: opts[:setter],
           reverse: false
@@ -65,6 +66,7 @@ module ReeDao
           assoc_name,
           list,
           scope: opts[:scope],
+          primary_key: opts[:primary_key],
           foreign_key: opts[:foreign_key],
           setter: opts[:setter],
           reverse: true
@@ -74,6 +76,7 @@ module ReeDao
           assoc_name,
           list,
           scope: opts[:scope],
+          primary_key: opts[:primary_key],
           foreign_key: opts[:foreign_key],
           setter: opts[:setter]
         )
@@ -82,6 +85,7 @@ module ReeDao
           assoc_name,
           list,
           scope: opts[:scope],
+          primary_key: opts[:primary_key],
           foreign_key: opts[:foreign_key],
           setter: opts[:setter],
           skip_dao: true
@@ -89,9 +93,9 @@ module ReeDao
       end
     end
 
-    contract(Hash, Bool, Block => Any)
+    contract(Or[Hash, Array], Bool, Block => Any)
     def process_block(assoc, autoload_children, &block)
-      assoc_list = assoc.values.flatten
+      assoc_list = assoc.is_a?(Array) ? assoc : assoc.values.flatten
 
       if ReeDao::Associations.sync_mode?
         ReeDao::Associations.new(
@@ -116,59 +120,73 @@ module ReeDao
       Symbol,
       Array,      
       Kwargs[
+        primary_key: Nilor[Symbol],
         foreign_key: Nilor[Symbol],
-        scope: Nilor[Sequel::Dataset],
+        scope: Nilor[Sequel::Dataset, Array],
         setter: Nilor[Or[Symbol, Proc]],
         reverse: Bool
-      ] => Hash
+      ] => Or[Hash, Array]
     )
     def one_to_one(
       assoc_name,
       list,
       scope: nil,
+      primary_key: :id,
       foreign_key: nil,
       setter: nil,
       reverse: true
     )
       return {} if list.empty?
 
-      assoc_dao = find_dao(assoc_name, parent, scope)
+      primary_key ||= :id
 
-      if reverse
-        if !foreign_key
-          name = underscore(demodulize(list.first.class.name))
-          foreign_key = "#{name}_id".to_sym
-        end
-
-        root_ids = list.map(&:id).uniq
+      # TODO: refactor
+      if scope.is_a?(Array)
+        items = scope
       else
-        if !foreign_key
-          dto_class = assoc_dao
-            .opts[:schema_mapper]
-            .dto(:db_load)
+        assoc_dao = find_dao(assoc_name, parent, scope)
   
-          name = underscore(demodulize(dto_class.name))
-          
-          root_ids = list.map(&:"#{"#{name}_id".to_sym}").uniq
-          foreign_key = :id
+        if reverse
+          if !foreign_key
+            name = underscore(demodulize(list.first.class.name))
+            foreign_key = "#{name}_id".to_sym
+          end
+  
+          root_ids = list.map(&:id).uniq
         else
-          root_ids = list.map(&:"#{foreign_key}")
-          foreign_key = :id
+          if !foreign_key
+            dto_class = assoc_dao
+              .opts[:schema_mapper]
+              .dto(:db_load)
+    
+            name = underscore(demodulize(dto_class.name))
+            
+            root_ids = list.map(&:"#{"#{name}_id".to_sym}").uniq
+            foreign_key = :id
+          else
+            root_ids = list.map(&:"#{foreign_key}")
+            foreign_key = :id
+          end
         end
+  
+        default_scope = assoc_dao&.where(foreign_key => root_ids)
+  
+        items = add_scopes(default_scope, scope, global_opts[assoc_name])
       end
 
-      default_scope = assoc_dao&.where(foreign_key => root_ids)
-
-      items = add_scopes(default_scope, scope, global_opts[assoc_name])
-
-      assoc = index_by(items) { _1.send(foreign_key) }
+      assoc = if foreign_key
+        index_by(items) { _1.send(foreign_key) }
+      else
+        items
+      end 
 
       populate_association(
         list,
         assoc,
         assoc_name,
         setter: setter,
-        reverse: reverse
+        reverse: reverse,
+        primary_key: primary_key
       )
 
       assoc
@@ -179,14 +197,16 @@ module ReeDao
       Array,
       Kwargs[
         foreign_key: Nilor[Symbol],
-        scope: Nilor[Sequel::Dataset],
+        primary_key: Nilor[Symbol],
+        scope: Nilor[Sequel::Dataset, Array],
         setter: Nilor[Or[Symbol, Proc]],
         skip_dao: Bool
-      ] => Hash
+      ] => Or[Hash, Array]
     )
     def one_to_many(
       assoc_name,
       list,
+      primary_key: nil,
       foreign_key: nil,
       scope: nil,
       setter: nil,
@@ -194,24 +214,36 @@ module ReeDao
     )
       return {} if list.empty?
 
-      assoc_dao = nil
-      assoc_dao = find_dao(assoc_name, parent, scope) if !skip_dao
+      primary_key ||= :id
 
-      foreign_key ||= "#{underscore(demodulize(list.first.class.name))}_id".to_sym
+      # TODO: refactor
+      if scope.is_a?(Array)
+        items = scope
+      else
+        assoc_dao = nil
+        assoc_dao = find_dao(assoc_name, parent, scope) if !skip_dao
+  
+        foreign_key ||= "#{underscore(demodulize(list.first.class.name))}_id".to_sym
+  
+        root_ids = list.map(&:"#{primary_key}")
+  
+        default_scope = assoc_dao&.where(foreign_key => root_ids)
+  
+        items = add_scopes(default_scope, scope, global_opts[assoc_name])
+      end
 
-      root_ids = list.map(&:id)
-
-      default_scope = assoc_dao&.where(foreign_key => root_ids)
-
-      items = add_scopes(default_scope, scope, global_opts[assoc_name])
-
-      assoc = group_by(items) { _1.send(foreign_key) }
+      assoc = if foreign_key
+        group_by(items) { _1.send(foreign_key) }
+      else
+        items
+      end
 
       populate_association(
         list,
         assoc,
         assoc_name,
-        setter: setter
+        setter: setter,
+        primary_key: primary_key
       )
 
       assoc
@@ -219,9 +251,10 @@ module ReeDao
 
     contract(
       Array,
-      Hash,
+      Or[Hash, Array],
       Symbol,
       Kwargs[
+        primary_key: Nilor[Symbol],
         reverse: Nilor[Bool],
         setter: Nilor[Or[Symbol, Proc]]
       ] => Any
@@ -230,6 +263,7 @@ module ReeDao
       list,
       association_index,
       assoc_name,
+      primary_key: nil,
       reverse: nil,
       setter: nil
     )
@@ -244,14 +278,18 @@ module ReeDao
           self.instance_exec(item, association_index, &assoc_setter)
         else
           key = if reverse.nil?
-            :id
+            primary_key
           else
-            reverse ? :id : "#{assoc_name}_id"
+            reverse ? primary_key : "#{assoc_name}_id"
           end
           value = association_index[item.send(key)]
           next if value.nil?
 
-          item.send(assoc_setter, value)
+          begin
+            item.send(assoc_setter, value)
+          rescue NoMethodError
+            item.send("#{assoc_name}=", value)
+          end
         end
       end
     end
@@ -292,6 +330,10 @@ module ReeDao
         s1 = s1.order(*s2.opts[:order])
       end
 
+      if s1.opts[:schema_mapper] != s2.opts[:schema_mapper]
+        s1 = s1.with_mapper(s2.opts[:schema_mapper])
+      end
+
       s1
     end
 
@@ -306,6 +348,12 @@ module ReeDao
       return dao_from_scope if dao_from_scope
 
       raise ArgumentError, "can't find DAO for :#{assoc_name}, provide correct scope or association name"
+    end
+
+    def method_missing(method, *args, &block)
+      return super if !parent.agg_caller.private_methods(false).include?(method)
+
+      parent.agg_caller.send(method, *args, &block)
     end
   end
 end

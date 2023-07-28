@@ -199,8 +199,6 @@ module ReeDao
         end
       end
 
-      
-
       def extract_primary_key(entity)
         if primary_key.is_a?(Array)
           primary_key.map do |key|
