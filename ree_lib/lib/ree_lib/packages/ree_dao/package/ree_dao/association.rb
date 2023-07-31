@@ -91,8 +91,7 @@ module ReeDao
           scope: opts[:scope],
           primary_key: opts[:primary_key],
           foreign_key: opts[:foreign_key],
-          setter: opts[:setter],
-          skip_dao: true
+          setter: opts[:setter]
         )
       end
     end
@@ -131,20 +130,11 @@ module ReeDao
         reverse: Bool
       ] => Or[Hash, Array]
     )
-    def one_to_one(
-      assoc_name,
-      list,
-      scope: nil,
-      primary_key: :id,
-      foreign_key: nil,
-      setter: nil,
-      reverse: true
-    )
+    def one_to_one(assoc_name, list, scope: nil, primary_key: :id, foreign_key: nil, setter: nil, reverse: true)
       return {} if list.empty?
 
       primary_key ||= :id
 
-      # TODO: refactor
       if scope.is_a?(Array)
         items = scope
       else
@@ -173,7 +163,9 @@ module ReeDao
           end
         end
   
-        default_scope = assoc_dao&.where(foreign_key => root_ids)
+        default_scope = if !scope 
+          assoc_dao&.where(foreign_key => root_ids)
+        end
   
         items = add_scopes(default_scope, scope, global_opts[assoc_name])
       end
@@ -203,35 +195,27 @@ module ReeDao
         foreign_key: Nilor[Symbol],
         primary_key: Nilor[Symbol],
         scope: Nilor[Sequel::Dataset, Array],
-        setter: Nilor[Or[Symbol, Proc]],
-        skip_dao: Bool
+        setter: Nilor[Or[Symbol, Proc]]
       ] => Or[Hash, Array]
     )
-    def one_to_many(
-      assoc_name,
-      list,
-      primary_key: nil,
-      foreign_key: nil,
-      scope: nil,
-      setter: nil,
-      skip_dao: false
-    )
+    def one_to_many(assoc_name, list, primary_key: nil, foreign_key: nil, scope: nil, setter: nil)
       return {} if list.empty?
 
       primary_key ||= :id
 
-      # TODO: refactor
       if scope.is_a?(Array)
         items = scope
       else
         assoc_dao = nil
-        assoc_dao = find_dao(assoc_name, parent, scope) if !skip_dao
+        assoc_dao = find_dao(assoc_name, parent, scope)
   
         foreign_key ||= "#{underscore(demodulize(list.first.class.name))}_id".to_sym
   
         root_ids = list.map(&:"#{primary_key}")
   
-        default_scope = assoc_dao&.where(foreign_key => root_ids)
+        default_scope = if !scope
+          assoc_dao&.where(foreign_key => root_ids)
+        end
   
         items = add_scopes(default_scope, scope, global_opts[assoc_name])
       end
@@ -263,14 +247,7 @@ module ReeDao
         setter: Nilor[Or[Symbol, Proc]]
       ] => Any
     )
-    def populate_association(
-      list,
-      association_index,
-      assoc_name,
-      primary_key: nil,
-      reverse: nil,
-      setter: nil
-    )
+    def populate_association(list, association_index, assoc_name, primary_key: nil, reverse: nil, setter: nil)
       assoc_setter = if setter
         setter
       else
@@ -300,45 +277,13 @@ module ReeDao
 
     contract(Nilor[Sequel::Dataset], Nilor[Sequel::Dataset], Nilor[Proc] => Array)
     def add_scopes(default_scope, scope, named_scope)
-      if default_scope && !scope
-        res = default_scope
-      end
-
-      if default_scope && scope
-        if scope == []
-          res = default_scope
-        else
-          res = merge_scopes(default_scope, scope)
-        end
-      end
-
-      if !default_scope && scope
-        return [] if scope.empty?
-
-        res = scope
-      end
+      res = scope || default_scope
 
       if named_scope
         res = named_scope.call(res)
       end
 
       res.all
-    end
-
-    def merge_scopes(s1, s2)
-      if s2.opts[:where]
-        s1 = s1.where(s2.opts[:where])
-      end
-
-      if s2.opts[:order]
-        s1 = s1.order(*s2.opts[:order])
-      end
-
-      if s1.opts[:schema_mapper] != s2.opts[:schema_mapper]
-        s1 = s1.with_mapper(s2.opts[:schema_mapper])
-      end
-
-      s1
     end
 
     def find_dao(assoc_name, parent, scope)
