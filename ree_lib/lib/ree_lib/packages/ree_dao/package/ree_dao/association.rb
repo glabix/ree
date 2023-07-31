@@ -26,8 +26,8 @@ module ReeDao
       load_association(assoc_type, assoc_name, **opts, &block)
     end
 
-    def handle_field(assoc_name, proc)
-      proc.call
+    def handle_field(field_proc)
+      field_proc.call
     end
 
     contract(
@@ -109,13 +109,24 @@ module ReeDao
           **global_opts
         ).instance_exec(assoc_list, &block)
       else
-        ReeDao::Associations.new(
+        threads = ReeDao::Associations.new(
           parent.agg_caller,
           assoc_list,
           parent.local_vars,
           autoload_children,
           **global_opts
-        ).instance_exec(assoc_list, &block)[:association_threads].map(&:join)
+        ).instance_exec(assoc_list, &block)
+        threads[:association_threads].map do |association, assoc_type, assoc_name, opts, block|
+          Thread.new do
+            association.load(assoc_type, assoc_name, **opts, &block)
+          end
+        end.map(&:join)
+
+        threads[:field_threads].map do |association, field_proc|
+          Thread.new do
+            association.handle_field(field_proc)
+          end
+        end.map(&:join)
       end
     end
 

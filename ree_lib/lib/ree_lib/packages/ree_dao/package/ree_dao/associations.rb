@@ -97,17 +97,18 @@ module ReeDao
         association = Association.new(self, list, **global_opts)
 
         if assoc_type == :field
+          field_proc = opts
           { 
             association_threads: @assoc_threads,
-            field_threads: @field_threads << Thread.new do
-              association.handle_field(assoc_name, opts)
-            end
+            field_threads: @field_threads << [
+              association, field_proc
+            ]
           }
         else
           {
-            association_threads: @assoc_threads << Thread.new do
-              association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
-            end,
+            association_threads: @assoc_threads << [
+              association, assoc_type, assoc_name, get_assoc_opts(opts), block
+            ],
             field_threads: @field_threads
           }
         end
