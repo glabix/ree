@@ -43,7 +43,7 @@ module ReeDao
     def belongs_to(assoc_name, opts = nil, &block)
       association(__method__, assoc_name, opts, &block)
     end
-  
+
     contract(
       Symbol,
       Nilor[Proc, Sequel::Dataset],
@@ -52,7 +52,7 @@ module ReeDao
     def has_one(assoc_name, opts = nil, &block)
       association(__method__, assoc_name, opts, &block)
     end
-  
+
     contract(
       Symbol,
       Nilor[Proc, Sequel::Dataset],
@@ -61,7 +61,7 @@ module ReeDao
     def has_many(assoc_name, opts = nil, &block)
       association(__method__, assoc_name, opts, &block)
     end
-  
+
     contract(Symbol, Proc => Any)
     def field(assoc_name, proc)
       association(__method__, assoc_name, proc)
@@ -83,8 +83,9 @@ module ReeDao
     def association(assoc_type, assoc_name, opts, &block)
       if self.class.sync_mode?
         return if association_is_not_included?(assoc_name) || list.empty?
-        
+
         association = Association.new(self, parent_dao_name, list, **global_opts)
+
         if assoc_type == :field
           association.handle_field(assoc_name, opts)
         else
@@ -92,14 +93,14 @@ module ReeDao
         end
       else
         if association_is_not_included?(assoc_name) || list.empty?
-          return { association_threads: @assoc_threads, field_threads: @field_threads } 
+          return { association_threads: @assoc_threads, field_threads: @field_threads }
         end
 
         association = Association.new(self, parent_dao_name, list, **global_opts)
 
         if assoc_type == :field
           field_proc = opts
-          { 
+          {
             association_threads: @assoc_threads,
             field_threads: @field_threads << [
               association, field_proc
@@ -125,7 +126,7 @@ module ReeDao
 
         if only && !only.include?(assoc_name)
           return false if autoload_children
-          return true 
+          return true
         end
       end
 

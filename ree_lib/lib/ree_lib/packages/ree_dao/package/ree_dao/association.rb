@@ -273,7 +273,11 @@ module ReeDao
         if setter && setter.is_a?(Proc)
           if to_dto
             assoc_index = transform_values(association_index) do |key, value|
-              to_dto.call(value)
+              if value.is_a?(Array)
+                value.map { to_dto.call(_1) }
+              else
+                to_dto.call(value)
+              end
             end
 
             self.instance_exec(item, assoc_index, &assoc_setter)
@@ -290,16 +294,14 @@ module ReeDao
           value = association_index[item.send(key)]
 
           if to_dto && !value.nil?
-            if value.is_a?(Array)
-              value = value.map { to_dto.call(_1) }
+            value = if value.is_a?(Array)
+              value.map { to_dto.call(_1) }
             else
-              value = to_dto.call(value)
+              to_dto.call(value)
             end
           end
 
-          if value.nil? && multiple
-            value = []
-          end
+          value = [] if value.nil? && multiple
 
           begin
             item.send(assoc_setter, value)
