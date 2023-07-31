@@ -143,6 +143,8 @@ module ReeDao
     def get_assoc_opts(opts)
       if opts.is_a?(Proc)
         opts.call
+      elsif opts.is_a?(Sequel::Dataset)
+        { scope: opts }
       else
         {}
       end
