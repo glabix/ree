@@ -37,7 +37,9 @@ class ReeDao::LoadAgg
     list = scope.is_a?(Sequel::Dataset) ? scope.all : scope
 
     if opts[:to_dto]
-      list = opts[:to_dto].call(list)
+      list = list.map do |item|
+        list = opts[:to_dto].call(item)
+      end
     end
 
     load_associations(list, **opts, &block) if block_given?

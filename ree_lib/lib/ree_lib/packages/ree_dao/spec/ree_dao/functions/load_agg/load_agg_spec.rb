@@ -275,7 +275,7 @@ RSpec.describe :load_agg do
       load_agg(users, ids_or_scope, **opts) do |agg_list|
         some_id = agg_list.first.id
         title = "1984"
-        belongs_to :organization
+        belongs_to :organization, organizations.by_name("Corp")
 
         has_many :books, -> { books_opts(title) }
       end
@@ -289,6 +289,22 @@ RSpec.describe :load_agg do
 
     def books_scope(title)
       books.where(title: title)
+    end
+  end
+
+  class ReeDaoLoadAggTest::UsersAggOnlyDataset
+    include ReeDao::AggregateDSL
+
+    aggregate :users_agg_only_dataset do
+      link :users, from: :ree_dao_load_agg_test
+      link :books, from: :ree_dao_load_agg_test
+      link :load_agg, from: :ree_dao
+    end
+
+    def call(ids_or_scope, **opts)
+      load_agg(users, ids_or_scope, **opts) do
+        has_many :books, books.where(title: "1408")
+      end
     end
   end
 
@@ -316,6 +332,7 @@ RSpec.describe :load_agg do
   let(:users_agg_autoload_reviews_children) { ReeDaoLoadAggTest::UsersAggAutoloadReviewsChildren.new }
   let(:users_agg_without_dao) { ReeDaoLoadAggTest::UsersAggWithoutDao.new }
   let(:users_agg_with_dto) { ReeDaoLoadAggTest::UsersAggWithDto.new }
+  let(:users_agg_only_dataset) { ReeDaoLoadAggTest::UsersAggOnlyDataset.new }
   let(:organizations) { ReeDaoLoadAggTest::Organizations.new }
   let(:users) { ReeDaoLoadAggTest::Users.new }
   let(:user_passports) { ReeDaoLoadAggTest::UserPassports.new }
@@ -354,21 +371,41 @@ RSpec.describe :load_agg do
 
     res = users_agg_with_dto.call(
       users.all,
-      to_dto: -> (users) {
-        users.map do |user|
-          ReeDaoLoadAggTest::UserDto.new(
-            id: user.id,
-            name: user.name,
-            organization_id: user.organization_id,
-            full_name: user.name
-          )
-        end
+      to_dto: -> (user) {
+        ReeDaoLoadAggTest::UserDto.new(
+          id: user.id,
+          name: user.name,
+          organization_id: user.organization_id,
+          full_name: user.name
+        )
       }
     )
 
-    res_user = res[0]
+    expect(res.first.class).to eq(ReeDaoLoadAggTest::UserDto)
+  }
 
-    expect(res_user.class).to eq(ReeDaoLoadAggTest::UserDto)
+  it {
+    organizations.delete_all
+    users.delete_all
+
+    org = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(org)
+
+    user = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: org.id)
+    users.put(user)
+
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user.id, title: "1984")
+    book_2 = ReeDaoLoadAggTest::Book.new(user_id: user.id, title: "1408")
+    book_3 = ReeDaoLoadAggTest::Book.new(user_id: user.id, title: "1408")
+
+    books.put(book_1)
+    books.put(book_2)
+    books.put(book_3)
+    
+    res = users_agg_only_dataset.call(users.where(name: "John"))
+
+    user = res[0]
+    expect(user.books.map(&:title).uniq).to eq(["1408"])
   }
 
   it {
