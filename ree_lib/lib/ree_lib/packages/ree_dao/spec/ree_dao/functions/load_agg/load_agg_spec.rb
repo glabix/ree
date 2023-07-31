@@ -101,13 +101,15 @@ RSpec.describe :load_agg do
     def call(ids_or_scope, **opts)
       load_agg(users, ids_or_scope, **opts) do
         belongs_to :organization
-        has_many :books do
+        has_many :books do |book_list|
           has_one :author
           has_many :chapters
         
           has_many :reviews do
             has_one :review_author
           end
+
+          field :calculatetable_field, -> { change_book_titles(book_list) }
         end
         
         has_one :passport, -> { passport_opts }
@@ -116,6 +118,12 @@ RSpec.describe :load_agg do
     end
 
     private
+
+    def change_book_titles(book_list)
+      book_list.each do |book|
+        book.title = "#{book.title.upcase} changed"
+      end
+    end
 
     def passport_opts
       {
@@ -352,6 +360,7 @@ RSpec.describe :load_agg do
     expect(res_user.passport).to eq(passport_1)
     expect(res_user.passport.info).to eq("some info")
     expect(res_user.books.count).to eq(2)
+    expect(res_user.books.map(&:title)).to eq(["1984 changed", "1408 changed"])
     expect(res_user.books[0].author.name).to eq("George Orwell")
     expect(res_user.books[0].chapters.map(&:title)).to eq(["beginning"])
     expect(res_user.books[0].reviews[0].review_author.name).to eq("John Review")

@@ -58,7 +58,7 @@ module ReeDao
   
     contract(Symbol, Proc => Any)
     def field(assoc_name, proc)
-      association(__method__, assoc_name, opts, &block)
+      association(__method__, assoc_name, proc)
     end
 
     private
@@ -79,13 +79,21 @@ module ReeDao
         return if association_is_not_included?(assoc_name) || list.empty?
         
         association = Association.new(self, list, **global_opts)
-        association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
+        if assoc_type == :field
+          association.handle_field(assoc_name, opts)
+        else
+          association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
+        end
       else
         return @threads if association_is_not_included?(assoc_name) || list.empty?
 
         @threads << Thread.new do
           association = Association.new(self, list, **global_opts)
-          association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
+          if assoc_type == :field
+            association.handle_field(assoc_name, opts)
+          else
+            association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
+          end
         end
       end
     end

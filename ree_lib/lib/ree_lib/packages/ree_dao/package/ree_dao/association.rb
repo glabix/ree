@@ -17,7 +17,7 @@ module ReeDao
     end
 
     contract(
-      Or[:belongs_to, :has_one, :has_many],
+      Or[:belongs_to, :has_one, :has_many, :field],
       Symbol,
       Ksplat[RestKeys => Any],
       Optblock => Array
@@ -26,8 +26,8 @@ module ReeDao
       load_association(assoc_type, assoc_name, **opts, &block)
     end
 
-    def process()
-      # TODO
+    def handle_field(assoc_name, proc)
+      proc.call
     end
 
     contract(
