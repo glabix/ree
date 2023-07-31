@@ -124,7 +124,6 @@ RSpec.describe :load_agg do
     private
 
     def change_book_titles(books_list)
-      puts books_list.map(&:title)
       books_list.each do |book|
         book.title = "#{book.title.upcase} changed"
       end

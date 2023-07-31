@@ -100,18 +100,12 @@ module ReeDao
           { 
             association_threads: @assoc_threads,
             field_threads: @field_threads << Thread.new do
-              Thread.current[:name] = assoc_name
-              Thread.current[:type] = :field
-              puts "processing FIELD #{assoc_name}"
               association.handle_field(assoc_name, opts)
             end
           }
         else
           {
             association_threads: @assoc_threads << Thread.new do
-              Thread.current[:name] = assoc_name
-              Thread.current[:type] = :assoc
-              puts "processing ASSOC #{assoc_name}"
               association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
             end,
             field_threads: @field_threads
