@@ -134,6 +134,25 @@ class ReeDaoLoadAggTest::User
   attr_accessor :name, :age, :organization_id
 end
 
+class ReeDaoLoadAggTest::UserDto
+  include ReeDto::EntityDSL
+
+  properties(
+    id: Integer,
+    organization_id: Integer,
+    name: String,
+    full_name: String,
+  )
+
+  def set_organization(org)
+    @organization = org; nil
+  end
+
+  def organization
+    @organization
+  end
+end
+
 class ReeDaoLoadAggTest::Organization
   include ReeDto::EntityDSL
 

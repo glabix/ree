@@ -15,6 +15,7 @@ class ReeDao::LoadAgg
     Ksplat[
       only?: ArrayOf[Symbol],
       except?: ArrayOf[Symbol],
+      to_dto?: Proc,
       RestKeys => Any
     ],
     Optblock => ArrayOf[Any]
@@ -34,6 +35,10 @@ class ReeDao::LoadAgg
     end
 
     list = scope.is_a?(Sequel::Dataset) ? scope.all : scope
+
+    if opts[:to_dto]
+      list = opts[:to_dto].call(list)
+    end
 
     load_associations(list, **opts, &block) if block_given?
 

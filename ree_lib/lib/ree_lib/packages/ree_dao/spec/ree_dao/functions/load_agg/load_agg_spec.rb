@@ -148,6 +148,22 @@ RSpec.describe :load_agg do
     end
   end
 
+  class ReeDaoLoadAggTest::UsersAggWithDto
+    include ReeDao::AggregateDSL
+
+    aggregate :users_agg_with_dto do
+      link :users, from: :ree_dao_load_agg_test
+      link :organizations, from: :ree_dao_load_agg_test
+      link :load_agg, from: :ree_dao
+    end
+
+    def call(ids_or_scope, **opts)
+      load_agg(users, ids_or_scope, **opts) do
+        belongs_to :organization
+      end
+    end
+  end
+
   class ReeDaoLoadAggTest::UsersAggAutoloadBooksChildren
     include ReeDao::AggregateDSL
 
@@ -299,6 +315,7 @@ RSpec.describe :load_agg do
   let(:users_agg_autoload_books_children) { ReeDaoLoadAggTest::UsersAggAutoloadBooksChildren.new }
   let(:users_agg_autoload_reviews_children) { ReeDaoLoadAggTest::UsersAggAutoloadReviewsChildren.new }
   let(:users_agg_without_dao) { ReeDaoLoadAggTest::UsersAggWithoutDao.new }
+  let(:users_agg_with_dto) { ReeDaoLoadAggTest::UsersAggWithDto.new }
   let(:organizations) { ReeDaoLoadAggTest::Organizations.new }
   let(:users) { ReeDaoLoadAggTest::Users.new }
   let(:user_passports) { ReeDaoLoadAggTest::UserPassports.new }
@@ -321,6 +338,37 @@ RSpec.describe :load_agg do
     expect {
       users_agg_without_dao.call(users.all)
     }.to raise_error(ArgumentError)
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user_2 = ReeDaoLoadAggTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
+    users.put(user_1)
+    users.put(user_2)
+
+    res = users_agg_with_dto.call(
+      users.all,
+      to_dto: -> (users) {
+        users.map do |user|
+          ReeDaoLoadAggTest::UserDto.new(
+            id: user.id,
+            name: user.name,
+            organization_id: user.organization_id,
+            full_name: user.name
+          )
+        end
+      }
+    )
+
+    res_user = res[0]
+
+    expect(res_user.class).to eq(ReeDaoLoadAggTest::UserDto)
   }
 
   it {

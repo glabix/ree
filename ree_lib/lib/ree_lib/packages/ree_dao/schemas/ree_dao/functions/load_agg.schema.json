@@ -27,7 +27,7 @@
         {
           "arg": "opts",
           "arg_type": "keyrest",
-          "type": "Ksplat[:only? => ArrayOf[Symbol], :except? => ArrayOf[Symbol], \"RestKeys\" => Any]"
+          "type": "Ksplat[:only? => ArrayOf[Symbol], :except? => ArrayOf[Symbol], :to_dto? => Proc, \"RestKeys\" => Any]"
         },
         {
           "arg": "block",
