@@ -38,6 +38,21 @@
     }
   ],
   "links": [
+    {
+      "target": "demodulize",
+      "package_name": "ree_string",
+      "as": "demodulize",
+      "imports": [
 
+      ]
+    },
+    {
+      "target": "underscore",
+      "package_name": "ree_string",
+      "as": "underscore",
+      "imports": [
+
+      ]
+    }
   ]
 }

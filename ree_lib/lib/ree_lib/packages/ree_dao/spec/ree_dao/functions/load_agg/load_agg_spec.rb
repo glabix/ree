@@ -153,6 +153,9 @@ RSpec.describe :load_agg do
 
     aggregate :users_agg_with_dto do
       link :users, from: :ree_dao_load_agg_test
+      link :books, from: :ree_dao_load_agg_test
+      link :authors, from: :ree_dao_load_agg_test
+      link :chapters, from: :ree_dao_load_agg_test
       link :organizations, from: :ree_dao_load_agg_test
       link :load_agg, from: :ree_dao
     end
@@ -160,7 +163,26 @@ RSpec.describe :load_agg do
     def call(ids_or_scope, **opts)
       load_agg(users, ids_or_scope, **opts) do
         belongs_to :organization
+
+        has_many :books, -> { books_opts } do
+          has_one :author, -> { author_opts }
+          has_many :chapters, -> { chapters_opts } 
+        end
       end
+    end
+
+    private
+
+    def books_opts
+      { to_dto: -> (book) { ReeDaoLoadAggTest::BookDto.new(book) }}
+    end
+
+    def author_opts
+      { to_dto: -> (author) { ReeDaoLoadAggTest::AuthorDto.new(author) }}
+    end
+
+    def chapters_opts
+      { to_dto: -> (chapter) { ReeDaoLoadAggTest::ChapterDto.new(chapter) }}
     end
   end
 
@@ -370,6 +392,12 @@ RSpec.describe :load_agg do
     users.put(user_1)
     users.put(user_2)
 
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
+    books.put(book_1)
+
+    authors.put(ReeDaoLoadAggTest::Author.new(book_id: book_1.id, name: "George Orwell"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "interlude"))
+
     res = users_agg_with_dto.call(
       users.all,
       to_dto: -> (user) {
@@ -382,7 +410,12 @@ RSpec.describe :load_agg do
       }
     )
 
+    book = res.first.books.first
+
     expect(res.first.class).to eq(ReeDaoLoadAggTest::UserDto)
+    expect(book.class).to eq(ReeDaoLoadAggTest::BookDto)
+    expect(book.author.class).to eq(ReeDaoLoadAggTest::AuthorDto)
+    expect(book.chapters.first.class).to eq(ReeDaoLoadAggTest::ChapterDto)
   }
 
   it {

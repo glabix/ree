@@ -75,6 +75,9 @@ class ReeDaoLoadAggTest::Book
   attr_accessor :title, :user_id
 end
 
+class ReeDaoLoadAggTest::BookDto < SimpleDelegator
+end
+
 class ReeDaoLoadAggTest::User
   include ReeDto::EntityDSL
 
@@ -158,6 +161,14 @@ class ReeDaoLoadAggTest::UserDto
 
   def organization
     @organization
+  end
+
+  def set_books(books)
+    @books = books; nil
+  end
+
+  def books
+    @books
   end
 end
 
@@ -276,6 +287,9 @@ class ReeDaoLoadAggTest::Chapter
   attr_accessor :title, :book_id
 end
 
+class ReeDaoLoadAggTest::ChapterDto < SimpleDelegator
+end
+
 class ReeDaoLoadAggTest::Author
   include ReeDto::EntityDSL
 
@@ -286,6 +300,9 @@ class ReeDaoLoadAggTest::Author
   )
 
   attr_accessor :name, :book_id
+end
+
+class ReeDaoLoadAggTest::AuthorDto < SimpleDelegator
 end
 
 class ReeDaoLoadAggTest::Review
