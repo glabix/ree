@@ -275,7 +275,7 @@ RSpec.describe :load_agg do
       load_agg(users, ids_or_scope, **opts) do |agg_list|
         some_id = agg_list.first.id
         title = "1984"
-        belongs_to :organization, organizations.by_name("Corp")
+        belongs_to :organization
 
         has_many :books, -> { books_opts(title) }
       end
