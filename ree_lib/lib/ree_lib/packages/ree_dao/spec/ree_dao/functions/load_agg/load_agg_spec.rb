@@ -278,6 +278,7 @@ RSpec.describe :load_agg do
         belongs_to :organization
 
         has_many :books, -> { books_opts(title) }
+        has_many :active_books, books
       end
     end
 
@@ -511,6 +512,45 @@ RSpec.describe :load_agg do
   it {
     organizations.delete_all
     users.delete_all
+    user_passports.delete_all
+    books.delete_all
+    chapters.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user_2 = ReeDaoLoadAggTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
+    users.put(user_1)
+    users.put(user_2)
+
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
+    book_2 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1408")
+
+    books.put(book_1)
+    books.put(book_2)
+
+    res = users_agg.call(
+      users.all
+    )
+
+    expect(res[0].books).to_not eq([])
+    expect(res[1].books).to eq([])
+
+    books.delete(book_1)
+    books.delete(book_2)
+
+    res = users_agg.call(
+      users.all
+    )
+
+    expect(res[0].books).to eq([])
+    expect(res[1].books).to eq([])
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
     books.delete_all
 
     organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
@@ -533,6 +573,7 @@ RSpec.describe :load_agg do
     expect(res_user.id).to eq(user_1.id)
     expect(res_user.organization).to eq(organization)
     expect(res_user.books.count).to eq(1)
+    expect(res_user.active_books.count).to eq(2)
   }
 
   it {
