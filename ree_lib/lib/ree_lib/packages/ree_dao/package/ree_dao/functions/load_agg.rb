@@ -4,6 +4,8 @@ class ReeDao::LoadAgg
   include Ree::FnDSL
 
   fn :load_agg do
+    link :demodulize, from: :ree_string
+    link :underscore, from: :ree_string
     link "ree_dao/associations", -> { Associations }
     link "ree_dao/contract/dao_dataset_contract", -> { DaoDatasetContract }
     link "ree_dao/contract/entity_contract", -> { EntityContract }
@@ -34,6 +36,12 @@ class ReeDao::LoadAgg
       ids_or_scope
     end
 
+    if dao
+      dao_name = dao.first_source_table
+    else
+      dao_name = underscore(demodulize(scope.first.class.name)).to_sym
+    end
+
     list = scope.is_a?(Sequel::Dataset) ? scope.all : scope
 
     if opts[:to_dto]
@@ -42,7 +50,7 @@ class ReeDao::LoadAgg
       end
     end
 
-    load_associations(list, **opts, &block) if block_given?
+    load_associations(dao_name, list, **opts, &block) if block_given?
 
     if ids_or_scope.is_a?(Array)
       list.sort_by { ids_or_scope.index(_1.id) }
@@ -53,7 +61,7 @@ class ReeDao::LoadAgg
 
   private
 
-  def load_associations(list, **opts, &block)
+  def load_associations(dao_name, list, **opts, &block)
     return if list.empty?
 
     local_vars = block.binding.eval(<<-CODE, __FILE__, __LINE__ + 1)
@@ -63,7 +71,7 @@ class ReeDao::LoadAgg
 
     agg_caller = block.binding.eval("self")
 
-    associations = Associations.new(agg_caller, list, local_vars, **opts).instance_exec(list, &block)
+    associations = Associations.new(agg_caller, list, local_vars, dao_name, **opts).instance_exec(list, &block)
 
     if ReeDao.load_sync_associations_enabled?
       associations

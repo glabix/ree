@@ -2,15 +2,16 @@ module ReeDao
   class Associations
     include Ree::LinkDSL
 
-    attr_reader :agg_caller, :list, :local_vars, :only, :except, :autoload_children, :global_opts
+    attr_reader :agg_caller, :list, :local_vars, :only, :except, :parent_dao_name, :autoload_children, :global_opts
 
-    def initialize(agg_caller, list, local_vars, autoload_children = false, **opts)
+    def initialize(agg_caller, list, local_vars, parent_dao_name, autoload_children = false, **opts)
       @agg_caller = agg_caller
       @list = list
       @local_vars = local_vars
       @global_opts = opts || {}
       @only = opts[:only] if opts[:only]
       @except = opts[:except] if opts[:except]
+      @parent_dao_name = parent_dao_name
       @autoload_children = autoload_children
 
       raise ArgumentError.new("you can't use both :only and :except arguments at the same time") if @only && @except
@@ -83,7 +84,7 @@ module ReeDao
       if self.class.sync_mode?
         return if association_is_not_included?(assoc_name) || list.empty?
         
-        association = Association.new(self, list, **global_opts)
+        association = Association.new(self, parent_dao_name, list, **global_opts)
         if assoc_type == :field
           association.handle_field(assoc_name, opts)
         else
@@ -94,7 +95,7 @@ module ReeDao
           return { association_threads: @assoc_threads, field_threads: @field_threads } 
         end
 
-        association = Association.new(self, list, **global_opts)
+        association = Association.new(self, parent_dao_name, list, **global_opts)
 
         if assoc_type == :field
           field_proc = opts
