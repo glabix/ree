@@ -468,6 +468,49 @@ RSpec.describe :load_agg do
   it {
     organizations.delete_all
     users.delete_all
+    user_passports.delete_all
+    books.delete_all
+    chapters.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user_2 = ReeDaoLoadAggTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
+    users.put(user_1)
+    users.put(user_2)
+
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
+    book_2 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1408")
+
+    books.put(book_1)
+    books.put(book_2)
+
+    author_1 = ReeDaoLoadAggTest::Author.new(book_id: book_1.id, name: "George Orwell")
+    author_2 = ReeDaoLoadAggTest::Author.new(book_id: book_2.id, name: "Stephen King")
+    authors.put(author_1)
+    authors.put(author_2)
+
+    res = users_agg.call(
+      users.all
+    )
+
+    expect(res[0].books.first.author).to_not eq(nil)
+
+    authors.delete(author_1)
+    authors.delete(author_2)
+
+    res = users_agg.call(
+      users.all
+    )
+
+    expect(res[0].books[0].author).to eq(nil)
+    expect(res[0].books[1].author).to eq(nil)
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
     books.delete_all
 
     organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
