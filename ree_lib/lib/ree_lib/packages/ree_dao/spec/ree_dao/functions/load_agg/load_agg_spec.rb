@@ -354,21 +354,17 @@ RSpec.describe :load_agg do
 
     res = users_agg_with_dto.call(
       users.all,
-      to_dto: -> (users) {
-        users.map do |user|
-          ReeDaoLoadAggTest::UserDto.new(
-            id: user.id,
-            name: user.name,
-            organization_id: user.organization_id,
-            full_name: user.name
-          )
-        end
+      to_dto: -> (user) {
+        ReeDaoLoadAggTest::UserDto.new(
+          id: user.id,
+          name: user.name,
+          organization_id: user.organization_id,
+          full_name: user.name
+        )
       }
     )
 
-    res_user = res[0]
-
-    expect(res_user.class).to eq(ReeDaoLoadAggTest::UserDto)
+    expect(res.first.class).to eq(ReeDaoLoadAggTest::UserDto)
   }
 
   it {
