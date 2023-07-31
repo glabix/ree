@@ -61,7 +61,8 @@ class ReeDao::LoadAgg
     if ReeDao.load_sync_associations_enabled?
       associations
     else
-      associations.map(&:join)
+      associations[:association_threads].map(&:join)
+      associations[:field_threads].map(&:join)
     end
   end
 end

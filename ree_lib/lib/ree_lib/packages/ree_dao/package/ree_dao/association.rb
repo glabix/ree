@@ -116,7 +116,7 @@ module ReeDao
           parent.local_vars,
           autoload_children,
           **global_opts
-        ).instance_exec(assoc_list, &block).map(&:join)
+        ).instance_exec(assoc_list, &block)[:association_threads].map(&:join)
       end
     end
 

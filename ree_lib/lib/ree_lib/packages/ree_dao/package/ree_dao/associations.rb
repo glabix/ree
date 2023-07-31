@@ -8,13 +8,18 @@ module ReeDao
       @agg_caller = agg_caller
       @list = list
       @local_vars = local_vars
-      @threads = [] if !self.class.sync_mode?
       @global_opts = opts || {}
       @only = opts[:only] if opts[:only]
       @except = opts[:except] if opts[:except]
       @autoload_children = autoload_children
 
       raise ArgumentError.new("you can't use both :only and :except arguments at the same time") if @only && @except
+
+
+      if !self.class.sync_mode?
+        @assoc_threads = []
+        @field_threads = []
+      end
 
       local_vars.each do |k, v|
         instance_variable_set(k, v)
@@ -85,15 +90,32 @@ module ReeDao
           association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
         end
       else
-        return @threads if association_is_not_included?(assoc_name) || list.empty?
+        if association_is_not_included?(assoc_name) || list.empty?
+          return { association_threads: @assoc_threads, field_threads: @field_threads } 
+        end
 
-        @threads << Thread.new do
-          association = Association.new(self, list, **global_opts)
-          if assoc_type == :field
-            association.handle_field(assoc_name, opts)
-          else
-            association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
-          end
+        association = Association.new(self, list, **global_opts)
+
+        if assoc_type == :field
+          { 
+            association_threads: @assoc_threads,
+            field_threads: @field_threads << Thread.new do
+              Thread.current[:name] = assoc_name
+              Thread.current[:type] = :field
+              puts "processing FIELD #{assoc_name}"
+              association.handle_field(assoc_name, opts)
+            end
+          }
+        else
+          {
+            association_threads: @assoc_threads << Thread.new do
+              Thread.current[:name] = assoc_name
+              Thread.current[:type] = :assoc
+              puts "processing ASSOC #{assoc_name}"
+              association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
+            end,
+            field_threads: @field_threads
+          }
         end
       end
     end

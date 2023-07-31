@@ -99,30 +99,40 @@ RSpec.describe :load_agg do
     end
 
     def call(ids_or_scope, **opts)
-      load_agg(users, ids_or_scope, **opts) do
+      load_agg(users, ids_or_scope, **opts) do |users_list|
         belongs_to :organization
-        has_many :books do |book_list|
+        has_many :books do |books_list|
           has_one :author
           has_many :chapters
         
-          has_many :reviews do
+          has_many :reviews do |reviews_list|
             has_one :review_author
+
+            field :review_calculatetable_field, -> { some_method(reviews_list) }
           end
 
-          field :calculatetable_field, -> { change_book_titles(book_list) }
+          field :book_calculatetable_field, -> { change_book_titles(books_list) }
         end
         
         has_one :passport, -> { passport_opts }
         has_one :custom_field, -> { custom_field_opts }
+
+        field :user_calculatetable_field, -> { some_method(users_list) }
       end
     end
 
     private
 
-    def change_book_titles(book_list)
-      book_list.each do |book|
+    def change_book_titles(books_list)
+      puts books_list.map(&:title)
+      books_list.each do |book|
         book.title = "#{book.title.upcase} changed"
       end
+    end
+
+    def some_method(list)
+      puts list.map(&:id)
+      puts list.map { _1.class.name }
     end
 
     def passport_opts
@@ -252,11 +262,15 @@ RSpec.describe :load_agg do
         title = "1984"
         belongs_to :organization
 
-        has_many :books, -> { { scope: books_scope(title) } }
+        has_many :books, -> { books_opts(title) }
       end
     end
 
     private
+
+    def books_opts(title)
+      { scope: books_scope(title) }
+    end
 
     def books_scope(title)
       books.where(title: title)
