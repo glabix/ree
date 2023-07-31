@@ -160,32 +160,19 @@ module ReeDao
           root_ids = list.map(&:id).uniq
         else
           if !foreign_key
-            dto_class = assoc_dao
-              .opts[:schema_mapper]
-              .dto(:db_load)
-    
-            name = underscore(demodulize(dto_class.name))
-            
-            root_ids = list.map(&:"#{"#{name}_id".to_sym}").uniq
-            foreign_key = :id
-          else
-            root_ids = list.map(&:"#{foreign_key}")
-            foreign_key = :id
+            foreign_key = :"#{assoc_name}_id"
           end
+
+          root_ids = list.map(&:"#{foreign_key}").compact
         end
   
-        default_scope = if !scope 
-          assoc_dao&.where(foreign_key => root_ids)
-        end
-  
-        items = add_scopes(default_scope, scope, global_opts[assoc_name])
+        scope ||= assoc_dao
+        scope = scope.where((reverse ? foreign_key : :id) => root_ids)
+        
+        items = add_scopes(scope, global_opts[assoc_name])
       end
 
-      assoc = if foreign_key
-        index_by(items) { _1.send(foreign_key) }
-      else
-        items
-      end 
+      assoc = index_by(items) { _1.send(reverse ? foreign_key : :id) }
 
       populate_association(
         list,
@@ -224,11 +211,10 @@ module ReeDao
   
         root_ids = list.map(&:"#{primary_key}")
   
-        default_scope = if !scope
-          assoc_dao&.where(foreign_key => root_ids)
-        end
+        scope ||= assoc_dao
+        scope = scope.where(foreign_key => root_ids)
   
-        items = add_scopes(default_scope, scope, global_opts[assoc_name])
+        items = add_scopes(scope, global_opts[assoc_name])
       end
 
       assoc = if foreign_key
@@ -289,12 +275,12 @@ module ReeDao
       end
     end
 
-    contract(Nilor[Sequel::Dataset], Nilor[Sequel::Dataset], Nilor[Proc] => Array)
-    def add_scopes(default_scope, scope, named_scope)
-      res = scope || default_scope
-
-      if named_scope
-        res = named_scope.call(res)
+    contract(Nilor[Sequel::Dataset], Nilor[Proc] => Array)
+    def add_scopes(scope, named_scope)
+      res = if named_scope
+        named_scope.call(scope)
+      else
+        scope
       end
 
       res.all

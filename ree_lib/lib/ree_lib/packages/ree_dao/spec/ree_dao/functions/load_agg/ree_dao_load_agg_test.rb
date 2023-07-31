@@ -105,6 +105,14 @@ class ReeDaoLoadAggTest::User
     @books
   end
 
+  def set_active_books(books)
+    @active_books = books
+  end
+
+  def active_books
+    @active_books
+  end
+
   contract(ArrayOf[ReeDaoLoadAggTest::Book] => nil)
   def set_books(books)
     @books = books; nil
