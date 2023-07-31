@@ -10,8 +10,8 @@ class ReeDao::LoadAgg
   end
 
   contract(
-    Or[Sequel::Dataset, ArrayOf[Integer], ArrayOf[EntityContract], Integer],
     Nilor[DaoDatasetContract],
+    Or[Sequel::Dataset, ArrayOf[Integer], ArrayOf[EntityContract], Integer],
     Ksplat[
       only?: ArrayOf[Symbol],
       except?: ArrayOf[Symbol],
@@ -19,7 +19,7 @@ class ReeDao::LoadAgg
     ],
     Optblock => ArrayOf[Any]
   )
-  def call(ids_or_scope, dao = nil, **opts, &block)
+  def call(dao = nil, ids_or_scope, **opts, &block)
     scope = if ids_or_scope.is_a?(Array) && ids_or_scope.any? { _1.is_a?(Integer) }
       raise ArgumentError.new("Dao should be provided") if dao.nil?
       return [] if ids_or_scope.empty?

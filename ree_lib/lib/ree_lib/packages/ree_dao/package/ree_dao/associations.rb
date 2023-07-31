@@ -9,7 +9,7 @@ module ReeDao
       @list = list
       @local_vars = local_vars
       @threads = [] if !self.class.sync_mode?
-      @global_opts = opts
+      @global_opts = opts || {}
       @only = opts[:only] if opts[:only]
       @except = opts[:except] if opts[:except]
       @autoload_children = autoload_children
@@ -31,62 +31,34 @@ module ReeDao
 
     contract(
       Symbol,
-      Ksplat[
-        scope?: Or[Sequel::Dataset, Array],
-        setter?: Or[Symbol, Proc],
-        primary_key?: Symbol,
-        foreign_key?: Symbol,
-        autoload_children?: Bool
-      ],
+      Nilor[Proc, Sequel::Dataset],
       Optblock => Any
     )
-    def belongs_to(assoc_name, **opts, &block)
-      association(__method__, assoc_name, **opts, &block)
+    def belongs_to(assoc_name, opts = nil, &block)
+      association(__method__, assoc_name, opts, &block)
     end
   
     contract(
       Symbol,
-      Ksplat[
-        scope?: Or[Sequel::Dataset, Array],
-        setter?: Or[Symbol, Proc],
-        primary_key?: Symbol,
-        foreign_key?: Symbol,
-        autoload_children?: Bool
-      ],
+      Nilor[Proc, Sequel::Dataset],
       Optblock => Any
     )
-    def has_one(assoc_name, **opts, &block)
-      association(__method__, assoc_name, **opts, &block)
+    def has_one(assoc_name, opts = nil, &block)
+      association(__method__, assoc_name, opts, &block)
     end
   
     contract(
       Symbol,
-      Ksplat[
-        scope?: Or[Sequel::Dataset, Array],
-        setter?: Or[Symbol, Proc],
-        primary_key?: Symbol,
-        foreign_key?: Symbol,
-        autoload_children?: Bool
-      ],
+      Nilor[Proc, Sequel::Dataset],
       Optblock => Any
     )
-    def has_many(assoc_name, **opts, &block)
-      association(__method__, assoc_name, **opts, &block)
+    def has_many(assoc_name, opts = nil, &block)
+      association(__method__, assoc_name, opts, &block)
     end
   
-    contract(
-      Symbol,
-      Ksplat[
-        scope?: Or[Sequel::Dataset, Array],
-        setter?: Or[Symbol, Proc],
-        primary_key?: Symbol,
-        foreign_key?: Symbol,
-        autoload_children?: Bool
-      ],
-      Optblock => Any
-    )
-    def field(assoc_name, **opts, &block)
-      association(__method__, assoc_name, **opts, &block)
+    contract(Symbol, Proc => Any)
+    def field(assoc_name, proc)
+      association(__method__, assoc_name, opts, &block)
     end
 
     private
@@ -99,27 +71,21 @@ module ReeDao
         :field
       ],
       Symbol,
-      Ksplat[
-        scope?: Or[Sequel::Dataset, Array],
-        setter?: Or[Symbol, Proc],
-        primary_key?: Symbol,
-        foreign_key?: Symbol,
-        autoload_children?: Bool
-      ],
+      Nilor[Proc, Sequel::Dataset],
       Optblock => Any
     )
-    def association(assoc_type, assoc_name, **assoc_opts, &block)
+    def association(assoc_type, assoc_name, opts, &block)
       if self.class.sync_mode?
         return if association_is_not_included?(assoc_name) || list.empty?
-
+        
         association = Association.new(self, list, **global_opts)
-        association.load(assoc_type, assoc_name, **assoc_opts, &block)
+        association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
       else
         return @threads if association_is_not_included?(assoc_name) || list.empty?
 
         @threads << Thread.new do
           association = Association.new(self, list, **global_opts)
-          association.load(assoc_type, assoc_name, **assoc_opts, &block)
+          association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
         end
       end
     end
@@ -148,6 +114,14 @@ module ReeDao
       return super if !agg_caller.private_methods(false).include?(method)
 
       agg_caller.send(method, *args, &block)
+    end
+
+    def get_assoc_opts(opts)
+      if opts.is_a?(Proc)
+        opts.call
+      else
+        {}
+      end
     end
   end
 end

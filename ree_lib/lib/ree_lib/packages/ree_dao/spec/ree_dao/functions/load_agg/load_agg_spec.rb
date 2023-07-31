@@ -99,7 +99,7 @@ RSpec.describe :load_agg do
     end
 
     def call(ids_or_scope, **opts)
-      load_agg(ids_or_scope, users, **opts) do
+      load_agg(users, ids_or_scope, **opts) do
         belongs_to :organization
         has_many :books do
           has_one :author
@@ -110,9 +110,24 @@ RSpec.describe :load_agg do
           end
         end
         
-        has_one :passport, foreign_key: :user_id, scope: user_passports
-        has_one :custom_field, scope: books.where(title: "1984")
+        has_one :passport, -> { passport_opts }
+        has_one :custom_field, -> { custom_field_opts }
       end
+    end
+
+    private
+
+    def passport_opts
+      {
+        foreign_key: :user_id,
+        scope: user_passports
+      }
+    end
+
+    def custom_field_opts
+      {
+        scope: books.where(title: "1984")
+      }
     end
   end
 
@@ -130,9 +145,9 @@ RSpec.describe :load_agg do
     end
 
     def call(ids_or_scope, **opts)
-      load_agg(ids_or_scope, users, **opts) do
+      load_agg(users, ids_or_scope, **opts) do
         belongs_to :organization
-        has_many :books, autoload_children: true do
+        has_many :books, -> { books_opts } do
           has_one :author
           has_many :chapters
         
@@ -141,6 +156,12 @@ RSpec.describe :load_agg do
           end
         end
       end
+    end
+
+    private
+    
+    def books_opts
+      { autoload_children: true }
     end
   end
 
@@ -158,17 +179,23 @@ RSpec.describe :load_agg do
     end
 
     def call(ids_or_scope, **opts)
-      load_agg(ids_or_scope, users, **opts) do
+      load_agg(users, ids_or_scope, **opts) do
         belongs_to :organization
         has_many :books do
           has_one :author
           has_many :chapters
         
-          has_many :reviews, autoload_children: true do
+          has_many :reviews, -> { { autoload_children: true } } do
             has_one :review_author
           end
         end
       end
+    end
+
+    private
+
+    def reviews_opts
+      { autoload_children: true }
     end
   end
 
@@ -183,13 +210,21 @@ RSpec.describe :load_agg do
     end
 
     def call(ids_or_scope, **opts)
-      load_agg(ids_or_scope, users, **opts) do
+      load_agg(users, ids_or_scope, **opts) do
         belongs_to :organization
-        has_many :books, setter: -> (item, items_index) {
+        has_many :books, -> { books_opts }
+      end
+    end
+
+    private
+
+    def books_opts
+      {
+        setter: -> (item, items_index) {
           b = items_index[item.id].each { |b| b.title = "Changed" }
           item.set_books(b)
         }
-      end
+      }
     end
   end
 
@@ -204,12 +239,12 @@ RSpec.describe :load_agg do
     end
 
     def call(ids_or_scope, **opts)
-      load_agg(ids_or_scope, users, **opts) do |agg_list|
+      load_agg(users, ids_or_scope, **opts) do |agg_list|
         some_id = agg_list.first.id
         title = "1984"
         belongs_to :organization
 
-        has_many :books, scope: books_scope(title)
+        has_many :books, -> { { scope: books_scope(title) } }
       end
     end
 
@@ -231,7 +266,7 @@ RSpec.describe :load_agg do
     end
 
     def call(ids_or_scope, **opts)
-      load_agg(ids_or_scope, users, **opts) do
+      load_agg(users, ids_or_scope, **opts) do
         has_many :something
       end
     end
@@ -595,7 +630,7 @@ RSpec.describe :load_agg do
 
     ids = [user_1, user_2].map(&:id)
 
-    res = load_agg(ids, users)
+    res = load_agg(users, ids)
     expect(res.count).to eq(2)
   }
 
@@ -609,7 +644,7 @@ RSpec.describe :load_agg do
     user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
     users.put(user_1)
 
-    res = load_agg(user_1.id, users)
+    res = load_agg(users, user_1.id)
     expect(res.count).to eq(1)
   }
 
@@ -625,7 +660,7 @@ RSpec.describe :load_agg do
     users.put(user_1)
     users.put(user_2)
 
-    res = load_agg(users.where(organization_id: organization.id), users)
+    res = load_agg(users, users.where(organization_id: organization.id))
     expect(res.count).to eq(2)
   }
 end
