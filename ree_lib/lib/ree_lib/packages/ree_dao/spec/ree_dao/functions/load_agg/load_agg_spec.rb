@@ -104,7 +104,7 @@ RSpec.describe :load_agg do
         has_many :books do |books_list|
           has_one :author
           has_many :chapters
-        
+
           has_many :reviews do |reviews_list|
             has_one :review_author
 
@@ -113,7 +113,7 @@ RSpec.describe :load_agg do
 
           field :book_calculatetable_field, -> { change_book_titles(books_list) }
         end
-        
+
         has_one :passport, -> { passport_opts }
         has_one :custom_field, -> { custom_field_opts }
 
@@ -166,7 +166,7 @@ RSpec.describe :load_agg do
 
         has_many :books, -> { books_opts } do
           has_one :author, -> { author_opts }
-          has_many :chapters, -> { chapters_opts } 
+          has_many :chapters, -> { chapters_opts }
         end
       end
     end
@@ -174,7 +174,12 @@ RSpec.describe :load_agg do
     private
 
     def books_opts
-      { to_dto: -> (book) { ReeDaoLoadAggTest::BookDto.new(book) }}
+      {
+        to_dto: -> (book) { ReeDaoLoadAggTest::BookDto.new(book) },
+        setter: -> (item, child_index) {
+          item.set_books(child_index[item.id] || [])
+        }
+      }
     end
 
     def author_opts
@@ -205,7 +210,7 @@ RSpec.describe :load_agg do
         has_many :books, -> { books_opts } do
           has_one :author
           has_many :chapters
-        
+
           has_many :reviews do
             has_one :review_author
           end
@@ -214,7 +219,7 @@ RSpec.describe :load_agg do
     end
 
     private
-    
+
     def books_opts
       { autoload_children: true }
     end
@@ -239,7 +244,7 @@ RSpec.describe :load_agg do
         has_many :books do
           has_one :author
           has_many :chapters
-        
+
           has_many :reviews, -> { { autoload_children: true } } do
             has_one :review_author
           end
@@ -435,7 +440,7 @@ RSpec.describe :load_agg do
     books.put(book_1)
     books.put(book_2)
     books.put(book_3)
-    
+
     res = users_agg_only_dataset.call(users.where(name: "John"))
 
     user = res[0]

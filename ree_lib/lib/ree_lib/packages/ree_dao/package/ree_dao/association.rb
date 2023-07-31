@@ -4,6 +4,7 @@ module ReeDao
 
     link :group_by, from: :ree_array
     link :index_by, from: :ree_array
+    link :transform_values, from: :ree_hash
 
     attr_reader :parent, :parent_dao_name, :list, :global_opts
 
@@ -141,7 +142,7 @@ module ReeDao
     contract(
       Symbol,
       Symbol,
-      Array,      
+      Array,
       Kwargs[
         primary_key: Nilor[Symbol],
         foreign_key: Nilor[Symbol],
@@ -160,12 +161,12 @@ module ReeDao
         items = scope
       else
         assoc_dao = find_dao(assoc_name, parent, scope)
-  
+
         if reverse
           if !foreign_key
-            foreign_key = "#{parent_assoc_name.to_s.gsub(/e?s$/,'')}_id".to_sym
+            foreign_key = "#{parent_assoc_name.to_s.gsub(/s$/,'')}_id".to_sym
           end
-  
+
           root_ids = list.map(&:id).uniq
         else
           if !foreign_key
@@ -174,10 +175,10 @@ module ReeDao
 
           root_ids = list.map(&:"#{foreign_key}").compact
         end
-  
+
         scope ||= assoc_dao
         scope = scope.where((reverse ? foreign_key : :id) => root_ids)
-        
+
         items = add_scopes(scope, global_opts[assoc_name])
       end
 
@@ -219,14 +220,14 @@ module ReeDao
       else
         assoc_dao = nil
         assoc_dao = find_dao(assoc_name, parent, scope)
-  
-        foreign_key ||= "#{parent_assoc_name.to_s.gsub(/e?s$/,'')}_id".to_sym
-  
+
+        foreign_key ||= "#{parent_assoc_name.to_s.gsub(/s$/, '')}_id".to_sym
+
         root_ids = list.map(&:"#{primary_key}")
-  
+
         scope ||= assoc_dao
         scope = scope.where(foreign_key => root_ids)
-  
+
         items = add_scopes(scope, global_opts[assoc_name])
       end
 
@@ -270,13 +271,22 @@ module ReeDao
 
       list.each do |item|
         if setter && setter.is_a?(Proc)
-          self.instance_exec(item, association_index, &assoc_setter)
+          if to_dto
+            assoc_index = transform_values(association_index) do |key, value|
+              to_dto.call(value)
+            end
+
+            self.instance_exec(item, assoc_index, &assoc_setter)
+          else
+            self.instance_exec(item, association_index, &assoc_setter)
+          end
         else
           key = if reverse.nil?
             primary_key
           else
             reverse ? primary_key : "#{assoc_name}_id"
           end
+
           value = association_index[item.send(key)]
 
           if to_dto && !value.nil?

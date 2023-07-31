@@ -129,7 +129,7 @@ RSpec.describe :load_agg do
     end
 
     def call(ids_or_scope)
-      load_agg(ids_or_scope, users) do
+      load_agg(users, ids_or_scope) do
         belongs_to :organization
 
         has_many :books
@@ -141,7 +141,7 @@ RSpec.describe :load_agg do
         has_many :skills
         has_many :dreams
 
-        has_one :passport, foreign_key: :user_id, scope: user_passports
+        has_one :passport, -> { {foreign_key: :user_id, scope: user_passports} }
       end
     end
   end
@@ -251,7 +251,7 @@ RSpec.describe :load_agg do
 
     _users = []
     st_time = Time.now
-    puts "Starting to seed #{NUM_OF_USERS} users..."
+    puts "Seeding #{NUM_OF_USERS} users..."
     NUM_OF_USERS.times do
       u = ReeDaoLoadAggTest::User.new(
         name: Faker::Name.name,
