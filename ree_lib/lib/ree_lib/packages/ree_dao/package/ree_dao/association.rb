@@ -2,8 +2,10 @@ module ReeDao
   class Association
     include Ree::LinkDSL
 
+    link :demodulize, from: :ree_string
     link :group_by, from: :ree_array
     link :index_by, from: :ree_array
+    link :underscore, from: :ree_string
 
     attr_reader :parent, :parent_dao_name, :list, :global_opts
 
@@ -45,7 +47,18 @@ module ReeDao
       )
 
       dao = find_dao(assoc_name, parent, opts[:scope])
-      dao_name = dao.first_source_table
+
+      dao_name = if dao
+        dao.first_source_table
+      elsif opts[:scope].is_a?(Array)
+        name = underscore(demodulize(opts[:scope].first.class.name))
+
+        if name.end_with?("s")
+          "#{name}es"
+        else
+          "#{name}s"
+        end
+      end
 
       process_block(assoc_index, opts[:autoload_children], opts[:to_dto], dao_name, &block) if block_given?
 
@@ -330,6 +343,7 @@ module ReeDao
       return dao_from_name if dao_from_name
 
       raise ArgumentError, "can't find DAO for :#{assoc_name}, provide correct scope or association name" if scope.nil?
+      return nil if scope.is_a?(Array)
 
       table_name = scope.first_source_table
       dao_from_scope = parent.instance_variable_get("@#{table_name}")
