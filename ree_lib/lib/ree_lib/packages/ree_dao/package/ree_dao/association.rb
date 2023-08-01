@@ -205,6 +205,7 @@ module ReeDao
         setter: setter,
         reverse: reverse,
         primary_key: primary_key,
+        foreign_key: foreign_key,
         to_dto: to_dto
       )
 
@@ -256,6 +257,7 @@ module ReeDao
         assoc_name,
         setter: setter,
         primary_key: primary_key,
+        foreign_key: foreign_key,
         to_dto: to_dto,
         multiple: true
       )
@@ -269,13 +271,14 @@ module ReeDao
       Symbol,
       Kwargs[
         primary_key: Nilor[Symbol],
+        foreign_key: Nilor[Symbol],
         reverse: Nilor[Bool],
         setter: Nilor[Or[Symbol, Proc]],
         to_dto: Nilor[Proc],
         multiple: Bool
       ] => Any
     )
-    def populate_association(list, association_index, assoc_name, primary_key: nil, reverse: nil, setter: nil, to_dto: nil, multiple: false)
+    def populate_association(list, association_index, assoc_name, primary_key: nil, foreign_key: nil, reverse: nil, setter: nil, to_dto: nil, multiple: false)
       assoc_setter = if setter
         setter
       else
@@ -303,7 +306,11 @@ module ReeDao
           key = if reverse.nil?
             primary_key
           else
-            reverse ? primary_key : "#{assoc_name}_id"
+            if reverse
+              primary_key
+            else
+              foreign_key ? foreign_key : "#{assoc_name}_id"
+            end
           end
 
           value = association_index[item.send(key)]
