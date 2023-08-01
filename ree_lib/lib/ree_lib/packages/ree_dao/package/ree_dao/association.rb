@@ -23,8 +23,8 @@ module ReeDao
       Ksplat[RestKeys => Any],
       Optblock => Array
     )
-    def load(assoc_type, assoc_name, **opts, &block)
-      load_association(assoc_type, assoc_name, **opts, &block)
+    def load(assoc_type, assoc_name, **__opts, &block)
+      load_association(assoc_type, assoc_name, **__opts, &block)
     end
 
     def handle_field(field_proc)
@@ -37,21 +37,21 @@ module ReeDao
       Ksplat[RestKeys => Any],
       Optblock => Nilor[Array]
     )
-    def load_association(assoc_type, assoc_name, **opts, &block)
-      opts[:autoload_children] ||= false
+    def load_association(assoc_type, assoc_name, **__opts, &block)
+      __opts[:autoload_children] ||= false
 
       assoc_index = load_association_by_type(
         assoc_type,
         assoc_name,
-        **opts
+        **__opts
       )
 
-      dao = find_dao(assoc_name, parent, opts[:scope])
+      dao = find_dao(assoc_name, parent, __opts[:scope])
 
       dao_name = if dao
         dao.first_source_table
-      elsif opts[:scope].is_a?(Array)
-        name = underscore(demodulize(opts[:scope].first.class.name))
+      elsif __opts[:scope].is_a?(Array)
+        name = underscore(demodulize(__opts[:scope].first.class.name))
 
         if name.end_with?("s")
           "#{name}es"
@@ -60,7 +60,7 @@ module ReeDao
         end
       end
 
-      process_block(assoc_index, opts[:autoload_children], opts[:to_dto], dao_name, &block) if block_given?
+      process_block(assoc_index, __opts[:autoload_children], __opts[:to_dto], dao_name, &block) if block_given?
 
       list
     end
@@ -70,17 +70,17 @@ module ReeDao
       Symbol,
       Ksplat[RestKeys => Any] => Any
     )
-    def load_association_by_type(type, assoc_name, **opts)
+    def load_association_by_type(type, assoc_name, **__opts)
       case type
       when :belongs_to
         one_to_one(
           parent_dao_name,
           assoc_name,
           list,
-          scope: opts[:scope],
-          primary_key: opts[:primary_key],
-          foreign_key: opts[:foreign_key],
-          setter: opts[:setter],
+          scope: __opts[:scope],
+          primary_key: __opts[:primary_key],
+          foreign_key: __opts[:foreign_key],
+          setter: __opts[:setter],
           reverse: false
         )
       when :has_one
@@ -88,11 +88,11 @@ module ReeDao
           parent_dao_name,
           assoc_name,
           list,
-          scope: opts[:scope],
-          primary_key: opts[:primary_key],
-          foreign_key: opts[:foreign_key],
-          to_dto: opts[:to_dto],
-          setter: opts[:setter],
+          scope: __opts[:scope],
+          primary_key: __opts[:primary_key],
+          foreign_key: __opts[:foreign_key],
+          to_dto: __opts[:to_dto],
+          setter: __opts[:setter],
           reverse: true
         )
       when :has_many
@@ -100,11 +100,11 @@ module ReeDao
           parent_dao_name,
           assoc_name,
           list,
-          scope: opts[:scope],
-          primary_key: opts[:primary_key],
-          foreign_key: opts[:foreign_key],
-          to_dto: opts[:to_dto],
-          setter: opts[:setter]
+          scope: __opts[:scope],
+          primary_key: __opts[:primary_key],
+          foreign_key: __opts[:foreign_key],
+          to_dto: __opts[:to_dto],
+          setter: __opts[:setter]
         )
       end
     end
@@ -137,9 +137,9 @@ module ReeDao
           autoload_children,
           **global_opts
         ).instance_exec(assoc_list, &block)
-        threads[:association_threads].map do |association, assoc_type, assoc_name, opts, block|
+        threads[:association_threads].map do |association, assoc_type, assoc_name, __opts, block|
           Thread.new do
-            association.load(assoc_type, assoc_name, **opts, &block)
+            association.load(assoc_type, assoc_name, **__opts, &block)
           end
         end.map(&:join)
 

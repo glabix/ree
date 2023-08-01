@@ -45,8 +45,8 @@ module ReeDao
       Nilor[Proc, Sequel::Dataset],
       Optblock => Any
     )
-    def belongs_to(assoc_name, opts = nil, &block)
-      association(__method__, assoc_name, opts, &block)
+    def belongs_to(assoc_name, __opts = nil, &block)
+      association(__method__, assoc_name, __opts, &block)
     end
 
     contract(
@@ -54,8 +54,8 @@ module ReeDao
       Nilor[Proc, Sequel::Dataset],
       Optblock => Any
     )
-    def has_one(assoc_name, opts = nil, &block)
-      association(__method__, assoc_name, opts, &block)
+    def has_one(assoc_name, __opts = nil, &block)
+      association(__method__, assoc_name, __opts, &block)
     end
 
     contract(
@@ -63,8 +63,8 @@ module ReeDao
       Nilor[Proc, Sequel::Dataset],
       Optblock => Any
     )
-    def has_many(assoc_name, opts = nil, &block)
-      association(__method__, assoc_name, opts, &block)
+    def has_many(assoc_name, __opts = nil, &block)
+      association(__method__, assoc_name, __opts, &block)
     end
 
     contract(Symbol, Proc => Any)
@@ -85,16 +85,16 @@ module ReeDao
       Nilor[Proc, Sequel::Dataset],
       Optblock => Any
     )
-    def association(assoc_type, assoc_name, opts, &block)
+    def association(assoc_type, assoc_name, __opts, &block)
       if self.class.sync_mode?
         return if association_is_not_included?(assoc_name) || list.empty?
 
         association = Association.new(self, parent_dao_name, list, **global_opts)
 
         if assoc_type == :field
-          association.handle_field(assoc_name, opts)
+          association.handle_field(assoc_name, __opts)
         else
-          association.load(assoc_type, assoc_name, **get_assoc_opts(opts), &block)
+          association.load(assoc_type, assoc_name, **get_assoc_opts(__opts), &block)
         end
       else
         if association_is_not_included?(assoc_name) || list.empty?
@@ -104,7 +104,7 @@ module ReeDao
         association = Association.new(self, parent_dao_name, list, **global_opts)
 
         if assoc_type == :field
-          field_proc = opts
+          field_proc = __opts
           {
             association_threads: @assoc_threads,
             field_threads: @field_threads << [
@@ -114,7 +114,7 @@ module ReeDao
         else
           {
             association_threads: @assoc_threads << [
-              association, assoc_type, assoc_name, get_assoc_opts(opts), block
+              association, assoc_type, assoc_name, get_assoc_opts(__opts), block
             ],
             field_threads: @field_threads
           }
@@ -130,7 +130,10 @@ module ReeDao
         return false if only && only.include?(assoc_name)
 
         if only && !only.include?(assoc_name)
-          return false if autoload_children
+          if autoload_children
+            return true if except && except.include?(assoc_name)
+            return false
+          end
           return true
         end
       end

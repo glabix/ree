@@ -105,7 +105,7 @@ RSpec.describe :load_agg do
           has_one :author
           has_many :chapters
 
-          has_many :reviews do |reviews_list|
+          has_many :reviews, -> { reviews_opts } do |reviews_list|
             has_one :review_author
 
             field :review_calculatetable_field, -> { some_method(reviews_list) }
@@ -145,6 +145,10 @@ RSpec.describe :load_agg do
       {
         scope: books.where(title: "1984")
       }
+    end
+
+    def reviews_opts
+      { autoload_children: true }
     end
   end
 
@@ -402,6 +406,54 @@ RSpec.describe :load_agg do
     expect {
       users_agg_without_dao.call(users.all)
     }.to raise_error(ArgumentError)
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+    user_passports.delete_all
+    books.delete_all
+    chapters.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user_1 = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user_2 = ReeDaoLoadAggTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
+    users.put(user_1)
+    users.put(user_2)
+
+    passport_1 = ReeDaoLoadAggTest::UserPassport.new(user_id: user_1.id, info: "some info")
+    user_passports.put(passport_1)
+    user_passports.put(ReeDaoLoadAggTest::UserPassport.new(user_id: user_2.id, info: "another info"))
+
+    book_1 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1984")
+    book_2 = ReeDaoLoadAggTest::Book.new(user_id: user_1.id, title: "1408")
+
+    books.put(book_1)
+    books.put(book_2)
+
+    chapter = ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "beginning")
+    chapters.put(chapter)
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "interlude"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_1.id, title: "tragic ending"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "beginning"))
+    chapters.put(ReeDaoLoadAggTest::Chapter.new(book_id: book_2.id, title: "ending"))
+
+
+    authors.put(ReeDaoLoadAggTest::Author.new(book_id: book_1.id, name: "George Orwell"))
+    review = ReeDaoLoadAggTest::Review.new(book_id: book_1.id, rating: 10)
+    reviews.put(review)
+    reviews.put(ReeDaoLoadAggTest::Review.new(book_id: book_1.id, rating: 7))
+    review_authors.put(ReeDaoLoadAggTest::ReviewAuthor.new(review_id: review.id, name: "John Review"))
+
+    res = users_agg.call(
+      users.all,
+      only: [:books, :reviews],
+      except: [:review_author]
+    )
+
+    expect(res.first.books.first.reviews.first.review_author).to eq(nil)
   }
 
   it {
