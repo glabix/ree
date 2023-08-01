@@ -14,8 +14,13 @@ module ReeDao
       @parent_dao_name = parent_dao_name
       @autoload_children = autoload_children
 
-      raise ArgumentError.new("you can't use both :only and :except arguments at the same time") if @only && @except
+      if @only && @except
+        shared_keys = @only.intersection(@except)
 
+        if shared_keys.size > 0
+          raise ArgumentError.new("you can't use both :only and :except for #{shared_keys.map { "\"#{_1}\"" }.join(", ")} keys") 
+        end
+      end
 
       if !self.class.sync_mode?
         @assoc_threads = []

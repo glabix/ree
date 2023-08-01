@@ -353,6 +353,24 @@ RSpec.describe :load_agg do
     end
   end
 
+  class ReeDaoLoadAggTest::UsersAggOnlyExceptKeys
+    include ReeDao::AggregateDSL
+
+    aggregate :users_agg_only_except_keys do
+      link :users, from: :ree_dao_load_agg_test
+      link :organizations, from: :ree_dao_load_agg_test
+      link :books, from: :ree_dao_load_agg_test
+      link :load_agg, from: :ree_dao
+    end
+
+    def call(ids_or_scope, **opts)
+      load_agg(users, ids_or_scope, **opts) do
+        belongs_to :organization
+        has_many :books
+      end
+    end
+  end
+
   let(:users_agg) { ReeDaoLoadAggTest::UsersAgg.new }
   let(:users_agg_block) { ReeDaoLoadAggTest::UsersAggBlockTest.new }
   let(:users_agg_scope_method) { ReeDaoLoadAggTest::UsersAggScopeMethodTest.new }
@@ -361,6 +379,7 @@ RSpec.describe :load_agg do
   let(:users_agg_without_dao) { ReeDaoLoadAggTest::UsersAggWithoutDao.new }
   let(:users_agg_with_dto) { ReeDaoLoadAggTest::UsersAggWithDto.new }
   let(:users_agg_only_dataset) { ReeDaoLoadAggTest::UsersAggOnlyDataset.new }
+  let(:user_agg_only_except_keys) { ReeDaoLoadAggTest::UsersAggOnlyExceptCase.new }
   let(:organizations) { ReeDaoLoadAggTest::Organizations.new }
   let(:users) { ReeDaoLoadAggTest::Users.new }
   let(:user_passports) { ReeDaoLoadAggTest::UserPassports.new }
@@ -383,6 +402,21 @@ RSpec.describe :load_agg do
     expect {
       users_agg_without_dao.call(users.all)
     }.to raise_error(ArgumentError)
+  }
+
+  it {
+    organizations.delete_all
+    users.delete_all
+
+    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organizations.put(organization)
+
+    user = ReeDaoLoadAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    users.put(user)
+
+    expect {
+      users_agg_without_dao.call(users.all, only: [:books], except: [:books])
+    }.to raise_error(ArgumentError, "you can't use both :only and :except for \"books\" keys")
   }
 
   it {
