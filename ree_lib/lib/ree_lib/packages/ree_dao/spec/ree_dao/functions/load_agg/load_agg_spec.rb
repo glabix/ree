@@ -130,8 +130,8 @@ RSpec.describe :load_agg do
     end
 
     def some_method(list)
-      puts list.map(&:id)
-      puts list.map { _1.class.name }
+      # puts list.map(&:id)
+      # puts list.map { _1.class.name }
     end
 
     def passport_opts

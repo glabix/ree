@@ -162,12 +162,14 @@ module ReeDao
         assoc_dao = find_dao(assoc_name, parent, scope)
 
         if reverse
+          # has_one
           if !foreign_key
             foreign_key = "#{parent_assoc_name.to_s.gsub(/s$/,'')}_id".to_sym
           end
 
           root_ids = list.map(&:id).uniq
         else
+          # belongs_to
           if !foreign_key
             foreign_key = :"#{assoc_name}_id"
           end
@@ -180,7 +182,6 @@ module ReeDao
 
         items = add_scopes(scope, global_opts[assoc_name])
       end
-
 
       assoc = index_by(items) { _1.send(reverse ? foreign_key : :id) }
 
@@ -277,7 +278,7 @@ module ReeDao
               if value.is_a?(Array)
                 assoc_index[key] = value.map { to_dto.call(_1) }
               else
-                assoc_index[key] to_dto.call(value)
+                assoc_index[key] = to_dto.call(value)
               end
             end
 

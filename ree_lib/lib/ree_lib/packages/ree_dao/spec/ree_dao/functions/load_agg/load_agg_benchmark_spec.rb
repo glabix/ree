@@ -251,7 +251,9 @@ RSpec.describe :load_agg do
 
     _users = []
     st_time = Time.now
+
     puts "Seeding #{NUM_OF_USERS} users..."
+
     NUM_OF_USERS.times do
       u = ReeDaoLoadAggTest::User.new(
         name: Faker::Name.name,
