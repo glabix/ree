@@ -4,7 +4,6 @@ module ReeDao
 
     link :group_by, from: :ree_array
     link :index_by, from: :ree_array
-    link :transform_values, from: :ree_hash
 
     attr_reader :parent, :parent_dao_name, :list, :global_opts
 
@@ -272,11 +271,13 @@ module ReeDao
       list.each do |item|
         if setter && setter.is_a?(Proc)
           if to_dto
-            assoc_index = transform_values(association_index) do |key, value|
+            assoc_index = {}
+
+            association_index.each do |key, value|
               if value.is_a?(Array)
-                value.map { to_dto.call(_1) }
+                assoc_index[key] = value.map { to_dto.call(_1) }
               else
-                to_dto.call(value)
+                assoc_index[key] to_dto.call(value)
               end
             end
 
