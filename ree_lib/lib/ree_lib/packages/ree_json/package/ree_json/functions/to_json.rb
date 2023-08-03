@@ -18,10 +18,8 @@ class ReeJson::ToJson
 
   contract(
     Any,
-    Kwargs[
-      mode: Or[*MODES]
-    ],
     Ksplat[
+      mode?: Or[*MODES],
       escape_mode?: Or[*ESCAPE_MODES],
       float_precision?: Integer,
       time_format?: Or[*TIME_FORMATS],
@@ -31,13 +29,10 @@ class ReeJson::ToJson
       use_to_json?: Bool,
       RestKeys => Any
     ] => String
-    ).throws(ArgumentError)
-  def call(object, mode: :rails, **opts)
+  ).throws(ArgumentError, TypeError)
+  def call(object, **opts)
     options = DEFAULT_OPTIONS
-      .dup
-      .merge(
-        opts.merge(mode: mode)
-      )
+      .merge(opts)
 
     Oj.dump(object, options)
   end
