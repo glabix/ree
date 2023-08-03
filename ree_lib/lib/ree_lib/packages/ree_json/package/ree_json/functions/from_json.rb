@@ -3,7 +3,7 @@ class ReeJson::FromJson
 
   fn :from_json do
     link 'ree_json/constants', -> {
-      DEFAULT_OPTIONS & MODES  & ESCAPE_MODES & TIME_FORMATS
+      DEFAULT_OPTIONS & MODES & ESCAPE_MODES & TIME_FORMATS
     }
   end
 
@@ -11,23 +11,18 @@ class ReeJson::FromJson
 
   contract(
     Any,
-    Kwargs[
-      mode: Or[*MODES]
-    ],
     Ksplat[
+      mode?: Or[*MODES],
       symbol_keys?: Bool,
       RestKeys => Any
-    ] => Hash
+    ] => Any
   ).throws(ParseJsonError)
-  def call(object, mode: :rails, **opts)
+  def call(object, **opts)
     options = DEFAULT_OPTIONS
-      .dup
-      .merge(
-        opts.merge(mode: mode)
-      )
+      .merge(opts)
 
     Oj.load(object, options)
-  rescue ArgumentError, EncodingError
+  rescue ArgumentError, EncodingError, TypeError
     raise ParseJsonError.new
   end
 end

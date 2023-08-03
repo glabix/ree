@@ -11,7 +11,7 @@ class ReeJson::Constants
     :object,
     :custom,
     :wab,
-  ]
+  ].freeze
 
   ESCAPE_MODES = [
     :newline, # allows unescaped newlines in the output.
@@ -19,12 +19,13 @@ class ReeJson::Constants
     :xss_safe, # escapes HTML and XML characters such as & and <.
     :ascii, # escapes all non-ascii or characters with the hi-bit set.
     :unicode_xss, # escapes a special unicodes and is xss safe.
-  ]
+  ].freeze
 
-  TIME_FORMATS = []
+  TIME_FORMATS = [].freeze
 
   DEFAULT_OPTIONS = {
     time_format: :xmlschema,
-    use_as_json: true
+    use_as_json: true,
+    mode: :rails,
   }.freeze
 end

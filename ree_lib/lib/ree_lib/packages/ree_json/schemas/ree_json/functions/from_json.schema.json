@@ -12,7 +12,7 @@
       "throws": [
         "ReeJson::FromJson::ParseJsonError"
       ],
-      "return": "Hash",
+      "return": "Any",
       "args": [
         {
           "arg": "object",
@@ -20,14 +20,9 @@
           "type": "Any"
         },
         {
-          "arg": "mode",
-          "arg_type": "key",
-          "type": "Or[strict, null, compat, json, rails, object, custom, wab]"
-        },
-        {
           "arg": "opts",
           "arg_type": "keyrest",
-          "type": "Ksplat[:symbol_keys? => Bool, \"RestKeys\" => Any]"
+          "type": "Ksplat[:mode? => Or[strict, null, compat, json, rails, object, custom, wab], :symbol_keys? => Bool, \"RestKeys\" => Any]"
         }
       ]
     }
