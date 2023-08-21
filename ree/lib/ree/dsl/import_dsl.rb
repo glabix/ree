@@ -4,12 +4,12 @@ class Ree::ImportDsl
   def execute(klass, proc)
     self.class.instance_exec(&proc)
   rescue Ree::ImportDsl::UnlinkConstError => e
-    const_removed = remove_const(klass, e.const)
+    const_removed = remove_or_assign_const(klass, e.const)
 
     retry if const_removed
   rescue NoMethodError => e
     if e.name == :&
-      const_removed = remove_const(klass, e.receiver)
+      const_removed = remove_or_assign_const(klass, e.receiver)
 
       if const_removed
         retry
@@ -82,25 +82,63 @@ class Ree::ImportDsl
 
   private
 
-  def remove_const(klass, constant)
-    const_removed = false
+  def remove_or_assign_const(klass, constant)
+    retry_after = false
 
     klass.constants.each do |const_sym|
       const = klass.const_get(const_sym)
+      next if const.is_a?(ClassConstant)
 
       if constant.is_a?(Class) || constant.is_a?(Module)
         if (const.is_a?(Class) || const.is_a?(Module)) && const.name == constant.name
           klass.send(:remove_const, const_sym)
-          const_removed = true
+          retry_after = true
           break
         end
       elsif const == constant
         klass.send(:remove_const, const_sym)
-        const_removed = true
+        retry_after = true
         break
       end
     end
 
-    const_removed
+    return true if retry_after
+
+    const_name = if constant.is_a?(String)
+      constant.to_sym
+    elsif constant.is_a?(Class) || constant.is_a?(Module)
+      constant.name
+    else
+      raise ArgumentError.new("unknown constant: #{constant.inspect}")
+    end
+
+    if parent_constant?(klass, const_name)
+      klass.const_set(const_name, ClassConstant.new(const_name.to_s))
+      retry_after = true
+    end
+
+    retry_after
+  end
+
+  private
+
+  def parent_constant?(klass, const_name)
+    modules = klass.to_s.split("::")[0..-2]
+
+    result = modules.each_with_index.any? do |mod, index|
+      mod = Object.const_get(modules[0..index].join("::"))
+      mod.constants.include?(const_name)
+    end
+
+    result || acnchestor_constant?(klass, const_name)
+  end
+
+  def acnchestor_constant?(klass, const_name)
+    return false if klass.ancestors.include?(klass) && klass.ancestors.size == 1
+
+    klass.ancestors.any? do |anchestor|
+      next if anchestor == klass
+      anchestor.constants.include?(const_name) || acnchestor_constant?(anchestor, const_name)
+    end
   end
 end

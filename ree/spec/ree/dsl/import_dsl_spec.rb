@@ -28,6 +28,34 @@ RSpec.describe Ree::ImportDsl do
     }
   end
 
+  context "constant from top parent scope" do
+    it {
+      module TestModule5
+        HTTP = 'HTTP'
+
+        class TestClass
+          EXISTING_CONST = 'const'
+
+          class << self
+            def result
+              Ree::ImportDsl.new.execute(
+                self,
+                Proc.new {
+                  MissingClass.as(Missing) & HTTP & FOO.as(FOO_CONST) & EXISTING_CONST
+                }
+              )
+            end
+          end
+        end
+      end
+
+      result = TestModule5::TestClass.result
+      list = [result] + result.constants
+
+      expect(list.map(&:name)).to eq(['MissingClass', 'HTTP', 'FOO', 'EXISTING_CONST'])
+    }
+  end
+
   context "first constant is declared in the parent scope" do
     it {
       module TestModule2
