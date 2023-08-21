@@ -29,7 +29,7 @@ class Ree::ImportDsl
 
   class UnlinkConstError < StandardError
     attr_reader :const
-    
+
     def initialize(const)
       @const = const
     end

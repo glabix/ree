@@ -5,7 +5,7 @@ class ReeHttp::BuildRequestExecutor
 
   fn :build_request_executor do
     link 'ree_http/constants', -> {
-      HTTPS & DEFAULT_TIMEOUT & DEFAULT_WRITE_TIMEOUT & DEFAULT_FORCE_SSL
+      HTTPS_STR & DEFAULT_TIMEOUT & DEFAULT_WRITE_TIMEOUT & DEFAULT_FORCE_SSL
     }
   end
 
@@ -47,7 +47,7 @@ class ReeHttp::BuildRequestExecutor
     request_executor.write_timeout = opts[:write_timeout]
     request_executor.read_timeout = opts[:timeout]
 
-    request_executor.use_ssl = opts[:force_ssl] || uri.scheme == HTTPS
+    request_executor.use_ssl = opts[:force_ssl] || uri.scheme == HTTPS_STR
 
 
     if opts[:ca_certs?]

@@ -7,7 +7,7 @@ class ReeHttp::BuildRequest
     link :not_blank, from: :ree_object
     link :to_json, from: :ree_json
     link 'ree_http/constants', -> {
-      HTTPS & HTTP & HTTPS_PORT & HTTP_PORT & DEFAULT_FORCE_SSL
+      HTTPS_STR & HTTP_STR & HTTPS_PORT & HTTP_PORT & DEFAULT_FORCE_SSL
     }
   end
 
@@ -49,7 +49,7 @@ class ReeHttp::BuildRequest
     opts = DEFAULTS.merge(opts)
     uri = URI(url)
 
-    uri.scheme = opts[:force_ssl] ? HTTPS : uri.scheme
+    uri.scheme = opts[:force_ssl] ? HTTPS_STR : uri.scheme
 
     if DEFAULT_PROTOCOL_PORTS.include?(uri.port)
       uri.port = opts[:force_ssl] ? HTTPS_PORT : uri.port

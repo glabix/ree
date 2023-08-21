@@ -68,7 +68,7 @@ class ReeDao::BuildConnection
     end
 
     if opts[:sql_log_level]
-      connection.sql_log_level = opts[:sql_log_level] 
+      connection.sql_log_level = opts[:sql_log_level]
     end
 
     Timeout::timeout(timeout) do
