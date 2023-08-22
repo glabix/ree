@@ -119,7 +119,7 @@ module ReeDao
         end
       end
 
-      if ReeDao::Associations.sync_mode?
+      if dao_db_in_transaction?(parent_dao_name) || ReeDao::Associations.sync_mode?
         ReeDao::Associations.new(
           parent.agg_caller,
           assoc_list,
@@ -357,6 +357,13 @@ module ReeDao
       return dao_from_scope if dao_from_scope
 
       raise ArgumentError, "can't find DAO for :#{assoc_name}, provide correct scope or association name"
+    end
+
+    def dao_db_in_transaction?(parent_dao_name)
+      return false if !parent.agg_caller.private_methods(false).include?(parent_dao_name)
+
+      dao = parent.agg_caller.send(parent_dao_name)
+      dao.db.in_transaction?
     end
 
     def method_missing(method, *args, &block)
