@@ -21,14 +21,6 @@ module ReeDao
   require_relative "./ree_dao/associations"
   require_relative "./ree_dao/association"
 
-  def self.init_cache(thread)
-    ReeDao::Cache.init_cache(thread)
-  end
-
-  def self.drop_cache(thread)
-    ReeDao::Cache.delete_cache(thread)
-  end
-
   def self.load_sync_associations_enabled?
     ENV.has_key?("REE_DAO_SYNC_ASSOCIATIONS") && ENV["REE_DAO_SYNC_ASSOCIATIONS"] == "true"
   end

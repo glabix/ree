@@ -147,8 +147,8 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
 
         contract Any, Hash => Integer
         def call(user_access, attrs)
-          user = ReeActionsTest::User.new(name: 'John', age: 30)
-          users_dao.put(user)
+          $user = ReeActionsTest::User.new(name: 'John', age: 30)
+          users_dao.put($user)
 
           Thread.new do
             users_dao.put(ReeActionsTest::User.new(name: 'Alex', age: 33))
@@ -162,8 +162,7 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
             end.join
           end.join
           
-          $thread_cache = ReeDao::DaoCache.new.instance_variable_get(:@threads)
-                                              .dig(Thread.current.object_id, :users)
+          $thread_cache = ReeDao::DaoCache.new.get(:users, $user.id)
 
           attrs[:user_id]
         end
@@ -173,7 +172,7 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
     Thread.new do
       ReeActionsTest::TestAction3.new.call('user_access', {user_id: 1})
     end.join
-    expect($thread_cache.keys.count).to_not eq(0)
-    expect($thread_cache.keys.count).to eq(4)
+
+    expect($thread_cache).to eq($user.to_h)
   }
 end

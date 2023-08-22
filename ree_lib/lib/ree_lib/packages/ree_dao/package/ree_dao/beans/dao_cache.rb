@@ -38,11 +38,11 @@ class ReeDao::DaoCache
   private
 
   def get_thread_object_id(thread)
-    thread.parent == Thread.main ? thread.object_id : get_parent_thread(thread)
+    thread == Thread.main ? thread.object_id : get_parent_thread(thread)
   end
 
   def get_parent_thread(thread)
-    return thread.object_id if thread.parent == Thread.main || thread == Thread.main
+    return thread.object_id if thread == Thread.main
 
     get_parent_thread(thread.parent)
   end
@@ -56,22 +56,26 @@ class ReeDao::DaoCache
   end
 
   def add_table_name(table_name)
-    if !@threads[current_thread_object_id]
-      @threads[current_thread_object_id] ||= {}
+    current_thr_obj_id = current_thread_object_id
+
+    if !@threads[current_thr_obj_id]
+      @threads[current_thr_obj_id] ||= {}
     end
 
-    @threads[current_thread_object_id][table_name] ||= {}
+    @threads[current_thr_obj_id][table_name] ||= {}
   end
 
   def add_primary_key(table_name, primary_key)
-    if !@threads[current_thread_object_id]
-      @threads[current_thread_object_id] ||= {}
+    current_thr_obj_id = current_thread_object_id
+
+    if !@threads[current_thr_obj_id]
+      @threads[current_thr_obj_id] ||= {}
     end
 
-    if !@threads[current_thread_object_id][table_name]
-      @threads[current_thread_object_id][table_name] ||= {}
+    if !@threads[current_thr_obj_id][table_name]
+      @threads[current_thr_obj_id][table_name] ||= {}
     end
 
-    @threads[current_thread_object_id][table_name][primary_key] ||= {}
+    @threads[current_thr_obj_id][table_name][primary_key] ||= {}
   end
 end
