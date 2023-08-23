@@ -1,6 +1,7 @@
 module ReeDao
   class Association
     include Ree::LinkDSL
+    include ReeDao::AssociationMethods
 
     link :demodulize, from: :ree_string
     link :group_by, from: :ree_array
@@ -119,24 +120,21 @@ module ReeDao
         end
       end
 
-      if dao_db_in_transaction?(parent_dao_name) || ReeDao::Associations.sync_mode?
-        ReeDao::Associations.new(
-          parent.agg_caller,
-          assoc_list,
-          parent.local_vars,
-          parent_dao_name,
-          autoload_children,
-          **global_opts
-        ).instance_exec(assoc_list, &block)
+      associations = ReeDao::Associations.new(
+        parent.agg_caller,
+        assoc_list,
+        parent.local_vars,
+        parent_dao_name,
+        autoload_children,
+        **global_opts
+      )
+      parent_dao = find_dao(parent_dao_name, parent.agg_caller)
+
+      if dao_in_transaction?(parent_dao) || ReeDao::Associations.sync_mode?
+        associations.instance_exec(assoc_list, &block)
       else
-        threads = ReeDao::Associations.new(
-          parent.agg_caller,
-          assoc_list,
-          parent.local_vars,
-          parent_dao_name,
-          autoload_children,
-          **global_opts
-        ).instance_exec(assoc_list, &block)
+        threads = associations.instance_exec(assoc_list, &block)
+
         threads[:association_threads].map do |association, assoc_type, assoc_name, __opts, block|
           Thread.new do
             association.load(assoc_type, assoc_name, **__opts, &block)
@@ -343,27 +341,6 @@ module ReeDao
       end
 
       res.all
-    end
-
-    def find_dao(assoc_name, parent, scope)
-      dao_from_name = parent.instance_variable_get("@#{assoc_name}") || parent.instance_variable_get("@#{assoc_name}s")
-      return dao_from_name if dao_from_name
-
-      raise ArgumentError, "can't find DAO for :#{assoc_name}, provide correct scope or association name" if scope.nil?
-      return nil if scope.is_a?(Array)
-
-      table_name = scope.first_source_table
-      dao_from_scope = parent.instance_variable_get("@#{table_name}")
-      return dao_from_scope if dao_from_scope
-
-      raise ArgumentError, "can't find DAO for :#{assoc_name}, provide correct scope or association name"
-    end
-
-    def dao_db_in_transaction?(parent_dao_name)
-      return false if !parent.agg_caller.private_methods(false).include?(parent_dao_name)
-
-      dao = parent.agg_caller.send(parent_dao_name)
-      dao.db.in_transaction?
     end
 
     def method_missing(method, *args, &block)

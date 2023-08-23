@@ -18,6 +18,7 @@ module ReeDao
   require_relative "./ree_dao/dsl"
   require_relative "./ree_dao/thread_parents"
   require_relative "./ree_dao/aggregate_dsl"
+  require_relative "./ree_dao/association_methods"
   require_relative "./ree_dao/associations"
   require_relative "./ree_dao/association"
 
