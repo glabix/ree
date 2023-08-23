@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-class ReeDao::LoadAgg
+class ReeDao::Agg
   include Ree::FnDSL
+  include ReeDao::AssociationMethods
 
-  fn :load_agg do
+  fn :agg do
     link :demodulize, from: :ree_string
     link :underscore, from: :ree_string
     link "ree_dao/associations", -> { Associations }
@@ -72,8 +73,9 @@ class ReeDao::LoadAgg
     agg_caller = block.binding.eval("self")
 
     associations = Associations.new(agg_caller, list, local_vars, dao_name, **opts).instance_exec(list, &block)
+    dao = find_dao(dao_name, agg_caller)
 
-    if dao_db_in_transaction?(agg_caller, dao_name) || ReeDao.load_sync_associations_enabled?
+    if dao_in_transaction?(dao) || ReeDao.load_sync_associations_enabled?
       associations
     else
       associations[:association_threads].map do |association, assoc_type, assoc_name, opts, block|
@@ -88,12 +90,5 @@ class ReeDao::LoadAgg
         end
       end.map(&:join)
     end
-  end
-
-  def dao_db_in_transaction?(agg_caller, dao_name)
-    return false if !agg_caller.private_methods(false).include?(dao_name)
-
-    dao = agg_caller.send(dao_name)
-    dao.db.in_transaction?
   end
 end

@@ -1,6 +1,6 @@
 Ree.enable_irb_mode
 
-module ReeDaoLoadAggTest
+module ReeDaoAggTest
   include Ree::PackageDSL
 
   package do
@@ -11,7 +11,7 @@ module ReeDaoLoadAggTest
   end
 end
 
-class ReeDaoLoadAggTest::Db
+class ReeDaoAggTest::Db
   include Ree::BeanDSL
 
   DB_CONFIG = {
@@ -35,7 +35,7 @@ class ReeDaoLoadAggTest::Db
   end
 end
 
-class ReeDaoLoadAggTest::Book
+class ReeDaoAggTest::Book
   include ReeDto::EntityDSL
 
   properties(
@@ -75,10 +75,10 @@ class ReeDaoLoadAggTest::Book
   attr_accessor :title, :user_id
 end
 
-class ReeDaoLoadAggTest::BookDto < SimpleDelegator
+class ReeDaoAggTest::BookDto < SimpleDelegator
 end
 
-class ReeDaoLoadAggTest::User
+class ReeDaoAggTest::User
   include ReeDto::EntityDSL
 
   properties(
@@ -116,7 +116,7 @@ class ReeDaoLoadAggTest::User
     @active_books
   end
 
-  contract(ArrayOf[ReeDaoLoadAggTest::Book] => nil)
+  contract(ArrayOf[ReeDaoAggTest::Book] => nil)
   def set_books(books)
     @books = books; nil
   end
@@ -145,7 +145,7 @@ class ReeDaoLoadAggTest::User
   attr_accessor :name, :age, :organization_id
 end
 
-class ReeDaoLoadAggTest::UserDto
+class ReeDaoAggTest::UserDto
   include ReeDto::EntityDSL
 
   properties(
@@ -172,7 +172,7 @@ class ReeDaoLoadAggTest::UserDto
   end
 end
 
-class ReeDaoLoadAggTest::Organization
+class ReeDaoAggTest::Organization
   include ReeDto::EntityDSL
 
   properties(
@@ -180,7 +180,7 @@ class ReeDaoLoadAggTest::Organization
     name: String
   )
   
-  contract(Array[ReeDaoLoadAggTest::User] => nil)
+  contract(Array[ReeDaoAggTest::User] => nil)
   def set_users(users)
     @users = users; nil
   end
@@ -193,7 +193,7 @@ class ReeDaoLoadAggTest::Organization
 end
 
 
-class ReeDaoLoadAggTest::UserPassport
+class ReeDaoAggTest::UserPassport
   include ReeDto::EntityDSL
 
   properties(
@@ -205,7 +205,7 @@ class ReeDaoLoadAggTest::UserPassport
   attr_accessor :info, :user_id
 end
 
-class ReeDaoLoadAggTest::Movie
+class ReeDaoAggTest::Movie
   include ReeDto::EntityDSL
 
   properties(
@@ -215,7 +215,7 @@ class ReeDaoLoadAggTest::Movie
   )
 end
 
-class ReeDaoLoadAggTest::Videogame
+class ReeDaoAggTest::Videogame
   include ReeDto::EntityDSL
 
   properties(
@@ -225,7 +225,7 @@ class ReeDaoLoadAggTest::Videogame
   )
 end
 
-class ReeDaoLoadAggTest::Hobby
+class ReeDaoAggTest::Hobby
   include ReeDto::EntityDSL
 
   properties(
@@ -235,7 +235,7 @@ class ReeDaoLoadAggTest::Hobby
   )
 end
 
-class ReeDaoLoadAggTest::Vinyl
+class ReeDaoAggTest::Vinyl
   include ReeDto::EntityDSL
 
   properties(
@@ -245,7 +245,7 @@ class ReeDaoLoadAggTest::Vinyl
   )
 end
 
-class ReeDaoLoadAggTest::Pet
+class ReeDaoAggTest::Pet
   include ReeDto::EntityDSL
 
   properties(
@@ -255,7 +255,7 @@ class ReeDaoLoadAggTest::Pet
   )
 end
 
-class ReeDaoLoadAggTest::Skill
+class ReeDaoAggTest::Skill
   include ReeDto::EntityDSL
 
   properties(
@@ -265,7 +265,7 @@ class ReeDaoLoadAggTest::Skill
   )
 end
 
-class ReeDaoLoadAggTest::Dream
+class ReeDaoAggTest::Dream
   include ReeDto::EntityDSL
 
   properties(
@@ -275,7 +275,7 @@ class ReeDaoLoadAggTest::Dream
   )
 end
 
-class ReeDaoLoadAggTest::Chapter
+class ReeDaoAggTest::Chapter
   include ReeDto::EntityDSL
 
   properties(
@@ -287,10 +287,10 @@ class ReeDaoLoadAggTest::Chapter
   attr_accessor :title, :book_id
 end
 
-class ReeDaoLoadAggTest::ChapterDto < SimpleDelegator
+class ReeDaoAggTest::ChapterDto < SimpleDelegator
 end
 
-class ReeDaoLoadAggTest::Author
+class ReeDaoAggTest::Author
   include ReeDto::EntityDSL
 
   properties(
@@ -302,10 +302,10 @@ class ReeDaoLoadAggTest::Author
   attr_accessor :name, :book_id
 end
 
-class ReeDaoLoadAggTest::AuthorDto < SimpleDelegator
+class ReeDaoAggTest::AuthorDto < SimpleDelegator
 end
 
-class ReeDaoLoadAggTest::Review
+class ReeDaoAggTest::Review
   include ReeDto::EntityDSL
 
   properties(
@@ -325,7 +325,7 @@ class ReeDaoLoadAggTest::Review
   attr_accessor :rating, :book_id
 end
 
-class ReeDaoLoadAggTest::ReviewAuthor
+class ReeDaoAggTest::ReviewAuthor
   include ReeDto::EntityDSL
 
   properties(
@@ -335,7 +335,7 @@ class ReeDaoLoadAggTest::ReviewAuthor
   )
 end
 
-class ReeDaoLoadAggTest::Users
+class ReeDaoAggTest::Users
   include ReeDao::DSL
 
   dao :users do
@@ -344,7 +344,7 @@ class ReeDaoLoadAggTest::Users
 
   table :users
 
-  schema ReeDaoLoadAggTest::User do
+  schema ReeDaoAggTest::User do
     integer :id, null: true
     integer :organization_id
     string :name
@@ -354,7 +354,7 @@ class ReeDaoLoadAggTest::Users
   filter :by_name, -> (name) { where(name: name) }
 end
 
-class ReeDaoLoadAggTest::Organizations
+class ReeDaoAggTest::Organizations
   include ReeDao::DSL
 
   dao :organizations do
@@ -363,7 +363,7 @@ class ReeDaoLoadAggTest::Organizations
 
   table :organizations
 
-  schema ReeDaoLoadAggTest::Organization do
+  schema ReeDaoAggTest::Organization do
     integer :id, null: true
     string :name
   end
@@ -371,7 +371,7 @@ class ReeDaoLoadAggTest::Organizations
   filter :by_name, -> (name) { where(name: name) }
 end
 
-class ReeDaoLoadAggTest::UserPassports
+class ReeDaoAggTest::UserPassports
   include ReeDao::DSL
 
   dao :user_passports do
@@ -380,14 +380,14 @@ class ReeDaoLoadAggTest::UserPassports
 
   table :user_passports
 
-  schema ReeDaoLoadAggTest::UserPassport do
+  schema ReeDaoAggTest::UserPassport do
     integer :id, null: true
     integer :user_id
     string :info
   end
 end
 
-class ReeDaoLoadAggTest::Movies
+class ReeDaoAggTest::Movies
   include ReeDao::DSL
 
   dao :movies do
@@ -396,14 +396,14 @@ class ReeDaoLoadAggTest::Movies
 
   table :movies
 
-  schema ReeDaoLoadAggTest::Movie do
+  schema ReeDaoAggTest::Movie do
     integer :id, null: true
     integer :user_id
     string :title
   end
 end
 
-class ReeDaoLoadAggTest::Videogames
+class ReeDaoAggTest::Videogames
   include ReeDao::DSL
 
   dao :videogames do
@@ -412,14 +412,14 @@ class ReeDaoLoadAggTest::Videogames
 
   table :videogames
 
-  schema ReeDaoLoadAggTest::Videogame do
+  schema ReeDaoAggTest::Videogame do
     integer :id, null: true
     integer :user_id
     string :title
   end
 end
 
-class ReeDaoLoadAggTest::Hobbies
+class ReeDaoAggTest::Hobbies
   include ReeDao::DSL
 
   dao :hobbies do
@@ -428,14 +428,14 @@ class ReeDaoLoadAggTest::Hobbies
 
   table :hobbies
 
-  schema ReeDaoLoadAggTest::Hobby do
+  schema ReeDaoAggTest::Hobby do
     integer :id, null: true
     integer :user_id
     string :title
   end
 end
 
-class ReeDaoLoadAggTest::Vinyls
+class ReeDaoAggTest::Vinyls
   include ReeDao::DSL
 
   dao :vinyls do
@@ -444,14 +444,14 @@ class ReeDaoLoadAggTest::Vinyls
 
   table :vinyls
 
-  schema ReeDaoLoadAggTest::Vinyl do
+  schema ReeDaoAggTest::Vinyl do
     integer :id, null: true
     integer :user_id
     string :title
   end
 end
 
-class ReeDaoLoadAggTest::Pets
+class ReeDaoAggTest::Pets
   include ReeDao::DSL
 
   dao :pets do
@@ -460,14 +460,14 @@ class ReeDaoLoadAggTest::Pets
 
   table :pets
 
-  schema ReeDaoLoadAggTest::Pet do
+  schema ReeDaoAggTest::Pet do
     integer :id, null: true
     integer :user_id
     string :name
   end
 end
 
-class ReeDaoLoadAggTest::Skills
+class ReeDaoAggTest::Skills
   include ReeDao::DSL
 
   dao :skills do
@@ -476,14 +476,14 @@ class ReeDaoLoadAggTest::Skills
 
   table :skills
 
-  schema ReeDaoLoadAggTest::Skill do
+  schema ReeDaoAggTest::Skill do
     integer :id, null: true
     integer :user_id
     string :title
   end
 end
 
-class ReeDaoLoadAggTest::Dreams
+class ReeDaoAggTest::Dreams
   include ReeDao::DSL
 
   dao :dreams do
@@ -492,14 +492,14 @@ class ReeDaoLoadAggTest::Dreams
 
   table :dreams
 
-  schema ReeDaoLoadAggTest::Dream do
+  schema ReeDaoAggTest::Dream do
     integer :id, null: true
     integer :user_id
     string :description
   end
 end
 
-class ReeDaoLoadAggTest::Books
+class ReeDaoAggTest::Books
   include ReeDao::DSL
 
   dao :books do
@@ -508,14 +508,14 @@ class ReeDaoLoadAggTest::Books
 
   table :books
 
-  schema ReeDaoLoadAggTest::Book do
+  schema ReeDaoAggTest::Book do
     integer :id, null: true
     integer :user_id
     string :title
   end
 end
 
-class ReeDaoLoadAggTest::Chapters
+class ReeDaoAggTest::Chapters
   include ReeDao::DSL
 
   dao :chapters do
@@ -524,14 +524,14 @@ class ReeDaoLoadAggTest::Chapters
 
   table :chapters
 
-  schema ReeDaoLoadAggTest::Chapter do
+  schema ReeDaoAggTest::Chapter do
     integer :id, null: true
     integer :book_id
     string :title
   end
 end
 
-class ReeDaoLoadAggTest::Authors
+class ReeDaoAggTest::Authors
   include ReeDao::DSL
 
   dao :authors do
@@ -540,14 +540,14 @@ class ReeDaoLoadAggTest::Authors
 
   table :authors
 
-  schema ReeDaoLoadAggTest::Author do
+  schema ReeDaoAggTest::Author do
     integer :id, null: true
     integer :book_id
     string :name
   end
 end
 
-class ReeDaoLoadAggTest::Reviews
+class ReeDaoAggTest::Reviews
   include ReeDao::DSL
 
   dao :reviews do
@@ -556,14 +556,14 @@ class ReeDaoLoadAggTest::Reviews
 
   table :reviews
 
-  schema ReeDaoLoadAggTest::Review do
+  schema ReeDaoAggTest::Review do
     integer :id, null: true
     integer :book_id
     integer :rating
   end
 end
 
-class ReeDaoLoadAggTest::ReviewAuthors
+class ReeDaoAggTest::ReviewAuthors
   include ReeDao::DSL
 
   dao :review_authors do
@@ -572,7 +572,7 @@ class ReeDaoLoadAggTest::ReviewAuthors
 
   table :review_authors
 
-  schema ReeDaoLoadAggTest::ReviewAuthor do
+  schema ReeDaoAggTest::ReviewAuthor do
     integer :id, null: true
     integer :review_id
     string :name
