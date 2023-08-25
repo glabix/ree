@@ -1,6 +1,7 @@
 module ReeDao
   class Associations
     include Ree::LinkDSL
+    include ReeDao::AssociationMethods
 
     attr_reader :agg_caller, :list, :local_vars, :only, :except, :parent_dao_name, :autoload_children, :global_opts
 
@@ -86,7 +87,9 @@ module ReeDao
       Optblock => Any
     )
     def association(assoc_type, assoc_name, __opts, &block)
-      if self.class.sync_mode?
+      parent_dao = find_dao(parent_dao_name, agg_caller)
+
+      if dao_in_transaction?(parent_dao) || self.class.sync_mode?
         return if association_is_not_included?(assoc_name) || list.empty?
 
         association = Association.new(self, parent_dao_name, list, **global_opts)

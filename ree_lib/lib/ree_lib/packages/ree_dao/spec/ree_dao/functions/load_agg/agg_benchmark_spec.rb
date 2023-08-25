@@ -2,9 +2,9 @@
 require 'faker'
 require 'benchmark'
 
-RSpec.describe :load_agg do
+RSpec.describe :agg do
+  link :agg, from: :ree_dao
   link :build_pg_connection, from: :ree_dao
-  link :load_agg, from: :ree_dao
 
   NUM_OF_USERS = 100
   ASSOC_COUNT = 10
@@ -14,7 +14,7 @@ RSpec.describe :load_agg do
   end
 
   before :all do
-    connection = build_pg_connection(ReeDaoLoadAggTest::Db::DB_CONFIG)
+    connection = build_pg_connection(ReeDaoAggTest::Db::DB_CONFIG)
 
     connection.drop_table(:organizations, cascade: true) if connection.table_exists?(:organizations)
     connection.drop_table(:users, cascade: true) if connection.table_exists?(:users)
@@ -108,28 +108,28 @@ RSpec.describe :load_agg do
     connection.disconnect
   end
 
-  require_relative 'ree_dao_load_agg_test'
+  require_relative 'ree_dao_agg_test'
 
-  class ReeDaoLoadAggTest::UsersAggBenchmark
+  class ReeDaoAggTest::AggUsersBenchmark
     include ReeDao::AggregateDSL
 
-    aggregate :users_agg_benchmark do
-      link :users, from: :ree_dao_load_agg_test
-      link :organizations, from: :ree_dao_load_agg_test
-      link :user_passports, from: :ree_dao_load_agg_test
-      link :books, from: :ree_dao_load_agg_test
-      link :movies, from: :ree_dao_load_agg_test
-      link :videogames, from: :ree_dao_load_agg_test
-      link :hobbies, from: :ree_dao_load_agg_test
-      link :vinyls, from: :ree_dao_load_agg_test
-      link :pets, from: :ree_dao_load_agg_test
-      link :skills, from: :ree_dao_load_agg_test
-      link :dreams, from: :ree_dao_load_agg_test
-      link :load_agg, from: :ree_dao
+    aggregate :agg_users_benchmark do
+      link :users, from: :ree_dao_agg_test
+      link :organizations, from: :ree_dao_agg_test
+      link :user_passports, from: :ree_dao_agg_test
+      link :books, from: :ree_dao_agg_test
+      link :movies, from: :ree_dao_agg_test
+      link :videogames, from: :ree_dao_agg_test
+      link :hobbies, from: :ree_dao_agg_test
+      link :vinyls, from: :ree_dao_agg_test
+      link :pets, from: :ree_dao_agg_test
+      link :skills, from: :ree_dao_agg_test
+      link :dreams, from: :ree_dao_agg_test
+      link :agg, from: :ree_dao
     end
 
     def call(ids_or_scope)
-      load_agg(users, ids_or_scope) do
+      agg(users, ids_or_scope) do
         belongs_to :organization
 
         has_many :books
@@ -146,21 +146,21 @@ RSpec.describe :load_agg do
     end
   end
 
-  class ReeDaoLoadAggTest::UsersSyncFetcher
+  class ReeDaoAggTest::UsersSyncFetcher
     include Ree::FnDSL
 
     fn :users_sync_fetcher do
-      link :users, from: :ree_dao_load_agg_test
-      link :organizations, from: :ree_dao_load_agg_test
-      link :user_passports, from: :ree_dao_load_agg_test
-      link :books, from: :ree_dao_load_agg_test
-      link :movies, from: :ree_dao_load_agg_test
-      link :videogames, from: :ree_dao_load_agg_test
-      link :hobbies, from: :ree_dao_load_agg_test
-      link :vinyls, from: :ree_dao_load_agg_test
-      link :pets, from: :ree_dao_load_agg_test
-      link :skills, from: :ree_dao_load_agg_test
-      link :dreams, from: :ree_dao_load_agg_test
+      link :users, from: :ree_dao_agg_test
+      link :organizations, from: :ree_dao_agg_test
+      link :user_passports, from: :ree_dao_agg_test
+      link :books, from: :ree_dao_agg_test
+      link :movies, from: :ree_dao_agg_test
+      link :videogames, from: :ree_dao_agg_test
+      link :hobbies, from: :ree_dao_agg_test
+      link :vinyls, from: :ree_dao_agg_test
+      link :pets, from: :ree_dao_agg_test
+      link :skills, from: :ree_dao_agg_test
+      link :dreams, from: :ree_dao_agg_test
       link :one_to_many, from: :ree_dao
       link :one_to_one, from: :ree_dao
     end
@@ -169,7 +169,7 @@ RSpec.describe :load_agg do
       Or[Sequel::Dataset, ArrayOf[Integer]],
       Kwargs[
         include: ArrayOf[Symbol]
-      ] => ArrayOf[ReeDaoLoadAggTest::User]
+      ] => ArrayOf[ReeDaoAggTest::User]
     )
     def call(ids_or_scope, include: [])
       scope = if ids_or_scope.is_a?(Array)
@@ -230,23 +230,23 @@ RSpec.describe :load_agg do
     end
   end
 
-  let(:users_agg) { ReeDaoLoadAggTest::UsersAggBenchmark.new }
-  let(:users_sync_fetcher) { ReeDaoLoadAggTest::UsersSyncFetcher.new }
+  let(:agg_users) { ReeDaoAggTest::AggUsersBenchmark.new }
+  let(:users_sync_fetcher) { ReeDaoAggTest::UsersSyncFetcher.new }
 
-  let(:organizations) { ReeDaoLoadAggTest::Organizations.new }
-  let(:users) { ReeDaoLoadAggTest::Users.new }
-  let(:user_passports) { ReeDaoLoadAggTest::UserPassports.new }
-  let(:books) { ReeDaoLoadAggTest::Books.new }
-  let(:movies) { ReeDaoLoadAggTest::Movies.new }
-  let(:videogames) { ReeDaoLoadAggTest::Videogames.new }
-  let(:hobbies) { ReeDaoLoadAggTest::Hobbies.new }
-  let(:vinyls) { ReeDaoLoadAggTest::Vinyls.new }
-  let(:pets) { ReeDaoLoadAggTest::Pets.new }
-  let(:skills) { ReeDaoLoadAggTest::Skills.new }
-  let(:dreams) { ReeDaoLoadAggTest::Dreams.new }
+  let(:organizations) { ReeDaoAggTest::Organizations.new }
+  let(:users) { ReeDaoAggTest::Users.new }
+  let(:user_passports) { ReeDaoAggTest::UserPassports.new }
+  let(:books) { ReeDaoAggTest::Books.new }
+  let(:movies) { ReeDaoAggTest::Movies.new }
+  let(:videogames) { ReeDaoAggTest::Videogames.new }
+  let(:hobbies) { ReeDaoAggTest::Hobbies.new }
+  let(:vinyls) { ReeDaoAggTest::Vinyls.new }
+  let(:pets) { ReeDaoAggTest::Pets.new }
+  let(:skills) { ReeDaoAggTest::Skills.new }
+  let(:dreams) { ReeDaoAggTest::Dreams.new }
 
   before(:each) do
-    organization = ReeDaoLoadAggTest::Organization.new(name: "Test Org")
+    organization = ReeDaoAggTest::Organization.new(name: "Test Org")
     organizations.put(organization)
 
     _users = []
@@ -255,7 +255,7 @@ RSpec.describe :load_agg do
     puts "Seeding #{NUM_OF_USERS} users..."
 
     NUM_OF_USERS.times do
-      u = ReeDaoLoadAggTest::User.new(
+      u = ReeDaoAggTest::User.new(
         name: Faker::Name.name,
         age: rand(18..50),
         organization_id: organization.id
@@ -268,7 +268,7 @@ RSpec.describe :load_agg do
     _users.each do |user|
       ASSOC_COUNT.times do
         books.put(
-          ReeDaoLoadAggTest::Book.new(
+          ReeDaoAggTest::Book.new(
             title: Faker::Book.title,
             user_id: user.id
           )
@@ -277,7 +277,7 @@ RSpec.describe :load_agg do
 
       ASSOC_COUNT.times do
         movies.put(
-          ReeDaoLoadAggTest::Movie.new(
+          ReeDaoAggTest::Movie.new(
             user_id: user.id,
             title: Faker::Movie.title
           )
@@ -286,7 +286,7 @@ RSpec.describe :load_agg do
 
       ASSOC_COUNT.times do
         videogames.put(
-          ReeDaoLoadAggTest::Videogame.new(
+          ReeDaoAggTest::Videogame.new(
             user_id: user.id,
             title: Faker::Game.title
           )
@@ -295,7 +295,7 @@ RSpec.describe :load_agg do
 
       ASSOC_COUNT.times do
         hobbies.put(
-          ReeDaoLoadAggTest::Hobby.new(
+          ReeDaoAggTest::Hobby.new(
             user_id: user.id,
             title: Faker::Hobby.activity
           )
@@ -304,7 +304,7 @@ RSpec.describe :load_agg do
 
       ASSOC_COUNT.times do
         vinyls.put(
-          ReeDaoLoadAggTest::Vinyl.new(
+          ReeDaoAggTest::Vinyl.new(
             user_id: user.id,
             title: Faker::Music.band
           )
@@ -313,7 +313,7 @@ RSpec.describe :load_agg do
 
       ASSOC_COUNT.times do
         pets.put(
-          ReeDaoLoadAggTest::Pet.new(
+          ReeDaoAggTest::Pet.new(
             user_id: user.id,
             name: Faker::Creature::Animal.name
           )
@@ -322,7 +322,7 @@ RSpec.describe :load_agg do
 
       ASSOC_COUNT.times do
         skills.put(
-          ReeDaoLoadAggTest::Skill.new(
+          ReeDaoAggTest::Skill.new(
             user_id: user.id,
             title: Faker::Job.key_skill
           )
@@ -331,7 +331,7 @@ RSpec.describe :load_agg do
 
       ASSOC_COUNT.times do
         dreams.put(
-          ReeDaoLoadAggTest::Dream.new(
+          ReeDaoAggTest::Dream.new(
             user_id: user.id,
             description: Faker::ChuckNorris.fact
           )
@@ -340,7 +340,7 @@ RSpec.describe :load_agg do
 
       ASSOC_COUNT.times do
         user_passports.put(
-          ReeDaoLoadAggTest::UserPassport.new(
+          ReeDaoAggTest::UserPassport.new(
             user_id: user.id,
             info: "Passport info #{user.id}"
           )
@@ -358,12 +358,12 @@ RSpec.describe :load_agg do
 
     benchmark_res = Benchmark.bm do |x|
       x.report("async_load_agg") do
-        res1 = users_agg.call(users.all.map(&:id))
+        res1 = agg_users.call(users.all.map(&:id))
       end
 
       x.report("sync_load_agg ") do
         ENV['REE_DAO_SYNC_ASSOCIATIONS'] = "true"
-        res2 = users_agg.call(users.all.map(&:id))
+        res2 = agg_users.call(users.all.map(&:id))
         ENV.delete('REE_DAO_SYNC_ASSOCIATIONS')
       end
 

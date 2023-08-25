@@ -1,10 +1,10 @@
 {
   "schema_type": "object",
   "schema_version": "1.1",
-  "name": "load_agg",
-  "path": "packages/ree_dao/package/ree_dao/functions/load_agg.rb",
+  "name": "agg",
+  "path": "packages/ree_dao/package/ree_dao/functions/agg.rb",
   "mount_as": "fn",
-  "class": "ReeDao::LoadAgg",
+  "class": "ReeDao::Agg",
   "factory": null,
   "methods": [
     {

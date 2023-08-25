@@ -34,6 +34,13 @@
   ],
   "objects": [
     {
+      "name": "agg",
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/agg.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
       "name": "build_connection",
       "schema": "packages/ree_dao/schemas/ree_dao/functions/build_connection.schema.json",
       "tags": [
@@ -92,13 +99,6 @@
     {
       "name": "init_cache",
       "schema": "packages/ree_dao/schemas/ree_dao/functions/init_cache.schema.json",
-      "tags": [
-        "fn"
-      ]
-    },
-    {
-      "name": "load_agg",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/load_agg.schema.json",
       "tags": [
         "fn"
       ]
