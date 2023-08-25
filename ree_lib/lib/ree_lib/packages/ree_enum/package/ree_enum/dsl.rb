@@ -52,28 +52,17 @@ module ReeEnum
               ] => ReeEnum::Value
             ).throws(ReeMapper::CoercionError)
             def cast(value, name:, role: nil)
-              if value.is_a?(String)
-                enum_val = @enum.values.all.detect { |v| v.to_s == value }
-
-                if !enum_val
-                  raise ReeMapper::CoercionError, "`#{name}` should be one of #{@enum.values.all.map(&:to_s).inspect}"
-                end
-
-                enum_val
-              elsif value.is_a?(Integer)
-                enum_val = @enum.values.all.detect { |v| v.to_i == value }
-
-                if !enum_val
-                  raise ReeMapper::CoercionError, "`#{name}` should be one of #{@enum.values.all.map(&:to_s).inspect}"
-                end
-
-                enum_val
-              else
-                enum_val = @enum.values.all.detect { |v| v == value }
-                return enum_val if enum_val
-
-                raise ReeMapper::CoercionError, "`#{name}` should be one of #{@enum.values.all.map(&:to_s).inspect}"
+              enum_value = if value.is_a?(String)
+                @enum.get_values.by_value(value)
+              elsif value.is_a?(ReeEnum::Value)
+                @enum.get_values.each.find { _1 == value }
               end
+
+              if enum_value.nil?
+                raise ReeMapper::CoercionError, "`#{name}` should be one of #{enum_inspection}"
+              end
+
+              enum_value
             end
 
             contract(
@@ -81,21 +70,38 @@ module ReeEnum
               Kwargs[
                 name: String,
                 role: Nilor[Symbol, ArrayOf[Symbol]]
-              ] => Integer
+              ] => Or[Integer, String]
             )
             def db_dump(value, name:, role: nil)
-              value.to_i
+              value.mapped_value
             end
 
             contract(
-              Integer,
+              Or[Integer, String],
               Kwargs[
                 name: String,
                 role: Nilor[Symbol, ArrayOf[Symbol]]
               ] => ReeEnum::Value
-            ).throws(ReeMapper::TypeError)
+            ).throws(ReeMapper::CoercionError)
             def db_load(value, name:, role: nil)
-              cast(value, name: name, role: role)
+              enum_val = @enum.get_values.by_mapped_value(value)
+
+              if !enum_val
+                raise ReeMapper::CoercionError, "`#{name}` should be one of #{enum_inspection}"
+              end
+
+              enum_val
+            end
+
+            private
+
+            def enum_inspection
+              @enum_inspect ||= truncate(@enum.get_values.each.map(&:to_s).inspect)
+            end
+
+            def truncate(str, limit = 180)
+              return str if str.length <= limit
+              "#{str[0..limit]}..."
             end
           end
 
@@ -113,7 +119,7 @@ module ReeEnum
             ->(*) {
               {
                 type: 'string',
-                enum: values.all.map(&:to_s)
+                enum: get_values.each.map(&:to_s)
               }
             }
           )
@@ -128,7 +134,7 @@ module ReeEnum
         )
 
         mapper_factory.register_type(
-          self.enum_name, type_for_mapper
+          self.get_enum_name, type_for_mapper
         )
       end
     end

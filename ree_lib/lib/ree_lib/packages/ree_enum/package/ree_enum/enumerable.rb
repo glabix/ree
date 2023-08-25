@@ -5,20 +5,6 @@ require_relative 'values'
 require_relative 'contractable'
 
 module ReeEnum::Enumerable
-  module CommonMethods
-    def by_value(value)
-      values.by_value(value)
-    end
-
-    def by_number(number)
-      values.by_number(number)
-    end
-
-    def all
-      values.all
-    end
-  end
-
   def self.included(base)
     base.extend(ClassMethods)
   end
@@ -26,43 +12,45 @@ module ReeEnum::Enumerable
   module ClassMethods
     include ReeEnum::Contractable
 
+    RESTRICTED_METHODS = [
+      :setup_enum, :get_values, :get_enum_name,
+      :val, :self, :class, :alias
+    ].freeze
+
     def setup_enum(enum_name)
       @values ||= ReeEnum::Values.new(self, enum_name)
     end
 
-    def values
+    def get_values
       @values
     end
 
-    def enum_name
-      return if !@values
-      @values.enum_name
+    def get_enum_name
+      @values&.enum_name
     end
 
-    include CommonMethods
+    def val(value, mapped_value = value.to_s, method: value.to_sym)
+      value = value.to_s
 
-    def val(value, number, label = nil)
-      if value == :new
-        raise ArgumentError.new(":new is not allowed as enum value")
-      end
-      
-      enum_value = values.add(value, number: number, label: label)
-
-      define_method "#{enum_value.value}" do
-        by_value(enum_value.value)
+      if RESTRICTED_METHODS.include?(method)
+        raise ArgumentError.new("#{method.inspect} is not allowed as enum method")
       end
 
-      define_singleton_method "#{enum_value.value}" do
-        by_value(enum_value.value)
+      enum_value = @values.add(value, mapped_value, method)
+
+      define_method(enum_value.method) do
+        get_values.by_value(enum_value.value)
+      end
+
+      define_singleton_method(enum_value.method) do
+        get_values.by_value(enum_value.value)
       end
 
       enum_value
     end
   end
 
-  def values
-    self.class.values
+  def get_values
+    self.class.get_values
   end
-
-  include CommonMethods
 end
