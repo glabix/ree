@@ -4,7 +4,7 @@ module ReeEnum::Contractable
   include Ree::Contracts::Truncatable
 
   def valid?(value)
-    value.is_a?(ReeEnum::Value) && value.enum_name == self.get_enum_name && get_values.each.include?(value)
+    value.is_a?(ReeEnum::Value) && value.enum_name == get_enum_name && get_values.each.include?(value)
   end
 
   def message(value, name, lvl = 1)
