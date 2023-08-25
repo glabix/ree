@@ -8,12 +8,12 @@ module ReeDao
     link :index_by, from: :ree_array
     link :underscore, from: :ree_string
 
-    attr_reader :parent, :parent_dao_name, :list, :global_opts
+    attr_reader :parent, :parent_dao, :list, :global_opts
 
-    contract(ReeDao::Associations, Symbol, Array, Ksplat[RestKeys => Any] => Any)
-    def initialize(parent, parent_dao_name, list, **global_opts)
+    contract(ReeDao::Associations, Sequel::Dataset, Array, Ksplat[RestKeys => Any] => Any)
+    def initialize(parent, parent_dao, list, **global_opts)
       @parent = parent
-      @parent_dao_name = parent_dao_name
+      @parent_dao = parent_dao
       @list = list
       @global_opts = global_opts
     end
@@ -36,7 +36,7 @@ module ReeDao
       Or[:belongs_to, :has_one, :has_many],
       Symbol,
       Ksplat[RestKeys => Any],
-      Optblock => Nilor[Array]
+      Optblock => Array
     )
     def load_association(assoc_type, assoc_name, **__opts, &block)
       __opts[:autoload_children] ||= false
@@ -47,21 +47,17 @@ module ReeDao
         **__opts
       )
 
-      dao = find_dao(assoc_name, parent, __opts[:scope])
+      scope = __opts[:scope]
 
-      dao_name = if dao
-        dao.first_source_table
-      elsif __opts[:scope].is_a?(Array)
-        name = underscore(demodulize(__opts[:scope].first.class.name))
-
-        if name.end_with?("s")
-          "#{name}es"
-        else
-          "#{name}s"
-        end
+      dao = if scope.is_a?(Array)
+        return [] if scope.empty?
+        name = underscore(demodulize(scope.first.class.name))
+        find_dao(name, parent, nil)
+      else
+        find_dao(assoc_name, parent, scope)
       end
 
-      process_block(assoc_index, __opts[:autoload_children], __opts[:to_dto], dao_name, &block) if block_given?
+      process_block(assoc_index, __opts[:autoload_children], __opts[:to_dto], dao, &block) if block_given?
 
       list
     end
@@ -75,7 +71,7 @@ module ReeDao
       case type
       when :belongs_to
         one_to_one(
-          parent_dao_name,
+          parent_dao,
           assoc_name,
           list,
           scope: __opts[:scope],
@@ -86,7 +82,7 @@ module ReeDao
         )
       when :has_one
         one_to_one(
-          parent_dao_name,
+          parent_dao,
           assoc_name,
           list,
           scope: __opts[:scope],
@@ -98,7 +94,7 @@ module ReeDao
         )
       when :has_many
         one_to_many(
-          parent_dao_name,
+          parent_dao,
           assoc_name,
           list,
           scope: __opts[:scope],
@@ -110,8 +106,8 @@ module ReeDao
       end
     end
 
-    contract(Or[Hash, Array], Bool, Nilor[Proc], Symbol, Block => Any)
-    def process_block(assoc, autoload_children, to_dto, parent_dao_name, &block)
+    contract(Or[Hash, Array], Bool, Nilor[Proc], Sequel::Dataset, Block => Any)
+    def process_block(assoc, autoload_children, to_dto, parent_dao, &block)
       assoc_list = assoc.is_a?(Array) ? assoc : assoc.values.flatten
 
       if to_dto
@@ -124,13 +120,12 @@ module ReeDao
         parent.agg_caller,
         assoc_list,
         parent.local_vars,
-        parent_dao_name,
+        parent_dao,
         autoload_children,
         **global_opts
       )
-      parent_dao = find_dao(parent_dao_name, parent.agg_caller)
 
-      if dao_in_transaction?(parent_dao) || ReeDao::Associations.sync_mode?
+      if parent_dao.db.in_transaction? || ReeDao::Associations.sync_mode?
         associations.instance_exec(assoc_list, &block)
       else
         threads = associations.instance_exec(assoc_list, &block)
@@ -150,7 +145,7 @@ module ReeDao
     end
 
     contract(
-      Symbol,
+      Sequel::Dataset,
       Symbol,
       Array,
       Kwargs[
@@ -162,7 +157,7 @@ module ReeDao
         reverse: Bool
       ] => Or[Hash, Array]
     )
-    def one_to_one(parent_assoc_name, assoc_name, list, scope: nil, primary_key: :id, foreign_key: nil, setter: nil, to_dto: nil, reverse: true)
+    def one_to_one(parent_dao, assoc_name, list, scope: nil, primary_key: :id, foreign_key: nil, setter: nil, to_dto: nil, reverse: true)
       return {} if list.empty?
 
       primary_key ||= :id
@@ -175,7 +170,7 @@ module ReeDao
         if reverse
           # has_one
           if !foreign_key
-            foreign_key = "#{parent_assoc_name.to_s.gsub(/s$/,'')}_id".to_sym
+            foreign_key = "#{parent_dao.first_source_table.to_s.gsub(/s$/,'')}_id".to_sym
           end
 
           root_ids = list.map(&:id).uniq
@@ -211,7 +206,7 @@ module ReeDao
     end
 
     contract(
-      Symbol,
+      Sequel::Dataset,
       Symbol,
       Array,
       Kwargs[
@@ -222,7 +217,7 @@ module ReeDao
         to_dto: Nilor[Proc]
       ] => Or[Hash, Array]
     )
-    def one_to_many(parent_assoc_name, assoc_name, list, primary_key: nil, foreign_key: nil, scope: nil, setter: nil, to_dto: nil)
+    def one_to_many(parent_dao, assoc_name, list, primary_key: nil, foreign_key: nil, scope: nil, setter: nil, to_dto: nil)
       return {} if list.empty?
 
       primary_key ||= :id
@@ -233,7 +228,7 @@ module ReeDao
         assoc_dao = nil
         assoc_dao = find_dao(assoc_name, parent, scope)
 
-        foreign_key ||= "#{parent_assoc_name.to_s.gsub(/s$/, '')}_id".to_sym
+        foreign_key ||= "#{parent_dao.first_source_table.to_s.gsub(/s$/, '')}_id".to_sym
 
         root_ids = list.map(&:"#{primary_key}")
 

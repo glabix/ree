@@ -3,23 +3,23 @@ module ReeDao
     include Ree::LinkDSL
     include ReeDao::AssociationMethods
 
-    attr_reader :agg_caller, :list, :local_vars, :only, :except, :parent_dao_name, :autoload_children, :global_opts
+    attr_reader :agg_caller, :list, :local_vars, :only, :except, :parent_dao, :autoload_children, :global_opts
 
-    def initialize(agg_caller, list, local_vars, parent_dao_name, autoload_children = false, **opts)
+    def initialize(agg_caller, list, local_vars, parent_dao, autoload_children = false, **opts)
       @agg_caller = agg_caller
       @list = list
       @local_vars = local_vars
       @global_opts = opts || {}
       @only = opts[:only] if opts[:only]
       @except = opts[:except] if opts[:except]
-      @parent_dao_name = parent_dao_name
+      @parent_dao = parent_dao
       @autoload_children = autoload_children
 
       if @only && @except
         shared_keys = @only.intersection(@except)
 
         if shared_keys.size > 0
-          raise ArgumentError.new("you can't use both :only and :except for #{shared_keys.map { "\"#{_1}\"" }.join(", ")} keys") 
+          raise ArgumentError.new("you can't use both :only and :except for #{shared_keys.map { "\"#{_1}\"" }.join(", ")} keys")
         end
       end
 
@@ -87,12 +87,10 @@ module ReeDao
       Optblock => Any
     )
     def association(assoc_type, assoc_name, __opts, &block)
-      parent_dao = find_dao(parent_dao_name, agg_caller)
-
-      if dao_in_transaction?(parent_dao) || self.class.sync_mode?
+      if parent_dao.db.in_transaction? || self.class.sync_mode?
         return if association_is_not_included?(assoc_name) || list.empty?
 
-        association = Association.new(self, parent_dao_name, list, **global_opts)
+        association = Association.new(self, parent_dao, list, **global_opts)
 
         if assoc_type == :field
           association.handle_field(assoc_name, __opts)
@@ -104,7 +102,7 @@ module ReeDao
           return { association_threads: @assoc_threads, field_threads: @field_threads }
         end
 
-        association = Association.new(self, parent_dao_name, list, **global_opts)
+        association = Association.new(self, parent_dao, list, **global_opts)
 
         if assoc_type == :field
           field_proc = __opts

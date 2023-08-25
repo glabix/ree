@@ -18,7 +18,7 @@ RSpec.describe :agg do
     connection.drop_table(:user_passports, cascade: true) if connection.table_exists?(:user_passports)
     connection.drop_table(:books, cascade: true) if connection.table_exists?(:books)
     connection.drop_table(:chapters, cascade: true) if connection.table_exists?(:chapters)
-    connection.drop_table(:authors, cascade: true) if connection.table_exists?(:authors)
+    connection.drop_table(:avtorki, cascade: true) if connection.table_exists?(:avtorki)
     connection.drop_table(:reviews, cascade: true) if connection.table_exists?(:reviews)
     connection.drop_table(:review_authors, cascade: true) if connection.table_exists?(:review_authors)
 
@@ -71,7 +71,7 @@ RSpec.describe :agg do
       column :name, 'varchar(256)'
     end
 
-    connection.create_table :authors do
+    connection.create_table :avtorki do
       primary_key :id
 
       foreign_key :book_id, :books, null: false, on_delete: :cascade
@@ -88,7 +88,7 @@ RSpec.describe :agg do
 
     aggregate :agg_users do
       link :users, from: :ree_dao_agg_test
-      link :organizations, from: :ree_dao_agg_test
+      link :organizations_dao, from: :ree_dao_agg_test
       link :user_passports, from: :ree_dao_agg_test
       link :books, from: :ree_dao_agg_test
       link :chapters, from: :ree_dao_agg_test
@@ -160,7 +160,7 @@ RSpec.describe :agg do
       link :books, from: :ree_dao_agg_test
       link :authors, from: :ree_dao_agg_test
       link :chapters, from: :ree_dao_agg_test
-      link :organizations, from: :ree_dao_agg_test
+      link :organizations_dao, from: :ree_dao_agg_test
       link :agg, from: :ree_dao
     end
 
@@ -268,7 +268,7 @@ RSpec.describe :agg do
 
     aggregate :agg_users_block_test do
       link :users, from: :ree_dao_agg_test
-      link :organizations, from: :ree_dao_agg_test
+      link :organizations_dao, from: :ree_dao_agg_test
       link :books, from: :ree_dao_agg_test
       link :agg, from: :ree_dao
     end
@@ -297,7 +297,7 @@ RSpec.describe :agg do
 
     aggregate :agg_users_scope_method_test do
       link :users, from: :ree_dao_agg_test
-      link :organizations, from: :ree_dao_agg_test
+      link :organizations_dao, from: :ree_dao_agg_test
       link :books, from: :ree_dao_agg_test
       link :agg, from: :ree_dao
     end
@@ -345,7 +345,7 @@ RSpec.describe :agg do
 
     aggregate :agg_users_without_dao do
       link :users, from: :ree_dao_agg_test
-      link :organizations, from: :ree_dao_agg_test
+      link :organizations_dao, from: :ree_dao_agg_test
       link :books, from: :ree_dao_agg_test
       link :agg, from: :ree_dao
     end
@@ -362,7 +362,7 @@ RSpec.describe :agg do
 
     aggregate :agg_users_only_except_keys do
       link :users, from: :ree_dao_agg_test
-      link :organizations, from: :ree_dao_agg_test
+      link :organizations_dao, from: :ree_dao_agg_test
       link :books, from: :ree_dao_agg_test
       link :agg, from: :ree_dao
     end
@@ -384,7 +384,7 @@ RSpec.describe :agg do
   let(:agg_users_with_dto) { ReeDaoAggTest::AggUsersWithDto.new }
   let(:agg_users_only_dataset) { ReeDaoAggTest::AggUsersOnlyDataset.new }
   let(:user_agg_only_except_keys) { ReeDaoAggTest::AggUsersOnlyExceptCase.new }
-  let(:organizations) { ReeDaoAggTest::Organizations.new }
+  let(:organizations) { ReeDaoAggTest::OrganizationsDao.new }
   let(:users) { ReeDaoAggTest::Users.new }
   let(:user_passports) { ReeDaoAggTest::UserPassports.new }
   let(:books) { ReeDaoAggTest::Books.new }

@@ -16,8 +16,8 @@
       "args": [
         {
           "arg": "dao",
-          "arg_type": "opt",
-          "type": "Nilor[PackageName::DaoName::Dao: \"SELECT * FROM `table`\"]"
+          "arg_type": "req",
+          "type": "PackageName::DaoName::Dao: \"SELECT * FROM `table`\""
         },
         {
           "arg": "ids_or_scope",
@@ -38,21 +38,6 @@
     }
   ],
   "links": [
-    {
-      "target": "demodulize",
-      "package_name": "ree_string",
-      "as": "demodulize",
-      "imports": [
 
-      ]
-    },
-    {
-      "target": "underscore",
-      "package_name": "ree_string",
-      "as": "underscore",
-      "imports": [
-
-      ]
-    }
   ]
 }
