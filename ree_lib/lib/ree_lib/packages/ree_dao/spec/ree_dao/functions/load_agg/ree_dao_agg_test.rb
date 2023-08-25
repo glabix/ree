@@ -179,7 +179,7 @@ class ReeDaoAggTest::Organization
     id: Nilor[Integer],
     name: String
   )
-  
+
   contract(Array[ReeDaoAggTest::User] => nil)
   def set_users(users)
     @users = users; nil
@@ -354,10 +354,10 @@ class ReeDaoAggTest::Users
   filter :by_name, -> (name) { where(name: name) }
 end
 
-class ReeDaoAggTest::Organizations
+class ReeDaoAggTest::OrganizationsDao
   include ReeDao::DSL
 
-  dao :organizations do
+  dao :organizations_dao do
     link :db
   end
 
@@ -538,7 +538,7 @@ class ReeDaoAggTest::Authors
     link :db
   end
 
-  table :authors
+  table :avtorki
 
   schema ReeDaoAggTest::Author do
     integer :id, null: true

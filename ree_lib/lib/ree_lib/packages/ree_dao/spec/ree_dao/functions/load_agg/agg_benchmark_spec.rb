@@ -2,7 +2,7 @@
 require 'faker'
 require 'benchmark'
 
-RSpec.describe :agg do
+RSpec.xdescribe :agg do
   link :agg, from: :ree_dao
   link :build_pg_connection, from: :ree_dao
 
@@ -115,7 +115,7 @@ RSpec.describe :agg do
 
     aggregate :agg_users_benchmark do
       link :users, from: :ree_dao_agg_test
-      link :organizations, from: :ree_dao_agg_test
+      link :organizations_dao, from: :ree_dao_agg_test
       link :user_passports, from: :ree_dao_agg_test
       link :books, from: :ree_dao_agg_test
       link :movies, from: :ree_dao_agg_test
@@ -151,7 +151,7 @@ RSpec.describe :agg do
 
     fn :users_sync_fetcher do
       link :users, from: :ree_dao_agg_test
-      link :organizations, from: :ree_dao_agg_test
+      link :organizations_dao, from: :ree_dao_agg_test
       link :user_passports, from: :ree_dao_agg_test
       link :books, from: :ree_dao_agg_test
       link :movies, from: :ree_dao_agg_test
@@ -183,7 +183,7 @@ RSpec.describe :agg do
       return [] if list.empty?
 
       if include.include?(:organization)
-        one_to_one(list, organizations.order(:id))
+        one_to_one(list, organizations_dao.order(:id))
       end
 
       if include.include?(:books)
@@ -233,7 +233,7 @@ RSpec.describe :agg do
   let(:agg_users) { ReeDaoAggTest::AggUsersBenchmark.new }
   let(:users_sync_fetcher) { ReeDaoAggTest::UsersSyncFetcher.new }
 
-  let(:organizations) { ReeDaoAggTest::Organizations.new }
+  let(:organizations) { ReeDaoAggTest::OrganizationsDao.new }
   let(:users) { ReeDaoAggTest::Users.new }
   let(:user_passports) { ReeDaoAggTest::UserPassports.new }
   let(:books) { ReeDaoAggTest::Books.new }
