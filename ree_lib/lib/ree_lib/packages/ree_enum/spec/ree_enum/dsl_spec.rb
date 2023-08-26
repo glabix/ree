@@ -32,9 +32,18 @@ RSpec.describe ReeEnum::DSL do
 
         enum :types
 
-        val :account, 0
+        val :account
 
         register_as_mapper_type
+      end
+
+      class Reflexives
+        include ReeEnum::DSL
+
+        enum :reflexives
+
+        val :self, method: :myself
+        val :yourself
       end
 
       class TestMapper
@@ -75,11 +84,11 @@ RSpec.describe ReeEnum::DSL do
       expect(o.first).to eq(0)
       expect(o.second).to eq(:second)
       expect(o.second).to eq(1)
-      expect(o.by_value(:first)).to eq(o.first)
-      expect(o.by_value(:second)).to eq(o.second)
-      expect(o.by_number(0)).to eq(o.first)
-      expect(o.by_number(1)).to eq(o.second)
-      expect(o.all).to eq([o.first, o.second])
+      expect(o.get_values.by_value(:first)).to eq(o.first)
+      expect(o.get_values.by_value(:second)).to eq(o.second)
+      expect(o.get_values.by_mapped_value(0)).to eq(o.first)
+      expect(o.get_values.by_mapped_value(1)).to eq(o.second)
+      expect(o.get_values.to_a).to eq([o.first, o.second])
     end
 
     expect {
@@ -146,18 +155,20 @@ RSpec.describe ReeEnum::DSL do
     ).to eq(
       {
         state: 0,
-        type: 0
+        type: "account"
       }
     )
 
     dto = mapper.db_load({
       state: 0,
-      type: 0,
+      type: "account",
     })
 
     expect(dto.state).to eq(TestReeEnum::States.first)
     expect(dto.state).to be_a(ReeEnum::Value)
     expect(dto.type).to eq(TestReeEnum::Types.account)
     expect(dto.type).to be_a(ReeEnum::Value)
+
+    expect(TestReeEnum::Reflexives.myself).to eq(:self)
   }
 end
