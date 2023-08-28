@@ -1,21 +1,24 @@
 # frozen_string_literal  = true
 
 class Ree::ImportDsl
+  def initialize
+    setup_removed_constants
+  end
+
   def execute(klass, proc)
-    self.class.instance_exec(&proc)
+    class_constant = self.class.instance_exec(&proc)
+
+    [
+      extract_constants(class_constant),
+      get_removed_constants
+    ]
   rescue Ree::ImportDsl::UnlinkConstError => e
-    const_removed = remove_or_assign_const(klass, e.const)
-
-    retry if const_removed
+    retry_after = remove_or_assign_const(klass, e.const)
+    retry if retry_after
   rescue NoMethodError => e
-    if e.name == :&
-      const_removed = remove_or_assign_const(klass, e.receiver)
-
-      if const_removed
-        retry
-      else
-        raise Ree::Error.new("'#{e.receiver}' already linked or defined in '#{klass}'", :invalid_dsl_usage)
-      end
+    if e.name == :& || e.name == :as
+      retry_after = remove_or_assign_const(klass, e.receiver)
+      retry if retry_after
     else
       raise e
     end
@@ -25,6 +28,27 @@ class Ree::ImportDsl
       .eval("#{e.name} = Ree::ImportDsl::ClassConstant.new('#{e.name}')")
 
     retry
+  end
+
+  private def extract_constants(class_constant)
+    [class_constant] + class_constant.constants
+  end
+
+  private def setup_removed_constants
+    self.class.instance_variable_set(:@removed_constants, [])
+  end
+
+  private def get_removed_constants
+    self.class.instance_variable_get(:@removed_constants)
+  end
+
+  class RemovedConstant
+    attr_reader :name, :const
+
+    def initialize(name, const)
+      @name = name
+      @const = const
+    end
   end
 
   class UnlinkConstError < StandardError
@@ -92,11 +116,15 @@ class Ree::ImportDsl
       if constant.is_a?(Class) || constant.is_a?(Module)
         if (const.is_a?(Class) || const.is_a?(Module)) && const.name == constant.name
           klass.send(:remove_const, const_sym)
+          store_removed_constant(const_sym, constant)
+
           retry_after = true
           break
         end
       elsif const == constant
         klass.send(:remove_const, const_sym)
+        store_removed_constant(const_sym, constant)
+
         retry_after = true
         break
       end
@@ -121,6 +149,11 @@ class Ree::ImportDsl
   end
 
   private
+
+  def store_removed_constant(name, constant)
+    return if constant.is_a?(ClassConstant)
+    get_removed_constants << RemovedConstant.new(name, constant.dup)
+  end
 
   def parent_constant?(klass, const_name)
     modules = klass.to_s.split("::")[0..-2]

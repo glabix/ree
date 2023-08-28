@@ -1,9 +1,17 @@
 class Accounts::RegisterAccountCmd
   include Ree::FnDSL
 
+  class UserStates
+    class << self
+      def value
+        :user_states
+      end
+    end
+  end
+
   fn :register_account_cmd do
     singleton
-    
+
     link :transaction
     link :build_user, import: -> { User & UserStates.as(States) }
     link :users_repo
@@ -26,7 +34,7 @@ class Accounts::RegisterAccountCmd
 
       # example of usage of linked object from gem package
       except(attrs, :test)
-      
+
       user = build_user(name, email)
       users_repo.put(user)
 
@@ -46,3 +54,5 @@ class Accounts::RegisterAccountCmd
     end
   end
 end
+
+

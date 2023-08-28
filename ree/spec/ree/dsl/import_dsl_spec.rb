@@ -21,8 +21,7 @@ RSpec.describe Ree::ImportDsl do
         end
       end
 
-      result = TestModule1::TestClass.result
-      list = [result] + result.constants
+      list, removed_consts = TestModule1::TestClass.result
 
       expect(list.map(&:name)).to eq(['MissingClass', 'ExistingClass', 'FOO', 'EXISTING_CONST'])
     }
@@ -49,8 +48,7 @@ RSpec.describe Ree::ImportDsl do
         end
       end
 
-      result = TestModule5::TestClass.result
-      list = [result] + result.constants
+      list, removed_consts = TestModule5::TestClass.result
 
       expect(list.map(&:name)).to eq(['MissingClass', 'HTTP', 'FOO', 'EXISTING_CONST'])
     }
@@ -76,8 +74,7 @@ RSpec.describe Ree::ImportDsl do
         end
       end
 
-      result = TestModule2::TestClass.result
-      list = [result] + result.constants
+      list, removed_consts = TestModule2::TestClass.result
 
       expect(list.map(&:name)).to eq(['ExistingClass', 'MissingClass', 'EXISTING_CONST', 'FOO'])
     }
@@ -103,8 +100,7 @@ RSpec.describe Ree::ImportDsl do
         end
       end
 
-      result = TestModule3::TestClass.result
-      list = [result] + result.constants
+      list, removed_consts = TestModule3::TestClass.result
 
       expect(list.map(&:name)).to eq(['FOO', 'MissingClass'])
     }
@@ -130,10 +126,37 @@ RSpec.describe Ree::ImportDsl do
         end
       end
 
-      result = TestModule4::TestClass.result
-      list = [result] + result.constants
+      list, removed_consts = TestModule4::TestClass.result
 
       expect(list.map(&:name)).to eq(['EXISTING_CONST', 'FOO', 'MissingClass'])
     }
   end
+
+  it {
+    module TestModule5
+      class TestClass
+        ExistingClass = Class.new
+        EXISTING_CONST = 'const'
+
+        class << self
+          def result
+            Ree::ImportDsl.new.execute(
+              self,
+              Proc.new {
+                EXISTING_CONST & FOO.as(FOO_CONST) & MissingClass.as(Missing) & ExistingClass.as(NewClass)
+              }
+            )
+          end
+        end
+      end
+    end
+
+    list, removed_consts = TestModule5::TestClass.result
+
+    expect(list.map { _1.get_as&.name || _1.name } ).to eq(['EXISTING_CONST', 'FOO_CONST', 'Missing', 'NewClass'])
+
+    expect(removed_consts.size).to eq(2)
+    expect(removed_consts.first.name).to eq(:EXISTING_CONST)
+    expect(removed_consts.last.name).to eq(:ExistingClass)
+  }
 end

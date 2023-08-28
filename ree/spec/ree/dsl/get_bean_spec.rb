@@ -51,5 +51,6 @@ RSpec.describe Accounts::RegisterAccountCmd do
     expect(user.send(:user_states)).to be_a(Accounts::UserStates)
     expect(user.send(:function)).to eq(:function)
     expect(user.class::Entity).to eq(Accounts::Entity)
+    expect(Accounts::RegisterAccountCmd::UserStates.value).to eq(:user_states)
   }
 end
