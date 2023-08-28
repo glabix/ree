@@ -130,8 +130,7 @@ RSpec.describe :agg do
     end
 
     def some_method(list)
-      # puts list.map(&:id)
-      # puts list.map { _1.class.name }
+      list.each { _1.some_field = :some_value if _1.respond_to?(:some_field=) }
     end
 
     def passport_opts
@@ -978,4 +977,20 @@ RSpec.describe :agg do
     res = agg(users, users.where(organization_id: organization.id))
     expect(res.count).to eq(2)
   }
+
+  context "when sync mode enabled" do
+    it {
+      organization = ReeDaoAggTest::Organization.new(name: "Test Org")
+      organizations.put(organization)
+      user = ReeDaoAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+      users.put(user)
+
+      allow(user).to receive(:some_field=)
+      expect(user).to receive(:some_field=).with(:some_value)
+
+      ENV['REE_DAO_SYNC_ASSOCIATIONS'] = "true"
+      res = agg_users.([user])
+      ENV.delete('REE_DAO_SYNC_ASSOCIATIONS')
+    }
+  end
 end

@@ -93,7 +93,7 @@ module ReeDao
         association = Association.new(self, parent_dao, list, **global_opts)
 
         if assoc_type == :field
-          association.handle_field(assoc_name, __opts)
+          association.handle_field(__opts)
         else
           association.load(assoc_type, assoc_name, **get_assoc_opts(__opts), &block)
         end
