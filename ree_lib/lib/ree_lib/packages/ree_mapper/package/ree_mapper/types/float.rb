@@ -12,8 +12,8 @@ class ReeMapper::Float < ReeMapper::AbstractType
 
   contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Float).throws(ReeMapper::CoercionError, ReeMapper::TypeError)
   def cast(value, name:, role: nil)
-    if value.is_a?(Float)
-      value
+    if value.is_a?(Numeric)
+      value.to_f
     elsif value.is_a?(String)
       begin
         Float(value)

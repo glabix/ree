@@ -32,7 +32,11 @@ RSpec.describe 'ReeMapper::Float' do
     }
 
     it {
-      expect(mapper.db_load({ float: BigDecimal("1.1") })).to eq({ float: 1.1 })
+      expect(mapper.cast({ float: BigDecimal("1.1") })).to eq({ float: 1.1 })
+    }
+
+    it {
+      expect(mapper.cast({ float: 1 })).to eq({ float: 1.0 })
     }
 
     it {
@@ -40,7 +44,7 @@ RSpec.describe 'ReeMapper::Float' do
     }
 
     it {
-      expect { mapper.db_load({ float: '1.1a' }) }.to raise_error(ReeMapper::CoercionError, '`float` is invalid float')
+      expect { mapper.cast({ float: '1.1a' }) }.to raise_error(ReeMapper::CoercionError, '`float` is invalid float')
     }
 
     it {
@@ -95,6 +99,10 @@ RSpec.describe 'ReeMapper::Float' do
 
     it {
       expect(mapper.db_load({ float: BigDecimal("1.1") })).to eq({ float: 1.1 })
+    }
+
+    it {
+      expect(mapper.db_load({ float: 1 })).to eq({ float: 1.0 })
     }
 
     it {
