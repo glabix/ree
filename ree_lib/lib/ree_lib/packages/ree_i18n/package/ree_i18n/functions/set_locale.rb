@@ -5,8 +5,8 @@ class ReeI18n::SetLocale
 
   fn :set_locale
 
-  contract(Symbol => Symbol).throws(I18n::InvalidLocale)
+  contract(Or[Symbol, String] => Symbol).throws(I18n::InvalidLocale)
   def call(locale)
-    I18n.locale = locale
+    I18n.locale = locale.to_sym
   end
 end
