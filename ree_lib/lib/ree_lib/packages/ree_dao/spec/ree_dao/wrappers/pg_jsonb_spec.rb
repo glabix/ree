@@ -29,6 +29,7 @@ RSpec.describe 'ReeDao::PgJsonb' do
       pg_jsonb? :number, integer
       pg_jsonb? :boolean, bool
       pg_jsonb? :any, any
+      pg_jsonb? :rational, rational
     end
   }
 
@@ -39,13 +40,15 @@ RSpec.describe 'ReeDao::PgJsonb' do
         numbers: [1, 2],
         figures: [{ coords: 'x=1,y=1' }],
         number: 1,
-        boolean: true
+        boolean: true,
+        rational: Rational("1/3"),
       })).to eq({
         payload: { key: 'key' },
         numbers: [1, 2],
         figures: [{ coords: 'x=1,y=1' }],
         number: 1,
-        boolean: true
+        boolean: true,
+        rational: "1/3",
       })
     }
 
@@ -69,13 +72,15 @@ RSpec.describe 'ReeDao::PgJsonb' do
         numbers: Sequel::Postgres::JSONBArray.new([1, 2]),
         figures: Sequel::Postgres::JSONBArray.new([{ coords: 'x=1,y=1' }]),
         number: 1,
-        boolean: true
+        boolean: true,
+        rational: "1/3"
       })).to eq({
         payload: { key: 'key' },
         numbers: [1, 2],
         figures: [{ coords: 'x=1,y=1' }],
         number: 1,
-        boolean: true
+        boolean: true,
+        rational: Rational("1/3"),
       })
     }
 
