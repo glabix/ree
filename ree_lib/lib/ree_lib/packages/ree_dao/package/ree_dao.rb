@@ -26,3 +26,11 @@ module ReeDao
     ENV.has_key?("REE_DAO_SYNC_ASSOCIATIONS") && ENV["REE_DAO_SYNC_ASSOCIATIONS"] == "true"
   end
 end
+
+# ReeEnum::Value#sql_literal is used to properly serialize enum values
+# for database queries
+class ReeEnum::Value
+  def sql_literal(*)
+    mapped_value.to_s
+  end
+end

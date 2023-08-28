@@ -16,10 +16,6 @@ class ReeEnum::Value
     value
   end
 
-  def sql_literal(*)
-    mapped_value.to_s
-  end
-
   def as_json(*args)
     to_s
   end
