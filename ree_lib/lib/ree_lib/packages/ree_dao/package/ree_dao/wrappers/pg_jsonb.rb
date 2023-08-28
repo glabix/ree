@@ -48,7 +48,8 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
       Float,
       String,
       Bool,
-      NilClass
+      NilClass,
+      Rational,
     ]
   ).throws(ReeMapper::TypeError)
   def db_load(value, name:, role: nil, fields_filters: [])

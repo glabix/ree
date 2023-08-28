@@ -34,6 +34,7 @@ module ReeMapper
   require_relative 'ree_mapper/types/float'
   require_relative 'ree_mapper/types/integer'
   require_relative 'ree_mapper/types/string'
+  require_relative 'ree_mapper/types/rational'
 
   require_relative 'ree_mapper/strategy_outputs/strategy_output'
   require_relative 'ree_mapper/strategy_outputs/object_output'
