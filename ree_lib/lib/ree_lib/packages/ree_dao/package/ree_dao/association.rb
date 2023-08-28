@@ -3,14 +3,12 @@ module ReeDao
     include Ree::LinkDSL
     include ReeDao::AssociationMethods
 
-    link :demodulize, from: :ree_string
     link :group_by, from: :ree_array
     link :index_by, from: :ree_array
-    link :underscore, from: :ree_string
 
     attr_reader :parent, :parent_dao, :list, :global_opts
 
-    contract(ReeDao::Associations, Sequel::Dataset, Array, Ksplat[RestKeys => Any] => Any)
+    contract(ReeDao::Associations, Nilor[Sequel::Dataset], Array, Ksplat[RestKeys => Any] => Any)
     def initialize(parent, parent_dao, list, **global_opts)
       @parent = parent
       @parent_dao = parent_dao
@@ -51,8 +49,7 @@ module ReeDao
 
       dao = if scope.is_a?(Array)
         return [] if scope.empty?
-        name = underscore(demodulize(scope.first.class.name))
-        find_dao(name, parent, nil)
+        nil
       else
         find_dao(assoc_name, parent, scope)
       end
@@ -125,7 +122,7 @@ module ReeDao
         **global_opts
       )
 
-      if parent_dao.db.in_transaction? || ReeDao::Associations.sync_mode?
+      if parent_dao.nil? || parent_dao.db.in_transaction? || ReeDao::Associations.sync_mode?
         associations.instance_exec(assoc_list, &block)
       else
         threads = associations.instance_exec(assoc_list, &block)
@@ -145,7 +142,7 @@ module ReeDao
     end
 
     contract(
-      Sequel::Dataset,
+      Nilor[Sequel::Dataset],
       Symbol,
       Array,
       Kwargs[
@@ -170,7 +167,11 @@ module ReeDao
         if reverse
           # has_one
           if !foreign_key
-            foreign_key = "#{parent_dao.first_source_table.to_s.gsub(/s$/,'')}_id".to_sym
+            if parent_dao.nil?
+              raise ArgumentError.new("foreign_key should be provided for :#{assoc_name} association")
+            end
+
+            foreign_key = foreign_key_from_dao(parent_dao)
           end
 
           root_ids = list.map(&:id).uniq
@@ -206,7 +207,7 @@ module ReeDao
     end
 
     contract(
-      Sequel::Dataset,
+      Nilor[Sequel::Dataset],
       Symbol,
       Array,
       Kwargs[
@@ -228,7 +229,13 @@ module ReeDao
         assoc_dao = nil
         assoc_dao = find_dao(assoc_name, parent, scope)
 
-        foreign_key ||= "#{parent_dao.first_source_table.to_s.gsub(/s$/, '')}_id".to_sym
+        if !foreign_key
+          if parent_dao.nil?
+            raise ArgumentError.new("foreign_key should be provided for :#{assoc_name} association")
+          end
+
+          foreign_key = foreign_key_from_dao(parent_dao)
+        end
 
         root_ids = list.map(&:"#{primary_key}")
 
@@ -342,6 +349,12 @@ module ReeDao
       return super if !parent.agg_caller.private_methods(false).include?(method)
 
       parent.agg_caller.send(method, *args, &block)
+    end
+
+    private
+
+    def foreign_key_from_dao(dao)
+      "#{dao.first_source_table.to_s.gsub(/s$/, '')}_id".to_sym
     end
   end
 end

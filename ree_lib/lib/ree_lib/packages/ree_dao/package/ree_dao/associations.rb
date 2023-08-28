@@ -87,7 +87,7 @@ module ReeDao
       Optblock => Any
     )
     def association(assoc_type, assoc_name, __opts, &block)
-      if parent_dao.db.in_transaction? || self.class.sync_mode?
+      if parent_dao.nil? || parent_dao.db.in_transaction? || self.class.sync_mode?
         return if association_is_not_included?(assoc_name) || list.empty?
 
         association = Association.new(self, parent_dao, list, **global_opts)
