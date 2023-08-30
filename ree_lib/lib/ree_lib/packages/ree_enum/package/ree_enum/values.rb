@@ -11,6 +11,11 @@ class ReeEnum::Values
     @collection_by_mapped_value = {}
   end
 
+  def value_type
+    raise ArgumentError, "value_type is not defined" unless defined?(@value_type)
+    @value_type
+  end
+
   def to_a
     @collection
   end
@@ -19,12 +24,13 @@ class ReeEnum::Values
     @collection.each(&)
   end
 
-  contract(Or[Symbol, String] => Nilor[ReeEnum::Value])
+  contract(Or[Symbol, String, Integer] => Nilor[ReeEnum::Value])
   def by_value(value)
-    @collection_by_value[value.to_s]
+    value = value.to_s if value.is_a?(Symbol)
+    @collection_by_value[value]
   end
 
-  contract(Or[Symbol, String] => ReeEnum::Value).throws(ArgumentError)
+  contract(Or[Symbol, String, Integer] => ReeEnum::Value).throws(ArgumentError)
   def by_value!(value)
     by_value(value) ||
       (raise ArgumentError.new("constant for value #{value.inspect} is not found in #{self.inspect}"))
@@ -45,8 +51,14 @@ class ReeEnum::Values
     @collection.map(&:inspect).inspect
   end
 
-  contract(String, Or[Integer, String], Symbol => ReeEnum::Value)
+  contract(Or[String, Integer], Or[Integer, String], Symbol => ReeEnum::Value)
   def add(value, mapped_value, method)
+    if @value_type.nil?
+      @value_type = value.class
+    elsif @value_type != value.class
+      raise ArgumentError, "#{@klass}: value types should be the same for all enum values"
+    end
+
     if @collection.any? { _1.method == method }
       raise ArgumentError, "#{@klass}: method #{method.inspect} was already added"
     end

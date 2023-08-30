@@ -1,4 +1,8 @@
+# frozen_string_literal: true
 package_require 'ree_swagger/functions/register_type'
+
+require_relative 'integer_value_enum_mapper'
+require_relative 'string_value_enum_mapper'
 
 module ReeEnum
   module DSL
@@ -27,100 +31,32 @@ module ReeEnum
       end
 
       def type_for_mapper
-        @type_for_mapper ||= begin
-          klass = Class.new(ReeMapper::AbstractType) do
-            def initialize(enum)
-              @enum = enum
-            end
+        return @type_for_mapper if defined? @type_for_mapper
 
-            contract(
-              ReeEnum::Value,
-              Kwargs[
-                name: String,
-                role: Nilor[Symbol, ArrayOf[Symbol]]
-              ] => String
-            )
-            def serialize(value, name:, role: nil)
-              value.to_s
-            end
+        value_type = get_values.value_type
 
-            contract(
-              Any,
-              Kwargs[
-                name: String,
-                role: Nilor[Symbol, ArrayOf[Symbol]]
-              ] => ReeEnum::Value
-            ).throws(ReeMapper::CoercionError)
-            def cast(value, name:, role: nil)
-              enum_value = if value.is_a?(String)
-                @enum.get_values.by_value(value)
-              elsif value.is_a?(ReeEnum::Value)
-                @enum.get_values.each.find { _1 == value }
-              end
-
-              if enum_value.nil?
-                raise ReeMapper::CoercionError, "`#{name}` should be one of #{enum_inspection}"
-              end
-
-              enum_value
-            end
-
-            contract(
-              ReeEnum::Value,
-              Kwargs[
-                name: String,
-                role: Nilor[Symbol, ArrayOf[Symbol]]
-              ] => Or[Integer, String]
-            )
-            def db_dump(value, name:, role: nil)
-              value.mapped_value
-            end
-
-            contract(
-              Or[Integer, String],
-              Kwargs[
-                name: String,
-                role: Nilor[Symbol, ArrayOf[Symbol]]
-              ] => ReeEnum::Value
-            ).throws(ReeMapper::CoercionError)
-            def db_load(value, name:, role: nil)
-              enum_val = @enum.get_values.by_mapped_value(value)
-
-              if !enum_val
-                raise ReeMapper::CoercionError, "`#{name}` should be one of #{enum_inspection}"
-              end
-
-              enum_val
-            end
-
-            private
-
-            def enum_inspection
-              @enum_inspect ||= truncate(@enum.get_values.each.map(&:to_s).inspect)
-            end
-
-            def truncate(str, limit = 180)
-              return str if str.length <= limit
-              "#{str[0..limit]}..."
-            end
-          end
-
-          klass.new(self)
+        klass = if value_type == String
+          StringValueEnumMapper
+        elsif value_type == Integer
+          IntegerValueEnumMapper
+        else
+          raise NotImplementedError, "value_type #{value_type} is not supported"
         end
+
+        @type_for_mapper = klass.new(self)
       end
 
       def register_as_swagger_type
         swagger_type_registrator = ReeSwagger::RegisterType.new
+
+        definition = swagger_definition
 
         [:casters, :serializers].each do |kind|
           swagger_type_registrator.call(
             kind,
             type_for_mapper.class,
             ->(*) {
-              {
-                type: 'string',
-                enum: get_values.each.map(&:to_s)
-              }
+              definition
             }
           )
         end
@@ -136,6 +72,23 @@ module ReeEnum
         mapper_factory.register_type(
           self.get_enum_name, type_for_mapper
         )
+      end
+
+      def swagger_definition
+        value_type = get_values.value_type
+
+        type = if value_type == String
+          "string"
+        elsif value_type == Integer
+          "integer"
+        else
+          raise NotImplementedError, "value_type #{value_type} is not supported"
+        end
+
+        {
+          type: type,
+          enum: get_values.each.map(&:value)
+        }
       end
     end
   end

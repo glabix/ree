@@ -29,8 +29,9 @@ module ReeEnum::Enumerable
       @values&.enum_name
     end
 
-    def val(value, mapped_value = value.to_s, method: value.to_sym)
-      value = value.to_s
+    def val(value, mapped_value = nil, method: value.to_s.to_sym)
+      value = value.to_s if value.is_a?(Symbol)
+      mapped_value ||= value
 
       if RESTRICTED_METHODS.include?(method)
         raise ArgumentError.new("#{method.inspect} is not allowed as enum method")
@@ -38,13 +39,15 @@ module ReeEnum::Enumerable
 
       enum_value = @values.add(value, mapped_value, method)
 
-      define_method(enum_value.method) do
-        get_values.by_value(enum_value.value)
-      end
+      class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
+        def #{method}
+          get_values.by_value(#{value.inspect}.freeze)
+        end
 
-      define_singleton_method(enum_value.method) do
-        get_values.by_value(enum_value.value)
-      end
+        def self.#{method}
+          get_values.by_value(#{value.inspect}.freeze)
+        end
+      RUBY
 
       enum_value
     end
