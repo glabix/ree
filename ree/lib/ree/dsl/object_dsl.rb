@@ -227,12 +227,14 @@ class Ree::ObjectDsl
       raise Ree::Error.new("Mount as should be one of #{MOUNT_AS.inspect}", :invalid_dsl_usage)
     end
 
-    object_name_from_path = if File.exist?(path) && !Ree.irb_mode?
-      File.basename(path, ".*").to_sym
-    end
+    if !Ree.irb_mode?
+      object_name_from_path = if File.exist?(path)
+        File.basename(path, ".*").to_sym
+      end
 
-    if !Ree.irb_mode? && object_name_from_path && object_name != object_name_from_path
-      raise Ree::Error.new("Object name does not correspond to a file name (#{object_name}, #{object_name_from_path}.rb). Fix object name or rename object file", :invalid_dsl_usage)
+      if object_name_from_path && object_name != object_name_from_path
+        raise Ree::Error.new("Object name does not correspond to a file name (#{object_name}, #{object_name_from_path}.rb). Fix object name or rename object file", :invalid_dsl_usage)
+      end
     end
 
     class_name = klass.to_s
