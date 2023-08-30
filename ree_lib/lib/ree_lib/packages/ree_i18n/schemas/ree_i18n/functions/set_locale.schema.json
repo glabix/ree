@@ -17,7 +17,7 @@
         {
           "arg": "locale",
           "arg_type": "req",
-          "type": "Symbol"
+          "type": "Or[Symbol, String]"
         }
       ]
     }
