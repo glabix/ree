@@ -6,14 +6,15 @@ class ReeHash::Slice
   fn :slice do
     link :build_filter_keys
     link 'ree_hash/contracts/hash_keys_contract', -> { HashKeysContract }
-    def_error { MissingKeyErr }
-    def_error { InvalidFilterKey }
   end
+
+  MissingKeyErr = Class.new(ArgumentError)
+  InvalidFilterKey = Class.new(ArgumentError)
 
   doc(<<~DOC)
     Replaces the hash with only the given keys.
     Returns a hash containing the removed key/value pairs.
-    
+
       hash = { a: 1, b: {e: 2, f: 1}, c: 3, d: 4 }
       slice(hash, [:a, :b])  # => {a: 1, b: 2}
       slice(hash, [:a, b: [:e]])  # => {a: 1, b: {e: 2}}

@@ -18,9 +18,9 @@ class Accounts::RegisterAccountCmd
     link :factory_users_repo
     link :welcome_email
     link :except, from: :hash_utils
-
-    def_error { ValidationErr }
   end
+
+  ValidationErr = Class.new(ArgumentError)
 
   doc("Register user and send welcome email")
   contract(String, String, SplatOf[Any], Kwargs[int: Integer, test: String], Ksplat[string?: String], Optblock => User).throws(ValidationErr)

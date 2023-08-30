@@ -3,9 +3,9 @@
 class ReeObject::ToHash
   include Ree::FnDSL
 
-  fn :to_hash do
-    def_error { RecursiveObjectErr }
-  end
+  fn :to_hash
+
+  RecursiveObjectErr = Class.new(ArgumentError)
 
   BASIC_TYPES = [
     Date, Time, Numeric, String, FalseClass, TrueClass, NilClass, Symbol,

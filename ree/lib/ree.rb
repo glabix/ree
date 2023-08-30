@@ -13,7 +13,6 @@ module Ree
   autoload :Contracts, 'ree/contracts'
   autoload :DomainError, 'ree/dsl/domain_error'
   autoload :Error, 'ree/error'
-  autoload :ErrorBuilder, 'ree/dsl/error_builder'
   autoload :ErrorDsl, 'ree/dsl/error_dsl'
   autoload :FnDSL, 'ree/fn_dsl'
   autoload :Gen, 'ree/gen'
@@ -261,18 +260,6 @@ module Ree
           write_object_schema(package.name, object.name)
         end
       end
-    end
-
-    def error_types
-      @error_types ||= []
-    end
-
-    def add_error_types(*args)
-      args.each do |arg|
-        check_arg(arg, :error, Symbol)
-      end
-
-      @error_types = (error_types + args).uniq
     end
   end
 end

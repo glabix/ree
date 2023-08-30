@@ -1,10 +1,3 @@
-
-Ree.add_error_types(
-  :invalid_param,
-  :not_found,
-  :validation
-)
-
 # Switch Ree.logger to debug level
 # Ree.set_logger_debug
 

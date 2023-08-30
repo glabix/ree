@@ -117,40 +117,6 @@ class Ree::ObjectDsl
     @object.set_freeze(flag)
   end
 
-  # @param [Nilor[Symbol]] code Global error code
-  # @param [Proc] proc Error DSL proc
-  def def_error(code = nil, &proc)
-    check_arg(code, :code, Symbol) if code
-
-    if !block_given?
-      raise_error("def_error should accept block with error class definition")
-    end
-
-    if code && !Ree.error_types.include?(code)
-      raise_error("Invalid error code :#{code}. Did you forget to setup it with Ree.add_error_types(*args)?")
-    end
-
-    class_name = begin
-      Ree::ErrorBuilder
-        .new(@packages_facade)
-        .build(
-          @object,
-          code,
-          &proc
-        )
-    rescue Ree::Error
-      raise_error("invalid def_error usage. Valid examples: def_error { InvalidDomainErr } or def_error(:validation) { EmailTakenErr['email taken'] }")
-    end
-
-    @object.add_const_list([class_name])
-
-    @object.errors.push(
-      Ree::ObjectError.new(
-        class_name
-      )
-    )
-  end
-
   # @param [String] path Relative package file path ('accounts/entities/user')
   # @param [Proc] proc Import constants proc
   def link_file(path, import_proc = nil)

@@ -50,7 +50,7 @@
       "package_name": "accounts",
       "as": "user_states",
       "imports": [
-        "UserStates"
+
       ]
     },
     {

@@ -2,15 +2,15 @@ class Accounts::BuildUser
   include Ree::FnDSL
 
   fn :build_user do
-    link :user_states, import: -> { UserStates }
-    link :users_repo
-    link :time, from: :clock
+    link :user_states
     link :raise_error, from: :errors
+    link :time, from: :clock
+    link :users_repo
     link 'accounts/entities/user', -> { User }
-
-    def_error(:not_found) { InvalidDomainErr }
-    def_error(:validation) { EmailTakenErr["email taken"] }
   end
+
+  InvalidDomainErr = Class.new(ArgumentError)
+  EmailTakenErr = Class.new(ArgumentError)
 
   ALLOWED_DOMAINS = 'google.com'
 
