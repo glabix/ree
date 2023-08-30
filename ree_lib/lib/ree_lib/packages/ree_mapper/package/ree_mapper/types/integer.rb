@@ -15,11 +15,11 @@ class ReeMapper::Integer < ReeMapper::AbstractType
     if value.is_a?(Integer)
       value
     elsif value.is_a?(String)
-      begin
-        Integer(value)
-      rescue ArgumentError => e
+      value = Integer(value, exception: false)
+      if value.nil?
         raise ReeMapper::CoercionError, "`#{name}` is invalid integer"
       end
+      value
     else
       raise ReeMapper::TypeError, "`#{name}` should be an integer"
     end

@@ -37,6 +37,17 @@ RSpec.describe ReeEnum::DSL do
         register_as_mapper_type
       end
 
+      class Numbers
+        include ReeEnum::DSL
+
+        enum :numbers
+
+        val 0, method: :zero
+        val 1, method: :one
+
+        register_as_mapper_type
+      end
+
       class Reflexives
         include ReeEnum::DSL
 
@@ -52,19 +63,22 @@ RSpec.describe ReeEnum::DSL do
         mapper :test_mapper do
           link :states
           link :types
+          link :numbers
         end
 
         class Dto
-          attr_reader :type, :state
-          def initialize(type, state)
+          attr_reader :type, :state, :number
+          def initialize(type, state, number)
             @type = type
             @state = state
+            @number = number
           end
         end
 
         build_mapper.use(:serialize).use(:cast).use(:db_dump).use(:db_load, dto: Dto) do
           types :type
           states :state
+          numbers :number
         end
       end
 
@@ -86,6 +100,8 @@ RSpec.describe ReeEnum::DSL do
       expect(o.second).to eq(1)
       expect(o.get_values.by_value(:first)).to eq(o.first)
       expect(o.get_values.by_value(:second)).to eq(o.second)
+      expect(o.get_values.by_value("first")).to eq(o.first)
+      expect(o.get_values.by_value("second")).to eq(o.second)
       expect(o.get_values.by_mapped_value(0)).to eq(o.first)
       expect(o.get_values.by_mapped_value(1)).to eq(o.second)
       expect(o.get_values.to_a).to eq([o.first, o.second])
@@ -108,11 +124,13 @@ RSpec.describe ReeEnum::DSL do
       mapper.serialize({
         state: TestReeEnum::States.first,
         type: TestReeEnum::Types.account,
+        number: TestReeEnum::Numbers.zero,
       })
     ).to eq(
       {
         state: 'first',
-        type: 'account'
+        type: 'account',
+        number: 0,
       }
     )
 
@@ -120,6 +138,7 @@ RSpec.describe ReeEnum::DSL do
       mapper.cast({
         state: 'first',
         type: 'invalid',
+        number: 0,
       })
       }.to raise_error(ReeMapper::CoercionError, '`type` should be one of ["account"]')
 
@@ -127,11 +146,13 @@ RSpec.describe ReeEnum::DSL do
       mapper.cast({
         state: 'first',
         type: 'account',
+        number: 0,
       })
     ).to eq(
       {
         state: TestReeEnum::States.first,
-        type: TestReeEnum::Types.account
+        type: TestReeEnum::Types.account,
+        number: TestReeEnum::Numbers.zero,
       }
     )
 
@@ -139,11 +160,27 @@ RSpec.describe ReeEnum::DSL do
       mapper.cast({
         state: TestReeEnum::States.first,
         type: TestReeEnum::Types.account,
+        number: TestReeEnum::Numbers.zero,
       })
     ).to eq(
       {
         state: TestReeEnum::States.first,
-        type: TestReeEnum::Types.account
+        type: TestReeEnum::Types.account,
+        number: TestReeEnum::Numbers.zero,
+      }
+    )
+
+    expect(
+      mapper.cast({
+        state: TestReeEnum::States.first,
+        type: TestReeEnum::Types.account,
+        number: TestReeEnum::Numbers.zero,
+      })
+    ).to eq(
+      {
+        state: "first",
+        type: "account",
+        number: 0,
       }
     )
 
@@ -151,23 +188,28 @@ RSpec.describe ReeEnum::DSL do
       mapper.db_dump({
         state: TestReeEnum::States.first,
         type: TestReeEnum::Types.account,
+        number: TestReeEnum::Numbers.zero,
       })
     ).to eq(
       {
         state: 0,
-        type: "account"
+        type: "account",
+        number: 0,
       }
     )
 
     dto = mapper.db_load({
       state: 0,
       type: "account",
+      number: 0,
     })
 
     expect(dto.state).to eq(TestReeEnum::States.first)
     expect(dto.state).to be_a(ReeEnum::Value)
     expect(dto.type).to eq(TestReeEnum::Types.account)
     expect(dto.type).to be_a(ReeEnum::Value)
+    expect(dto.number).to eq(TestReeEnum::Numbers.zero)
+    expect(dto.number).to be_a(ReeEnum::Value)
 
     expect(TestReeEnum::Reflexives.myself).to eq(:self)
   }
