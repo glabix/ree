@@ -57,13 +57,24 @@ RSpec.describe ReeEnum::DSL do
         val :yourself
       end
 
+      class ContentTypes
+        include ReeEnum::DSL
+
+        enum :content_types
+
+        val "video/mp4"
+        val "image/png"
+
+        register_as_mapper_type
+      end
+
       class TestMapper
         include ReeMapper::DSL
 
         mapper :test_mapper do
+          link :numbers
           link :states
           link :types
-          link :numbers
         end
 
         class Dto
@@ -212,5 +223,7 @@ RSpec.describe ReeEnum::DSL do
     expect(dto.number).to be_a(ReeEnum::Value)
 
     expect(TestReeEnum::Reflexives.myself).to eq(:self)
+
+    expect(TestReeEnum::ContentTypes.method_defined?(:"video/mp4")).to be_falsey
   }
 end

@@ -13,9 +13,15 @@ module ReeEnum::Enumerable
     include ReeEnum::Contractable
 
     RESTRICTED_METHODS = [
-      :setup_enum, :get_values, :get_enum_name,
-      :val, :self, :class, :alias
+      :setup_enum, :get_values, :get_enum_name, :val,
+      :__ENCODING__, :__LINE__, :__FILE__, :BEGIN, :END,
+      :alias, :and, :begin, :break, :case, :class, :def, :defined?,
+      :do, :else, :elsif, :end, :ensure, :false, :for, :if, :in,
+      :module, :next, :nil, :not, :or, :redo, :rescue, :retry, :return,
+      :self, :super, :then, :true, :undef, :unless, :until, :when, :while, :yield
     ].freeze
+
+    ALLOWED_VALUE_TO_METHOD_REGEXP = /^[a-z_]\w*[?!]?$/
 
     def setup_enum(enum_name)
       @values ||= ReeEnum::Values.new(self, enum_name)
@@ -29,9 +35,13 @@ module ReeEnum::Enumerable
       @values&.enum_name
     end
 
-    def val(value, mapped_value = nil, method: value.to_s.to_sym)
+    def val(value, mapped_value = nil, method: nil)
       value = value.to_s if value.is_a?(Symbol)
       mapped_value ||= value
+
+      if method.nil? && value.is_a?(String) && value.match?(ALLOWED_VALUE_TO_METHOD_REGEXP)
+        method = value.to_sym
+      end
 
       if RESTRICTED_METHODS.include?(method)
         raise ArgumentError.new("#{method.inspect} is not allowed as enum method")
@@ -39,15 +49,17 @@ module ReeEnum::Enumerable
 
       enum_value = @values.add(value, mapped_value, method)
 
-      class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-        def #{method}
-          get_values.by_value(#{value.inspect}.freeze)
-        end
+      if !method.nil?
+        class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
+          def #{method}
+            get_values.by_value(#{value.inspect}.freeze)
+          end
 
-        def self.#{method}
-          get_values.by_value(#{value.inspect}.freeze)
-        end
-      RUBY
+          def self.#{method}
+            get_values.by_value(#{value.inspect}.freeze)
+          end
+        RUBY
+      end
 
       enum_value
     end

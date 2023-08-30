@@ -3,7 +3,7 @@
 class ReeEnum::Value
   attr_reader :enum_class, :enum_name, :value, :method, :mapped_value
 
-  contract(Class, Symbol, Or[String, Integer], Or[Integer, String], Symbol => Any)
+  contract(Class, Symbol, Or[String, Integer], Or[Integer, String], Nilor[Symbol] => Any)
   def initialize(enum_class, enum_name, value, mapped_value, method)
     @enum_class = enum_class
     @enum_name = enum_name

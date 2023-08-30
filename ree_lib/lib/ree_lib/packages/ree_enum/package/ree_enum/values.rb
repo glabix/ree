@@ -51,7 +51,7 @@ class ReeEnum::Values
     @collection.map(&:inspect).inspect
   end
 
-  contract(Or[String, Integer], Or[Integer, String], Symbol => ReeEnum::Value)
+  contract(Or[String, Integer], Or[Integer, String], Nilor[Symbol] => ReeEnum::Value)
   def add(value, mapped_value, method)
     if @value_type.nil?
       @value_type = value.class
@@ -59,7 +59,7 @@ class ReeEnum::Values
       raise ArgumentError, "#{@klass}: value types should be the same for all enum values"
     end
 
-    if @collection.any? { _1.method == method }
+    if !method.nil? && @collection.any? { _1.method == method }
       raise ArgumentError, "#{@klass}: method #{method.inspect} was already added"
     end
 
