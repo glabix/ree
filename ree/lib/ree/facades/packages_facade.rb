@@ -142,6 +142,11 @@ class Ree::PackagesFacade
   # @return nil
   def load_package_entry(package_name)
     package = @packages_store.get(package_name)
+
+    if package.nil?
+      raise Ree::Error.new("package :#{package_name} not found in Packages.schema.json")
+    end
+
     return if package.loaded?
 
     Ree.logger.debug("load_package_entry(:#{package_name})")
