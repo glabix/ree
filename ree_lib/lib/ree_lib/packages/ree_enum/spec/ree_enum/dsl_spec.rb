@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 package_require('ree_enum/dsl')
+package_require('ree_swagger/functions/get_serializer_definition')
 
 RSpec.describe ReeEnum::DSL do
   before do
@@ -225,5 +226,12 @@ RSpec.describe ReeEnum::DSL do
     expect(TestReeEnum::Reflexives.myself).to eq(:self)
 
     expect(TestReeEnum::ContentTypes.method_defined?(:"video/mp4")).to be_falsey
+
+    swagger_definition_fetcher = ReeSwagger::GetSerializerDefinition.new
+    expect(
+      swagger_definition_fetcher.call(TestReeEnum::Reflexives.type_for_mapper, -> {})
+    ).not_to eq(
+      swagger_definition_fetcher.call(TestReeEnum::ContentTypes.type_for_mapper, -> {})
+    )
   }
 end

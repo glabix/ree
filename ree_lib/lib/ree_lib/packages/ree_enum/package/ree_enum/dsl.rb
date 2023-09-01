@@ -49,14 +49,12 @@ module ReeEnum
       def register_as_swagger_type
         swagger_type_registrator = ReeSwagger::RegisterType.new
 
-        definition = swagger_definition
-
         [:casters, :serializers].each do |kind|
           swagger_type_registrator.call(
             kind,
             type_for_mapper.class,
-            ->(*) {
-              definition
+            ->(type, _build_schema) {
+              type.enum.swagger_definition
             }
           )
         end
@@ -75,6 +73,8 @@ module ReeEnum
       end
 
       def swagger_definition
+        return @swagger_definition if defined? @swagger_definition
+
         value_type = get_values.value_type
 
         type = if value_type == String
@@ -85,7 +85,7 @@ module ReeEnum
           raise NotImplementedError, "value_type #{value_type} is not supported"
         end
 
-        {
+        @swagger_definition = {
           type: type,
           enum: get_values.each.map(&:value)
         }

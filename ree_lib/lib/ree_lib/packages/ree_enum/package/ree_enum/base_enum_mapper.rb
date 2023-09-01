@@ -2,6 +2,8 @@
 require_relative "value"
 
 class ReeEnum::BaseEnumMapper < ReeMapper::AbstractType
+  attr_reader :enum
+
   def initialize(enum)
     @enum = enum
   end
