@@ -229,7 +229,13 @@ module ReeDao
 
       def set_entity_primary_key(entity, raw, key)
         if key && !primary_key.is_a?(Array)
-          entity.instance_variable_set("@#{primary_key}", key)
+          if entity.respond_to?("#{primary_key}=")
+            entity.send("#{primary_key}=", key)
+          elsif entity.respond_to?("set_#{primary_key}")
+            entity.send("set_#{primary_key}", key)
+          else
+            entity.instance_variable_set("@#{primary_key}", key)
+          end
           raw[primary_key] = key
         end
       end
