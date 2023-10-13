@@ -83,14 +83,14 @@ module ReeDao
         return if entities.empty?
 
         mapper = opts[:schema_mapper]
-        columns = columns
+        columns = self.columns
         raw = {}
 
         columns.delete(:id)
         columns.delete(:row)
 
         data = entities.map do |entity|
-          hash = mapper.to_hash(entity)
+          hash = mapper.db_dump(entity)
           raw[entity] = hash
 
           columns.map { hash[_1] }
