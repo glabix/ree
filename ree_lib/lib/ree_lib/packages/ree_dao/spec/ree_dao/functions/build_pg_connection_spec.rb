@@ -148,7 +148,7 @@ RSpec.describe :build_pg_connection do
     expect(product.labels).to eq(["Sale", "New"])
   }
 
-  it "batch put" do
+  it "insert multiple records" do
     products_dao.delete_all
 
     products = Array.new(3) { |i| ReeDaoTestPg::Product.new(title: "Product#{i}", info: { price: 1337, count: 200 }, labels: ["Sale"]) }
