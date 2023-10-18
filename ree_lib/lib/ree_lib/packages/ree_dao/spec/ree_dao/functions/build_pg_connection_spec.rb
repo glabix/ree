@@ -147,4 +147,14 @@ RSpec.describe :build_pg_connection do
     expect(product.info[:price]).to eq(1440)
     expect(product.labels).to eq(["Sale", "New"])
   }
+
+  it "insert multiple records" do
+    products_dao.delete_all
+
+    products = Array.new(3) { |i| ReeDaoTestPg::Product.new(title: "Product#{i}", info: { price: 1337, count: 200 }, labels: ["Sale"]) }
+    
+    products_dao.import_all(products)
+
+    expect(products_dao.count).to eq 3
+  end
 end
