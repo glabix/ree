@@ -72,7 +72,7 @@ class Roda
           Proc.new do |r|
             r.send(route.request_method) do
               if route.override
-                route.override.call(r)
+                r.instance_exec(r, &route.override)
               else
                 r.send(route.respond_to) do
                   r.env["warden"].authenticate!(scope: route.warden_scope)
