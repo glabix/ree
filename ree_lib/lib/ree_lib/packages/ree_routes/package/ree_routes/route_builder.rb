@@ -31,6 +31,12 @@ class ReeRoutes::RouteBuilder
     nil
   end
 
+  contract Block => nil
+  def override(&proc)
+    @route.override = proc
+    nil
+  end
+
   contract String => String
   def summary(str)
     @route.summary = str

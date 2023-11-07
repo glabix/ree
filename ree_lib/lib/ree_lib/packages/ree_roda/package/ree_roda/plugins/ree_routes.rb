@@ -71,50 +71,54 @@ class Roda
         def route_proc(route, context)
           Proc.new do |r|
             r.send(route.request_method) do
-              r.send(route.respond_to) do
-                r.env["warden"].authenticate!(scope: route.warden_scope)
+              if route.override
+                route.override.call(r)
+              else
+                r.send(route.respond_to) do
+                  r.env["warden"].authenticate!(scope: route.warden_scope)
 
-                if context.opts[:ree_routes_before]
-                  r.instance_exec(@_request, route.warden_scope, &r.scope.opts[:ree_routes_before])
-                end
-
-                params = r.params
-
-                if r.body
-                  body = begin
-                    JSON.parse(r.body.read)
-                  rescue => e
-                    {}
+                  if context.opts[:ree_routes_before]
+                    r.instance_exec(@_request, route.warden_scope, &r.scope.opts[:ree_routes_before])
                   end
 
-                  params = params.merge(body)
-                end
+                  params = r.params
 
-                not_blank = ReeObject::NotBlank.new
+                  if r.body
+                    body = begin
+                      JSON.parse(r.body.read)
+                    rescue => e
+                      {}
+                    end
 
-                filtered_params = ReeHash::TransformValues.new.call(params) do |k, v|
-                  v.is_a?(Array) ? v.select { not_blank.call(_1) } : v
-                end
+                    params = params.merge(body)
+                  end
 
-                accessor = r.env["warden"].user(route.warden_scope)
-                action_result = get_cached_action(route).call(accessor, filtered_params)
+                  not_blank = ReeObject::NotBlank.new
 
-                if route.serializer
-                  serialized_result = get_cached_serializer(route).serialize(action_result)
-                else
-                  serialized_result = {}
-                end
+                  filtered_params = ReeHash::TransformValues.new.call(params) do |k, v|
+                    v.is_a?(Array) ? v.select { not_blank.call(_1) } : v
+                  end
 
-                case route.request_method
-                when :post
-                  r.response.status = 201
-                  ReeJson::ToJson.new.call(serialized_result)
-                when :put, :delete, :patch
-                  r.response.status = 204
-                  ""
-                else
-                  r.response.status = 200
-                  ReeJson::ToJson.new.call(serialized_result)
+                  accessor = r.env["warden"].user(route.warden_scope)
+                  action_result = get_cached_action(route).call(accessor, filtered_params)
+
+                  if route.serializer
+                    serialized_result = get_cached_serializer(route).serialize(action_result)
+                  else
+                    serialized_result = {}
+                  end
+
+                  case route.request_method
+                  when :post
+                    r.response.status = 201
+                    ReeJson::ToJson.new.call(serialized_result)
+                  when :put, :delete, :patch
+                    r.response.status = 204
+                    ""
+                  else
+                    r.response.status = 200
+                    ReeJson::ToJson.new.call(serialized_result)
+                  end
                 end
               end
 
@@ -152,7 +156,7 @@ class Roda
                     route_procs.each do |route_proc|
                       r.instance_exec(r, &route_proc)
                     end
-                    
+
                     nil
                   end
 

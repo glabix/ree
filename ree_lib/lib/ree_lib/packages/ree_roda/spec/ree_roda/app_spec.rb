@@ -116,6 +116,20 @@ RSpec.describe ReeRoda::App do
           serializer :serializer, **opts
         end
 
+        get "api/action/:action_id/test_override" do
+          summary "Subaction"
+          warden_scope :visitor
+          sections "some_action"
+          action :action_cmd, **opts
+          serializer :serializer, **opts
+          override do |r|
+            r.json do
+              r.response.status = 200
+              "result"
+            end
+          end
+        end
+
         get "api/action/:id/subaction" do
           summary "Subaction"
           warden_scope :visitor
@@ -231,6 +245,12 @@ RSpec.describe ReeRoda::App do
     get "api/action/1/test"
     expect(last_response.status).to eq(200)
     expect(last_response.body).to eq("{\"result\":\"action_cmd\"}")
+  }
+
+  it {
+    get "api/action/:action_id/test_override"
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq("result")
   }
 
   it {
