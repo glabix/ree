@@ -38,7 +38,7 @@ class ReeStd::RetryOnFail
       retry_block?: Proc,
       retry_if?: Proc,
     ],
-    Block => nil
+    Block => Any
   )
   def call(max:, **opts, &block)
     Retry.new(max: max, **opts).call(&block)
