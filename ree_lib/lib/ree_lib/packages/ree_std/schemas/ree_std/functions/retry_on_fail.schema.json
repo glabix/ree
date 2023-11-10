@@ -22,7 +22,7 @@
         {
           "arg": "opts",
           "arg_type": "keyrest",
-          "type": "Ksplat[:interval? => Integer, :max_interval? => Integer, :backoff_factor? => Integer, :exceptions? => ArrayOf[SubclassOf[StandardError]], :retry_block? => Proc, :retry_if? => Proc]"
+          "type": "Ksplat[:interval? => Or[Float, Integer], :max_interval? => Or[Float, Integer], :backoff_factor? => Integer, :exceptions? => ArrayOf[SubclassOf[StandardError]], :retry_block? => Proc, :retry_if? => Proc]"
         },
         {
           "arg": "block",

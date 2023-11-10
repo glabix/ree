@@ -31,8 +31,8 @@ class ReeStd::RetryOnFail
       max: Integer,
     ],
     Ksplat[
-      interval?: Integer,
-      max_interval?: Integer,
+      interval?: Or[Float, Integer],
+      max_interval?: Or[Float, Integer],
       backoff_factor?: Integer,
       exceptions?: ArrayOf[SubclassOf[StandardError]],
       retry_block?: Proc,

@@ -6,8 +6,8 @@ class ReeStd::Retry
       max: Integer,
     ],
     Ksplat[
-      interval?: Integer,
-      max_interval?: Integer,
+      interval?: Or[Integer, Float],
+      max_interval?: Or[Integer, Float],
       backoff_factor?: Integer,
       exceptions?: ArrayOf[SubclassOf[StandardError]],
       retry_block?: Proc,
