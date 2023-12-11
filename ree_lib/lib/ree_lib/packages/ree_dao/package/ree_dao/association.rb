@@ -127,17 +127,19 @@ module ReeDao
       else
         threads = associations.instance_exec(assoc_list, &block)
 
-        threads[:association_threads].map do |association, assoc_type, assoc_name, __opts, block|
-          Thread.new do
-            association.load(assoc_type, assoc_name, **__opts, &block)
+        scheduler_proc do
+          threads[:association_threads].map do |association, assoc_type, assoc_name, __opts, block|
+            task_proc do
+              association.load(assoc_type, assoc_name, **__opts, &block)
+            end
           end
-        end.map(&:join)
 
-        threads[:field_threads].map do |association, field_proc|
-          Thread.new do
-            association.handle_field(field_proc)
+          threads[:field_threads].map do |association, field_proc|
+            task_proc do
+              association.handle_field(field_proc)
+            end
           end
-        end.map(&:join)
+        end
       end
     end
 
@@ -352,6 +354,22 @@ module ReeDao
     end
 
     private
+
+    def task_proc(&proc)
+      if Sequel.current.is_a?(Fiber)
+        Fiber.schedule &proc
+      else
+        proc.call
+      end
+    end
+
+    def scheduler_proc(&proc)
+      if Sequel.current.is_a?(Fiber)
+        FiberScheduler &proc
+      else
+        proc.call
+      end
+    end
 
     def foreign_key_from_dao(dao)
       "#{dao.first_source_table.to_s.gsub(/s$/, '')}_id".to_sym

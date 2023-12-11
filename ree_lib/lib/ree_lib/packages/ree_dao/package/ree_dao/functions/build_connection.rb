@@ -19,7 +19,6 @@ class ReeDao::BuildConnection
     database_timezone: :utc,
     application_timezone: :utc,
     typecast_timezone: :utc,
-    connection_validation_timeout: 60,
     single_threaded: false,
     timeout: 90
   }.freeze
@@ -27,6 +26,7 @@ class ReeDao::BuildConnection
   contract(
     Hash,
     Ksplat[
+      fibered?: Bool,
       timeout?: Integer,
       convert_two_digit_years?: Bool,
       single_threaded?: Bool,
@@ -36,7 +36,6 @@ class ReeDao::BuildConnection
       database_timezone?: Or[*TIMEZONES],
       application_timezone?: Or[*TIMEZONES],
       typecast_timezone?: Or[*TIMEZONES],
-      connection_validation_timeout?: Integer,
       logger?: Logger,
       sql_log_level?: [:fatal, :error, :warn, :info, :debug],
     ] => Any
@@ -47,7 +46,6 @@ class ReeDao::BuildConnection
     database_timezone = opts.delete(:database_timezone)
     application_timezone = opts.delete(:application_timezone)
     typecast_timezone = opts.delete(:typecast_timezone)
-    # connection_validation_timeout = opts.delete(:connection_validation_timeout)
     convert_two_digit_years = opts.delete(:convert_two_digit_years)
     single_threaded = opts.delete(:single_threaded)
     datetime_class = opts.delete(:datetime_class)
@@ -62,6 +60,10 @@ class ReeDao::BuildConnection
     Sequel.datetime_class = datetime_class
 
     connection = Sequel.connect(conn_opts)
+
+    if opts[:fibered]
+      Sequel.extension :fiber_concurrency
+    end
 
     if opts[:logger]
       connection.logger = opts[:logger]
@@ -83,8 +85,6 @@ class ReeDao::BuildConnection
         end
       end
     end
-
-    # connection.pool.connection_validation_timeout = connection_validation_timeout if connection_validation_timeout
 
     extensions.each { connection.extension(_1) }
     connections.add(connection)

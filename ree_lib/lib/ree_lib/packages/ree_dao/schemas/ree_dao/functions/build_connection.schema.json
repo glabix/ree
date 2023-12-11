@@ -22,7 +22,7 @@
         {
           "arg": "opts",
           "arg_type": "keyrest",
-          "type": "Ksplat[:timeout? => Integer, :convert_two_digit_years? => Bool, :single_threaded? => Bool, :extensions? => ArrayOf[Symbol], :datetime_class? => Or[Time, DateTime], :after_connect? => Proc, :database_timezone? => Or[utc, local], :application_timezone? => Or[utc, local], :typecast_timezone? => Or[utc, local], :connection_validation_timeout? => Integer, :logger? => Logger, :sql_log_level? => [fatal, error, warn, info, debug]]"
+          "type": "Ksplat[:fibered? => Bool, :timeout? => Integer, :convert_two_digit_years? => Bool, :single_threaded? => Bool, :extensions? => ArrayOf[Symbol], :datetime_class? => Or[Time, DateTime], :after_connect? => Proc, :database_timezone? => Or[utc, local], :application_timezone? => Or[utc, local], :typecast_timezone? => Or[utc, local], :logger? => Logger, :sql_log_level? => [fatal, error, warn, info, debug]]"
         }
       ]
     }

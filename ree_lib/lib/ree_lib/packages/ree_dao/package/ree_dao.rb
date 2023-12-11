@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "sequel"
+require "fiber_scheduler"
 
 module ReeDao
   include Ree::PackageDSL

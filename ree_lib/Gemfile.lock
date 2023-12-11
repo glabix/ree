@@ -3,6 +3,7 @@ PATH
   specs:
     ree_lib (1.0.81)
       binding_of_caller (~> 1.0.0)
+      fiber_scheduler (~> 0.13.0)
       i18n (~> 1.12.0)
       loofah (~> 2.18.0)
       oj (~> 3.13.17)
@@ -30,6 +31,7 @@ GEM
     diff-lcs (1.5.0)
     faker (3.2.0)
       i18n (>= 1.8.11, < 2)
+    fiber_scheduler (0.13.0)
     hashdiff (1.0.1)
     highline (2.0.3)
     i18n (1.12.0)

@@ -64,17 +64,39 @@ class ReeDao::Agg
     if dao.db.in_transaction? || ReeDao.load_sync_associations_enabled?
       associations
     else
-      associations[:association_threads].map do |association, assoc_type, assoc_name, opts, block|
-        Thread.new do
-          association.load(assoc_type, assoc_name, **opts, &block)
+      scheduler_proc do
+        associations[:association_threads].map do |association, assoc_type, assoc_name, opts, block|
+          task_proc do
+            association.load(assoc_type, assoc_name, **opts, &block)
+          end
         end
-      end.map(&:join)
 
-      associations[:field_threads].map do |association, field_proc|
-        Thread.new do
-          association.handle_field(field_proc)
+        associations[:field_threads].map do |association, field_proc|
+          task_proc do
+            association.handle_field(field_proc)
+          end
         end
-      end.map(&:join)
+      end
+    end
+  end
+
+  def task_proc(&proc)
+    if Sequel.current.is_a?(Fiber)
+      Fiber.schedule do
+        proc.call
+      end
+    else
+      proc.call
+    end
+  end
+
+  def scheduler_proc(&proc)
+    if Sequel.current.is_a?(Fiber)
+      FiberScheduler do
+        proc.call
+      end
+    else
+      proc.call
     end
   end
 end
