@@ -81,22 +81,22 @@ class ReeDao::Agg
   end
 
   def task_proc(&proc)
-    if Sequel.current.is_a?(Fiber)
-      Fiber.schedule do
-        proc.call
-      end
-    else
+    # if Sequel.current.is_a?(Fiber)
+    #   Fiber.schedule do
+    #     proc.call
+    #   end
+    # else
       proc.call
-    end
+    # end
   end
 
   def scheduler_proc(&proc)
-    if Sequel.current.is_a?(Fiber)
-      FiberScheduler do
-        proc.call
-      end
-    else
+    # if Sequel.current.is_a?(Fiber)
+    #   FiberScheduler do
+    #     proc.call
+    #   end
+    # else
       proc.call
-    end
+    # end
   end
 end
