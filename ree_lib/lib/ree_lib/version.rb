@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module ReeLib
-  VERSION = "1.0.81"
+  VERSION = "1.0.82"
 end
