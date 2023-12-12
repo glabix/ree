@@ -356,19 +356,21 @@ module ReeDao
     private
 
     def task_proc(&proc)
-      # if Sequel.current.is_a?(Fiber)
-      #   Fiber.schedule &proc
-      # else
+      if Sequel.current.is_a?(Fiber)
+        Fiber.schedule &proc
+      else
         proc.call
-      # end
+      end
     end
 
     def scheduler_proc(&proc)
-      # if Sequel.current.is_a?(Fiber)
-      #   FiberScheduler &proc
-      # else
+      if Sequel.current.is_a?(Fiber)
+        FiberScheduler do
+          Fiber.schedule(:waiting, &proc)
+        end
+      else
         proc.call
-      # end
+      end
     end
 
     def foreign_key_from_dao(dao)
