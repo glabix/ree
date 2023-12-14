@@ -82,7 +82,7 @@ export function getCachedIndex(): ICachedIndex {
   if (cachedIndex && !isCachedIndexIsEmpty()) {
     let root = getCachedProjectRoot()
     if (isPackagesSchemaCtimeChanged()) {
-      
+
       logInfoMessage('Packages.schema.json is changed')
       getNewProjectIndex()
       calculatePackagesSchemaCtime(root)
@@ -166,7 +166,7 @@ export function getPackageIndex(root: string, packageName: string) {
           getPackageIndexSemaphore = Semaphore.open
         }
       }
-    } catch(e: any) {
+    } catch (e: any) {
       logErrorMessage(e.toString())
       connection.window.showErrorMessage(e.toString())
       getPackageIndexSemaphore = Semaphore.open
@@ -197,7 +197,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
   connection.workspace.getWorkspaceFolders().then(v => {
     return v?.map(folder => folder)
   }).then(v => {
-    if (v) { 
+    if (v) {
       const folder = v[0]
       const root = url.fileURLToPath(folder.uri)
       let projectRoot = getProjectRootDir(root)
@@ -209,7 +209,8 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
         try {
           if (r) {
             if (r.code === 0) {
-              cachedIndex = JSON.parse(r.message)
+              const cleanCmdMessage = cleanCmdOutput(r.message)
+              cachedIndex = JSON.parse(cleanCmdMessage)
               calculatePackagesSchemaCtime(root)
               cachedIndex.packages_schema.packages.forEach(pckg => {
                 calculatePackageSchemaCtime(root, pckg.name)
@@ -228,7 +229,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
               getProjectIndexSemaphore = Semaphore.open
             }
           }
-        } catch(e: any) {
+        } catch (e: any) {
           logErrorMessage('Catched some error when tried to get new Project index')
           if (isCachedIndexIsEmpty()) {
             logInfoMessage('Index is empty, set as empty object')
@@ -250,11 +251,11 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
                 cachedIndex ??= <ICachedIndex>{}
               }
               cachedIndex.gem_paths ??= {}
-    
+
               gemPathsArr?.map((path) => {
                 let splitedPath = path.split("/")
                 let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
-        
+
                 cachedIndex.gem_paths[name] = path
               })
               logInfoMessage('Gem Paths setted')
@@ -366,6 +367,11 @@ export interface IObjectLink {
 }
 /* eslint-enable @typescript-eslint/naming-convention */
 
+// TODO: it's hack for hotfix, remove me later
+export function cleanCmdOutput(cmdOutput: string): string {
+  return cmdOutput.split("\n/")[0]
+}
+
 export function cacheGemPaths(rootDir: string): Promise<ExecCommand | undefined> {
   return execBundlerGetGemPaths(rootDir)
 }
@@ -444,7 +450,7 @@ async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | un
       argsArr,
       { cwd: rootDir }
     ])
-  } catch(e) {
+  } catch (e) {
     console.error(e)
     return new Promise(() => undefined)
   }
@@ -452,9 +458,9 @@ async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | un
 
 async function execGetReeProjectIndex(rootDir: string): Promise<ExecCommand | undefined> {
   try {
-    const {dockerAppDirectory, dockerContainerName, dockerPresented} = getReeVscodeSettings(rootDir)
+    const { dockerAppDirectory, dockerContainerName, dockerPresented } = getReeVscodeSettings(rootDir)
 
-    if (dockerPresented) { 
+    if (dockerPresented) {
       return spawnCommand([
         'docker', [
           'exec',
@@ -480,7 +486,7 @@ async function execGetReeProjectIndex(rootDir: string): Promise<ExecCommand | un
         { cwd: rootDir }
       ])
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e)
     return new Promise(() => undefined)
   }
@@ -488,9 +494,9 @@ async function execGetReeProjectIndex(rootDir: string): Promise<ExecCommand | un
 
 async function execGetReeFileIndex(rootDir: string, filePath: string): Promise<ExecCommand | undefined> {
   try {
-    const {dockerAppDirectory, dockerContainerName, dockerPresented} = getReeVscodeSettings(rootDir)
+    const { dockerAppDirectory, dockerContainerName, dockerPresented } = getReeVscodeSettings(rootDir)
 
-    if (dockerPresented) { 
+    if (dockerPresented) {
       return spawnCommand([
         'docker', [
           'exec',
@@ -518,7 +524,7 @@ async function execGetReeFileIndex(rootDir: string, filePath: string): Promise<E
         { cwd: rootDir }
       ])
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e)
     return new Promise(() => undefined)
   }
@@ -526,9 +532,9 @@ async function execGetReeFileIndex(rootDir: string, filePath: string): Promise<E
 
 async function execGetReePackageIndex(rootDir: string, packageName: string): Promise<ExecCommand | undefined> {
   try {
-    const {dockerAppDirectory, dockerContainerName, dockerPresented} = getReeVscodeSettings(rootDir)
+    const { dockerAppDirectory, dockerContainerName, dockerPresented } = getReeVscodeSettings(rootDir)
 
-    if (dockerPresented) { 
+    if (dockerPresented) {
       return spawnCommand([
         'docker', [
           'exec',
@@ -556,7 +562,7 @@ async function execGetReePackageIndex(rootDir: string, packageName: string): Pro
         { cwd: rootDir }
       ])
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e)
     return new Promise(() => undefined)
   }
@@ -587,7 +593,7 @@ export function updateFileIndex(uri: string) {
     let dateInFile = new Date(parseInt(filePath.split("/").pop().split("_")?.[0]))
     if (!isNaN(dateInFile?.getTime())) { return }
 
-    cacheFileIndex(root,rFilePath).then(r => {
+    cacheFileIndex(root, rFilePath).then(r => {
       if (r) {
         if (r.code === 0) {
           try {
@@ -634,7 +640,7 @@ async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> 
       message += chunk
     }
 
-    const code: number  = await new Promise( (resolve, _) => {
+    const code: number = await new Promise((resolve, _) => {
       child.on('close', resolve)
     })
 
@@ -642,7 +648,7 @@ async function spawnCommand(args: Array<any>): Promise<ExecCommand | undefined> 
       message: message,
       code: code
     }
-  } catch(e) {
+  } catch (e) {
     console.error(`Error. ${e}`)
     return undefined
   }
@@ -654,14 +660,14 @@ export function buildObjectArguments(obj: IObject, tokenNode?: SyntaxNode | null
 
     if (tokenNode?.nextSibling?.type === 'argument_list') { return obj.name }
     if (method.args.length === 0) { return `${obj.name}` }
-    if (method.args.length === 1) { return `${obj.name}(${mapObjectArgument(method.args[0])})`}
+    if (method.args.length === 1) { return `${obj.name}(${mapObjectArgument(method.args[0])})` }
     if (method.args.every(arg => {
       return [...BASIC_TYPES, 'Block'].includes(arg.type) ||
-              arg.type.startsWith('ArrayOf') ||
-              arg.type.startsWith('SplatOf') ||
-              arg.type.startsWith('Nilor') ||
-              arg.type.startsWith('Or')
-            })
+        arg.type.startsWith('ArrayOf') ||
+        arg.type.startsWith('SplatOf') ||
+        arg.type.startsWith('Nilor') ||
+        arg.type.startsWith('Or')
+    })
     ) {
       return `${obj.name}(${method.args.map(arg => mapObjectArgument(arg)).join(', ')})`
     }
@@ -702,12 +708,12 @@ function mapObjectArgument(arg: IMethodArg): string {
   if (
     (arg.type.startsWith("{") && arg.type.endsWith("}")) ||
     (arg.type.startsWith("Ksplat[") && arg.type.endsWith("]"))
-  ){
+  ) {
     return getHashArgs(arg.type)
   }
 
-  if (arg.type === "Block") { return `&${arg.arg}`}
-  if (arg.type.startsWith("SplatOf")) { return `*${arg.arg}`}
+  if (arg.type === "Block") { return `&${arg.arg}` }
+  if (arg.type.startsWith("SplatOf")) { return `*${arg.arg}` }
 
   if (index && !isCachedIndexIsEmpty()) {
     if (index.classes && Object.keys(index.classes).includes(arg.type)) {
@@ -720,9 +726,9 @@ function mapObjectArgument(arg: IMethodArg): string {
 
 function groupBy(data: Array<any>, key: string) {
   return data.reduce((storage, item) => {
-      let group = item[key]
-      storage[group] = storage[group] || []
-      storage[group].push(item)
-      return storage
+    let group = item[key]
+    storage[group] = storage[group] || []
+    storage[group].push(item)
+    return storage
   }, {})
 }
