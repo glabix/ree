@@ -93,7 +93,7 @@ export function getCachedIndex(): ICachedIndex {
                     }
                   })
                 }
-      
+
                 if (objects && Object.keys(objects).length > 0) {
                   let objectsKeys = Object.keys(objects)
                   objectsKeys.forEach(key => {
@@ -112,7 +112,7 @@ export function getCachedIndex(): ICachedIndex {
                     }
                   })
                 }
-                
+
                 calculatePackageSchemaCtime(root, pckg.name)
                 let refreshedPackages = cachedIndex.packages_schema.packages.filter(p => p.name !== pckg.name)
                 refreshedPackages.push(packageSchema)
@@ -121,7 +121,7 @@ export function getCachedIndex(): ICachedIndex {
                 logErrorMessage(`GetPackageIndexError: ${r.message}`)
               }
             }
-          } catch(e: any) {
+          } catch (e: any) {
             logErrorMessage(e.toString())
             vscode.window.showErrorMessage(e.toString())
           }
@@ -145,7 +145,7 @@ export function isCachedIndexIsEmpty(): boolean {
 }
 
 export function getNewProjectIndex(manual = false, showNotification = false) {
-  if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT && !manual) { 
+  if (getNewIndexRetryCount > MAX_GET_INDEX_RETRY_COUNT && !manual) {
     logWarnMessage('getNewProjectIndex reached max limit')
     return
   }
@@ -157,7 +157,8 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
     try {
       if (r) {
         if (r.code === 0) {
-          cachedIndex = JSON.parse(r.message)
+          const cleanCmdMessage = cleanCmdOutput(r.message)
+          cachedIndex = JSON.parse(cleanCmdMessage)
           calculatePackagesSchemaCtime(root)
           cachedIndex.packages_schema.packages.forEach(pckg => {
             calculatePackageSchemaCtime(root, pckg.name)
@@ -174,7 +175,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
           logErrorMessage(`GetProjectIndexError: ${r.message}`)
         }
       }
-    } catch(e: any) {
+    } catch (e: any) {
       logErrorMessage('Catched some error when tried to get new Project index')
       if (isCachedIndexIsEmpty()) {
         logInfoMessage('Index is empty, set as empty object')
@@ -199,7 +200,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
           gemPathsArr?.map((path) => {
             let splitedPath = path.split("/")
             let name = splitedPath[splitedPath.length - 1].replace(/\-(\d+\.?)+/, '')
-    
+
             cachedIndex.gem_paths[name] = path
           })
           logInfoMessage('Gem Paths setted')
@@ -213,7 +214,7 @@ export function getNewProjectIndex(manual = false, showNotification = false) {
     if (showNotification) {
       vscode.window.showInformationMessage("CLIENT: Reindex is completed!")
     }
-  }) 
+  })
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -302,6 +303,10 @@ export interface IObjectLink {
 
 /* eslint-enable @typescript-eslint/naming-convention */
 
+// TODO: it's hack for hotfix, remove me later
+export function cleanCmdOutput(cmdOutput: string): string {
+  return cmdOutput.split("\n/")[0]
+}
 
 export function cacheGemPaths(rootDir: string): Promise<ExecCommand | undefined> {
   return execBundlerGetGemPaths(rootDir)
@@ -322,7 +327,7 @@ export function cacheFileIndex(rootDir: string, filePath: string): Promise<ExecC
 export function calculatePackagesSchemaCtime(root: string) {
   logInfoMessage('Trying to recalculate Packages.schema.json ctime')
   const packagesSchemaPath = getPackagesSchemaPath(root)
-  if (packagesSchemaPath) { 
+  if (packagesSchemaPath) {
     logInfoMessage('Packages.schema.json ctime recalculated')
     setPackagesSchemaCtime(fs.statSync(packagesSchemaPath).ctimeMs)
   }
@@ -381,7 +386,7 @@ async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | un
       argsArr,
       { cwd: rootDir }
     ])
-  } catch(e) {
+  } catch (e) {
     console.error(e)
     return new Promise(() => undefined)
   }
@@ -389,9 +394,9 @@ async function execBundlerGetGemPaths(rootDir: string): Promise<ExecCommand | un
 
 function groupBy(data: Array<any>, key: string) {
   return data.reduce((storage, item) => {
-      let group = item[key]
-      storage[group] = storage[group] || []
-      storage[group].push(item)
-      return storage
+    let group = item[key]
+    storage[group] = storage[group] || []
+    storage[group].push(item)
+    return storage
   }, {})
 }
