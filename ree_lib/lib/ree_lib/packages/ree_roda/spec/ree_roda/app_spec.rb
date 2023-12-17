@@ -32,11 +32,17 @@ RSpec.describe ReeRoda::App do
       end
 
       def call(access, attrs)
-        if attrs[:id] == 500
-          {result: :not_string}
-        else
-          {result: "result"}
-        end
+        {result: "result"}
+      end
+    end
+
+    class ReeRodaTest::SerializerErrorCmd
+      include ReeActions::DSL
+
+      action :serializer_error_cmd
+
+      def call(access, attrs)
+        {result: :not_string}
       end
     end
 
@@ -173,6 +179,14 @@ RSpec.describe ReeRoda::App do
           action :cmd, **opts
           serializer :serializer, **opts
         end
+
+        get "api/serializer_error" do
+          summary "Action with serializer error"
+          warden_scope :visitor
+          sections "some_action"
+          action :serializer_error_cmd, **opts
+          serializer :serializer, **opts
+        end
       end
     end
 
@@ -275,7 +289,7 @@ RSpec.describe ReeRoda::App do
   }
 
   it {
-    get "api/action/500"
+    get "api/serializer_error"
     expect(last_response.status).to eq(500)
   }
 end
