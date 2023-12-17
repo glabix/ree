@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+package_require("ree_mapper/errors/type_error")
+package_require("ree_mapper/errors/coercion_error")
+
 module ReeActions
   module DSL
     def self.included(base)
@@ -57,10 +61,14 @@ module ReeActions
               raise ArgumentError.new("ActionCaster does not respond to `cast` method")
             end
 
-            __original_call(user_access, caster.cast(attrs))
-          else
-            __original_call(user_access, attrs)
+            attrs = begin
+              caster.cast(attrs)
+            rescue ReeMapper::TypeError, ReeMapper::CoercionError => e
+              raise ReeActions::ParamError, e.message
+            end
           end
+
+          __original_call(user_access, attrs)
         ensure
           __ree_dao_drop_cache
         end

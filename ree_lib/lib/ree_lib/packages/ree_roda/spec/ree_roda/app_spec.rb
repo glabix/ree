@@ -32,7 +32,11 @@ RSpec.describe ReeRoda::App do
       end
 
       def call(access, attrs)
-        {result: "result"}
+        if attrs[:id] == 500
+          {result: :not_string}
+        else
+          {result: "result"}
+        end
       end
     end
 
@@ -263,5 +267,15 @@ RSpec.describe ReeRoda::App do
     post "api/action/1/anotheraction"
     expect(last_response.status).to eq(201)
     expect(last_response.body).to eq("{\"result\":\"another_result\"}")
+  }
+
+  it {
+    get "api/action/not_integer"
+    expect(last_response.status).to eq(400)
+  }
+
+  it {
+    get "api/action/500"
+    expect(last_response.status).to eq(500)
   }
 end

@@ -59,6 +59,10 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
 
     result = ReeActionsTest::TestAction.new.call('user_access', {user_id: 1})
     expect(result).to eq(1)
+
+    expect {
+      ReeActionsTest::TestAction.new.call('user_access', {user_id: 'not integer'})
+    }.to raise_error(ReeActions::ParamError)
   }
 
   it {
@@ -161,7 +165,7 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
               users_dao.put(ReeActionsTest::User.new(name: 'Sam', age: 19))
             end.join
           end.join
-          
+
           $thread_cache = ReeDao::DaoCache.new.get(:users, $user.id)
 
           attrs[:user_id]
