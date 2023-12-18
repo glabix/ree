@@ -9,4 +9,5 @@ module ReeActions
   end
 end
 
+require_relative "ree_actions/errors"
 require_relative "ree_actions/dsl"

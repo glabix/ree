@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 package_require("ree_errors/error")
-package_require("ree_mapper/errors/type_error")
+package_require("ree_actions/errors")
 
 class ReeRoda::App < Roda
   include Ree::LinkDSL
@@ -25,7 +26,7 @@ class ReeRoda::App < Roda
       response.status = status_from_error(e.type)
       response.write(to_json(body))
       response.finish
-    elsif e.is_a?(ReeMapper::TypeError) || e.is_a?(ReeMapper::CoercionError)
+    elsif e.is_a?(ReeActions::ParamError)
       body = {
         code: "param",
         message: e.message,
