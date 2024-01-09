@@ -6,7 +6,7 @@ class ReeMapper::Float < ReeMapper::AbstractType
     if value.is_a?(Float)
       value
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a float"
+      raise ReeMapper::TypeError, "`#{name}` should be a float, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -18,12 +18,12 @@ class ReeMapper::Float < ReeMapper::AbstractType
       begin
         Float(value)
       rescue ArgumentError => e
-        raise ReeMapper::CoercionError, "`#{name}` is invalid float"
+        raise ReeMapper::CoercionError, "`#{name}` is invalid float, got `#{truncate(value.inspect)}`"
       end
     elsif defined?(BigDecimal) && value.is_a?(BigDecimal)
       value.to_f
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a float"
+      raise ReeMapper::TypeError, "`#{name}` should be a float, got `#{truncate(value.inspect)}`"
     end
   end
 

@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 class Ree::PackagesSchemaLocator
   def call(path)
@@ -13,7 +13,7 @@ class Ree::PackagesSchemaLocator
     raise Ree::Error.new("#{Ree::PACKAGES_SCHEMA_FILE} not found", :packages_json_not_found) if some_path == '/'
 
     return potential_file(some_path) if present?(some_path)
-    
+
     find_source_path_in_hierarchy(File.dirname(some_path))
   end
 

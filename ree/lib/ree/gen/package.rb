@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 require 'fileutils'
 require 'pathname'
@@ -24,15 +24,15 @@ module Ree
 
       def create
         if Dir.exist?(File.join(Ree.root_dir, @local_path))
-          raise Ree::Error.new("Package directory #{@local_path} already exists") 
+          raise Ree::Error.new("Package directory #{@local_path} already exists")
         end
 
         if @package_name.nil? || @package_name.empty?
-          raise Ree::Error.new('Package name was not specified') 
+          raise Ree::Error.new('Package name was not specified')
         end
 
         if @schema.packages.map(&:name).include?(@package_name)
-          raise Ree::Error.new('Package already exists') 
+          raise Ree::Error.new('Package already exists')
         end
 
         generated_files = Ree::TemplateHandler.generate(

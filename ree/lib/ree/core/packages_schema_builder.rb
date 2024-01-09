@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 require 'pathname'
 require 'json'
@@ -36,7 +36,7 @@ class Ree::PackagesSchemaBuilder
         }
       },
     }
-    
+
     result
   end
 end

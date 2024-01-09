@@ -13,7 +13,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
         end
       }
     else
-      raise ReeMapper::TypeError, "`#{name}` should be an array"
+      raise ReeMapper::TypeError, "`#{name}` should be an array, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -29,7 +29,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
         end
       }
     else
-      raise ReeMapper::TypeError, "`#{name}` should be an array"
+      raise ReeMapper::TypeError, "`#{name}` should be an array, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -45,7 +45,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
         end
       }
     else
-      raise ReeMapper::TypeError, "`#{name}` should be an array"
+      raise ReeMapper::TypeError, "`#{name}` should be an array, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -61,7 +61,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
         end
       }
     else
-      raise ReeMapper::TypeError, "`#{name}` should be an array"
+      raise ReeMapper::TypeError, "`#{name}` should be an array, got `#{truncate(value.inspect)}`"
     end
   end
 end

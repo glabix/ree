@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 require 'pathname'
 require 'fileutils'
@@ -8,7 +8,7 @@ class Ree::TemplateHandler
   NOT_HANDLED_TEMPLATES_EXT = %W(.erb)
 
   class << self
-    def generate(template_name:, local_path:, project_path:, locals: {}, 
+    def generate(template_name:, local_path:, project_path:, locals: {},
                 stdout: STDOUT, stdin: STDIN)
 
       Ree::TemplateHandler.new(

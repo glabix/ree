@@ -9,6 +9,7 @@ module ReeMapper
   end
 
   package_require('ree_string/functions/underscore')
+  package_require('ree_string/functions/truncate')
   package_require('ree_datetime/functions/in_default_time_zone')
 
   require_relative 'ree_mapper/types/abstract_type'

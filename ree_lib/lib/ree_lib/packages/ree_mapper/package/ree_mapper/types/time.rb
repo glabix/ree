@@ -8,7 +8,7 @@ class ReeMapper::Time < ReeMapper::AbstractType
     if value.class == Time
       value
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a time"
+      raise ReeMapper::TypeError, "`#{name}` should be a time, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -22,10 +22,10 @@ class ReeMapper::Time < ReeMapper::AbstractType
       begin
         Time.parse(value)
       rescue ArgumentError
-        raise ReeMapper::CoercionError, "`#{name}` is invalid time"
+        raise ReeMapper::CoercionError, "`#{name}` is invalid time, got `#{truncate(value.inspect)}`"
       end
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a time"
+      raise ReeMapper::TypeError, "`#{name}` should be a time, got `#{truncate(value.inspect)}`"
     end
   end
 

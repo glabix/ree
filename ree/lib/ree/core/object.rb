@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 class Ree::Object
   attr_reader :name, :rpath, :schema_rpath, :package_name, :klass,
@@ -6,7 +6,7 @@ class Ree::Object
               :class_name, :links, :mount_as, :freeze,
               :errors, :linked_const_list, :compiled_frozen,
               :singleton, :tags
-  
+
   # @param [Symbol] name Object name
   # @param [String] schema_rpath Object schema path relative to project root dir
   # @param [String] rpath Object source file path relative to project root dir

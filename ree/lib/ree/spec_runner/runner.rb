@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 class Ree::SpecRunner::Runner
   attr_accessor :no_specs_packages
@@ -73,7 +73,7 @@ class Ree::SpecRunner::Runner
     selected = prepared_command_params.detect do |cmd_params|
       cmd_params.package_name == package_name
     end
-    
+
     prepare_commands_for_packages([selected])
   end
 

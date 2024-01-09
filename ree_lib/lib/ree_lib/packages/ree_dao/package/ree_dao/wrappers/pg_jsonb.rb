@@ -31,7 +31,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
     begin
       Sequel.pg_jsonb_wrap(value)
     rescue Sequel::Error
-      raise ReeMapper::TypeError, "`#{name}` should be an jsonb primitive"
+      raise ReeMapper::TypeError, "`#{name}` should be an jsonb primitive, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -61,7 +61,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
     when Numeric, String, TrueClass, FalseClass, NilClass
       value
     else
-      raise ReeMapper::TypeError, "`#{name}` is not Sequel::Postgres::JSONB"
+      raise ReeMapper::TypeError, "`#{name}` should be a Sequel::Postgres::JSONB, got `#{truncate(value.inspect)}`"
     end
 
     subject.type.db_load(

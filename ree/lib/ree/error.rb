@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 class Ree::Error < StandardError
   attr_reader :code, :type

@@ -31,7 +31,7 @@ RSpec.describe 'Mapper Hash' do
     }
 
     it {
-      expect { mapper.cast({ point: { x: 1, y: 'not integer' } }) }.to raise_error(ReeMapper::CoercionError, '`point[y]` is invalid integer')
+      expect { mapper.cast({ point: { x: 1, y: 'not integer' } }) }.to raise_error(ReeMapper::CoercionError, '`point[y]` is invalid integer, got `"not integer"`')
     }
   end
 

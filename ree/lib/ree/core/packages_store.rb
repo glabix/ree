@@ -1,8 +1,8 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 class Ree::PackagesStore
   attr_reader :ree_version
-  
+
   def initialize(ree_version = Ree::VERSION)
     @ree_version = ree_version
     @store = {}
@@ -26,7 +26,7 @@ class Ree::PackagesStore
   def add_package(package)
     existing = get(package.name)
     return existing if existing
-    
+
     @store[package.name] = package
   end
 end

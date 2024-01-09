@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 class Ree::SpecRunner::CommandGenerator
   attr_accessor :package_name, :package_path, :spec_matcher, :spec_string_number

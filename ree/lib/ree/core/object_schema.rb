@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 module Ree::ObjectSchema
   SCHEMA_VERSION_NUMBER = '1.1'
