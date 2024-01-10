@@ -27,19 +27,20 @@ RSpec.describe 'ReeMapper::Date' do
     }
 
     it {
-      expect { mapper.serialize({ date: DateTime.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date")
+      expect { mapper.serialize({ date: DateTime.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date, got `#{DateTime.new(2020).inspect}`")
     }
 
     it {
-      expect { mapper.serialize({ date: Time.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date")
+      expect { mapper.serialize({ date: Time.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date, got `#{Time.new(2020).inspect}`")
     }
 
     it {
-      expect { mapper.serialize({ date: '2020-01-01' }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date")
+      expect { mapper.serialize({ date: '2020-01-01' }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date, got `\"2020-01-01\"`")
     }
 
     it {
-      expect { mapper.serialize({ date: Object.new }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date")
+      object = Object.new
+      expect { mapper.serialize({ date: object }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date, got `#{object.inspect}`")
     }
   end
 
@@ -61,7 +62,7 @@ RSpec.describe 'ReeMapper::Date' do
     }
 
     it {
-      expect { mapper.cast({ 'date' => 'no date' }) }.to raise_error(ReeMapper::CoercionError, "`date` is invalid date")
+      expect { mapper.cast({ 'date' => 'no date' }) }.to raise_error(ReeMapper::CoercionError, "`date` is invalid date, got `\"no date\"`")
     }
   end
 
@@ -83,7 +84,7 @@ RSpec.describe 'ReeMapper::Date' do
     }
 
     it {
-      expect { mapper.db_load({ 'date' => 'no date' }) }.to raise_error(ReeMapper::CoercionError, "`date` is invalid date")
+      expect { mapper.db_load({ 'date' => 'no date' }) }.to raise_error(ReeMapper::CoercionError, "`date` is invalid date, got `\"no date\"`")
     }
   end
 
@@ -93,19 +94,20 @@ RSpec.describe 'ReeMapper::Date' do
     }
 
     it {
-      expect { mapper.db_dump OpenStruct.new({ date: DateTime.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date")
+      expect { mapper.db_dump OpenStruct.new({ date: DateTime.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date, got `#{DateTime.new(2020).inspect}`")
     }
 
     it {
-      expect { mapper.db_dump OpenStruct.new({ date: Time.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date")
+      expect { mapper.db_dump OpenStruct.new({ date: Time.new(2020) }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date, got `#{Time.new(2020).inspect}`")
     }
 
     it {
-      expect { mapper.db_dump OpenStruct.new({ date: '2020-01-01' }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date")
+      expect { mapper.db_dump OpenStruct.new({ date: '2020-01-01' }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date, got `\"2020-01-01\"`")
     }
 
     it {
-      expect { mapper.db_dump OpenStruct.new({ date: Object.new }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date")
+      object = Object.new
+      expect { mapper.db_dump OpenStruct.new({ date: object }) }.to raise_error(ReeMapper::TypeError, "`date` should be a date, got `#{object.inspect}`")
     }
   end
 end

@@ -30,7 +30,7 @@ class ReeEnum::BaseEnumMapper < ReeMapper::AbstractType
     enum_val = @enum.get_values.by_mapped_value(value)
 
     if !enum_val
-      raise ReeMapper::CoercionError, "`#{name}` should be one of #{enum_inspection}"
+      raise ReeMapper::CoercionError, "`#{name}` should be one of #{enum_inspection}, got `#{truncate(value.inspect)}`"
     end
 
     enum_val
@@ -40,10 +40,5 @@ class ReeEnum::BaseEnumMapper < ReeMapper::AbstractType
 
   def enum_inspection
     @enum_inspection ||= truncate(@enum.get_values.each.map(&:to_s).inspect)
-  end
-
-  def truncate(str, limit = 180)
-    return str if str.length <= limit
-    "#{str[0..limit]}..."
   end
 end

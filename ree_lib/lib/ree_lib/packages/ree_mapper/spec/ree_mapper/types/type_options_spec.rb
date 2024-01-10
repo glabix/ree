@@ -193,7 +193,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
     }
 
     it {
-      expect { mapper.cast({}) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.cast({}) }.to raise_error(ReeMapper::TypeError, "Missing required field `number` for `root`")
     }
 
     it {
@@ -226,7 +226,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
     }
 
     it {
-      expect { mapper.cast({ number: nil, number_or_nil: 1 }) }.to raise_error(ReeMapper::TypeError)
+      expect { mapper.cast({ number: nil, number_or_nil: 1 }) }.to raise_error(ReeMapper::TypeError, "`number` should be an integer, got `nil`")
     }
   end
 
@@ -306,7 +306,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
     }
 
     it {
-      expect { mapper.cast({ number: nil }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.cast({ number: nil }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `nil`')
     }
 
     it {
@@ -319,7 +319,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
       let(:mapper) { mapper_factory.call.use(:cast) { integer? :number, default: :not_number } }
 
       it {
-        expect { mapper.cast({}) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+        expect { mapper.cast({}) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `:not_number`')
       }
     end
   end

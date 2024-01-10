@@ -31,15 +31,15 @@ RSpec.describe 'ReeMapper::Integer' do
     }
 
     it {
-      expect { mapper.cast({ number: 'b1' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer')
+      expect { mapper.cast({ number: 'b1' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer, got `"b1"`')
     }
 
     it {
-      expect { mapper.cast({ number: '1b' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer')
+      expect { mapper.cast({ number: '1b' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer, got `"1b"`')
     }
 
     it {
-      expect { mapper.cast({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.cast({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `1.1`')
     }
   end
 
@@ -49,19 +49,19 @@ RSpec.describe 'ReeMapper::Integer' do
     }
 
     it {
-      expect { mapper.serialize({ number: '1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.serialize({ number: '1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `"1"`')
     }
 
     it {
-      expect { mapper.serialize({ number: 'b1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.serialize({ number: 'b1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `"b1"`')
     }
 
     it {
-      expect { mapper.serialize({ number: '1b' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.serialize({ number: '1b' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `"1b"`')
     }
 
     it {
-      expect { mapper.serialize({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.serialize({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `1.1`')
     }
   end
 
@@ -71,19 +71,19 @@ RSpec.describe 'ReeMapper::Integer' do
     }
 
     it {
-      expect { mapper.db_dump({ number: '1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.db_dump({ number: '1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `"1"`')
     }
 
     it {
-      expect { mapper.db_dump({ number: 'b1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.db_dump({ number: 'b1' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `"b1"`')
     }
 
     it {
-      expect { mapper.db_dump({ number: '1b' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.db_dump({ number: '1b' }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `"1b"`')
     }
 
     it {
-      expect { mapper.db_dump({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.db_dump({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `1.1`')
     }
   end
 
@@ -97,15 +97,15 @@ RSpec.describe 'ReeMapper::Integer' do
     }
 
     it {
-      expect { mapper.db_load({ number: 'b1' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer')
+      expect { mapper.db_load({ number: 'b1' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer, got `"b1"`')
     }
 
     it {
-      expect { mapper.db_load({ number: '1b' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer')
+      expect { mapper.db_load({ number: '1b' }) }.to raise_error(ReeMapper::CoercionError, '`number` is invalid integer, got `"1b"`')
     }
 
     it {
-      expect { mapper.db_load({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer')
+      expect { mapper.db_load({ number: 1.1 }) }.to raise_error(ReeMapper::TypeError, '`number` should be an integer, got `1.1`')
     }
   end
 end

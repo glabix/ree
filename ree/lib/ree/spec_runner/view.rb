@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 class Ree::SpecRunner::View
   def packages_menu(prepared_command_params)

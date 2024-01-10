@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 package_require('accounts/commands/register_account_cmd')
 

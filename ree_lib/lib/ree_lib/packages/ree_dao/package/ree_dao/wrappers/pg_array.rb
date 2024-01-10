@@ -13,7 +13,7 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
   )
   def db_dump(value, name:, role: nil, fields_filters: [])
     if !value.is_a?(Array)
-      raise ReeMapper::TypeError, "`#{name}` should be an array"
+      raise ReeMapper::TypeError, "`#{name}` should be an array, got `#{truncate(value.inspect)}`"
     end
 
     value = value.map.with_index do |el, index|
@@ -42,7 +42,7 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
   ).throws(ReeMapper::TypeError)
   def db_load(value, name:, role: nil, fields_filters: [])
     if !value.is_a?(Sequel::Postgres::PGArray)
-      raise ReeMapper::TypeError, "`#{name}` is not Sequel::Postgres::PGArray"
+      raise ReeMapper::TypeError, "`#{name}` should be a Sequel::Postgres::PGArray, got `#{truncate(value.inspect)}`"
     end
 
     value.map.with_index do |val, index|

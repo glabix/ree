@@ -1,11 +1,11 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 class Ree::StringUtils
   class << self
     def truncate(str, limit = 80)
       str.length > limit ? "#{str[0..limit]}..." : str
     end
-    
+
     def underscore(camel_cased_word)
       return camel_cased_word unless /[A-Z-]|::/.match?(camel_cased_word)
       word = camel_cased_word.to_s.gsub("::".freeze, "/".freeze)
@@ -22,7 +22,7 @@ class Ree::StringUtils
       else
         string = string.sub(/^(?:(?=\b|[A-Z_])|\w)/) { |match| match.downcase }
       end
-      
+
       string.gsub(/(?:_|(\/))([a-z\d]*)/) { "#{$1}#{$2.capitalize}" }.gsub("/", "::")
     end
   end

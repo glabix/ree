@@ -6,7 +6,7 @@ class ReeMapper::Integer < ReeMapper::AbstractType
     if value.is_a? Integer
       value
     else
-      raise ReeMapper::TypeError, "`#{name}` should be an integer"
+      raise ReeMapper::TypeError, "`#{name}` should be an integer, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -15,13 +15,13 @@ class ReeMapper::Integer < ReeMapper::AbstractType
     if value.is_a?(Integer)
       value
     elsif value.is_a?(String)
-      value = Integer(value, exception: false)
-      if value.nil?
-        raise ReeMapper::CoercionError, "`#{name}` is invalid integer"
+      coerced_value = Integer(value, exception: false)
+      if coerced_value.nil?
+        raise ReeMapper::CoercionError, "`#{name}` is invalid integer, got `#{truncate(value.inspect)}`"
       end
-      value
+      coerced_value
     else
-      raise ReeMapper::TypeError, "`#{name}` should be an integer"
+      raise ReeMapper::TypeError, "`#{name}` should be an integer, got `#{truncate(value.inspect)}`"
     end
   end
 

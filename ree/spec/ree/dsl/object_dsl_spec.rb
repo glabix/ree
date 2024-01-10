@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 RSpec.describe Ree::ObjectDsl do
   before :all do
@@ -8,7 +8,7 @@ RSpec.describe Ree::ObjectDsl do
   after :all do
     Ree.disable_irb_mode
   end
-  
+
   module ObjectDslPackage
   end
 

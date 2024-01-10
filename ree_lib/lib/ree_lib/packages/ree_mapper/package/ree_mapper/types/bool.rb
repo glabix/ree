@@ -9,7 +9,7 @@ class ReeMapper::Bool < ReeMapper::AbstractType
     if value.is_a?(TrueClass) || value.is_a?(FalseClass)
       value
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a boolean"
+      raise ReeMapper::TypeError, "`#{name}` should be a boolean, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -20,7 +20,7 @@ class ReeMapper::Bool < ReeMapper::AbstractType
     elsif FALSE_CAST_VALUES.include?(value)
       false
     else
-      raise ReeMapper::CoercionError, "`#{name}` is invalid boolean"
+      raise ReeMapper::CoercionError, "`#{name}` is invalid boolean, got `#{truncate(value.inspect)}`"
     end
   end
 

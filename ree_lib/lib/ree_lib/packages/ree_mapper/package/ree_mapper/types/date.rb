@@ -8,7 +8,7 @@ class ReeMapper::Date < ReeMapper::AbstractType
     if value.class == Date
       value
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a date"
+      raise ReeMapper::TypeError, "`#{name}` should be a date, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -22,10 +22,10 @@ class ReeMapper::Date < ReeMapper::AbstractType
       begin
         Date.parse(value)
       rescue ArgumentError => e
-        raise ReeMapper::CoercionError, "`#{name}` is invalid date"
+        raise ReeMapper::CoercionError, "`#{name}` is invalid date, got `#{truncate(value.inspect)}`"
       end
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a date"
+      raise ReeMapper::TypeError, "`#{name}` should be a date, got `#{truncate(value.inspect)}`"
     end
   end
 

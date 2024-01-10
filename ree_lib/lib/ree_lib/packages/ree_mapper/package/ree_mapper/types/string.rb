@@ -6,7 +6,7 @@ class ReeMapper::String < ReeMapper::AbstractType
     if value.is_a? String
       value
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a string"
+      raise ReeMapper::TypeError, "`#{name}` should be a string, got `#{truncate(value.inspect)}`"
     end
   end
 

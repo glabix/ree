@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 RSpec.describe Ree::ImportDsl do
   context "first constant is not declared in the parent scope" do

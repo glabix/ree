@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 require 'fileutils'
 require 'pathname'
@@ -45,7 +45,7 @@ module Ree
         )
 
         FileUtils.mkdir_p(local_templates_path)
-        
+
         FileUtils.cp_r(
           @template_detector.gem_template_folder('package'),
           File.dirname(@template_detector.project_template_folder('package'))

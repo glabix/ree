@@ -29,7 +29,7 @@ class ReeEnum::StringValueEnumMapper < ReeEnum::BaseEnumMapper
     end
 
     if enum_value.nil?
-      raise ReeMapper::CoercionError, "`#{name}` should be one of #{enum_inspection}"
+      raise ReeMapper::CoercionError, "`#{name}` should be one of #{enum_inspection}, got `#{truncate(value.inspect)}`"
     end
 
     enum_value

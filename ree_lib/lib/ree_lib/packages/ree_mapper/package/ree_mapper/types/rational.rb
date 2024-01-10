@@ -6,7 +6,7 @@ class ReeMapper::Rational < ReeMapper::AbstractType
     if value.is_a?(Rational)
       value
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a rational"
+      raise ReeMapper::TypeError, "`#{name}` should be a rational, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -18,12 +18,12 @@ class ReeMapper::Rational < ReeMapper::AbstractType
       begin
         Rational(value)
       rescue ArgumentError, ZeroDivisionError => e
-        raise ReeMapper::CoercionError, "`#{name}` is invalid rational"
+        raise ReeMapper::CoercionError, "`#{name}` is invalid rational, got `#{truncate(value.inspect)}`"
       end
     elsif value.is_a?(Numeric)
       Rational(value)
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a rational"
+      raise ReeMapper::TypeError, "`#{name}` should be a rational, got `#{truncate(value.inspect)}`"
     end
   end
 

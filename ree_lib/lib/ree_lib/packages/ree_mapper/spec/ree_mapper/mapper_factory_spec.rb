@@ -83,7 +83,7 @@ RSpec.describe ReeMapper::MapperFactory do
     let(:round_wrapper) {
       Class.new(ReeMapper::AbstractWrapper) do
         def serialize(value, name:, **opts)
-          raise ReeMapper::TypeError, "`#{name}` should be a number" if !value.is_a?(Numeric)
+          raise ReeMapper::TypeError, "`#{name}` should be a number, got `#{truncate(value.inspect)}`" if !value.is_a?(Numeric)
 
           subject.type.serialize(value.round, name: name, **opts)
         end
@@ -103,7 +103,7 @@ RSpec.describe ReeMapper::MapperFactory do
         def cast(value, name:, **opts)
           value = subject.type.cast(value, name: name, **opts)
 
-          raise ReeMapper::TypeError, "`#{name}` should be a number" if !value.is_a?(Numeric)
+          raise ReeMapper::TypeError, "`#{name}` should be a number, got `#{truncate(value.inspect)}`" if !value.is_a?(Numeric)
           value.round
         end
       end

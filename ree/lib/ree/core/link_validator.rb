@@ -1,10 +1,10 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 class Ree::LinkValidator
   def initialize(packages_facade)
     @packages_facade = packages_facade
   end
-  
+
   # Validates existance and uniqueness of linked object
   # @param [Ree::Object] object
   # @param [Ree::ObjectLink] link

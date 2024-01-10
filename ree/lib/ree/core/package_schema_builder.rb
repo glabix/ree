@@ -1,4 +1,4 @@
-# frozen_string_literal  = true
+# frozen_string_literal: true
 
 require 'pathname'
 require 'json'
@@ -14,7 +14,7 @@ class Ree::PackageSchemaBuilder
     if !package.loaded?
       raise Ree::Error.new("package schema should be loaded", :invalid_schema)
     end
-    
+
     data = {
       Schema::SCHEMA_TYPE => Schema::PACKAGE,
       Schema::SCHEMA_VERSION => Schema::SCHEMA_VERSION_NUMBER,

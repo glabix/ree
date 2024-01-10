@@ -8,7 +8,7 @@ class ReeMapper::DateTime < ReeMapper::AbstractType
     if value.class == DateTime
       value
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a datetime"
+      raise ReeMapper::TypeError, "`#{name}` should be a datetime, got `#{truncate(value.inspect)}`"
     end
   end
 
@@ -22,10 +22,10 @@ class ReeMapper::DateTime < ReeMapper::AbstractType
       begin
         ReeDatetime::InDefaultTimeZone.new.call(DateTime.parse(value))
       rescue ArgumentError
-        raise ReeMapper::CoercionError, "`#{name}` is invalid datetime"
+        raise ReeMapper::CoercionError, "`#{name}` is invalid datetime, got `#{truncate(value.inspect)}`"
       end
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a datetime"
+      raise ReeMapper::TypeError, "`#{name}` should be a datetime, got `#{truncate(value.inspect)}`"
     end
   end
 

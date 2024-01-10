@@ -40,15 +40,16 @@ RSpec.describe 'ReeMapper::Rational' do
     }
 
     it {
-      expect { mapper.cast({ rational: 'a333' }) }.to raise_error(ReeMapper::CoercionError, '`rational` is invalid rational')
+      expect { mapper.cast({ rational: 'a333' }) }.to raise_error(ReeMapper::CoercionError, '`rational` is invalid rational, got `"a333"`')
     }
 
     it {
-      expect { mapper.cast({ rational: '333a' }) }.to raise_error(ReeMapper::CoercionError, '`rational` is invalid rational')
+      expect { mapper.cast({ rational: '333a' }) }.to raise_error(ReeMapper::CoercionError, '`rational` is invalid rational, got `"333a"`')
     }
 
     it {
-      expect { mapper.cast({ rational: Object.new }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational")
+      object = Object.new
+      expect { mapper.cast({ rational: object }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational, got `#{object.inspect}`")
     }
   end
 
@@ -58,15 +59,16 @@ RSpec.describe 'ReeMapper::Rational' do
     }
 
     it {
-      expect { mapper.serialize({ rational: '1/3' }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational")
+      expect { mapper.serialize({ rational: '1/3' }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational, got `\"1/3\"`")
     }
 
     it {
-      expect { mapper.serialize({ rational: nil }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational")
+      expect { mapper.serialize({ rational: nil }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational, got `nil`")
     }
 
     it {
-      expect { mapper.serialize({ rational: Object.new }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational")
+      object = Object.new
+      expect { mapper.serialize({ rational: object }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational, got `#{object.inspect}`")
     }
   end
 
@@ -76,15 +78,16 @@ RSpec.describe 'ReeMapper::Rational' do
     }
 
     it {
-      expect { mapper.db_dump({ rational: '1/3' }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational")
+      expect { mapper.db_dump({ rational: '1/3' }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational, got `\"1/3\"`")
     }
 
     it {
-      expect { mapper.db_dump({ rational: nil }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational")
+      expect { mapper.db_dump({ rational: nil }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational, got `nil`")
     }
 
     it {
-      expect { mapper.db_dump({ rational: Object.new }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational")
+      object = Object.new
+      expect { mapper.db_dump({ rational: object }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational, got `#{object.inspect}`")
     }
   end
 
@@ -106,15 +109,16 @@ RSpec.describe 'ReeMapper::Rational' do
     }
 
     it {
-      expect { mapper.db_load({ rational: 'a333' }) }.to raise_error(ReeMapper::CoercionError, '`rational` is invalid rational')
+      expect { mapper.db_load({ rational: 'a333' }) }.to raise_error(ReeMapper::CoercionError, '`rational` is invalid rational, got `"a333"`')
     }
 
     it {
-      expect { mapper.db_load({ rational: '333a' }) }.to raise_error(ReeMapper::CoercionError, '`rational` is invalid rational')
+      expect { mapper.db_load({ rational: '333a' }) }.to raise_error(ReeMapper::CoercionError, '`rational` is invalid rational, got `"333a"`')
     }
 
     it {
-      expect { mapper.db_load({ rational: Object.new }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational")
+      object = Object.new
+      expect { mapper.db_load({ rational: object }) }.to raise_error(ReeMapper::TypeError, "`rational` should be a rational, got `#{object.inspect}`")
     }
   end
 end
