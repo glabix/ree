@@ -93,7 +93,8 @@ RSpec.describe 'ReeMapper::Time' do
     }
 
     it {
-      expect { mapper.db_dump({ time: Time.new(2020).to_s }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time, got `\"2020-01-01 00:00:00 +0000\"`")
+      time = Time.new(2020).to_s
+      expect { mapper.db_dump({ time: time }) }.to raise_error(ReeMapper::TypeError, "`time` should be a time, got `#{time.inspect}`")
     }
 
     it {
