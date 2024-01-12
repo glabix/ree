@@ -2,11 +2,13 @@ PATH
   remote: .
   specs:
     ree (1.0.33)
+      abbrev
       commander (~> 4.6.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
+    abbrev (0.1.2)
     commander (4.6.0)
       highline (~> 2.0.0)
     debug (1.6.2)
@@ -38,6 +40,7 @@ PLATFORMS
   arm64-darwin-21
   x86_64-darwin-19
   x86_64-darwin-21
+  x86_64-darwin-22
   x86_64-linux
 
 DEPENDENCIES
@@ -47,4 +50,4 @@ DEPENDENCIES
   rspec (~> 3.0)
 
 BUNDLED WITH
-   2.3.7
+   2.5.4
