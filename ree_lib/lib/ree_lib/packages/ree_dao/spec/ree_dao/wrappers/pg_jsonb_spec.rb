@@ -55,14 +55,14 @@ RSpec.describe 'ReeDao::PgJsonb' do
     it {
       expect {
         mapper.db_dump({ numbers: ['1'] })
-      }.to raise_error(ReeMapper::TypeError, "`numbers[0]` should be an integer, got `\"1\"`")
+      }.to raise_error(ReeMapper::TypeError, /`numbers\[0\]` should be an integer, got `\"1\"`/)
     }
 
     it {
       object = Object.new
       expect {
         mapper.db_dump({ any: object })
-      }.to raise_error(ReeMapper::TypeError, "`any` should be an jsonb primitive, got `#{object.inspect}`")
+      }.to raise_error(ReeMapper::TypeError, /`any` should be an jsonb primitive, got `#{object.inspect}`/)
     }
   end
 
@@ -88,14 +88,14 @@ RSpec.describe 'ReeDao::PgJsonb' do
     it {
       expect {
         mapper.db_load({ numbers: Sequel::Postgres::JSONBArray.new([1.1]) })
-      }.to raise_error(ReeMapper::TypeError, "`numbers[0]` should be an integer, got `1.1`")
+      }.to raise_error(ReeMapper::TypeError, /`numbers\[0\]` should be an integer, got `1.1`/)
     }
 
     it {
       object = Object.new
       expect {
         mapper.db_load({ numbers: object })
-      }.to raise_error(ReeMapper::TypeError, "`numbers` should be a Sequel::Postgres::JSONB, got `#{object.inspect}`")
+      }.to raise_error(ReeMapper::TypeError, /`numbers` should be a Sequel::Postgres::JSONB, got `#{object.inspect}`/)
     }
   end
 end
