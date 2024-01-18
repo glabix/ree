@@ -4,6 +4,10 @@ class ReeMapper::ErrorWithLocation < ReeMapper::Error
   attr_reader :location
 
   def initialize(message, location = nil)
+    if message.is_a?(String) && location && ENV["RUBY_ENV"] == "test"
+      message = "#{message}, located at #{location}"
+    end
+
     super(message)
     @location = location
   end
@@ -14,7 +18,8 @@ class ReeMapper::ErrorWithLocation < ReeMapper::Error
 
     idx = msg.index(/\).*\n/)
     return msg if idx.nil?
-    
-    msg.insert(idx + 1, "\nlocated at #{location}")
+    return msg if ENV["RUBY_ENV"] == "test"
+
+    msg.insert(idx + 1, ", located at #{location}")
   end
 end
