@@ -14,6 +14,7 @@ module ReeMapper
 
   require_relative 'ree_mapper/types/abstract_type'
   require_relative 'ree_mapper/errors/error'
+  require_relative 'ree_mapper/errors/error_with_location'
   require_relative 'ree_mapper/errors/coercion_error'
   require_relative 'ree_mapper/errors/type_error'
   require_relative 'ree_mapper/errors/unsupported_type_error'

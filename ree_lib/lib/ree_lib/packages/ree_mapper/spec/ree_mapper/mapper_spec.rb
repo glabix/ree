@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+package_require "ree_mapper"
 
 RSpec.describe ReeMapper::Mapper do
   link :build_mapper_factory, from: :ree_mapper
@@ -32,6 +33,12 @@ RSpec.describe ReeMapper::Mapper do
       obj.define_singleton_method(:my_field) { 1 }
       expect(mapper.cast(obj)).to eq({ my_field: 1 })
     }
+
+    it "add mapper location to error full message" do
+      mapper.cast({ my_field: "not number" })
+    rescue => e
+      expect(e.full_message).to include("located at")
+    end
   end
 
   describe 'hash dto' do

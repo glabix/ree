@@ -4,33 +4,33 @@ class ReeMapper::Bool < ReeMapper::AbstractType
   TRUE_CAST_VALUES = ['1', 'true', 'on', 1, true].freeze
   FALSE_CAST_VALUES = ['0', 'false', 'off', 0, false].freeze
 
-  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Bool).throws(ReeMapper::TypeError)
-  def serialize(value, name:, role: nil)
+  contract(Any, Kwargs[name: String, location: Nilor[String]] => Bool).throws(ReeMapper::TypeError)
+  def serialize(value, name:, location: nil)
     if value.is_a?(TrueClass) || value.is_a?(FalseClass)
       value
     else
-      raise ReeMapper::TypeError, "`#{name}` should be a boolean, got `#{truncate(value.inspect)}`"
+      raise ReeMapper::TypeError.new("`#{name}` should be a boolean, got `#{truncate(value.inspect)}`", location)
     end
   end
 
-  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Bool).throws(ReeMapper::CoercionError)
-  def cast(value, name:, role: nil)
+  contract(Any, Kwargs[name: String, location: Nilor[String]] => Bool).throws(ReeMapper::CoercionError)
+  def cast(value, name:, location: nil)
     if TRUE_CAST_VALUES.include?(value)
       true
     elsif FALSE_CAST_VALUES.include?(value)
       false
     else
-      raise ReeMapper::CoercionError, "`#{name}` is invalid boolean, got `#{truncate(value.inspect)}`"
+      raise ReeMapper::CoercionError.new("`#{name}` is invalid boolean, got `#{truncate(value.inspect)}`", location)
     end
   end
 
-  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Bool).throws(ReeMapper::TypeError)
-  def db_dump(value, name:, role: nil)
-    serialize(value, name: name, role: role)
+  contract(Any, Kwargs[name: String, location: Nilor[String]] => Bool).throws(ReeMapper::TypeError)
+  def db_dump(value, name:, location: nil)
+    serialize(value, name: name, location: location)
   end
 
-  contract(Any, Kwargs[name: String, role: Nilor[Symbol, ArrayOf[Symbol]]] => Bool).throws(ReeMapper::CoercionError)
-  def db_load(value, name:, role: nil)
-    cast(value, name: name, role: role)
+  contract(Any, Kwargs[name: String, location: Nilor[String]] => Bool).throws(ReeMapper::CoercionError)
+  def db_load(value, name:, location: nil)
+    cast(value, name: name, location: location)
   end
 end

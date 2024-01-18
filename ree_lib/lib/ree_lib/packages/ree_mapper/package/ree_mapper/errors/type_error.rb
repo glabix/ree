@@ -1,4 +1,4 @@
 # frozen_string_literal: true
 
-class ReeMapper::TypeError < ReeMapper::Error
+class ReeMapper::TypeError < ReeMapper::ErrorWithLocation
 end

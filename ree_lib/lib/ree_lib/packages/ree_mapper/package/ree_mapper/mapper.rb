@@ -23,19 +23,19 @@ class ReeMapper::Mapper
 
         if type
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: [])
+            def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: [], location: nil)
               #{
                 if type.is_a?(ReeMapper::AbstractWrapper)
-                  "@type.#{method}(obj, name: name, role: role, fields_filters: fields_filters)"
+                  "@type.#{method}(obj, name: name, role: role, fields_filters: fields_filters, location: location)"
                 else
-                  "@type.#{method}(obj, name: name, role: role)"
+                  "@type.#{method}(obj, name: name, location: location)"
                 end
               }
             end
           RUBY
         else
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: [])
+            def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: [], location: nil)
               if only && !ReeMapper::FilterFieldsContract.valid?(only)
                 raise ReeMapper::ArgumentError, "Invalid `only` format"
               end
@@ -56,7 +56,7 @@ class ReeMapper::Mapper
                 is_optional = field.optional || @#{method}_strategy.always_optional
 
                 if !is_with_value && !is_optional
-                  raise ReeMapper::TypeError, "Missing required field `\#{field.from_as_str}` for `\#{name || 'root'}`"
+                  raise ReeMapper::TypeError.new("Missing required field `\#{field.from_as_str}` for `\#{name || 'root'}`", field.location)
                 end
 
                 next if !is_with_value && !field.has_default?
@@ -73,7 +73,13 @@ class ReeMapper::Mapper
                   nested_fields_filters = field_fields_filters.map { _1.filter_for(field.name) }
                   nested_fields_filters += [field.fields_filter]
 
-                  value = field.type.#{method}(value, name: nested_name, role: role, fields_filters: nested_fields_filters)
+                  value = field.type.#{method}(
+                    value,
+                    name: nested_name,
+                    role: role,
+                    fields_filters: nested_fields_filters,
+                    location: field.location,
+                  )
                 end
 
                 @#{method}_strategy.assign_value(acc, field, value)
