@@ -11,4 +11,6 @@ Bootsnap.setup(
 require 'rspec'
 require 'ree'
 
+ENV["RUBY_ENV"] = "test"
+
 Ree.init(__dir__)

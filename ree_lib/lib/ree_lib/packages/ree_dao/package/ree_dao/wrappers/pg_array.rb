@@ -8,12 +8,13 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
     Kwargs[
       name: String,
       role: Nilor[Symbol, ArrayOf[Symbol]],
-      fields_filters: ArrayOf[ReeMapper::FieldsFilter]
+      fields_filters: ArrayOf[ReeMapper::FieldsFilter],
+      location: Nilor[String],
     ] => Or[Sequel::Postgres::PGArray, String]
   )
-  def db_dump(value, name:, role: nil, fields_filters: [])
+  def db_dump(value, name:, role: nil, fields_filters: [], location: nil)
     if !value.is_a?(Array)
-      raise ReeMapper::TypeError, "`#{name}` should be an array, got `#{truncate(value.inspect)}`"
+      raise ReeMapper::TypeError.new("`#{name}` should be an array, got `#{truncate(value.inspect)}`", location)
     end
 
     value = value.map.with_index do |el, index|
@@ -21,7 +22,8 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
         el,
         name: "#{name}[#{index}]",
         role: role,
-        fields_filters: fields_filters + [subject.fields_filter]
+        fields_filters: fields_filters + [subject.fields_filter],
+        location: subject.location,
       )
     end
 
@@ -37,12 +39,13 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
     Kwargs[
       name: String,
       role: Nilor[Symbol, ArrayOf[Symbol]],
-      fields_filters: ArrayOf[ReeMapper::FieldsFilter]
+      fields_filters: ArrayOf[ReeMapper::FieldsFilter],
+      location: Nilor[String],
     ] => Array
   ).throws(ReeMapper::TypeError)
-  def db_load(value, name:, role: nil, fields_filters: [])
+  def db_load(value, name:, role: nil, fields_filters: [], location: nil)
     if !value.is_a?(Sequel::Postgres::PGArray)
-      raise ReeMapper::TypeError, "`#{name}` should be a Sequel::Postgres::PGArray, got `#{truncate(value.inspect)}`"
+      raise ReeMapper::TypeError.new("`#{name}` should be a Sequel::Postgres::PGArray, got `#{truncate(value.inspect)}`", location)
     end
 
     value.map.with_index do |val, index|
@@ -50,7 +53,8 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
         val,
         name: "#{name}[#{index}]",
         role: role,
-        fields_filters: fields_filters + [subject.fields_filter]
+        fields_filters: fields_filters + [subject.fields_filter],
+        location: subject.location,
       )
     end
   end

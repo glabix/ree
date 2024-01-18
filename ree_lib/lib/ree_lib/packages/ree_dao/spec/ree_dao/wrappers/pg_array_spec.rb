@@ -46,7 +46,7 @@ RSpec.describe 'ReeDao::PgArray' do
     it {
       expect {
         mapper.db_dump({ tags: 1 })
-      }.to raise_error(ReeMapper::TypeError, "`tags` should be an array, got `1`")
+      }.to raise_error(ReeMapper::TypeError, /`tags` should be an array, got `1`/)
     }
   end
 
@@ -66,7 +66,7 @@ RSpec.describe 'ReeDao::PgArray' do
         mapper.db_load({
           tags: 1
         })
-      }.to raise_error(ReeMapper::TypeError, "`tags` should be a Sequel::Postgres::PGArray, got `1`")
+      }.to raise_error(ReeMapper::TypeError, /`tags` should be a Sequel::Postgres::PGArray, got `1`/)
     }
   end
 end

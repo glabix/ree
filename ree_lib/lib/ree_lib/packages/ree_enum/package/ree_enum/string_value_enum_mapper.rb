@@ -6,10 +6,10 @@ class ReeEnum::StringValueEnumMapper < ReeEnum::BaseEnumMapper
     ReeEnum::Value,
     Kwargs[
       name: String,
-      role: Nilor[Symbol, ArrayOf[Symbol]]
+      location: Nilor[String],
     ] => String
   )
-  def serialize(value, name:, role: nil)
+  def serialize(value, name:, location: nil)
     value.value
   end
 
@@ -17,10 +17,10 @@ class ReeEnum::StringValueEnumMapper < ReeEnum::BaseEnumMapper
     Any,
     Kwargs[
       name: String,
-      role: Nilor[Symbol, ArrayOf[Symbol]]
+      location: Nilor[String],
     ] => ReeEnum::Value
   ).throws(ReeMapper::CoercionError)
-  def cast(value, name:, role: nil)
+  def cast(value, name:, location: nil)
     enum_value = case value
     when String
       @enum.get_values.by_value(value)
@@ -29,7 +29,7 @@ class ReeEnum::StringValueEnumMapper < ReeEnum::BaseEnumMapper
     end
 
     if enum_value.nil?
-      raise ReeMapper::CoercionError, "`#{name}` should be one of #{enum_inspection}, got `#{truncate(value.inspect)}`"
+      raise ReeMapper::CoercionError.new("`#{name}` should be one of #{enum_inspection}, got `#{truncate(value.inspect)}`", location)
     end
 
     enum_value

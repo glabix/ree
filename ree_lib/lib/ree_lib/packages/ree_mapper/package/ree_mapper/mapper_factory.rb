@@ -43,7 +43,13 @@ class ReeMapper::MapperFactory
           raise ReeMapper::UnsupportedTypeError, "type :#{name} should implement `\#{@mapper.strategy_methods.join(', ')}`"
         end
 
-        field = ReeMapper::Field.new(type, field_name, optional: optional, **opts)
+        field = ReeMapper::Field.new(
+          type,
+          field_name,
+          optional: optional,
+          **opts,
+          location: caller_locations&.first&.to_s
+        )
 
         return field unless field_name
 
@@ -90,7 +96,8 @@ class ReeMapper::MapperFactory
 
         if blk
           subject = ReeMapper::Field.new(
-            hash_from_blk(dto: dto, &blk)
+            hash_from_blk(dto: dto, &blk),
+            location: caller_locations&.first&.to_s,
           )
         end
 
@@ -105,7 +112,13 @@ class ReeMapper::MapperFactory
         type = ReeMapper::Mapper.build(@mapper.strategies, wrapper.new(subject))
         type.name = :#{name}
 
-        field = ReeMapper::Field.new(type, field_name, optional: optional, **opts)
+        field = ReeMapper::Field.new(
+          type,
+          field_name,
+          optional: optional,
+          **opts,
+          location: caller_locations&.first&.to_s,
+        )
 
         return field unless field_name
 
@@ -141,7 +154,7 @@ class ReeMapper::MapperFactory
 
     type = hash_from_blk(dto: dto, &blk)
 
-    field = ReeMapper::Field.new(type, field_name, **opts)
+    field = ReeMapper::Field.new(type, field_name, **opts, location: caller_locations&.first&.to_s)
 
     @mapper.add_field(field)
   end

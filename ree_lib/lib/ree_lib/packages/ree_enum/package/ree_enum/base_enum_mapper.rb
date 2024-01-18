@@ -12,10 +12,10 @@ class ReeEnum::BaseEnumMapper < ReeMapper::AbstractType
     ReeEnum::Value,
     Kwargs[
       name: String,
-      role: Nilor[Symbol, ArrayOf[Symbol]]
+      location: Nilor[String],
     ] => Or[Integer, String]
   )
-  def db_dump(value, name:, role: nil)
+  def db_dump(value, name:, location: nil)
     value.mapped_value
   end
 
@@ -23,14 +23,14 @@ class ReeEnum::BaseEnumMapper < ReeMapper::AbstractType
     Or[Integer, String],
     Kwargs[
       name: String,
-      role: Nilor[Symbol, ArrayOf[Symbol]]
+      location: Nilor[String],
     ] => ReeEnum::Value
   ).throws(ReeMapper::CoercionError)
-  def db_load(value, name:, role: nil)
+  def db_load(value, name:, location: nil)
     enum_val = @enum.get_values.by_mapped_value(value)
 
     if !enum_val
-      raise ReeMapper::CoercionError, "`#{name}` should be one of #{enum_inspection}, got `#{truncate(value.inspect)}`"
+      raise ReeMapper::CoercionError.new("`#{name}` should be one of #{enum_inspection}, got `#{truncate(value.inspect)}`", location)
     end
 
     enum_val
