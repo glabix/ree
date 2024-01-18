@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "sequel", "~> 5.58.0"
   spec.add_dependency "binding_of_caller", "~> 1.0.0"
   spec.add_dependency "rainbow", "~> 3.1.1"
-  spec.add_dependency "abbrev"
+  spec.add_dependency "bigdecimal", "~> 3.1.6"
 
   spec.add_development_dependency 'rack-test'
   spec.add_development_dependency 'roda', "~> 3.58.0"
