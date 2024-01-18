@@ -152,7 +152,7 @@ RSpec.describe ReeEnum::DSL do
         type: 'invalid',
         number: 0,
       })
-    }.to raise_error(ReeMapper::CoercionError, '`type` should be one of ["account"], got `"invalid"`')
+    }.to raise_error(ReeMapper::CoercionError, /`type` should be one of \["account"\], got `"invalid"`/)
 
     expect {
       mapper.db_load({
@@ -160,7 +160,7 @@ RSpec.describe ReeEnum::DSL do
         type: 'invalid',
         number: 0,
       })
-    }.to raise_error(ReeMapper::CoercionError, '`type` should be one of ["account"], got `"invalid"`')
+    }.to raise_error(ReeMapper::CoercionError, /`type` should be one of \["account"\], got `"invalid"`/)
 
     expect(
       mapper.cast({
