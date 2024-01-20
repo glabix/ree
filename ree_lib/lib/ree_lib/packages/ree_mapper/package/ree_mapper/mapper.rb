@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ReeMapper::Mapper
+  EMPTY_ARY = [].freeze
+
   contract(
     ArrayOf[ReeMapper::MapperStrategy],
     Nilor[ReeMapper::AbstractType, ReeMapper::AbstractWrapper] => self
@@ -23,7 +25,7 @@ class ReeMapper::Mapper
 
         if type
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: [], location: nil)
+            def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: EMPTY_ARY, location: nil)
               #{
                 if type.is_a?(ReeMapper::AbstractWrapper)
                   "@type.#{method}(obj, name: name, role: role, fields_filters: fields_filters, location: location)"
@@ -35,7 +37,7 @@ class ReeMapper::Mapper
           RUBY
         else
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: [], location: nil)
+            def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: EMPTY_ARY, location: nil)
               if only && !ReeMapper::FilterFieldsContract.valid?(only)
                 raise ReeMapper::ArgumentError, "Invalid `only` format"
               end
@@ -47,7 +49,11 @@ class ReeMapper::Mapper
               user_fields_filter = ReeMapper::FieldsFilter.build(only: only, except: except)
 
               @fields.each_with_object(@#{method}_strategy.build_object) do |(_, field), acc|
-                field_fields_filters = fields_filters + [user_fields_filter]
+                field_fields_filters = if user_fields_filter == ReeMapper::FieldsFilter::NoneStrategy
+                  fields_filters
+                else
+                  fields_filters + [user_fields_filter]
+                end
 
                 next unless field_fields_filters.all? { _1.allow? field.name }
                 next unless field.has_role?(role)
@@ -56,7 +62,10 @@ class ReeMapper::Mapper
                 is_optional = field.optional || @#{method}_strategy.always_optional
 
                 if !is_with_value && !is_optional
-                  raise ReeMapper::TypeError.new("Missing required field `\#{field.from_as_str}` for `\#{name || 'root'}`", field.location)
+                  raise ReeMapper::TypeError.new(
+                    "Missing required field `\#{field.from_as_str}` for `\#{name || 'root'}`", 
+                    field.location
+                  )
                 end
 
                 next if !is_with_value && !field.has_default?
@@ -70,8 +79,15 @@ class ReeMapper::Mapper
                 unless value.nil? && field.null
                   nested_name = name ? "\#{name}[\#{field.name_as_str}]" : field.name_as_str
 
-                  nested_fields_filters = field_fields_filters.map { _1.filter_for(field.name) }
-                  nested_fields_filters += [field.fields_filter]
+                  nested_fields_filters = if field_fields_filters.empty?
+                    field_fields_filters
+                  else
+                    field_fields_filters.map { _1.filter_for(field.name) }
+                  end
+
+                  if field.fields_filter != ReeMapper::FieldsFilter::NoneStrategy
+                    nested_fields_filters += [field.fields_filter]
+                  end
 
                   value = field.type.#{method}(
                     value,
