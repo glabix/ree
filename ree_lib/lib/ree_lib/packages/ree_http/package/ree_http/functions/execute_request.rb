@@ -4,13 +4,13 @@ class ReeHttp::ExecuteRequest
   include Ree::FnDSL
 
   fn :execute_request do
+    link :build_request
     link :build_request_executor
     link :slice, from: :ree_hash
-    link 'ree_http/http_exceptions', -> { HttpExceptions }
-
     link 'ree_http/constants', -> {
       DEFAULT_TIMEOUT & DEFAULT_WRITE_TIMEOUT & DEFAULT_FORCE_SSL
     }
+    link 'ree_http/http_exceptions', -> { HttpExceptions }
   end
 
   include HttpExceptions
@@ -89,7 +89,9 @@ class ReeHttp::ExecuteRequest
       "Got #{response.code} response on request URI #{request.uri}\n With BODY: #{response.body}\n"
     )
 
-    process_redirect_response(response, request, opts, &block)
+    if response.is_a?(Net::HTTPRedirection)
+      return process_redirect_response(response, request, opts, &block)
+    end
 
     response
   end
@@ -97,27 +99,33 @@ class ReeHttp::ExecuteRequest
   private
 
   def process_redirect_response(response, request, opts, &block)
-    if response.is_a?(Net::HTTPRedirection)
-      if opts[:redirects_count] == 0
-        raise TooManyRedirectsError, "Got too match redirects, if you want more redirects, use redirects_count"
-      end
-
-      if opts[:strict_redirect_mode] && STRICT_SENSITIVE_CODES.include?(response.code.to_i) && UNSAFE_VERBS.include?(request.method.to_sym)
-        raise RedirectMethodError, "Got #{response.code.to_i} with strict_mode"
-      end
-
-      if (ALWAYS_GET_CODES.include?(response.code.to_i) || STRICT_SENSITIVE_CODES.include?(response.code.to_i)) && UNSAFE_VERBS.include?(request.method.downcase.to_sym)
-        request.instance_variable_set(:@method, 'GET')
-      end
-
-      request.instance_variable_set(:@uri, URI(response['Location']))
-      request.instance_variable_set(:@path, request.uri.path)
-
-      opts[:redirects_count] -= 1
-
-      return call(request, **opts, &block)
+    if opts[:redirects_count] == 0
+      raise TooManyRedirectsError, "Got too match redirects, if you want more redirects, use redirects_count"
     end
 
-    response
+    if opts[:strict_redirect_mode] && STRICT_SENSITIVE_CODES.include?(response.code.to_i) && UNSAFE_VERBS.include?(request.method.to_sym)
+      raise RedirectMethodError, "Got #{response.code.to_i} with strict_mode"
+    end
+
+    if (ALWAYS_GET_CODES.include?(response.code.to_i) || STRICT_SENSITIVE_CODES.include?(response.code.to_i)) && UNSAFE_VERBS.include?(request.method.downcase.to_sym)
+      request.instance_variable_set(:@method, 'GET')
+    end
+
+    new_uri = URI(response['Location'] || response['location'])
+    new_request = build_request(
+      request.method.downcase.to_sym,
+      new_uri.to_s,
+      **slice(opts, [
+          :headers, :body, :form_data, :query_params,
+          :force_ssl, :ca_certs, :basic_auth, :bearer_token
+      ])
+    )
+    # request.instance_variable_set(:@uri, new_uri)
+    # request['host'] = new_uri.host
+    # request.instance_variable_set(:@path, new_uri.path)
+
+    opts[:redirects_count] -= 1
+
+    call(new_request, **opts, &block)
   end
 end
