@@ -120,9 +120,6 @@ class ReeHttp::ExecuteRequest
           :force_ssl, :ca_certs, :basic_auth, :bearer_token
       ])
     )
-    # request.instance_variable_set(:@uri, new_uri)
-    # request['host'] = new_uri.host
-    # request.instance_variable_set(:@path, new_uri.path)
 
     opts[:redirects_count] -= 1
 
