@@ -28,15 +28,15 @@ RSpec.describe 'ReeMapper::Array' do
     }
 
     it {
-      expect { mapper.serialize({ tags: 1 }) }.to raise_error(ReeMapper::TypeError, "`tags` should be an array, got `1`")
+      expect { mapper.serialize({ tags: 1 }) }.to raise_error(ReeMapper::TypeError, /`tags` should be an array, got `1`/)
     }
 
     it {
-      expect { mapper.serialize({tags: [1], ary_of_ary: ["1"] }) }.to raise_error(ReeMapper::TypeError, "`ary_of_ary[0]` should be an array, got `\"1\"`")
+      expect { mapper.serialize({tags: [1], ary_of_ary: ["1"] }) }.to raise_error(ReeMapper::TypeError, /`ary_of_ary\[0\]` should be an array, got `\"1\"`/)
     }
 
     it {
-      expect { mapper.serialize({tags: [1], ary_of_ary: [[1, "1"]] }) }.to raise_error(ReeMapper::TypeError, "`ary_of_ary[0][1]` should be an integer, got `\"1\"`")
+      expect { mapper.serialize({tags: [1], ary_of_ary: [[1, "1"]] }) }.to raise_error(ReeMapper::TypeError, /`ary_of_ary\[0\]\[1\]` should be an integer, got `\"1\"`/)
     }
   end
 
@@ -46,7 +46,7 @@ RSpec.describe 'ReeMapper::Array' do
     }
 
     it {
-      expect { mapper.cast({ 'tags' => 1 }) }.to raise_error(ReeMapper::TypeError, "`tags` should be an array, got `1`")
+      expect { mapper.cast({ 'tags' => 1 }) }.to raise_error(ReeMapper::TypeError, /`tags` should be an array, got `1`/)
     }
   end
 
@@ -56,7 +56,7 @@ RSpec.describe 'ReeMapper::Array' do
     }
 
     it {
-      expect { mapper.db_dump(OpenStruct.new({ tags: 1 })) }.to raise_error(ReeMapper::TypeError, "`tags` should be an array, got `1`")
+      expect { mapper.db_dump(OpenStruct.new({ tags: 1 })) }.to raise_error(ReeMapper::TypeError, /`tags` should be an array, got `1`/)
     }
   end
 
@@ -66,7 +66,7 @@ RSpec.describe 'ReeMapper::Array' do
     }
 
     it {
-      expect { mapper.db_load({ 'tags' => 1 }) }.to raise_error(ReeMapper::TypeError, "`tags` should be an array, got `1`")
+      expect { mapper.db_load({ 'tags' => 1 }) }.to raise_error(ReeMapper::TypeError, /`tags` should be an array, got `1`/)
     }
   end
 

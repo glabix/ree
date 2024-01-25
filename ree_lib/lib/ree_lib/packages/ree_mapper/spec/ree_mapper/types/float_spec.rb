@@ -40,16 +40,16 @@ RSpec.describe 'ReeMapper::Float' do
     }
 
     it {
-      expect { mapper.cast({ float: 'a1.1' }) }.to raise_error(ReeMapper::CoercionError, '`float` is invalid float, got `"a1.1"`')
+      expect { mapper.cast({ float: 'a1.1' }) }.to raise_error(ReeMapper::CoercionError, /`float` is invalid float, got `"a1.1"`/)
     }
 
     it {
-      expect { mapper.cast({ float: '1.1a' }) }.to raise_error(ReeMapper::CoercionError, '`float` is invalid float, got `"1.1a"`')
+      expect { mapper.cast({ float: '1.1a' }) }.to raise_error(ReeMapper::CoercionError, /`float` is invalid float, got `"1.1a"`/)
     }
 
     it {
       object = Object.new
-      expect { mapper.cast({ float: object }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float, got `#{object.inspect}`")
+      expect { mapper.cast({ float: object }) }.to raise_error(ReeMapper::TypeError, /`float` should be a float, got `#{object.inspect}`/)
     }
   end
 
@@ -59,16 +59,16 @@ RSpec.describe 'ReeMapper::Float' do
     }
 
     it {
-      expect { mapper.serialize({ float: '1.1' }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float, got `\"1.1\"`")
+      expect { mapper.serialize({ float: '1.1' }) }.to raise_error(ReeMapper::TypeError, /`float` should be a float, got `\"1.1\"`/)
     }
 
     it {
-      expect { mapper.serialize({ float: nil }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float, got `nil`")
+      expect { mapper.serialize({ float: nil }) }.to raise_error(ReeMapper::TypeError, /`float` should be a float, got `nil`/)
     }
 
     it {
       object = Object.new
-      expect { mapper.serialize({ float: object }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float, got `#{object.inspect}`")
+      expect { mapper.serialize({ float: object }) }.to raise_error(ReeMapper::TypeError, /`float` should be a float, got `#{object.inspect}`/)
     }
   end
 
@@ -78,16 +78,16 @@ RSpec.describe 'ReeMapper::Float' do
     }
 
     it {
-      expect { mapper.db_dump({ float: '1.1' }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float, got `\"1.1\"`")
+      expect { mapper.db_dump({ float: '1.1' }) }.to raise_error(ReeMapper::TypeError, /`float` should be a float, got `\"1.1\"`/)
     }
 
     it {
-      expect { mapper.db_dump({ float: nil }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float, got `nil`")
+      expect { mapper.db_dump({ float: nil }) }.to raise_error(ReeMapper::TypeError, /`float` should be a float, got `nil`/)
     }
 
     it {
       object = Object.new
-      expect { mapper.db_dump({ float: object }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float, got `#{object.inspect}`")
+      expect { mapper.db_dump({ float: object }) }.to raise_error(ReeMapper::TypeError, /`float` should be a float, got `#{object.inspect}`/)
     }
   end
 
@@ -109,20 +109,20 @@ RSpec.describe 'ReeMapper::Float' do
     }
 
     it {
-      expect { mapper.db_load({ float: 'a1.1' }) }.to raise_error(ReeMapper::CoercionError, '`float` is invalid float, got `"a1.1"`')
+      expect { mapper.db_load({ float: 'a1.1' }) }.to raise_error(ReeMapper::CoercionError, /`float` is invalid float, got `"a1.1"`/)
     }
 
     it {
-      expect { mapper.db_load({ float: '1.1a' }) }.to raise_error(ReeMapper::CoercionError, '`float` is invalid float, got `"1.1a"`')
+      expect { mapper.db_load({ float: '1.1a' }) }.to raise_error(ReeMapper::CoercionError, /`float` is invalid float, got `"1.1a"`/)
     }
 
     it {
-      expect { mapper.db_load({ float: nil }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float, got `nil`")
+      expect { mapper.db_load({ float: nil }) }.to raise_error(ReeMapper::TypeError, /`float` should be a float, got `nil`/)
     }
 
     it {
       object = Object.new
-      expect { mapper.db_load({ float: object }) }.to raise_error(ReeMapper::TypeError, "`float` should be a float, got `#{object.inspect}`")
+      expect { mapper.db_load({ float: object }) }.to raise_error(ReeMapper::TypeError, /`float` should be a float, got `#{object.inspect}`/)
     }
   end
 end
