@@ -219,7 +219,7 @@ RSpec.describe :http_get do
         force_ssl: true, headers: { token: '123'}
       )
 
-      expect(WebMock).to have_requested(:get, 'https://www.example.com/redirect_307').once
+      expect(WebMock).to have_requested(:get, 'https://www.example.com/redirect_307').with(headers: { token: '123'}).once
       expect(WebMock).to have_requested(:get, 'https://www.example.com').once
     end
   end

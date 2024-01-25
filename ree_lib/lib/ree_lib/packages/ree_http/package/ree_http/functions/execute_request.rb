@@ -108,12 +108,14 @@ class ReeHttp::ExecuteRequest
     end
 
     if (ALWAYS_GET_CODES.include?(response.code.to_i) || STRICT_SENSITIVE_CODES.include?(response.code.to_i)) && UNSAFE_VERBS.include?(request.method.downcase.to_sym)
-      request.instance_variable_set(:@method, 'GET')
+      new_request_method = :get
     end
+
+    new_request_method ||= request.method.downcase.to_sym
 
     new_uri = URI(response['Location'] || response['location'])
     new_request = build_request(
-      request.method.downcase.to_sym,
+      new_request_method,
       new_uri.to_s,
       **slice(opts, [
           :headers, :body, :form_data, :query_params,

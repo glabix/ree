@@ -148,10 +148,10 @@ RSpec.describe :http_options do
             'Accept'=>'*/*',
             'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
             'User-Agent'=>'Ruby',
-            'Token'=>'123'
+            'Host' => 'www.example.com'
           }
         )
-        .to_return(status: 200, headers: {'Token': '123'})
+        .to_return(status: 200)
     end
     after :all do
       WebMock.reset!
@@ -171,14 +171,15 @@ RSpec.describe :http_options do
         host_with_ssl + '/redirect_307',
         force_ssl: true, headers: { token: '123'}
       )
-      expect(WebMock).to have_requested(:options, host_with_ssl).with(headers: { 'Token'=>'123' })
+      expect(WebMock).to have_requested(:options, host_with_ssl + '/redirect_307').with(headers: { 'Token'=>'123' }).once
+      expect(WebMock).to have_requested(:options, host_with_ssl).once
 
       http_options(
         host_with_ssl + '/redirect_303',
         force_ssl: true, headers: { token: '123'}
       )
-      expect(WebMock).to have_requested(:get, host_with_ssl).with(headers: { 'Token'=>'123' })
+      expect(WebMock).to have_requested(:options, host_with_ssl + '/redirect_303').with(headers: { 'Token'=>'123' })
+      expect(WebMock).to have_requested(:get, host_with_ssl).once
     end
   end
 end
-
