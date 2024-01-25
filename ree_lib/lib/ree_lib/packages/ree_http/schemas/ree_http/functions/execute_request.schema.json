@@ -35,6 +35,14 @@
   ],
   "links": [
     {
+      "target": "build_request",
+      "package_name": "ree_http",
+      "as": "build_request",
+      "imports": [
+
+      ]
+    },
+    {
       "target": "build_request_executor",
       "package_name": "ree_http",
       "as": "build_request_executor",

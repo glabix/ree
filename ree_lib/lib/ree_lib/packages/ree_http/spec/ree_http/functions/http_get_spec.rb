@@ -38,7 +38,7 @@ RSpec.describe :http_get do
 
       http_get(
         host,
-        basic_auth: {username: 'user', password: 'pass'}
+        basic_auth: { username: 'user', password: 'pass' }
       )
       expect(WebMock).to have_requested(:get, host).with(basic_auth: ['user', 'pass'])
 
@@ -50,20 +50,20 @@ RSpec.describe :http_get do
 
       http_get(
         host,
-        query_params: { q: 100, "s"=> 'simple'}
+        query_params: { q: 100, "s"=> 'simple' }
       )
-      expect(WebMock).to have_requested(:get, host).with(query: { "q"=> 100, "s"=> "simple"})
+      expect(WebMock).to have_requested(:get, host).with(query: { "q"=> 100, "s"=> "simple" })
 
       http_get(
         host_with_path + '?a=200',
-        query_params: { q: 100, "s"=> 'simple'}
+        query_params: { q: 100, "s"=> 'simple' }
       )
-      expect(WebMock).to have_requested(:get, host_with_path).with(query: {"a"=>200, "q"=> 100, "s"=> "simple"})
+
+      expect(WebMock).to have_requested(:get, host_with_path).with(query: { "a"=>200, "q"=> 100, "s"=> "simple" })
     end
   end
 
   context "force ssl" do
-
     before :all do
       WebMock.reset!
       WebMock
@@ -84,6 +84,7 @@ RSpec.describe :http_get do
         host,
         force_ssl: true, headers: { token: '321'}
       )
+
       expect(WebMock).to have_requested(:get, host_with_ssl).with(headers: { 'Token'=>'321' })
     end
   end
@@ -100,7 +101,7 @@ RSpec.describe :http_get do
             'User-Agent'=>'Ruby',
           }
         )
-        .to_return(status: 307, headers: {'Location': 'https://www.example.com/'})
+        .to_return(status: 307, headers: { 'Location': 'https://www.example.com/' })
 
       WebMock
         .stub_request(:get, 'https://www.example.com/redirect_303')
@@ -111,7 +112,51 @@ RSpec.describe :http_get do
             'User-Agent'=>'Ruby',
           }
         )
-        .to_return(status: 303, headers: {'Location': 'https://www.example.com/'})
+        .to_return(status: 303, headers: { 'Location': 'https://www.example.com/' })
+
+      WebMock
+        .stub_request(:any, 'https://domain.com')
+        .with(
+          headers: {
+            'Accept'=>'*/*',
+            'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+            'User-Agent'=>'Ruby',
+          }
+        )
+        .to_return(status: 302, headers: { 'Location': 'https://www.domain.com' })
+
+      WebMock
+        .stub_request(:any, 'https://www.domain.com')
+        .with(
+          headers: {
+            'Accept'=>'*/*',
+            'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+            'User-Agent'=>'Ruby',
+          }
+        )
+        .to_return(status: 200, headers: {})
+
+      WebMock
+        .stub_request(:any, 'https://www.anotherdomain.com')
+        .with(
+          headers: {
+            'Accept'=>'*/*',
+            'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+            'User-Agent'=>'Ruby',
+          }
+        )
+        .to_return(status: 302, headers: { 'Location': 'https://sub.anotherdomain.com' })
+
+      WebMock
+        .stub_request(:any, 'https://sub.anotherdomain.com')
+        .with(
+          headers: {
+            'Accept'=>'*/*',
+            'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+            'User-Agent'=>'Ruby',
+          }
+        )
+        .to_return(status: 200, headers: {})
 
       WebMock
         .stub_request(:any, 'https://www.example.com/redirect_303_infinity')
@@ -122,7 +167,7 @@ RSpec.describe :http_get do
             'User-Agent'=>'Ruby',
           }
         )
-        .to_return(status: 303, headers: {'Location': 'https://www.example.com/redirect_303_infinity'})
+        .to_return(status: 303, headers: { 'Location': 'https://www.example.com/redirect_303_infinity' })
 
       WebMock
         .stub_request(:any, 'https://www.example.com/')
@@ -130,36 +175,52 @@ RSpec.describe :http_get do
           headers: {
             'Accept'=>'*/*',
             'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-            'User-Agent'=>'Ruby',
-            'Token'=>'123'
+            'Host' => 'www.example.com',
+            'User-Agent'=>'Ruby'
           }
         )
-        .to_return(status: 200, headers: {'Token': '123'})
+        .to_return(status: 200, headers: { 'Token': '123' })
     end
+
     after :all do
       WebMock.reset!
     end
+
     include ReeHttp::HttpExceptions
+
     let(:err_result) {
       http_get(
-        host_with_ssl + '/redirect_303_infinity',
+        'https://www.example.com/redirect_303_infinity',
         force_ssl: true, headers: { token: '123'}
       )
     }
 
     it do
-      expect{err_result}.to raise_error(ReeHttp::HttpExceptions::TooManyRedirectsError)
+      expect{ err_result }.to raise_error(ReeHttp::HttpExceptions::TooManyRedirectsError)
+
+      http_get(
+        "https://domain.com",
+        force_ssl: true
+      )
+
+      expect(WebMock).to have_requested(:get, "https://domain.com").once
+      expect(WebMock).to have_requested(:get, "https://www.domain.com").once
+
+      http_get(
+        "https://www.anotherdomain.com",
+        force_ssl: true
+      )
+
+      expect(WebMock).to have_requested(:get, "https://www.anotherdomain.com").once
+      expect(WebMock).to have_requested(:get, "https://sub.anotherdomain.com").once
 
       http_get(
         host_with_ssl + '/redirect_307',
         force_ssl: true, headers: { token: '123'}
       )
 
-      http_get(
-        host_with_ssl + '/redirect_303',
-        force_ssl: true, headers: { token: '123'}
-      )
-      expect(WebMock).to have_requested(:get, host_with_ssl).with(headers: { 'Token'=>'123' }).twice
+      expect(WebMock).to have_requested(:get, 'https://www.example.com/redirect_307').with(headers: { token: '123'}).once
+      expect(WebMock).to have_requested(:get, 'https://www.example.com').once
     end
   end
 end
