@@ -30,20 +30,20 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "ree", "~> 1.0.0"
   spec.add_dependency "tzinfo", "~> 2.0.5"
-  spec.add_dependency "loofah", "~> 2.18.0"
-  spec.add_dependency "oj", "~> 3.13.17"
-  spec.add_dependency "i18n", "~> 1.12.0"
-  spec.add_dependency "sequel", "~> 5.58.0"
+  spec.add_dependency "loofah", "~> 2.22.0"
+  spec.add_dependency "oj", "~> 3.16.3"
+  spec.add_dependency "i18n", "~> 1.14.1"
+  spec.add_dependency "sequel", "~> 5.76.0"
   spec.add_dependency "binding_of_caller", "~> 1.0.0"
   spec.add_dependency "rainbow", "~> 3.1.1"
   spec.add_dependency "bigdecimal", "~> 3.1.6"
 
   spec.add_development_dependency 'rack-test'
-  spec.add_development_dependency 'roda', "~> 3.58.0"
+  spec.add_development_dependency 'roda', "~> 3.76.0"
   spec.add_development_dependency 'sqlite3', "~> 1.4.4"
-  spec.add_development_dependency 'pg', "~> 1.4.1"
+  spec.add_development_dependency 'pg', "~> 1.5.4"
   spec.add_development_dependency 'warden', "~> 1.2.9"
   spec.add_development_dependency 'timecop', "~> 0.9.5"
-  spec.add_development_dependency "rollbar", "~> 3.3.1"
+  spec.add_development_dependency "rollbar", "~> 3.5.1"
   spec.add_development_dependency "faker", "~> 3.2"
 end
