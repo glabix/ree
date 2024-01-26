@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
 RSpec.describe :t do
-  link :t, from: :ree_i18n
   link :add_load_path, from: :ree_i18n
   link :set_locale, from: :ree_i18n
+  link :t, from: :ree_i18n
 
   before do
     add_load_path(Dir[File.join(__dir__, 'locales/*.yml')])
   end
-  
+
   it {
     set_locale(:ru)
 
     expect(t('gender.male')).to eq("Мужской")
-    expect(t('gender.missing')).to eq("translation missing: ru.gender.missing")
+    expect(t('gender.missing')).to eq("Translation missing: ru.gender.missing")
 
     expect {
       t('gender.missing', raise: true)
