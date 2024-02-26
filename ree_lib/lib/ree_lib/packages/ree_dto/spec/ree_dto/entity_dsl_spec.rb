@@ -4,6 +4,15 @@ package_require('ree_dto/entity_dsl')
 
 RSpec.describe ReeDto::EntityDSL do
   before :all do
+    class TestTaskDTO
+      include ReeDto::EntityDSL
+
+      properties(
+        id: Nilor[Integer],
+        title: String
+      )
+    end
+
     class TestDTO
       include ReeDto::EntityDSL
 
@@ -12,6 +21,24 @@ RSpec.describe ReeDto::EntityDSL do
         name: String,
         email: Nilor[String]
       )
+
+      collection :tasks, ArrayOf[TestTaskDTO]
+    end
+
+    class TestPropertyDTO
+      include ReeDto::EntityDSL
+
+      properties(
+        id: Nilor[Integer],
+        name: String,
+        email: Nilor[String]
+      )
+
+      collection :tasks, ArrayOf[TestTaskDTO]
+
+      property :email, String
+      property :user_id, Integer
+      property :age, Integer, setter: false
     end
 
     @test_dto = TestDTO.new(
@@ -61,36 +88,7 @@ TestDTO
     }
   end
 
-  context "#values_for" do
-    it {
-      dto = TestDTO.new(
-        id:    1,
-        name:  'John',
-        email: 'test@example.com'
-      )
-
-      expect(dto.values_for(:id)).to eq([1])
-      expect(dto.values_for(:id, :name)).to eq([1, 'John'])
-      expect(dto.values_for(:email, :name)).to eq(['test@example.com', 'John'])
-    }
-  end
-
-  context "#from" do
-    it {
-      StructDTO = Struct.new(:id, :name, :email, :phone)
-
-      obj = StructDTO.new(1, 'John', 'test@example.com', '123123')
-
-      dto = TestDTO.import_from(obj)
-
-      expect(dto).to be_a(TestDTO)
-      expect(dto.id).to eq(1)
-      expect(dto.name).to eq('John')
-      expect(dto.email).to eq('test@example.com')
-    }
-  end
-
-  context "#to_h" do
+  context "collection methods" do
     it {
       dto = TestDTO.new(
         id: 1,
@@ -98,11 +96,110 @@ TestDTO
         email: 'test@example.com',
       )
 
-      expect(dto.to_h).to eq({
-        id: 1,
-        name: 'John',
-        email: 'test@example.com'
-      })
+      expect(dto.respond_to? "set_tasks").to eq(true)
+      expect(dto.respond_to? "tasks").to eq(true)
+
+      task_1 = TestTaskDTO.new(id: 1, title: "new task")
+      task_2 = TestTaskDTO.new(id: 2, title: "other task")
+
+      dto.set_tasks([task_1, task_2])
+      dto.tasks
+
+      expect(dto.tasks.class).to eq(Array)
+      expect(dto.tasks.size).to eq(2)
+      expect(dto.tasks.first.class).to eq(task_1.class)
+      expect(dto.tasks.last.class).to eq(task_2.class)
     }
+
+    context "collection does not set" do
+      it {
+        ReeDto.enable_strict_mode
+
+        dto = TestDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect { dto.tasks }.to raise_error(ReeDto::EntityDSL::ClassMethods::PropertyNotSetError)
+      }
+    end
+
+    context "collection set to []" do
+      it {
+        dto = TestDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        dto.set_tasks([])
+
+        expect{ dto.tasks }.to_not raise_error
+      }
+    end
+
+    context "collection contract errors" do
+      it {
+        dto = TestDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect { dto.set_tasks([1,2,3]) }.to raise_error(Ree::Contracts::ContractError)
+      }
+    end
+
+    context "property setter true" do
+      it {
+        dto = TestPropertyDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect(dto.respond_to?("email=")).to eq(true)
+      }
+    end
+
+    context "property setter false, getter true" do
+      it {
+        dto = TestPropertyDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect(dto.respond_to? "age").to eq(true)
+        expect(dto.respond_to? "set_age").to eq(false)
+      }
+    end
+
+    context "property contract error" do
+      it {
+        dto = TestPropertyDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect { dto.email = 123 }.to raise_error(Ree::Contracts::ContractError)
+      }
+    end
+
+    context "getter true, property not set error" do
+      it {
+        ReeDto.enable_strict_mode
+
+        dto = TestPropertyDTO.new(
+          id: 1,
+          name: 'John',
+          email: 'test@example.com',
+        )
+
+        expect { dto.user_id }.to raise_error(ReeDto::EntityDSL::ClassMethods::PropertyNotSetError)
+      }
+    end
   end
 end
