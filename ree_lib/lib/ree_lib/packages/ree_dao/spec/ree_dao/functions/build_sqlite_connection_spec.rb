@@ -5,7 +5,6 @@ package_require('ree_dto/entity_dsl')
 
 RSpec.describe :build_sqlite_connection do
   link :build_sqlite_connection, from: :ree_dao
-  link :dao_cache, from: :ree_dao
 
   after do
     Ree.disable_irb_mode
@@ -129,42 +128,6 @@ RSpec.describe :build_sqlite_connection do
     expect(user.id).to be_a(Integer)
     expect(user.name).to eq(u.name)
     expect(user.age).to eq(u.age)
-  }
-
-  it {
-    dao.delete_all
-
-    user = ReeDaoTest::User.new(name: 'John', age: 30)
-    dao.put(user)
-
-    u = dao.find(user.id)
-
-    expect(u).to be_a(ReeDaoTest::User)
-
-    state = dao_cache.get(:users, u.id)
-
-    expect(state).to be_a(Hash)
-    expect(state[:id]).to eq(user.id)
-    expect(state[:age]).to eq(user.age)
-    expect(state[:name]).to eq(user.name)
-  }
-
-  it {
-    dao.delete_all
-
-    user = ReeDaoTest::User.new(name: 'John', age: 30)
-    dao.put(user)
-
-    u = dao.find(user.id)
-    expect(u).to be_a(ReeDaoTest::User)
-    expect(dao_cache.get(:users, u.id)).to_not eq(nil)
-
-    all = dao.all
-    expect(all.size).to eq(1)
-    u = all.first
-
-    expect(u).to be_a(ReeDaoTest::User)
-    expect(dao_cache.get(:users, u.id)).to be_a(Hash)
   }
 
   it {

@@ -134,10 +134,17 @@ RSpec.describe :build_pg_connection do
   it {
     products_dao.delete_all
 
-    product = ReeDaoTestPg::Product.new(title: "Product", info: { price: 1337, count: 200 }, labels: ["Sale"])
+    product = ReeDaoTestPg::Product.new(
+      title: "Product",
+      info: {
+        price: 1337, count: 200
+      },
+      labels: ["Sale"]
+    )
+
     products_dao.put(product)
 
-    product.info[:price] = 1440
+    product.info = {price: 1440, count: 200}
     product.labels << "New"
 
     products_dao.update(product)
@@ -152,7 +159,7 @@ RSpec.describe :build_pg_connection do
     products_dao.delete_all
 
     products = Array.new(3) { |i| ReeDaoTestPg::Product.new(title: "Product#{i}", info: { price: 1337, count: 200 }, labels: ["Sale"]) }
-    
+
     products_dao.import_all(products)
 
     expect(products_dao.count).to eq 3

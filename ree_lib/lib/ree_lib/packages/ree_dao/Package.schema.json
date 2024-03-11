@@ -76,34 +76,6 @@
       ]
     },
     {
-      "name": "dao_cache",
-      "schema": "packages/ree_dao/schemas/ree_dao/beans/dao_cache.schema.json",
-      "tags": [
-        "object"
-      ]
-    },
-    {
-      "name": "drop_cache",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/drop_cache.schema.json",
-      "tags": [
-        "fn"
-      ]
-    },
-    {
-      "name": "extract_changes",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/extract_changes.schema.json",
-      "tags": [
-        "fn"
-      ]
-    },
-    {
-      "name": "init_cache",
-      "schema": "packages/ree_dao/schemas/ree_dao/functions/init_cache.schema.json",
-      "tags": [
-        "fn"
-      ]
-    },
-    {
       "name": "one_to_many",
       "schema": "packages/ree_dao/schemas/ree_dao/functions/one_to_many.schema.json",
       "tags": [

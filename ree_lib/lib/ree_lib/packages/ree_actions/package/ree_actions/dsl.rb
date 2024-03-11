@@ -7,19 +7,11 @@ module ReeActions
     def self.included(base)
       base.extend(ClassMethods)
       base.include(ReeMapper::DSL)
-      link_dao_cache(base)
     end
 
     def self.extended(base)
       base.extend(ClassMethods)
       base.include(ReeMapper::DSL)
-      link_dao_cache(base)
-    end
-
-    private_class_method def self.link_dao_cache(base)
-      base.include(Ree::LinkDSL)
-      base.link :drop_cache, as: :__ree_dao_drop_cache, from: :ree_dao
-      base.link :init_cache, as: :__ree_dao_init_cache, from: :ree_dao
     end
 
     module ClassMethods
@@ -52,8 +44,6 @@ module ReeActions
         alias_method(:__original_call, :call)
 
         define_method :call do |user_access, attrs|
-          __ree_dao_init_cache
-
           if self.class.const_defined?(:ActionCaster)
             caster = self.class.const_get(:ActionCaster)
 
@@ -69,8 +59,6 @@ module ReeActions
           end
 
           __original_call(user_access, attrs)
-        ensure
-          __ree_dao_drop_cache
         end
 
         nil
