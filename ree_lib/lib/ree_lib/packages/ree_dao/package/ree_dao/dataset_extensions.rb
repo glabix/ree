@@ -227,8 +227,10 @@ module ReeDao
         hash.each do |column, value|
           previous_column_value = persistence_state[column]
 
-          if persistence_state.has_key?(column) && previous_column_value != value
-            changes[column] = value
+          if persistence_state.has_key?(column)
+            if value.is_a?(Hash) || value.is_a?(Array) || previous_column_value != value
+              changes[column] = value
+            end
           end
         end
 
