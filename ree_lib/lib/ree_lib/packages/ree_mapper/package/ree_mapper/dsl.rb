@@ -4,6 +4,7 @@ module ReeMapper::DSL
   def self.included(base)
     base.extend(ClassMethods)
     base.include(InstanceMethods)
+    base.include(Ree::Inspectable)
   end
 
   def self.extended(base)
