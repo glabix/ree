@@ -228,7 +228,7 @@ module ReeDao
           previous_column_value = persistence_state[column]
 
           if persistence_state.has_key?(column)
-            if value.is_a?(Hash) || value.is_a?(Array) || previous_column_value != value
+            if previous_column_value != value || value.respond_to?(:each)
               changes[column] = value
             end
           end
