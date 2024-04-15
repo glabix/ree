@@ -8,6 +8,7 @@ module ReeEnum
   module DSL
     def self.included(base)
       base.extend(ClassMethods)
+      base.include(Ree::Inspectable)
     end
 
     def self.extended(base)

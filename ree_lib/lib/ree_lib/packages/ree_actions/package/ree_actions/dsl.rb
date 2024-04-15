@@ -7,6 +7,7 @@ module ReeActions
     def self.included(base)
       base.extend(ClassMethods)
       base.include(ReeMapper::DSL)
+      base.include(Ree::Inspectable)
     end
 
     def self.extended(base)
