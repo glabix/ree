@@ -44,7 +44,7 @@ module ReeActions
 
         alias_method(:__original_call, :call)
 
-        define_method :call do |user_access, attrs|
+        define_method :call do |user_access, attrs, &proc|
           if self.class.const_defined?(:ActionCaster)
             caster = self.class.const_get(:ActionCaster)
 
@@ -59,7 +59,7 @@ module ReeActions
             end
           end
 
-          __original_call(user_access, attrs)
+          __original_call(user_access, attrs, &proc)
         end
 
         nil
