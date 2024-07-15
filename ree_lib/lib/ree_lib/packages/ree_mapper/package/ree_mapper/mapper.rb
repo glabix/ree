@@ -38,14 +38,6 @@ class ReeMapper::Mapper
         else
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
             def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: EMPTY_ARY, location: nil)
-              if only && !ReeMapper::FilterFieldsContract.valid?(only)
-                raise ReeMapper::ArgumentError, "Invalid `only` format"
-              end
-
-              if except && !ReeMapper::FilterFieldsContract.valid?(except)
-                raise ReeMapper::ArgumentError, "Invalid `except` format"
-              end
-
               user_fields_filter = ReeMapper::FieldsFilter.build(only: only, except: except)
 
               @fields.each_with_object(@#{method}_strategy.build_object) do |(_, field), acc|
@@ -65,7 +57,7 @@ class ReeMapper::Mapper
                 else
                   if !field.optional && !@#{method}_strategy.always_optional
                     raise ReeMapper::TypeError.new(
-                      "Missing required field `\#{field.from_as_str}` for `\#{name || 'root'}`", 
+                      "Missing required field `\#{field.from_as_str}` for `\#{name || 'root'}`",
                       field.location
                     )
                   end

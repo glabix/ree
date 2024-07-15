@@ -6,10 +6,9 @@ Ree.disable_contracts
 
 package_require "ree_mapper"
 
-RSpec.xdescribe 'Mapper Benchmark' do
+RSpec.describe 'Mapper Benchmark' do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
-  # link :deep_dup, from: :ree_object
 
   let(:mapper) do
     build_mapper_factory(
@@ -25,12 +24,11 @@ RSpec.xdescribe 'Mapper Benchmark' do
     end
   end
 
-  xit do
+  it do
     obj = { my_field: { my_field: { my_field: 1 } } }
 
     _benchmark_res = Benchmark.bmbm do |x|
       x.report('cast') { 100000.times { mapper.cast(obj) } }
-      # x.report('deep dup') { 100000.times { deep_dup(obj) } }
     end
   end
 
@@ -56,7 +54,7 @@ RSpec.xdescribe 'Mapper Benchmark' do
     result = RubyProf::Profile.profile do
       mapper.cast(obj)
     end
-    
+
     RubyProf::FlatPrinter.new(result).print(STDOUT)
   end
 end
@@ -66,11 +64,8 @@ if !no_contracts
 end
 
 # version main
-# cast   1.170618   0.004079   1.174697 (  1.181429)
-# cast   1.084879   0.003998   1.088877 (  1.090996)
+# cast   0.687436   0.016204   0.703640 (  0.704353)
+# cast   0.660420   0.001677   0.662097 (  0.662329)
 # version 1.0.93
-# cast   1.452954   0.004661   1.457615 (  1.458566)
-# cast   1.389489   0.000011   1.389500 (  1.389671)
-# 
-# deep dup   0.891498   0.000000   0.891498 (  0.892556)
-# deep dup   0.845772   0.007774   0.853546 (  0.854641)
+# cast   0.791664   0.004125   0.795789 (  0.796938)
+# cast   0.782544   0.016745   0.799289 (  0.799759)
