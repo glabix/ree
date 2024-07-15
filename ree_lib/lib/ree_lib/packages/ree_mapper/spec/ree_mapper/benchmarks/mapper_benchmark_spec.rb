@@ -9,6 +9,7 @@ package_require "ree_mapper"
 RSpec.xdescribe 'Mapper Benchmark' do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
+  # link :deep_dup, from: :ree_object
 
   let(:mapper) do
     build_mapper_factory(
@@ -29,10 +30,11 @@ RSpec.xdescribe 'Mapper Benchmark' do
 
     _benchmark_res = Benchmark.bmbm do |x|
       x.report('cast') { 100000.times { mapper.cast(obj) } }
+      # x.report('deep dup') { 100000.times { deep_dup(obj) } }
     end
   end
 
-  it do
+  xit do
     Ree.disable_contracts
     require "ruby-prof"
     package_require "ree_mapper"
@@ -69,3 +71,6 @@ end
 # version 1.0.93
 # cast   1.452954   0.004661   1.457615 (  1.458566)
 # cast   1.389489   0.000011   1.389500 (  1.389671)
+# 
+# deep dup   0.891498   0.000000   0.891498 (  0.892556)
+# deep dup   0.845772   0.007774   0.853546 (  0.854641)
