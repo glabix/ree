@@ -38,7 +38,7 @@ class ReeMapper::Mapper
         else
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
             def #{method}(obj, name: nil, role: nil, only: nil, except: nil, fields_filters: EMPTY_ARY, location: nil)
-              user_fields_filter = ReeMapper::FieldsFilter.build(only: only, except: except)
+              user_fields_filter = ReeMapper::FieldsFilter.build(only, except)
 
               @fields.each_with_object(@#{method}_strategy.build_object) do |(_, field), acc|
                 field_fields_filters = if user_fields_filter == ReeMapper::FieldsFilter::NoneStrategy
@@ -50,9 +50,7 @@ class ReeMapper::Mapper
                 next unless field_fields_filters.all? { _1.allow? field.name }
                 next unless field.has_role?(role)
 
-                has_value = @#{method}_strategy.has_value?(obj, field)
-
-                value = if has_value
+                value = if @#{method}_strategy.has_value?(obj, field)
                   @#{method}_strategy.get_value(obj, field)
                 else
                   if !field.optional && !@#{method}_strategy.always_optional

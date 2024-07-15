@@ -33,7 +33,7 @@ class ReeMapper::Field
     @roles    = Array(role)
     @default  = default
 
-    @fields_filter = ReeMapper::FieldsFilter.build(only: only, except: except)
+    @fields_filter = ReeMapper::FieldsFilter.build(only, except)
 
     @name_as_str               = @name.to_s
     @name_as_instance_var_name = :"@#{@name}"
