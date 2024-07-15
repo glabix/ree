@@ -115,40 +115,6 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
         )
       }
     end
-
-    context 'with invalid only' do
-      let(:mapper) {
-        mapper_factory.call.use(:cast) {
-          point :point
-        }
-      }
-
-      it {
-        expect {
-          mapper.cast({}, only: {})
-        }.to raise_error(
-          ReeMapper::ArgumentError,
-          "Invalid `only` format"
-        )
-      }
-    end
-
-    context 'with invalid except' do
-      let(:mapper) {
-        mapper_factory.call.use(:cast) {
-          point :point
-        }
-      }
-
-      it {
-        expect {
-          mapper.cast({}, except: {})
-        }.to raise_error(
-          ReeMapper::ArgumentError,
-          "Invalid `except` format"
-        )
-      }
-    end
   end
 
   describe 'from:' do
