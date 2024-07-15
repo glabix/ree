@@ -58,25 +58,24 @@ class ReeMapper::Mapper
                 next unless field_fields_filters.all? { _1.allow? field.name }
                 next unless field.has_role?(role)
 
-                is_with_value = @#{method}_strategy.has_value?(obj, field)
-                is_optional = field.optional || @#{method}_strategy.always_optional
+                has_value = @#{method}_strategy.has_value?(obj, field)
 
-                if !is_with_value && !is_optional
-                  raise ReeMapper::TypeError.new(
-                    "Missing required field `\#{field.from_as_str}` for `\#{name || 'root'}`", 
-                    field.location
-                  )
-                end
-
-                next if !is_with_value && !field.has_default?
-
-                value = if is_with_value
+                value = if has_value
                   @#{method}_strategy.get_value(obj, field)
                 else
+                  if !field.optional && !@#{method}_strategy.always_optional
+                    raise ReeMapper::TypeError.new(
+                      "Missing required field `\#{field.from_as_str}` for `\#{name || 'root'}`", 
+                      field.location
+                    )
+                  end
+
+                  next unless field.has_default?
+
                   field.default
                 end
 
-                unless value.nil? && field.null
+                if !value.nil? || !field.null
                   nested_name = name ? "\#{name}[\#{field.name_as_str}]" : field.name_as_str
 
                   nested_fields_filters = if field_fields_filters.empty?
@@ -85,7 +84,7 @@ class ReeMapper::Mapper
                     field_fields_filters.map { _1.filter_for(field.name) }
                   end
 
-                  if field.fields_filter != ReeMapper::FieldsFilter::NoneStrategy
+                  if field.fields_filter != ReeMapper::FieldsFilter.empty_filter
                     nested_fields_filters += [field.fields_filter]
                   end
 

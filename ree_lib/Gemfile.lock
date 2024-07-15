@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ree_lib (1.0.91)
+    ree_lib (1.0.92)
       bigdecimal (~> 3.1.6)
       binding_of_caller (~> 1.0.0)
       i18n (~> 1.14.1)
@@ -73,6 +73,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.12.0)
     rspec-support (3.12.1)
+    ruby-prof (1.7.0)
     sequel (5.76.0)
       bigdecimal
     sqlite3 (1.4.4)
@@ -102,6 +103,7 @@ DEPENDENCIES
   roda (~> 3.76.0)
   rollbar (~> 3.5.1)
   rspec
+  ruby-prof
   sqlite3 (~> 1.4.4)
   timecop (~> 0.9.5)
   warden (~> 1.2.9)
