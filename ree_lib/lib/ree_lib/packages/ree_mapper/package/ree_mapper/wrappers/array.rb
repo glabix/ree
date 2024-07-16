@@ -71,6 +71,8 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
 
+    fields_filters += [subject.fields_filter]
+
     value.map.with_index do |item, idx|
       next nil if item.nil? && subject.null
 
@@ -97,6 +99,8 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     if !value.is_a?(Array)
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
+
+    fields_filters += [subject.fields_filter]
 
     value.map.with_index do |item, idx|
       next nil if item.nil? && subject.null
