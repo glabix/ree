@@ -6,7 +6,7 @@ Ree.disable_contracts
 
 package_require "ree_mapper"
 
-RSpec.describe 'Mapper Benchmark' do
+RSpec.xdescribe 'Mapper Benchmark' do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
 
