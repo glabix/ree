@@ -6,7 +6,7 @@ Ree.disable_contracts
 
 package_require "ree_mapper"
 
-RSpec.xdescribe 'Mapper Benchmark' do
+RSpec.describe 'Mapper Benchmark' do
   link :build_mapper_factory, from: :ree_mapper
   link :build_mapper_strategy, from: :ree_mapper
 
@@ -64,8 +64,8 @@ if !no_contracts
 end
 
 # version main
-# cast   0.687436   0.016204   0.703640 (  0.704353)
-# cast   0.660420   0.001677   0.662097 (  0.662329)
+# cast   0.625590   0.008543   0.634133 (  0.635625)
+# cast   0.589163   0.003962   0.593125 (  0.593500)
 # version 1.0.93
 # cast   0.791664   0.004125   0.795789 (  0.796938)
 # cast   0.782544   0.016745   0.799289 (  0.799759)

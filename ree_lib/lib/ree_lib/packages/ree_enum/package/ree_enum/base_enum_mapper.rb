@@ -8,29 +8,17 @@ class ReeEnum::BaseEnumMapper < ReeMapper::AbstractType
     @enum = enum
   end
 
-  contract(
-    ReeEnum::Value,
-    Kwargs[
-      name: String,
-      location: Nilor[String],
-    ] => Or[Integer, String]
-  )
-  def db_dump(value, name:, location: nil)
+  contract(ReeEnum::Value => Or[Integer, String])
+  def db_dump(value)
     value.mapped_value
   end
 
-  contract(
-    Or[Integer, String],
-    Kwargs[
-      name: String,
-      location: Nilor[String],
-    ] => ReeEnum::Value
-  ).throws(ReeMapper::CoercionError)
-  def db_load(value, name:, location: nil)
+  contract(Or[Integer, String] => ReeEnum::Value).throws(ReeMapper::CoercionError)
+  def db_load(value)
     enum_val = @enum.get_values.by_mapped_value(value)
 
     if !enum_val
-      raise ReeMapper::CoercionError.new("`#{name}` should be one of #{enum_inspection}, got `#{truncate(value.inspect)}`", location)
+      raise ReeMapper::CoercionError.new("should be one of #{enum_inspection}, got `#{truncate(value.inspect)}`")
     end
 
     enum_val

@@ -6,25 +6,27 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
   contract(
     Any,
     Kwargs[
-      name: String,
       role: Nilor[Symbol, ArrayOf[Symbol]],
       fields_filters: ArrayOf[ReeMapper::FieldsFilter],
-      location: Nilor[String],
     ] => Or[Sequel::Postgres::PGArray, String]
   )
-  def db_dump(value, name:, role: nil, fields_filters: [], location: nil)
+  def db_dump(value, role: nil, fields_filters: [])
     if !value.is_a?(Array)
-      raise ReeMapper::TypeError.new("`#{name}` should be an array, got `#{truncate(value.inspect)}`", location)
+      raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
 
-    value = value.map.with_index do |el, index|
+    fields_filters += [subject.fields_filter]
+
+    value = value.map.with_index do |item, idx|
       subject.type.db_dump(
-        el,
-        name: "#{name}[#{index}]",
+        item,
         role: role,
-        fields_filters: fields_filters + [subject.fields_filter],
-        location: subject.location,
+        fields_filters: fields_filters,
       )
+    rescue ReeMapper::ErrorWithLocation => e
+      e.location ||= subject.location
+      e.prepend_field_name(idx.to_s)
+      raise e
     end
 
     if value.empty?
@@ -37,25 +39,27 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
   contract(
     Any,
     Kwargs[
-      name: String,
       role: Nilor[Symbol, ArrayOf[Symbol]],
       fields_filters: ArrayOf[ReeMapper::FieldsFilter],
-      location: Nilor[String],
     ] => Array
   ).throws(ReeMapper::TypeError)
-  def db_load(value, name:, role: nil, fields_filters: [], location: nil)
+  def db_load(value, role: nil, fields_filters: [])
     if !value.is_a?(Sequel::Postgres::PGArray)
-      raise ReeMapper::TypeError.new("`#{name}` should be a Sequel::Postgres::PGArray, got `#{truncate(value.inspect)}`", location)
+      raise ReeMapper::TypeError.new("should be a Sequel::Postgres::PGArray, got `#{truncate(value.inspect)}`")
     end
 
-    value.map.with_index do |val, index|
+    fields_filters += [subject.fields_filter]
+
+    value.map.with_index do |item, idx|
       subject.type.db_load(
-        val,
-        name: "#{name}[#{index}]",
+        item,
         role: role,
-        fields_filters: fields_filters + [subject.fields_filter],
-        location: subject.location,
+        fields_filters: fields_filters,
       )
+    rescue ReeMapper::ErrorWithLocation => e
+      e.location ||= subject.location
+      e.prepend_field_name(idx.to_s)
+      raise e
     end
   end
 end

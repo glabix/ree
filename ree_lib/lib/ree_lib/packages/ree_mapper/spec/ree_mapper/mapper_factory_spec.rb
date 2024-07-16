@@ -82,12 +82,17 @@ RSpec.describe ReeMapper::MapperFactory do
   describe '.register_wrapper' do
     let(:round_wrapper) {
       Class.new(ReeMapper::AbstractWrapper) do
-        def serialize(value, name:, location: nil, **opts)
+        def serialize(value, **opts)
           if !value.is_a?(Numeric)
-            raise ReeMapper::TypeError.new("`#{name}` should be a number, got `#{truncate(value.inspect)}`", location)
+            raise ReeMapper::TypeError.new("should be a number, got `#{truncate(value.inspect)}`")
           end
 
-          subject.type.serialize(value.round, name: name, location: subject.location, **opts)
+          begin
+            subject.type.serialize(value.round, **opts)
+          rescue ReeMapper::ErrorWithLocation => e
+            e.location ||= subject.location
+            raise e
+          end
         end
       end
     }
@@ -102,12 +107,18 @@ RSpec.describe ReeMapper::MapperFactory do
 
     it 'allow to register caster and serializer with the same name' do
       caster_round_wrapper = Class.new(ReeMapper::AbstractWrapper) do
-        def cast(value, name:, location: nil, **opts)
-          value = subject.type.cast(value, name: name, location: subject.location, **opts)
+        def cast(value, **opts)
+          value = begin
+            subject.type.cast(value, **opts)
+          rescue ReeMapper::ErrorWithLocation => e
+            e.location ||= subject.location
+            raise e
+          end
 
           if !value.is_a?(Numeric)
-            raise ReeMapper::TypeError.new("`#{name}` should be a number, got `#{truncate(value.inspect)}`", location)
+            raise ReeMapper::TypeError.new("should be a number, got `#{truncate(value.inspect)}`")
           end
+
           value.round
         end
       end
