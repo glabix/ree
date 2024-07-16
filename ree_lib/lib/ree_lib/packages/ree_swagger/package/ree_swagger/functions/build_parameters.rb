@@ -6,6 +6,7 @@ class ReeSwagger::BuildParameters
   fn :build_parameters do
     link :get_caster_definition
     link :build_request_body_schema
+    link :wrap, from: :ree_array
   end
 
   ObjectPathParamError = Class.new(StandardError)
@@ -36,7 +37,7 @@ class ReeSwagger::BuildParameters
         name: field.name_as_str,
         in: is_path_param ? 'path' : 'query',
         required: is_path_param || !field.optional,
-        schema: build_request_body_schema(field.type, [], [field.fields_filter]) || {}
+        schema: build_request_body_schema(field.type, [], wrap(field.fields_filter)) || {}
       }
 
       schema[:style] = 'deepObject' if field.type.type.nil?

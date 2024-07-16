@@ -7,14 +7,14 @@ class ReeSwagger::BuildSerializerSchema
     link :get_serializer_definition
   end
 
-  contract(ReeMapper::Mapper, ArrayOf[ReeMapper::FieldsFilter] => Nilor[Hash])
-  def call(mapper, fields_filters = [])
+  contract(ReeMapper::Mapper, Nilor[ArrayOf[ReeMapper::FieldsFilter]] => Nilor[Hash])
+  def call(mapper, fields_filters = nil)
     if mapper.type
       return get_serializer_definition(mapper.type, method(:call).to_proc)
     end
 
     properties = mapper.fields.each_with_object({}) do |(_name, field), acc|
-      next unless fields_filters.all? { _1.allow?(field.name) }
+      next unless fields_filters.nil? || fields_filters.all? { _1.allow?(field.name) }
 
       if field.type == mapper
         acc[field.name] = {}
@@ -25,8 +25,15 @@ class ReeSwagger::BuildSerializerSchema
 
       field_mapper = field.type
 
-      nested_fields_filters = fields_filters.map { _1.filter_for(field.name) }
-      nested_fields_filters += [field.fields_filter]
+      nested_fields_filters = fields_filters&.filter_map { _1.filter_for(field.name) }
+
+      if field.fields_filter
+        nested_fields_filters = if nested_fields_filters
+          nested_fields_filters + [field.fields_filter]
+        else
+          [field.fields_filter]
+        end
+      end
 
       swagger_type = call(field_mapper, nested_fields_filters)
 
