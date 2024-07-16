@@ -17,7 +17,7 @@ class ReeMapper::Rational < ReeMapper::AbstractType
     elsif value.is_a?(String)
       begin
         Rational(value)
-      rescue ArgumentError, ZeroDivisionError => e
+      rescue ArgumentError, ZeroDivisionError
         raise ReeMapper::CoercionError.new("`#{name}` is invalid rational, got `#{truncate(value.inspect)}`", location)
       end
     elsif value.is_a?(Numeric)

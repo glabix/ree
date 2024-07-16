@@ -17,7 +17,7 @@ class ReeMapper::Float < ReeMapper::AbstractType
     elsif value.is_a?(String)
       begin
         Float(value)
-      rescue ArgumentError => e
+      rescue ArgumentError
         raise ReeMapper::CoercionError.new("`#{name}` is invalid float, got `#{truncate(value.inspect)}`", location)
       end
     elsif defined?(BigDecimal) && value.is_a?(BigDecimal)

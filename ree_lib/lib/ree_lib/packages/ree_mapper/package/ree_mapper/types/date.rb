@@ -21,7 +21,7 @@ class ReeMapper::Date < ReeMapper::AbstractType
     elsif value.is_a?(String)
       begin
         Date.parse(value)
-      rescue ArgumentError => e
+      rescue ArgumentError
         raise ReeMapper::CoercionError.new("`#{name}` is invalid date, got `#{truncate(value.inspect)}`", location)
       end
     else
