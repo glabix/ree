@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class ReeMapper::Mapper
-  EMPTY_ARY = [].freeze
-
   contract(
     ArrayOf[ReeMapper::MapperStrategy],
     Nilor[ReeMapper::AbstractType, ReeMapper::AbstractWrapper] => self
@@ -25,10 +23,10 @@ class ReeMapper::Mapper
 
         if type
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, role: nil, only: nil, except: nil, fields_filters: EMPTY_ARY)
+            def #{method}(obj, role: nil, only: nil, except: nil, fields_filters: nil)
               #{
                 if type.is_a?(ReeMapper::AbstractWrapper)
-                  "@type.#{method}(obj, role: role, fields_filters: fields_filters)"
+                  "@type.#{method}(obj, role:, fields_filters:)"
                 else
                   "@type.#{method}(obj)"
                 end
@@ -37,17 +35,19 @@ class ReeMapper::Mapper
           RUBY
         else
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, role: nil, only: nil, except: nil, fields_filters: EMPTY_ARY)
+            def #{method}(obj, role: nil, only: nil, except: nil, fields_filters: nil)
               user_fields_filter = ReeMapper::FieldsFilter.build(only, except)
 
-              @fields.each_with_object(@#{method}_strategy.build_object) do |(_, field), acc|
-                field_fields_filters = if user_fields_filter == ReeMapper::FieldsFilter::NoneStrategy
-                  fields_filters
+              if !user_fields_filter.nil?
+                fields_filters = if fields_filters.nil?
+                  [user_fields_filter]
                 else
                   fields_filters + [user_fields_filter]
                 end
+              end
 
-                next unless field_fields_filters.all? { _1.allow? field.name }
+              @fields.each_with_object(@#{method}_strategy.build_object) do |(_, field), acc|
+                next unless fields_filters.nil? || fields_filters.all? { _1.allow? field.name }
                 next unless field.has_role?(role)
 
                 value = if @#{method}_strategy.has_value?(obj, field)
@@ -67,22 +67,18 @@ class ReeMapper::Mapper
                 end
 
                 if !value.nil? || !field.null
-                  nested_fields_filters = if field_fields_filters.empty?
-                    field_fields_filters
-                  else
-                    field_fields_filters.map { _1.filter_for(field.name) }
-                  end
+                  nested_fields_filters = fields_filters&.map { _1.filter_for(field.name) }
 
-                  if field.fields_filter != ReeMapper::FieldsFilter.empty_filter
-                    nested_fields_filters += [field.fields_filter]
+                  if field.fields_filter
+                    nested_fields_filters = if nested_fields_filters
+                      nested_fields_filters + [field.fields_filter]
+                    else
+                      [field.fields_filter]
+                    end
                   end
 
                   value = begin
-                    field.type.#{method}(
-                      value,
-                      role: role,
-                      fields_filters: nested_fields_filters,
-                    )
+                    field.type.#{method}(value, role:, fields_filters: nested_fields_filters)
                   rescue ReeMapper::ErrorWithLocation => e
                     e.prepend_field_name field.name_as_str
                     e.location ||= field.location

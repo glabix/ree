@@ -7,7 +7,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
     Any,
     Kwargs[
       role: Nilor[Symbol, ArrayOf[Symbol]],
-      fields_filters: ArrayOf[ReeMapper::FieldsFilter],
+      fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
     ] => Or[
       Sequel::Postgres::JSONBHash,
       Sequel::Postgres::JSONBArray,
@@ -19,13 +19,17 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
       Sequel::Postgres::JSONBNull
     ]
   ).throws(ReeMapper::TypeError)
-  def db_dump(value, role: nil, fields_filters: [])
+  def db_dump(value, role: nil, fields_filters: nil)
+    if subject.fields_filter
+      fields_filters = if fields_filters
+        fields_filters + [subject.fields_filter]
+      else
+        [subject.fields_filter]
+      end
+    end
+
     value = begin
-      subject.type.db_dump(
-        value,
-        role: role,
-        fields_filters: fields_filters + [subject.fields_filter],
-      )
+      subject.type.db_dump(value, role:, fields_filters:)
     rescue ReeMapper::ErrorWithLocation => e
       e.location ||= subject.location
       raise e
@@ -42,7 +46,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
     Any,
     Kwargs[
       role: Nilor[Symbol, ArrayOf[Symbol]],
-      fields_filters: ArrayOf[ReeMapper::FieldsFilter],
+      fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
     ] => Or[
       Hash,
       Array,
@@ -54,7 +58,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
       Rational,
     ]
   ).throws(ReeMapper::TypeError)
-  def db_load(value, role: nil, fields_filters: [])
+  def db_load(value, role: nil, fields_filters: nil)
     value = case value
     when Sequel::Postgres::JSONBHash
       ReeObject::ToHash.new.call(value.to_h)
@@ -66,12 +70,16 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
       raise ReeMapper::TypeError.new("should be a Sequel::Postgres::JSONB, got `#{truncate(value.inspect)}`")
     end
 
+    if subject.fields_filter
+      fields_filters = if fields_filters
+        fields_filters + [subject.fields_filter]
+      else
+        [subject.fields_filter]
+      end
+    end
+
     begin
-      subject.type.db_load(
-        value,
-        role: role,
-        fields_filters: fields_filters + [subject.fields_filter],
-      )
+      subject.type.db_load(value, role:, fields_filters:)
     rescue ReeMapper::ErrorWithLocation => e
       e.location ||= subject.location
       raise e
