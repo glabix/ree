@@ -67,7 +67,7 @@ class ReeMapper::Mapper
                 end
 
                 if !value.nil? || !field.null
-                  nested_fields_filters = fields_filters&.map { _1.filter_for(field.name) }
+                  nested_fields_filters = fields_filters&.filter_map { _1.filter_for(field.name) }
 
                   if field.fields_filter
                     nested_fields_filters = if nested_fields_filters

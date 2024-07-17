@@ -115,6 +115,21 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
         )
       }
     end
+
+    context "with empty nested filter" do
+      let(:mapper) {
+        mapper_factory.call.use(:cast) {
+          hash :point_wrap do
+            point :point
+          end
+        }
+      }
+
+      it {
+        expect(mapper.cast({ point_wrap: { point: { x: 1, y: 1, z: 1 } } }, only: [point_wrap: [:point]]))
+          .to eq({ point_wrap: { point: { x: 1, y: 1, z: 1 } } })
+      }
+    end
   end
 
   describe 'from:' do
