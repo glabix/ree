@@ -6,10 +6,8 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
   contract(
     Any,
     Kwargs[
-      name: String,
       role: Nilor[Symbol, ArrayOf[Symbol]],
-      fields_filters: ArrayOf[ReeMapper::FieldsFilter],
-      location: Nilor[String],
+      fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
     ] => Or[
       Sequel::Postgres::JSONBHash,
       Sequel::Postgres::JSONBArray,
@@ -21,29 +19,34 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
       Sequel::Postgres::JSONBNull
     ]
   ).throws(ReeMapper::TypeError)
-  def db_dump(value, name:, role: nil, fields_filters: [], location: nil)
-    value = subject.type.db_dump(
-      value,
-      name: name,
-      role: role,
-      fields_filters: fields_filters + [subject.fields_filter],
-      location: subject.location,
-    )
+  def db_dump(value, role: nil, fields_filters: nil)
+    if subject.fields_filter
+      fields_filters = if fields_filters
+        fields_filters + [subject.fields_filter]
+      else
+        [subject.fields_filter]
+      end
+    end
+
+    value = begin
+      subject.type.db_dump(value, role:, fields_filters:)
+    rescue ReeMapper::ErrorWithLocation => e
+      e.location ||= subject.location
+      raise e
+    end
 
     begin
       Sequel.pg_jsonb_wrap(value)
     rescue Sequel::Error
-      raise ReeMapper::TypeError.new("`#{name}` should be an jsonb primitive, got `#{truncate(value.inspect)}`", location)
+      raise ReeMapper::TypeError.new("should be an jsonb primitive, got `#{truncate(value.inspect)}`")
     end
   end
 
   contract(
     Any,
     Kwargs[
-      name: String,
       role: Nilor[Symbol, ArrayOf[Symbol]],
-      fields_filters: ArrayOf[ReeMapper::FieldsFilter],
-      location: Nilor[String],
+      fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
     ] => Or[
       Hash,
       Array,
@@ -55,7 +58,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
       Rational,
     ]
   ).throws(ReeMapper::TypeError)
-  def db_load(value, name:, role: nil, fields_filters: [], location: nil)
+  def db_load(value, role: nil, fields_filters: nil)
     value = case value
     when Sequel::Postgres::JSONBHash
       ReeObject::ToHash.new.call(value.to_h)
@@ -64,15 +67,22 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
     when Numeric, String, TrueClass, FalseClass, NilClass
       value
     else
-      raise ReeMapper::TypeError.new("`#{name}` should be a Sequel::Postgres::JSONB, got `#{truncate(value.inspect)}`", location)
+      raise ReeMapper::TypeError.new("should be a Sequel::Postgres::JSONB, got `#{truncate(value.inspect)}`")
     end
 
-    subject.type.db_load(
-      value,
-      name: name,
-      role: role,
-      fields_filters: fields_filters + [subject.fields_filter],
-      location: subject.location,
-    )
+    if subject.fields_filter
+      fields_filters = if fields_filters
+        fields_filters + [subject.fields_filter]
+      else
+        [subject.fields_filter]
+      end
+    end
+
+    begin
+      subject.type.db_load(value, role:, fields_filters:)
+    rescue ReeMapper::ErrorWithLocation => e
+      e.location ||= subject.location
+      raise e
+    end
   end
 end

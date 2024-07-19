@@ -1,27 +1,27 @@
 # frozen_string_literal: true
 
 class ReeMapper::String < ReeMapper::AbstractType
-  contract(Any, Kwargs[name: String, location: Nilor[String]] => String).throws(ReeMapper::TypeError)
-  def serialize(value, name:, location: nil)
+  contract(Any => String).throws(ReeMapper::TypeError)
+  def serialize(value)
     if value.is_a? String
       value
     else
-      raise ReeMapper::TypeError.new("`#{name}` should be a string, got `#{truncate(value.inspect)}`", location)
+      raise ReeMapper::TypeError.new("should be a string, got `#{truncate(value.inspect)}`")
     end
   end
 
-  contract(Any, Kwargs[name: String, location: Nilor[String]] => String).throws(ReeMapper::TypeError)
-  def cast(value, name:, location: nil)
-    serialize(value, name: name, location: location)
+  contract(Any => String).throws(ReeMapper::TypeError)
+  def cast(value)
+    serialize(value)
   end
 
-  contract(Any, Kwargs[name: String, location: Nilor[String]] => String).throws(ReeMapper::TypeError)
-  def db_dump(value, name:, location: nil)
-    serialize(value, name: name, location: location)
+  contract(Any => String).throws(ReeMapper::TypeError)
+  def db_dump(value)
+    serialize(value)
   end
 
-  contract(Any, Kwargs[name: String, location: Nilor[String]] => String).throws(ReeMapper::TypeError)
-  def db_load(value, name:, location: nil)
-    serialize(value, name: name, location: location)
+  contract(Any => String).throws(ReeMapper::TypeError)
+  def db_load(value)
+    serialize(value)
   end
 end

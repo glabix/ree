@@ -22,7 +22,7 @@
         {
           "arg": "fields_filters",
           "arg_type": "opt",
-          "type": "ArrayOf[ReeMapper::FieldsFilter]"
+          "type": "Nilor[ArrayOf[ReeMapper::FieldsFilter]]"
         }
       ]
     }

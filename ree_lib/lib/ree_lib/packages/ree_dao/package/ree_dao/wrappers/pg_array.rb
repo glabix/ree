@@ -6,25 +6,29 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
   contract(
     Any,
     Kwargs[
-      name: String,
       role: Nilor[Symbol, ArrayOf[Symbol]],
-      fields_filters: ArrayOf[ReeMapper::FieldsFilter],
-      location: Nilor[String],
+      fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
     ] => Or[Sequel::Postgres::PGArray, String]
   )
-  def db_dump(value, name:, role: nil, fields_filters: [], location: nil)
+  def db_dump(value, role: nil, fields_filters: nil)
     if !value.is_a?(Array)
-      raise ReeMapper::TypeError.new("`#{name}` should be an array, got `#{truncate(value.inspect)}`", location)
+      raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
 
-    value = value.map.with_index do |el, index|
-      subject.type.db_dump(
-        el,
-        name: "#{name}[#{index}]",
-        role: role,
-        fields_filters: fields_filters + [subject.fields_filter],
-        location: subject.location,
-      )
+    if subject.fields_filter
+      fields_filters = if fields_filters
+        fields_filters + [subject.fields_filter]
+      else
+        [subject.fields_filter]
+      end
+    end
+
+    value = value.map.with_index do |item, idx|
+      subject.type.db_dump(item, role:, fields_filters:)
+    rescue ReeMapper::ErrorWithLocation => e
+      e.location ||= subject.location
+      e.prepend_field_name(idx.to_s)
+      raise e
     end
 
     if value.empty?
@@ -37,25 +41,29 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
   contract(
     Any,
     Kwargs[
-      name: String,
       role: Nilor[Symbol, ArrayOf[Symbol]],
-      fields_filters: ArrayOf[ReeMapper::FieldsFilter],
-      location: Nilor[String],
+      fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
     ] => Array
   ).throws(ReeMapper::TypeError)
-  def db_load(value, name:, role: nil, fields_filters: [], location: nil)
+  def db_load(value, role: nil, fields_filters: nil)
     if !value.is_a?(Sequel::Postgres::PGArray)
-      raise ReeMapper::TypeError.new("`#{name}` should be a Sequel::Postgres::PGArray, got `#{truncate(value.inspect)}`", location)
+      raise ReeMapper::TypeError.new("should be a Sequel::Postgres::PGArray, got `#{truncate(value.inspect)}`")
     end
 
-    value.map.with_index do |val, index|
-      subject.type.db_load(
-        val,
-        name: "#{name}[#{index}]",
-        role: role,
-        fields_filters: fields_filters + [subject.fields_filter],
-        location: subject.location,
-      )
+    if subject.fields_filter
+      fields_filters = if fields_filters
+        fields_filters + [subject.fields_filter]
+      else
+        [subject.fields_filter]
+      end
+    end
+
+    value.map.with_index do |item, idx|
+      subject.type.db_load(item, role:, fields_filters:)
+    rescue ReeMapper::ErrorWithLocation => e
+      e.location ||= subject.location
+      e.prepend_field_name(idx.to_s)
+      raise e
     end
   end
 end

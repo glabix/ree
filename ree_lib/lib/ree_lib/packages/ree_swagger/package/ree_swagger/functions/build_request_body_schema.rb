@@ -10,9 +10,9 @@ class ReeSwagger::BuildRequestBodySchema
   contract(
     ReeMapper::Mapper,
     ArrayOf[Symbol],
-    ArrayOf[ReeMapper::FieldsFilter] => Nilor[Hash]
+    Nilor[ArrayOf[ReeMapper::FieldsFilter]] => Nilor[Hash]
   )
-  def call(mapper, path_params = [], fields_filters = [])
+  def call(mapper, path_params = [], fields_filters = nil)
     if mapper.type
       return get_caster_definition(mapper.type, method(:call).to_proc)
     end
@@ -20,7 +20,7 @@ class ReeSwagger::BuildRequestBodySchema
     required_fields = []
 
     properties = mapper.fields.each_with_object({}) do |(_name, field), acc|
-      next unless fields_filters.all? { _1.allow?(field.name) }
+      next unless fields_filters.nil? || fields_filters.all? { _1.allow?(field.name) }
 
       next if path_params.include?(field.name)
 
@@ -34,8 +34,15 @@ class ReeSwagger::BuildRequestBodySchema
       required_fields << field.name.to_s if !field.optional
       field_mapper = field.type
 
-      nested_fields_filters = fields_filters.map { _1.filter_for(field.name) }
-      nested_fields_filters += [field.fields_filter]
+      nested_fields_filters = fields_filters&.filter_map { _1.filter_for(field.name) }
+
+      if field.fields_filter
+        nested_fields_filters = if nested_fields_filters
+          nested_fields_filters + [field.fields_filter]
+        else
+          [field.fields_filter]
+        end
+      end
 
       swagger_type = call(field_mapper, [], nested_fields_filters)
 

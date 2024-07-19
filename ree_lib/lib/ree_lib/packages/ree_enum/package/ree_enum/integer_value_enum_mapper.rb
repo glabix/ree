@@ -2,25 +2,13 @@
 require_relative "base_enum_mapper"
 
 class ReeEnum::IntegerValueEnumMapper < ReeEnum::BaseEnumMapper
-  contract(
-    ReeEnum::Value,
-    Kwargs[
-      name: String,
-      location: Nilor[String],
-    ] => Integer
-  )
-  def serialize(value, name:, location: nil)
+  contract(ReeEnum::Value => Integer)
+  def serialize(value)
     value.value
   end
 
-  contract(
-    Any,
-    Kwargs[
-      name: String,
-      location: Nilor[String],
-    ] => ReeEnum::Value
-  ).throws(ReeMapper::CoercionError)
-  def cast(value, name:, location: nil)
+  contract(Any => ReeEnum::Value).throws(ReeMapper::CoercionError)
+  def cast(value)
     enum_value = case value
     when Integer
       @enum.get_values.by_value(value)
@@ -34,7 +22,7 @@ class ReeEnum::IntegerValueEnumMapper < ReeEnum::BaseEnumMapper
     end
 
     if enum_value.nil?
-      raise ReeMapper::CoercionError.new("`#{name}` should be one of #{enum_inspection}, got `#{truncate(value.inspect)}`", location)
+      raise ReeMapper::CoercionError.new("should be one of #{enum_inspection}, got `#{truncate(value.inspect)}`")
     end
 
     enum_value

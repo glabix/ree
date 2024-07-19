@@ -8,6 +8,9 @@
   ],
   "depends_on": [
     {
+      "name": "ree_array"
+    },
+    {
       "name": "ree_dto"
     },
     {

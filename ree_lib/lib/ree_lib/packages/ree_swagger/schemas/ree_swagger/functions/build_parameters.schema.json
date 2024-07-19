@@ -48,6 +48,14 @@
       "imports": [
 
       ]
+    },
+    {
+      "target": "wrap",
+      "package_name": "ree_array",
+      "as": "wrap",
+      "imports": [
+
+      ]
     }
   ]
 }

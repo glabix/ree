@@ -55,35 +55,26 @@ class ReeMapper::FieldsFilter
     attr_reader :fields
   end
 
-  class NoneStrategy
-    def self.allow?(field)
-      true
-    end
-  end
-
-  def self.empty_filter
-    @empty_filter ||= new(NoneStrategy, {}).freeze
-  end
-
-  contract Nilor[ReeMapper::FilterFieldsContract], Nilor[ReeMapper::FilterFieldsContract] => Any
-  def self.build(only:, except:)
-    return empty_filter if only.nil? && except.nil?
-
+  contract(
+    Nilor[ReeMapper::FilterFieldsContract],
+    Nilor[ReeMapper::FilterFieldsContract] => Nilor[ReeMapper::FieldsFilter]
+  )
+  def self.build(only, except)
     strategy = if !only.nil?
       OnlyStrategy.new(only, except)
     elsif !except.nil?
       ExceptStrategy.new(except)
     else
-      NoneStrategy
+      return nil
     end
 
     nested_fields_filters = {}
-    
+
     only = only&.select { _1.is_a? Hash }&.reduce(&:merge)
     except = except&.select { _1.is_a? Hash }&.reduce(&:merge)
 
-    only&.each { nested_fields_filters[_1] = build(only: _2, except: except&.dig(_1)) }
-    except&.each { nested_fields_filters[_1] ||= build(only: nil, except: _2) }
+    only&.each { nested_fields_filters[_1] = build(_2, except&.dig(_1)) }
+    except&.each { nested_fields_filters[_1] ||= build(nil, _2) }
 
     new(strategy, nested_fields_filters)
   end
@@ -98,7 +89,7 @@ class ReeMapper::FieldsFilter
   end
 
   def filter_for(field)
-    nested_fields_filters.fetch(field, self.class.empty_filter)
+    nested_fields_filters[field]
   end
 
   private
