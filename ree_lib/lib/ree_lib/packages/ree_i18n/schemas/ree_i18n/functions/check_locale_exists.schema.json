@@ -1,0 +1,33 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.1",
+  "name": "check_locale_exists",
+  "path": "packages/ree_i18n/package/ree_i18n/functions/check_locale_exists.rb",
+  "mount_as": "fn",
+  "class": "ReeI18n::CheckLocaleExists",
+  "factory": null,
+  "methods": [
+    {
+      "doc": "",
+      "throws": [
+
+      ],
+      "return": "Bool",
+      "args": [
+        {
+          "arg": "value",
+          "arg_type": "req",
+          "type": "String"
+        },
+        {
+          "arg": "locale",
+          "arg_type": "opt",
+          "type": "Nilor[Or[String, Symbol]]"
+        }
+      ]
+    }
+  ],
+  "links": [
+
+  ]
+}

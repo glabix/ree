@@ -26,6 +26,13 @@
       ]
     },
     {
+      "name": "check_locale_exists",
+      "schema": "packages/ree_i18n/schemas/ree_i18n/functions/check_locale_exists.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
       "name": "get_default_locale",
       "schema": "packages/ree_i18n/schemas/ree_i18n/functions/get_default_locale.schema.json",
       "tags": [
