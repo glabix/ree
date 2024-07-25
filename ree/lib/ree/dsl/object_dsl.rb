@@ -45,11 +45,13 @@ class Ree::ObjectDsl
   # @param [Nilor[Symbol]] as
   # @param [Nilor[Symbol]] from
   # @param [Nilor[Proc]] import
-  def link_object(object_name, as: nil, from: nil, import: nil)
+  # @param [Or[:object, :class, :both]] import
+  def link_object(object_name, as: nil, from: nil, import: nil, target: nil)
     check_arg(object_name, :object_name, Symbol)
     check_arg(as, :as, Symbol) if as
     check_arg(from, :from, Symbol) if from
     check_arg(import, :import, Proc) if import
+    check_target(target) if target
 
     link_package_name = from.nil? ? @object.package_name : from
     link_object_name = object_name
@@ -69,7 +71,7 @@ class Ree::ObjectDsl
     end
 
     link = Ree::ObjectLink.new(
-      link_object_name, link_package_name, link_as
+      link_object_name, link_package_name, link_as, target
     )
 
     if const_list
@@ -81,6 +83,14 @@ class Ree::ObjectDsl
     Ree.logger.debug("  #{@object.klass}.link(:#{link_object_name}, from: #{link_package_name}, as: #{link_as})")
 
     @packages_facade.load_package_object(link_package_name, link_object_name)
+  end
+
+  # @param [Symbol] target (:object, :class, :both, default: :object)
+  def target(val)
+    check_arg(val, :target, Symbol)
+    check_target(val)
+
+    @object.set_target(val)
   end
 
   # @param [Symbol] method_name
@@ -274,6 +284,12 @@ class Ree::ObjectDsl
 
     if dep_package.nil?
       raise_error("Package :#{package_name} is not added as dependency for :#{@object.package_name} package\npackage path: #{File.join(Ree.root_dir, @package.entry_rpath)}")
+    end
+  end
+
+  def check_target(val)
+    if ![:object, :class, :both].include?(val)
+      raise Ree::Error.new("target should be one of [:object, :class, :both]", :invalid_dsl_usage)
     end
   end
 

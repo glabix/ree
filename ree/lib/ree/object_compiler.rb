@@ -18,12 +18,51 @@ class Ree::ObjectCompiler
 
     klass = object.klass
     links = object.links
+
+    links.each do |_|
+      @link_validator.call(object, _)
+      pckg = @packages_facade.get_loaded_package(_.package_name)
+      obj = pckg.get_object(_.object_name)
+      @packages_facade.load_package_object(pckg.name, obj.name)
+    end
+
     eval_list = []
 
     eval_list.push("\n# #{object.klass}")
     indent = ""
+    class_links = []
+    object_links = []
 
     links.each do |_|
+      pckg = @packages_facade.get_loaded_package(_.package_name)
+      obj = pckg.get_object(_.object_name)
+
+      if [:class, :both].include?(_.target || obj.target)
+        class_links << _
+      end
+
+      if [:object, :both].include?(_.target || obj.target)
+        object_links << _
+      end
+    end
+
+    if !class_links.empty?
+      eval_list.push("class << self")
+      indent = inc_indent(indent)
+
+      class_links.each do |_|
+        pckg = @packages_facade.get_loaded_package(_.package_name)
+        obj = pckg.get_object(_.object_name)
+        eval_list.push(indent + "@#{_.as} = #{obj.klass}.new")
+        eval_list.push(indent + "private attr_reader :#{_.as}")
+      end
+
+      indent = dec_indent(indent)
+      eval_list.push("end")
+      eval_list.push("\n")
+    end
+
+    object_links.each do |_|
       eval_list.push(indent + "private attr_reader :#{_.as}")
     end
 

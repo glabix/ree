@@ -5,7 +5,7 @@ class Ree::Object
               :package_name, :factory, :after_init,
               :class_name, :links, :mount_as, :freeze,
               :errors, :linked_const_list, :compiled_frozen,
-              :singleton, :tags
+              :singleton, :tags, :target
 
   # @param [Symbol] name Object name
   # @param [String] schema_rpath Object schema path relative to project root dir
@@ -16,6 +16,7 @@ class Ree::Object
     @rpath = rpath
     @links = []
     @errors = []
+    @target = :object
     @loaded = false
     @freeze = true
     @compiled = false
@@ -77,6 +78,11 @@ class Ree::Object
 
   def freeze?
     @freeze
+  end
+
+  # @param [Symbol] val Object linking target (:object, :class, :both)
+  def set_target(val)
+    @target = val; self
   end
 
   # @param [Symbol] val Object mount as type (:fn or :bean)

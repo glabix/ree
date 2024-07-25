@@ -12,12 +12,17 @@ class Accounts::RegisterAccountCmd
   fn :register_account_cmd do
     singleton
 
-    link :transaction
-    link :build_user, import: -> { User & UserStates.as(States) }
-    link :users_repo
-    link :factory_users_repo
-    link :welcome_email
+    link :build_user, import: -> { User }
     link :except, from: :hash_utils
+    link :factory_users_repo
+    link :transaction, target: :both
+    link :user_states, import: -> { UserStates.as(States) }
+    link :users_repo
+    link :welcome_email
+  end
+
+  transaction do
+    user_states
   end
 
   ValidationErr = Class.new(ArgumentError)

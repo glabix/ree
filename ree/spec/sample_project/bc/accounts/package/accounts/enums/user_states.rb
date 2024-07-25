@@ -1,7 +1,9 @@
 class Accounts::UserStates
   include Ree::BeanDSL
 
-  bean :user_states
+  bean :user_states do
+    target :both
+  end
 
   class << self
     def active

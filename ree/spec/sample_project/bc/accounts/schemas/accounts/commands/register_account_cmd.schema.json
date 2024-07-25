@@ -58,8 +58,7 @@
       "package_name": "accounts",
       "as": "build_user",
       "imports": [
-        "User",
-        "UserStates"
+        "User"
       ]
     },
     {
@@ -84,6 +83,14 @@
       "as": "transaction",
       "imports": [
 
+      ]
+    },
+    {
+      "target": "user_states",
+      "package_name": "accounts",
+      "as": "user_states",
+      "imports": [
+        "UserStates"
       ]
     },
     {
