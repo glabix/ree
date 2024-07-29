@@ -11,19 +11,28 @@ module Ree::RSpecLinkDSL
 
       define_method as do |*args, **kwargs, &proc|
         if obj.object?
-          obj.klass.new
+          if obj.with_caller?
+            obj.klass.new.set_caller(self)
+          else
+            obj.klass.new
+          end
         else
-          obj.klass.new.call(*args, **kwargs, &proc)
+          if obj.with_caller?
+            obj.klass.new.set_caller(self).call(*args, **kwargs, &proc)
+          else
+            obj.klass.new.call(*args, **kwargs, &proc)
+          end
         end
       end
     elsif obj_name.is_a?(String)
       const_list = link_file(from, obj_name, import_proc)
+
       const_list.each do |const|
         Object.const_set(const.name, self.const_get(const.name))
       end
     else
       raise Ree::Error.new("Invalid link DSL usage. Args should be Hash or String")
-    end  
+    end
   end
 
   private
