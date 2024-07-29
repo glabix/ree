@@ -30,6 +30,18 @@ class Ree::ObjectCompiler
 
     eval_list.push("\n# #{object.klass}")
     indent = ""
+
+    if object.with_caller?
+      eval_list.push("def get_caller = @caller")
+      eval_list.push("\n")
+      eval_list.push("def set_caller(c)")
+      indent = inc_indent(indent)
+      eval_list.push("@caller = c")
+      eval_list.push("self")
+      indent = dec_indent(indent)
+      eval_list.push("end")
+    end
+
     class_links = []
     object_links = []
 
@@ -47,23 +59,16 @@ class Ree::ObjectCompiler
     end
 
     if !class_links.empty?
-      eval_list.push("class << self")
-      indent = inc_indent(indent)
-
       class_links.each do |_|
         pckg = @packages_facade.get_loaded_package(_.package_name)
         obj = pckg.get_object(_.object_name)
-        eval_list.push(indent + "@#{_.as} = #{obj.klass}.new")
-        eval_list.push(indent + "private attr_reader :#{_.as}")
+
+        if !obj.with_caller?
+          eval_list.push(indent + "@#{_.as} = #{obj.klass}.new")
+        end
       end
 
-      indent = dec_indent(indent)
-      eval_list.push("end")
       eval_list.push("\n")
-    end
-
-    object_links.each do |_|
-      eval_list.push(indent + "private attr_reader :#{_.as}")
     end
 
     eval_list.push("\n")
@@ -136,23 +141,26 @@ class Ree::ObjectCompiler
 
     eval_list.push(indent + 'end')
 
-    links.each do |_|
+    if !class_links.empty?
+      eval_list.push("\n")
+      eval_list.push("class << self")
+      indent = inc_indent(indent)
+
+      class_links.each do |_|
+        pckg = @packages_facade.get_loaded_package(_.package_name)
+        obj = pckg.get_object(_.object_name)
+        mount_fn(eval_list, obj, indent, _)
+      end
+
+      indent = dec_indent(indent)
+      eval_list.push("end")
+      eval_list.push("\n")
+    end
+
+    object_links.each do |_|
       pckg = @packages_facade.get_loaded_package(_.package_name)
       obj = pckg.get_object(_.object_name)
-
-      if obj.fn?
-        eval_list.push(indent + "\nprivate def #{_.as}(*args, **kwargs, &block)")
-        indent = inc_indent(indent)
-        eval_list.push(indent + "@#{_.as}.call(*args, **kwargs, &block)")
-        indent = dec_indent(indent)
-        eval_list.push(indent + "end")
-      else
-        eval_list.push(indent + "\nprivate def #{_.as}")
-        indent = inc_indent(indent)
-        eval_list.push(indent + "@#{_.as}")
-        indent = dec_indent(indent)
-        eval_list.push(indent + "end")
-      end
+      mount_fn(eval_list, obj, indent, _)
     end
 
     indent = dec_indent(indent)
@@ -177,6 +185,38 @@ class Ree::ObjectCompiler
   end
 
   private
+
+  def mount_fn(eval_list, obj, indent, object_link)
+    if obj.fn?
+      if obj.with_caller?
+        eval_list.push(indent + "private def #{object_link.as}(*args, **kwargs, &block)")
+        indent = inc_indent(indent)
+        eval_list.push(indent + "#{obj.klass}.new.set_caller(self).call(*args, **kwargs, &block)")
+        indent = dec_indent(indent)
+        eval_list.push(indent + "end")
+      else
+        eval_list.push(indent + "private def #{object_link.as}(*args, **kwargs, &block)")
+        indent = inc_indent(indent)
+        eval_list.push(indent + "@#{object_link.as}.call(*args, **kwargs, &block)")
+        indent = dec_indent(indent)
+        eval_list.push(indent + "end")
+      end
+    else
+      if obj.with_caller?
+        eval_list.push(indent + "private def #{object_link.as}")
+        indent = inc_indent(indent)
+        eval_list.push(indent + "@#{object_link.as}")
+        indent = dec_indent(indent)
+        eval_list.push(indent + "end")
+      else
+        eval_list.push(indent + "private def #{object_link.as}")
+        indent = inc_indent(indent)
+        eval_list.push(indent + "@#{object_link.as}")
+        indent = dec_indent(indent)
+        eval_list.push(indent + "end")
+      end
+    end
+  end
 
   def inc_indent(indent)
     indent += "  "

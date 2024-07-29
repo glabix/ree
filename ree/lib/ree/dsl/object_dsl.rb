@@ -93,6 +93,20 @@ class Ree::ObjectDsl
     @object.set_target(val)
   end
 
+  def with_caller
+    @object.set_freeze(false)
+
+    if @object.singleton?
+      raise_error("`with_caller` is not available for singletons")
+    end
+
+    if @object.factory?
+      raise_error("`with_caller` is not available for factory beans")
+    end
+
+    @object.set_as_with_caller
+  end
+
   # @param [Symbol] method_name
   def factory(method_name)
     if !@object.object?
@@ -103,11 +117,19 @@ class Ree::ObjectDsl
       raise_error("Factory beans do not support after_init DSL")
     end
 
+    if @object.with_caller?
+      raise_error("Factory beans do not support with_caller DSL")
+    end
+
     check_arg(method_name, :method_name, Symbol)
     @object.set_factory(method_name)
   end
 
   def singleton
+    if @object.with_caller?
+      raise_error("`singleton` should not be combined with `with_caller`")
+    end
+
     @object.set_as_singleton
   end
 
@@ -123,6 +145,10 @@ class Ree::ObjectDsl
 
   # @param [Bool] flag
   def freeze(flag)
+    if @object.with_caller? && flag
+      raise_error("`freeze` should not be combined with `with_caller`")
+    end
+
     check_bool(flag, :flag)
     @object.set_freeze(flag)
   end
