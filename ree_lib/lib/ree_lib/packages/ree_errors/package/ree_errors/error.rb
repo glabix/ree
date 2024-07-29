@@ -2,8 +2,8 @@ module ReeErrors
   class Error < StandardError
     include Ree::LinkDSL
 
-    link :t, from: :ree_i18n
     link :check_locale_exists, from: :ree_i18n
+    link :t, from: :ree_i18n
     link :underscore, from: :ree_string
 
     def initialize(msg = nil)
@@ -20,7 +20,7 @@ module ReeErrors
         has_path = path.include?(".")
 
         if has_path
-          pre_path = [caller_module, caller_class].compact.map { underscore(_)}.join(".")
+          pre_path = [caller_module, caller_class].compact.map { underscore(_1)}.join(".")
 
           if check_locale_exists(path)
             t(path, default_by_locale: :en)
