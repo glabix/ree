@@ -205,7 +205,7 @@ class Ree::ObjectCompiler
       if obj.with_caller?
         eval_list.push(indent + "private def #{object_link.as}")
         indent = inc_indent(indent)
-        eval_list.push(indent + "@#{object_link.as}")
+        eval_list.push(indent + "#{obj.klass}.new.set_caller(self)")
         indent = dec_indent(indent)
         eval_list.push(indent + "end")
       else

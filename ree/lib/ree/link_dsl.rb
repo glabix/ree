@@ -70,21 +70,34 @@ module Ree::LinkDSL
         .load_package_object(link_package_name, link_object_name)
 
       if obj.fn?
-        self.class_eval %Q(
-          private def _#{link_as}
-            @#{link_as} ||= #{obj.klass}.new
-          end
-
-          private def #{link_as}(*args, **kwargs, &block)
-            _#{link_as}.call(*args, **kwargs, &block)
-          end
-        )
+        if obj.with_caller?
+          self.class_eval %Q(
+            private def #{link_as}(*args, **kwargs, &block)
+              #{obj.klass}.new.set_caller(self).call(*args, **kwargs, &block)
+            end
+          )
+        else
+          self.class_eval %Q(
+            private def #{link_as}(*args, **kwargs, &block)
+              @#{link_as} ||= #{obj.klass}.new
+              @#{link_as}.call(*args, **kwargs, &block)
+            end
+          )
+        end
       else
-        self.class_eval %Q(
-          private def #{link_as}
-            @#{link_as} ||= #{obj.klass}.new
-          end
-        )
+        if obj.with_caller?
+          self.class_eval %Q(
+            private def #{link_as}
+              #{obj.klass}.new.set_caller(self)
+            end
+          )
+        else
+          self.class_eval %Q(
+            private def #{link_as}
+              @#{link_as} ||= #{obj.klass}.new
+            end
+          )
+        end
       end
     end
 

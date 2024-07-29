@@ -2,6 +2,7 @@ class Accounts::UserStates
   include Ree::BeanDSL
 
   bean :user_states do
+    with_caller
     target :both
   end
 
