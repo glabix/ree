@@ -40,11 +40,15 @@ module Ree::LinkDSL
     # @param [Nilor[Symbol]] as
     # @param [Nilor[Symbol]] from
     # @param [Nilor[Proc]] import
-    def _link_object(object_name, as: nil, from: nil, import: nil)
+    def _link_object(object_name, as: nil, from: nil, target: nil, import: nil)
       check_arg(object_name, :object_name, Symbol)
       check_arg(as, :as, Symbol) if as
       check_arg(from, :from, Symbol) if from
       check_arg(import, :import, Proc) if import
+
+      if target && ![:object, :class, :both].include?(target)
+        raise Ree::Error.new("target should be one of [:object, :class, :both]", :invalid_dsl_usage)
+      end
 
       package_name = Ree::StringUtils.underscore(self.name.split('::').first).to_sym
       link_package_name = from.nil? ? package_name : from
@@ -69,33 +73,54 @@ module Ree::LinkDSL
         .packages_facade
         .load_package_object(link_package_name, link_object_name)
 
+      target ||= obj.target
+
+      if target == :both
+        mount_obj(obj, link_as, true)
+        mount_obj(obj, link_as, false)
+      elsif target == :class
+        mount_obj(obj, link_as, true)
+      elsif target == :object
+        mount_obj(obj, link_as, false)
+      end
+    end
+
+    def mount_obj(obj, link_as, mount_self)
       if obj.fn?
         if obj.with_caller?
           self.class_eval %Q(
+            #{mount_self ? "class << self" : ""}
             private def #{link_as}(*args, **kwargs, &block)
               #{obj.klass}.new.set_caller(self).call(*args, **kwargs, &block)
             end
+            #{mount_self ? "end" : ""}
           )
         else
           self.class_eval %Q(
+            #{mount_self ? "class << self" : ""}
             private def #{link_as}(*args, **kwargs, &block)
               @#{link_as} ||= #{obj.klass}.new
               @#{link_as}.call(*args, **kwargs, &block)
             end
+            #{mount_self ? "end" : ""}
           )
         end
       else
         if obj.with_caller?
           self.class_eval %Q(
+            #{mount_self ? "class << self" : ""}
             private def #{link_as}
               #{obj.klass}.new.set_caller(self)
             end
+            #{mount_self ? "end" : ""}
           )
         else
           self.class_eval %Q(
+            #{mount_self ? "class << self" : ""}
             private def #{link_as}
               @#{link_as} ||= #{obj.klass}.new
             end
+            #{mount_self ? "end" : ""}
           )
         end
       end
