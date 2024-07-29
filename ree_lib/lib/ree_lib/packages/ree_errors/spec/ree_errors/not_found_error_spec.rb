@@ -1,8 +1,10 @@
 package_require('ree_errors/not_found_error')
 
 RSpec.describe ReeErrors::NotFoundError do
+  link :not_found_error, from: :ree_errors
+
   it {
-    klass = described_class.build(:code)
+    klass = not_found_error(:code)
     error = klass.new('message')
 
     expect(klass).to be_a(Class)

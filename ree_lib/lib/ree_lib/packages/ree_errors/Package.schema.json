@@ -9,6 +9,9 @@
   "depends_on": [
     {
       "name": "ree_i18n"
+    },
+    {
+      "name": "ree_string"
     }
   ],
   "env_vars": [
@@ -19,7 +22,7 @@
       "name": "auth_error",
       "schema": "packages/ree_errors/schemas/ree_errors/auth_error.schema.json",
       "tags": [
-        "object"
+        "fn"
       ]
     },
     {
@@ -33,42 +36,42 @@
       "name": "conflict_error",
       "schema": "packages/ree_errors/schemas/ree_errors/conflict_error.schema.json",
       "tags": [
-        "object"
+        "fn"
       ]
     },
     {
       "name": "invalid_param_error",
       "schema": "packages/ree_errors/schemas/ree_errors/invalid_param_error.schema.json",
       "tags": [
-        "object"
+        "fn"
       ]
     },
     {
       "name": "not_found_error",
       "schema": "packages/ree_errors/schemas/ree_errors/not_found_error.schema.json",
       "tags": [
-        "object"
+        "fn"
       ]
     },
     {
       "name": "payment_required_error",
       "schema": "packages/ree_errors/schemas/ree_errors/payment_required_error.schema.json",
       "tags": [
-        "object"
+        "fn"
       ]
     },
     {
       "name": "permission_error",
       "schema": "packages/ree_errors/schemas/ree_errors/permission_error.schema.json",
       "tags": [
-        "object"
+        "fn"
       ]
     },
     {
       "name": "validation_error",
       "schema": "packages/ree_errors/schemas/ree_errors/validation_error.schema.json",
       "tags": [
-        "object"
+        "fn"
       ]
     }
   ]

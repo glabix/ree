@@ -1,15 +1,15 @@
-require_relative 'error_factory'
+class ReeErrors::PermissionError
+  include Ree::FnDSL
 
-class ReeErrors::PermissionError < ReeErrors::ErrorFactory
-  include Ree::BeanDSL
-
-  bean :permission_error do
+  fn :permission_error do
+    target :class
+    with_caller
     link :build_error
     link 'ree_errors/error', -> { Error }
   end
 
-  contract Symbol, Nilor[String] => SubclassOf[Error]
-  def build(code, locale = nil)
-    build_error(:permission, code, locale)
+  contract Symbol, Nilor[String], Kwargs[msg: Nilor[String]] => SubclassOf[Error]
+  def call(code, locale = nil, msg: nil)
+    build_error(get_caller, :permission, code,locale, msg)
   end
 end

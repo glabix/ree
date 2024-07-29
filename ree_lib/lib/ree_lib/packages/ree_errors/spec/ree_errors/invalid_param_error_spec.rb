@@ -1,8 +1,10 @@
 package_require('ree_errors/invalid_param_error')
 
 RSpec.describe ReeErrors::InvalidParamError do
+  link :invalid_param_error, from: :ree_errors
+
   it {
-    klass = described_class.build(:code)
+    klass = invalid_param_error(:code)
     error = klass.new('message')
 
     expect(klass).to be_a(Class)

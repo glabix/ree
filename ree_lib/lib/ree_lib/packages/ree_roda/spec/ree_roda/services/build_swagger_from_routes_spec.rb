@@ -17,19 +17,22 @@ RSpec.describe :build_swagger_from_routes do
       package do
         depends_on :ree_actions
         depends_on :ree_dao
+        depends_on :ree_errors
       end
     end
 
     class ReeRodaTestSwagger::Cmd
       include ReeActions::DSL
 
-      action :cmd
+      action :cmd do
+        link :invalid_param_error, from: :ree_errors
+      end
 
       ActionCaster = build_mapper.use(:cast) do
         integer :id
       end
 
-      InvalidErr = ReeErrors::ValidationError.build(:invalid, "invalid")
+      InvalidErr = invalid_param_error(:invalid, "invalid")
 
       contract(Any, Any => Any).throws(InvalidErr)
       def call(access, attrs)
@@ -71,7 +74,7 @@ RSpec.describe :build_swagger_from_routes do
   it {
     swagger = build_swagger_from_routes(routes, "test", "test", "1.0", "https://example.com")
 
-    expect(swagger.dig(:paths, "/api/actions", :post, :responses, 422, :description))
-      .to eq("- type: **validation**, code: **invalid**, message: **invalid**")
+    expect(swagger.dig(:paths, "/api/actions", :post, :responses, 400, :description))
+      .to eq("- type: **invalid_param**, code: **invalid**, message: **invalid param**")
   }
 end

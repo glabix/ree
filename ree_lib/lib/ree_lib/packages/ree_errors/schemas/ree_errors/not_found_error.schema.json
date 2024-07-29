@@ -3,11 +3,34 @@
   "schema_version": "1.1",
   "name": "not_found_error",
   "path": "packages/ree_errors/package/ree_errors/not_found_error.rb",
-  "mount_as": "object",
+  "mount_as": "fn",
   "class": "ReeErrors::NotFoundError",
   "factory": null,
   "methods": [
+    {
+      "doc": "",
+      "throws": [
 
+      ],
+      "return": "SubclassOf[ReeErrors::Error]",
+      "args": [
+        {
+          "arg": "code",
+          "arg_type": "req",
+          "type": "Symbol"
+        },
+        {
+          "arg": "locale",
+          "arg_type": "opt",
+          "type": "Nilor[String]"
+        },
+        {
+          "arg": "msg",
+          "arg_type": "key",
+          "type": "Nilor[String]"
+        }
+      ]
+    }
   ],
   "links": [
     {

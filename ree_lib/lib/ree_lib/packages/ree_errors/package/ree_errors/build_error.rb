@@ -5,14 +5,16 @@ class ReeErrors::BuildError
     link 'ree_errors/error', -> { Error }
   end
 
-  contract Symbol, Symbol, Nilor[String] => SubclassOf[Error]
-  def call(type, code, locale)
+  contract Any, Symbol, Symbol, Nilor[String], Nilor[String] => SubclassOf[Error]
+  def call(caller, type, code, locale, default_msg)
     klass = Class.new(Error)
 
     klass.instance_exec do
+      @caller = caller
       @type = type
       @code = code
       @locale = locale
+      @default_msg = default_msg
     end
 
     klass

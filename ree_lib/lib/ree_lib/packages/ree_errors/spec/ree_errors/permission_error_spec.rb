@@ -1,8 +1,10 @@
 package_require('ree_errors/permission_error')
 
 RSpec.describe ReeErrors::PermissionError do
+  link :permission_error, from: :ree_errors
+
   it {
-    klass = described_class.build(:code)
+    klass = permission_error(:code)
     error = klass.new('message')
 
     expect(klass).to be_a(Class)

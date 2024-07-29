@@ -1,8 +1,10 @@
 package_require('ree_errors/payment_required_error')
 
 RSpec.describe ReeErrors::PaymentRequiredError do
+  link :payment_required_error, from: :ree_errors
+
   it {
-    klass = described_class.build(:code)
+    klass = payment_required_error(:code)
     error = klass.new('message')
 
     expect(klass).to be_a(Class)

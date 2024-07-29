@@ -1,3 +1,8 @@
 en:
   ree_errors_test:
     error: 'test error message'
+  r_spec:
+    errors:
+      locale_error1: "locale error 1"
+      ree_errors_auth_error:
+        locale_error: "locale error"

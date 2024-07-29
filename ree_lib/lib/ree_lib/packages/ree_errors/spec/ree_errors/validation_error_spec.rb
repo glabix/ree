@@ -1,8 +1,10 @@
 package_require('ree_errors/validation_error')
 
 RSpec.describe ReeErrors::ValidationError do
+  link :validation_error, from: :ree_errors
+
   it {
-    klass = described_class.build(:code)
+    klass = validation_error(:code)
     error = klass.new('message')
 
     expect(klass).to be_a(Class)

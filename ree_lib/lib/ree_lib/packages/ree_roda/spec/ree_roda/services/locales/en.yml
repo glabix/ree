@@ -1,2 +1,4 @@
 en:
-  invalid: "invalid"
+  ree_roda_test_swagger:
+    errors:
+      invalid: "invalid param"

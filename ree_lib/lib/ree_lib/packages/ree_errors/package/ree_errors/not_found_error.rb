@@ -1,15 +1,15 @@
-require_relative 'error_factory'
+class ReeErrors::NotFoundError
+  include Ree::FnDSL
 
-class ReeErrors::NotFoundError < ReeErrors::ErrorFactory
-  include Ree::BeanDSL
-
-  bean :not_found_error do
+  fn :not_found_error do
+    target :class
+    with_caller
     link :build_error
     link 'ree_errors/error', -> { Error }
   end
 
-  contract Symbol, Nilor[String] => SubclassOf[Error]
-  def build(code, locale = nil)
-    build_error(:not_found, code, locale)
+  contract Symbol, Nilor[String], Kwargs[msg: Nilor[String]] => SubclassOf[Error]
+  def call(code, locale = nil, msg: nil)
+    build_error(get_caller, :not_found, code,locale, msg)
   end
 end

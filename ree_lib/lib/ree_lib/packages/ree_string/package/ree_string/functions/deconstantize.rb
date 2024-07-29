@@ -7,7 +7,7 @@ class ReeString::Deconstantize
 
   doc(<<~DOC)
     Removes the rightmost segment from the constant expression in the string.
-    
+
       deconstantize('Net::HTTP')   # => "Net"
       deconstantize('::Net::HTTP') # => "::Net"
       deconstantize('String')      # => ""

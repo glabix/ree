@@ -3,5 +3,6 @@ module ReeErrors
 
   package do
     depends_on :ree_i18n
+    depends_on :ree_string
   end
 end

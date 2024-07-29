@@ -15,6 +15,11 @@
       "return": "SubclassOf[ReeErrors::Error]",
       "args": [
         {
+          "arg": "caller",
+          "arg_type": "req",
+          "type": "Any"
+        },
+        {
           "arg": "type",
           "arg_type": "req",
           "type": "Symbol"
@@ -26,6 +31,11 @@
         },
         {
           "arg": "locale",
+          "arg_type": "req",
+          "type": "Nilor[String]"
+        },
+        {
+          "arg": "default_msg",
           "arg_type": "req",
           "type": "Nilor[String]"
         }

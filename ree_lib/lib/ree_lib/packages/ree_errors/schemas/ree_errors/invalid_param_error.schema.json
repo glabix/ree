@@ -3,11 +3,34 @@
   "schema_version": "1.1",
   "name": "invalid_param_error",
   "path": "packages/ree_errors/package/ree_errors/invalid_param_error.rb",
-  "mount_as": "object",
+  "mount_as": "fn",
   "class": "ReeErrors::InvalidParamError",
   "factory": null,
   "methods": [
+    {
+      "doc": "",
+      "throws": [
 
+      ],
+      "return": "SubclassOf[ReeErrors::Error]",
+      "args": [
+        {
+          "arg": "code",
+          "arg_type": "req",
+          "type": "Symbol"
+        },
+        {
+          "arg": "locale",
+          "arg_type": "opt",
+          "type": "Nilor[String]"
+        },
+        {
+          "arg": "msg",
+          "arg_type": "key",
+          "type": "Nilor[String]"
+        }
+      ]
+    }
   ],
   "links": [
     {
