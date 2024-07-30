@@ -11,7 +11,6 @@ module Ree
   autoload :CLI, 'ree/cli'
   autoload :Container, 'ree/container'
   autoload :Contracts, 'ree/contracts'
-  autoload :DomainError, 'ree/dsl/domain_error'
   autoload :Error, 'ree/error'
   autoload :ErrorDsl, 'ree/dsl/error_dsl'
   autoload :FnDSL, 'ree/fn_dsl'
