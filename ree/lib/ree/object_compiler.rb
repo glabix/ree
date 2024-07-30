@@ -82,40 +82,29 @@ class Ree::ObjectCompiler
     end
 
     if object.factory || object.singleton
-      eval_list.push(indent + "def self.new(**kwargs)")
+      eval_list.push(indent + "def self.new")
 
       if object.singleton
         eval_list.push(indent + "  SEMAPHORE.synchronize do")
-        eval_list.push(indent + "    obj_links = #{links.map(&:as).inspect}")
-        eval_list.push(indent + "    if (obj_links & kwargs.keys).size == 0")
-        eval_list.push(indent + "      @__instance ||= begin")
+        eval_list.push(indent + "    @__instance ||= begin")
 
         if object.factory
-          eval_list.push(indent + "        super(**kwargs).#{object.factory}")
+          eval_list.push(indent + "      super.#{object.factory}")
         else
-          eval_list.push(indent + "        super(**kwargs)")
-        end
-
-        eval_list.push(indent + "      end")
-        eval_list.push(indent + "    else")
-
-        if object.factory
-          eval_list.push(indent + "      super(**kwargs).#{object.factory}")
-        else
-          eval_list.push(indent + "      super(**kwargs)")
+          eval_list.push(indent + "      super")
         end
 
         eval_list.push(indent + "    end")
         eval_list.push(indent + "  end")
       else
-        eval_list.push(indent + "  super(**kwargs).#{object.factory}")
+        eval_list.push(indent + "  super.#{object.factory}")
       end
 
       eval_list.push(indent + "end")
     end
 
     eval_list.push("\n")
-    eval_list.push(indent + "def initialize(**kwargs)")
+    eval_list.push(indent + "def initialize")
 
     indent = inc_indent(indent)
 
@@ -126,7 +115,7 @@ class Ree::ObjectCompiler
 
       @packages_facade.load_package_object(pckg.name, obj.name)
 
-      eval_list.push(indent + "@#{_.as} = kwargs[:#{_.as}] || #{obj.klass}.new(**kwargs)")
+      eval_list.push(indent + "@#{_.as} = #{obj.klass}.new")
     end
 
     if object.after_init?
