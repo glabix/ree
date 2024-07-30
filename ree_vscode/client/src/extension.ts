@@ -14,11 +14,9 @@ import { goToSpec } from "./commands/goToSpec"
 import { onCreatePackageFile, onRenamePackageFile } from "./commands/documentTemplates"
 import { isBundleGemsInstalled, isBundleGemsInstalledInDocker } from "./utils/reeUtils"
 import { generatePackagesSchema } from "./commands/generatePackagesSchema"
-import { genObjectSchemaCmd, generateObjectSchema } from "./commands/generateObjectSchema"
 import { generatePackage } from "./commands/generatePackage"
 import { getFileFromManager, updatePackageDeps } from './commands/updatePackageDeps'
 import { selectAndGeneratePackageSchema } from './commands/selectAndGeneratePackageSchema'
-import { onDeletePackageFile } from "./commands/deleteObjectSchema"
 import { reindexProject } from "./commands/reindexProject"
 import { getCurrentProjectDir, isReeProject } from './utils/fileUtils'
 import { forest } from './utils/forest'
@@ -58,11 +56,6 @@ export async function activate(context: vscode.ExtensionContext) {
     generatePackagesSchema
   )
 
-  let generateObjectSchemaCmd = vscode.commands.registerCommand(
-    "ree.generateObjectSchema",
-    genObjectSchemaCmd
-  )
-
   let generatePackageCmd = vscode.commands.registerCommand(
     "ree.generatePackage",
     generatePackage
@@ -89,29 +82,26 @@ export async function activate(context: vscode.ExtensionContext) {
   const onDidCreateFiles = vscode.workspace.onDidCreateFiles(
     (e: vscode.FileCreateEvent) => {
       onCreatePackageFile(e.files[0].path)
-      generateObjectSchema(e.files[0].path, true)
-    } 
+    }
   )
 
   const onDidRenameFiles = vscode.workspace.onDidRenameFiles(
     (e: vscode.FileRenameEvent) => {
       onRenamePackageFile(e.files[0].newUri.path)
-      onDeletePackageFile(e.files[0].oldUri.path)
       forest.deleteTree(e.files[0].oldUri.toString())
-      generateObjectSchema(e.files[0].newUri.path, true)
+
       if (e.files[0].newUri.path.split("/").pop().match(/\.rb/)) {
         getFileFromManager(e.files[0].newUri.path).then(file => {
           forest.createTree(e.files[0].newUri.toString(), file.getText())
         })
       }
-    } 
+    }
   )
 
   const onDidDeleteFiles = vscode.workspace.onDidDeleteFiles(
     (e: vscode.FileDeleteEvent) => {
-      onDeletePackageFile(e.files[0].path)
       forest.deleteTree(e.files[0].toString())
-    } 
+    }
   )
 
   vscode.workspace.onDidSaveTextDocument(document => {
@@ -152,7 +142,7 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!isReeProject()) { return } // register commands, but don't go further
 
   let curPath = getCurrentProjectDir()
-  if (curPath) {  
+  if (curPath) {
     getNewProjectIndex()
   }
 

@@ -14,7 +14,7 @@ export function isReeInstalled(projectDir: string): Promise<ExecCommand> | undef
     const containerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
     const appDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
 
-    if (dockerPresented) { 
+    if (dockerPresented) {
       return spawnCommand([
         'docker', [
           'exec',
@@ -179,16 +179,8 @@ export function genPackageSchemaJsonCommandArgsArray(projectDir: string, name?: 
   if (name && !skipObjects) { return ['gen.package_json', name.toString(), '--project_path', projectDir, '--trace'] }
   if (name && skipObjects) { return ['gen.package_json', name.toString(), '--project_path', projectDir, '--skip_objects', '--trace'] }
   if (!name && skipObjects) { return ['gen.package_json', '--project_path', projectDir, '--skip_objects', '--trace'] }
-  
+
   return  ['gen.package_json', '--project_path', projectDir, '--trace']
-}
-
-export function genObjectSchemaJsonCommandArgsArray(projectDir: string, packageName: string, objectPath: string) {
-  return  ['gen.schema_json', packageName, objectPath, '--project_path', projectDir, '--trace']
-}
-
-export function deleteObjectSchemaJsonCommandArgsArray(projectDir: string, objectPath: string) {
-  return  ['delete.schema_json', objectPath, '--project_path', projectDir, '--trace']
 }
 
 export async function execGetReeProjectIndex(rootDir: string): Promise<ExecCommand | undefined> {
@@ -197,7 +189,7 @@ export async function execGetReeProjectIndex(rootDir: string): Promise<ExecComma
     const dockerContainerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
     const dockerAppDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
 
-    if (dockerPresented) { 
+    if (dockerPresented) {
       return spawnCommand([
         'docker', [
           'exec',
@@ -235,7 +227,7 @@ export async function execGetReeFileIndex(rootDir: string, filePath: string): Pr
     const dockerContainerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
     const dockerAppDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
 
-    if (dockerPresented) { 
+    if (dockerPresented) {
       return spawnCommand([
         'docker', [
           'exec',
@@ -275,7 +267,7 @@ export async function execGetReePackageIndex(rootDir: string, packageName: strin
     const dockerContainerName = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('containerName') as string
     const dockerAppDirectory = vscode.workspace.getConfiguration('reeLanguageServer.docker').get('appDirectory') as string
 
-    if (dockerPresented) { 
+    if (dockerPresented) {
       return spawnCommand([
         'docker', [
           'exec',
