@@ -107,7 +107,6 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidSaveTextDocument(document => {
     if (document) {
       forest.updateTree(document.uri.toString(), document.getText())
-      generateObjectSchema(document.fileName, true)
     }
   })
 
@@ -128,7 +127,6 @@ export async function activate(context: vscode.ExtensionContext) {
     goToSpecCmd,
     generatePackageSchemaCmd,
     generatePackagesSchemaCmd,
-    generateObjectSchemaCmd,
     generatePackageCmd,
     updatePackageDepsCmd,
     reindexProjectCmd,

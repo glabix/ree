@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import { DiagnosticSeverity } from 'vscode-languageclient'
 import { getCurrentProjectDir } from '../utils/fileUtils'
-import { 
+import {
   isReeInstalled,
   isBundleGemsInstalled,
   isBundleGemsInstalledInDocker,
@@ -35,7 +35,7 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
   })
 
   if (!checkIsReeInstalled) { return }
-  
+
 
   const checkIsBundleGemsInstalled = isBundleGemsInstalled(rootProjectDir)?.then((res) => {
     if (res.code !== 0) {
@@ -87,32 +87,32 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
 
     return result.then((commandResult) => {
       removeDocumentProblems(document.uri, ReeDiagnosticCode.reeDiagnostic)
-    
+
       if (commandResult.code === 1) {
         const rPath = path.relative(
           rootProjectDir, document.uri.path
         )
-    
+
         const line = commandResult.message.split("\n").find(s => s.includes(rPath + ":"))
         let lineNumber = 0
-    
+
         if (line) {
           try {
             lineNumber = parseInt(line.split(rPath)[1].split(":")[1])
           } catch {}
         }
-    
+
         if (lineNumber > 0) {
           lineNumber -= 1
         }
-    
+
         if (document.getText().length < lineNumber ) {
           lineNumber = 0
         }
-    
+
         const character = document.getText().split("\n")[lineNumber].length - 1
         let diagnostics: vscode.Diagnostic[] = []
-    
+
         let diagnostic: vscode.Diagnostic = {
           severity: DiagnosticSeverity.Error,
           range: new vscode.Range(
@@ -123,13 +123,13 @@ export function generatePackageSchema(document: vscode.TextDocument, silent: boo
           code: ReeDiagnosticCode.reeDiagnostic,
           source: 'ree'
         }
-    
+
         diagnostics.push(diagnostic)
         addDocumentProblems(document.uri, diagnostics)
-    
+
         return
       }
-      
+
       if (!silent) {
         vscode.window.showInformationMessage(commandResult.message)
       }
