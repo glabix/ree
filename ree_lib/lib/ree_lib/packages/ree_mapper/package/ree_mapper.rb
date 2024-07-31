@@ -72,8 +72,6 @@ module ReeMapper
 
   private
 
-  require_relative "./ree_mapper/functions/build_mapper_factory"
-
   def self.build_mapper_factory(mod)
     pckg_name = ReeString::Underscore.new.call(mod.name)
     factory_path = "#{pckg_name}/mapper_factory"
@@ -81,9 +79,6 @@ module ReeMapper
     if Ree.irb_mode? && Object.const_defined?("#{mod.name}::MapperFactory") && mod != self
       return Object.const_get("#{mod.name}::MapperFactory").new
     end
-
-    factory = ReeMapper::BuildMapperFactory.new
-    factory.set_caller(mod).call(strategies: [])
 
     mapper_factory_klass = if package_file_exists?(factory_path) && mod != self
       package_require(factory_path)

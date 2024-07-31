@@ -10,50 +10,19 @@ class ReeMapper::BuildMapperFactory
     link 'ree_mapper/mapper_strategy', -> { MapperStrategy }
   end
 
-  SEMAPHORE = Mutex.new
-
   contract(ArrayOf[MapperStrategy] => SubclassOf[MapperFactory])
   def call(strategies:)
-    mod = if get_caller.is_a?(Module)
-      get_caller
-    else
-      name = get_caller.class.to_s.split("::").first
-      Object.const_get(name)
-    end
+    module_name = get_caller.class.to_s.split("::").first
+    mod = Object.const_get(module_name)
 
-    klass = nil
+    klass = Class.new(ReeMapper::MapperFactory)
+    mod.instance_variable_set(:@mapper_factory, klass)
 
-    SEMAPHORE.synchronize do
-      if klass = mod.instance_variable_get(:@mapper_factory)
-        klass.instance_eval do
-          @strategies = strategies
-        end
-      else
-        klass = Class.new(ReeMapper::MapperFactory)
-
-        klass.instance_eval do
-          @types = {}
-          @wrappers = {}
-          @strategies = strategies
-        end
-
-        mod.instance_variable_set(:@mapper_factory, klass)
-      end
-
-      register_default_types(klass)
-    end
-
-    klass
-  end
-
-  private
-
-  def register_default_types(klass)
-    types = klass.instance_variable_get(:@types)
-    strategies = klass.instance_variable_get(:@strategies)
-
-    return if !types.empty?
-    return if strategies.empty?
+    klass.instance_eval {
+      @types = {}
+      @wrappers = {}
+      @strategies = strategies
+    }
 
     klass.register_type(:bool, ReeMapper::Bool.new)
     klass.register_type(:date_time, ReeMapper::DateTime.new)
@@ -66,5 +35,7 @@ class ReeMapper::BuildMapperFactory
     klass.register_type(:rational, ReeMapper::Rational.new)
 
     klass.register_wrapper(:array, ReeMapper::Array)
+
+    klass
   end
 end
