@@ -4,7 +4,6 @@ class ReeMapper::BuildMapperFactory
   include Ree::FnDSL
 
   fn :build_mapper_factory do
-    with_caller
     link 'ree_mapper/mapper', -> { Mapper }
     link 'ree_mapper/mapper_factory', -> { MapperFactory }
     link 'ree_mapper/mapper_strategy', -> { MapperStrategy }
@@ -12,11 +11,7 @@ class ReeMapper::BuildMapperFactory
 
   contract(ArrayOf[MapperStrategy] => SubclassOf[MapperFactory])
   def call(strategies:)
-    module_name = get_caller.class.to_s.split("::").first
-    mod = Object.const_get(module_name)
-
     klass = Class.new(ReeMapper::MapperFactory)
-    mod.instance_variable_set(:@mapper_factory, klass)
 
     klass.instance_eval {
       @types = {}
