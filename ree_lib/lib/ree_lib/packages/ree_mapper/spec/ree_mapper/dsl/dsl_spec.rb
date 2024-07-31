@@ -55,10 +55,10 @@ RSpec.describe ReeMapper::DSL do
     )
 
     expect(result).to eq({
-      id: 1, 
-      title: 'Product', 
-      creator: { 
-        id: 1, 
+      id: 1,
+      title: 'Product',
+      creator: {
+        id: 1,
         name: 'John',
         created_by: {
           id: 2,

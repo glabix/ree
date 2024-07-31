@@ -67,16 +67,7 @@ module ReeMapper
     factory = mod.instance_variable_get(:@mapper_factory)
     return factory if factory
 
-    if !mod.instance_variable_get(:@mapper_semaphore)
-      mod.instance_variable_set(:@mapper_semaphore, Mutex.new)
-    end
-
-    mod.instance_variable_get(:@mapper_semaphore).synchronize do
-      factory = self.build_mapper_factory(mod)
-      mod.instance_variable_set(:@mapper_factory, factory)
-    end
-
-    factory
+    self.build_mapper_factory(mod)
   end
 
   private
