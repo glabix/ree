@@ -30,7 +30,7 @@ class Accounts::BuildUser
   private
 
   def validate_email(email)
-    if !ALLOWED_DOMAINS.include?(email.split('@').last)
+    if ALLOWED_DOMAINS.include?(email.split('@').last)
       raise_error(InvalidDomainErr)
     end
 

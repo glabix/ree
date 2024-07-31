@@ -17,7 +17,7 @@
         {
           "arg": "err",
           "arg_type": "req",
-          "type": "Any"
+          "type": "SubclassOf[Ree::DomainError]"
         }
       ]
     }

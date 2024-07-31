@@ -6,20 +6,20 @@ RSpec.describe Accounts::RegisterAccountCmd do
   subject { described_class.new }
 
   it {
-    user = subject.call('John Doe', 'email@google.com', int: 1, string: 'string')
+    user = subject.call('John Doe', 'email@test.com', int: 1, string: 'string')
 
-    expect(subject.frozen?).to eq(false)
+    expect(subject.frozen?).to eq(true)
     expect(user.name).to eq('John Doe')
-    expect(user.email).to eq('email@google.com')
+    expect(user.email).to eq('email@test.com')
   }
 
   it {
     cmd = Accounts::RegisterAccountCmd.new
-    user = cmd.call('John Doe', 'user@google.com', int: 1, string: 'string')
+    user = cmd.call('John Doe', 'email@test.com', int: 1, string: 'string')
 
     expect(user.id).to eq(1)
     expect(user.name).to eq('John Doe')
-    expect(user.email).to eq('user@google.com')
+    expect(user.email).to eq('email@test.com')
     expect(user.send(:user_states)).to be_a(Accounts::UserStates)
     expect(user.send(:function)).to eq(:function)
     expect(user.class::Entity).to eq(Accounts::Entity)

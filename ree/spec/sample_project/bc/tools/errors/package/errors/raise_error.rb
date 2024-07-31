@@ -3,7 +3,8 @@ class Errors::RaiseError
 
   fn :raise_error
 
+  contract SubclassOf[Ree::DomainError] => nil
   def call(err)
-    raise err.new
+    raise err.new('error', :error_code)
   end
 end
