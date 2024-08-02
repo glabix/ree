@@ -87,7 +87,7 @@ RSpec.describe :agg do
     include ReeDao::AggregateDSL
 
     aggregate :agg_users do
-      link :users, from: :ree_dao_agg_test
+      link :users, from: :ree_dao_agg_test, import: -> { User }
       link :organizations_dao, from: :ree_dao_agg_test
       link :user_passports, from: :ree_dao_agg_test
       link :books, from: :ree_dao_agg_test
@@ -96,8 +96,10 @@ RSpec.describe :agg do
       link :reviews, from: :ree_dao_agg_test
       link :review_authors, from: :ree_dao_agg_test
       link :agg, from: :ree_dao
+      link :agg_contract_for, from: :ree_dao
     end
 
+    agg_contract_for User
     def call(ids_or_scope, **opts)
       agg(users, ids_or_scope, **opts) do |users_list|
         belongs_to :organization

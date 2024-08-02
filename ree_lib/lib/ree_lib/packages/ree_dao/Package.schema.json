@@ -41,6 +41,13 @@
       ]
     },
     {
+      "name": "agg_contract_for",
+      "schema": "packages/ree_dao/schemas/ree_dao/functions/agg_contract_for.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
       "name": "build_connection",
       "schema": "packages/ree_dao/schemas/ree_dao/functions/build_connection.schema.json",
       "tags": [
