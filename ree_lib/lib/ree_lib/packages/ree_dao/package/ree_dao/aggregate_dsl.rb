@@ -18,6 +18,7 @@ module ReeDao
         dsl.tags(["aggregate"])
         dsl.freeze(false)
         dsl.object.set_as_compiled(false)
+        dsl.link :agg_contract_for, from: :ree_dao
 
         Ree.container.compile(dsl.package, name)
       end

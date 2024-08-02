@@ -96,7 +96,6 @@ RSpec.describe :agg do
       link :reviews, from: :ree_dao_agg_test
       link :review_authors, from: :ree_dao_agg_test
       link :agg, from: :ree_dao
-      link :agg_contract_for, from: :ree_dao
     end
 
     agg_contract_for User
