@@ -174,7 +174,7 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
     }
 
     it {
-      expect { mapper.cast({}) }.to raise_error(ReeMapper::TypeError, /`number` is missing required field/)
+      expect { mapper.cast({}) }.to raise_error(ReeMapper::TypeError, /`number` is missing (required field)/)
     }
 
     it {

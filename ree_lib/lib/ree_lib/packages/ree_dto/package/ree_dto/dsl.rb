@@ -166,7 +166,7 @@ module ReeDto::DSL
         meta = get_meta(name)
 
         if !meta.has_default?
-          raise FieldNotSetError.new("field :#{name} not set for #{self.class}")
+          raise FieldNotSetError.new("field :#{name} not set for:#{self}")
         else
           @_attrs[name] = meta.default
         end
@@ -179,8 +179,10 @@ module ReeDto::DSL
 
     contract Symbol, Any => Any
     def set_value(name, val)
-      old = get_value(name)
-      return if old == val
+      if has_value?(name)
+        old = get_value(name)
+        return if old == val
+      end
 
       @changed_fields ||= Set.new
       @changed_fields << name

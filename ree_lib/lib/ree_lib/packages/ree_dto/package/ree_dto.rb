@@ -17,3 +17,4 @@ module ReeDto
 end
 
 require_relative 'ree_dto/entity_dsl'
+require_relative 'ree_dto/dsl'

@@ -44,7 +44,8 @@ module ReeDao
       end
 
       def put(entity)
-        raw = opts[:schema_mapper].db_dump(entity)
+        raw = dump_entity(entity)
+
         remove_null_primary_key(raw)
         key = insert(raw)
 
@@ -81,7 +82,6 @@ module ReeDao
       def import_all(entities, batch_size: IMPORT_BATCH_SIZE)
         return if entities.empty?
 
-        mapper = opts[:schema_mapper]
         columns = self.columns
         raw = {}
 
@@ -89,7 +89,7 @@ module ReeDao
         columns.delete(:row)
 
         data = entities.map do |entity|
-          hash = mapper.db_dump(entity)
+          hash = dump_entity(entity)
           raw[entity] = hash
 
           columns.map { hash[_1] }
@@ -118,8 +118,8 @@ module ReeDao
         return __original_update(hash_or_entity) if !opts[:schema_mapper]
         return __original_update(hash_or_entity) if hash_or_entity.is_a?(Hash)
 
-        raw = opts[:schema_mapper].db_dump(hash_or_entity)
-        raw = extract_changes(hash_or_entity, raw)
+        dump = dump_entity(hash_or_entity)
+        raw = extract_changes(hash_or_entity, dump)
 
         unless raw.empty?
           update_persistence_state(hash_or_entity, raw)
@@ -159,9 +159,7 @@ module ReeDao
 
             if m
               entity = m.db_load(hash)
-
               self.set_persistence_state(entity, hash)
-
               entity
             else
               hash
@@ -205,6 +203,8 @@ module ReeDao
       end
 
       def set_persistence_state(entity, raw)
+        return if is_ree_dto?(entity)
+
         if !entity.is_a?(Integer) && !entity.is_a?(Symbol)
           entity.instance_variable_set(PERSISTENCE_STATE_VARIABLE, raw)
         end
@@ -246,8 +246,17 @@ module ReeDao
           else
             entity.instance_variable_set("@#{primary_key}", key)
           end
+
           raw[primary_key] = key
         end
+      end
+
+      def dump_entity(entity_or_hash)
+        opts[:schema_mapper].db_dump(entity_or_hash)
+      end
+
+      def is_ree_dto?(entity)
+        entity.class.include?(ReeDto::DSL)
       end
 
       def prepare_key_condition_from_entity(entity)

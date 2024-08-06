@@ -89,16 +89,11 @@ RSpec.describe :one_to_one do
       end
 
       class ProjectUser
-        include ReeDto::EntityDSL
+        include ReeDto::DSL
 
-        properties(
-          id: Nilor[Integer],
-          project_id: Nilor[Integer]
-        )
-
-        contract Integer => Integer
-        def project_id=(id)
-          @project_id = id
+        build_dto do
+          field :id, Nilor[Integer], default: nil
+          field :project_id, Nilor[Integer]
         end
       end
 
