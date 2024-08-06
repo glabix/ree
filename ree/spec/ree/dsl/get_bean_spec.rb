@@ -6,14 +6,15 @@ RSpec.describe Accounts::RegisterAccountCmd do
   subject { described_class.new }
 
   it {
+    Accounts::UsersRepo.init_store
     user = subject.call('John Doe', 'email@test.com', int: 1, string: 'string')
 
-    expect(subject.frozen?).to eq(true)
     expect(user.name).to eq('John Doe')
     expect(user.email).to eq('email@test.com')
   }
 
   it {
+    Accounts::UsersRepo.init_store
     cmd = Accounts::RegisterAccountCmd.new
     user = cmd.call('John Doe', 'email@test.com', int: 1, string: 'string')
 

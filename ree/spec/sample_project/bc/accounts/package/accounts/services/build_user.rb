@@ -12,7 +12,7 @@ class Accounts::BuildUser
   InvalidDomainErr = Class.new(ArgumentError)
   EmailTakenErr = Class.new(ArgumentError)
 
-  ALLOWED_DOMAINS = 'google.com'
+  ALLOWED_DOMAINS = 'test.com'
 
   contract(String, String => User).throws(InvalidDomainErr, EmailTakenErr)
   def call(name, email)
@@ -30,7 +30,7 @@ class Accounts::BuildUser
   private
 
   def validate_email(email)
-    if ALLOWED_DOMAINS.include?(email.split('@').last)
+    if !ALLOWED_DOMAINS.include?(email.split('@').last)
       raise_error(InvalidDomainErr)
     end
 

@@ -89,7 +89,6 @@ class ReeCliRunner
         Ree::CLI::GeneratePackageSchema.run(
           package_name: options_with_defaults[:package_name],
           project_path: options_with_defaults[:project_path],
-          include_objects: false,
           silence: false
         )
       end
@@ -118,7 +117,6 @@ class ReeCliRunner
       c.description = 'generates Package.schema.json for specific package'
       c.summary     = '> ' + c.description
       c.example     'ree gen.package_json PACKAGE_NAME', ''
-      c.option      '--skip_objects', String, 'Skip generation of object schemas'
       c.option      '--silence', String, 'Silence all logs'
       c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
       c.action do |args, options|
@@ -132,7 +130,6 @@ class ReeCliRunner
         default_options = {
           package_name: package_name,
           project_path: options_hash[:project_path] || File.expand_path(Dir.pwd),
-          include_objects: !options_hash.has_key?(:skip_objects),
           silence: options_hash.has_key?(:silence)
         }
 

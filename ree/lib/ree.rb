@@ -27,7 +27,6 @@ module Ree
   autoload :ObjectError, 'ree/core/object_error'
   autoload :ObjectLink, 'ree/core/object_link'
   autoload :ObjectSchema, 'ree/core/object_schema'
-  autoload :ObjectSchemaBuilder, 'ree/core/object_schema_builder'
   autoload :Package, 'ree/core/package'
   autoload :PackageDep, 'ree/core/package_dep'
   autoload :BuildPackageDsl, 'ree/dsl/build_package_dsl'
@@ -230,12 +229,6 @@ module Ree
       @root_dir || (raise Ree::Error.new(ROOT_DIR_MESSAGE, :invalid_root_dir))
     end
 
-    def write_object_schema(package_name, object_name)
-      check_arg(package_name, :package_name, Symbol)
-      check_arg(object_name, :object_name, Symbol)
-      container.packages_facade.write_object_schema(package_name, object_name)
-    end
-
     def generate_schemas_for_all_packages(silence = false)
       Ree.logger.debug("generate_schemas_for_all_packages") if !silence
       facade = container.packages_facade
@@ -250,16 +243,6 @@ module Ree
 
         facade.load_entire_package(package.name)
         facade.write_package_schema(package.name)
-
-        schemas_path = Ree::PathHelper.abs_package_schemas_dir(package)
-
-        FileUtils.rm_rf(schemas_path)
-        FileUtils.mkdir_p(schemas_path)
-
-        package.objects.each do |object|
-          next if !object.schema_rpath
-          write_object_schema(package.name, object.name)
-        end
       end
     end
   end

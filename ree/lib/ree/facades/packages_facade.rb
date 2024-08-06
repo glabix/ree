@@ -114,31 +114,6 @@ class Ree::PackagesFacade
   end
 
   # @param [Symbol] package_name
-  # @param [Symbol] object_name
-  # @return [String]
-  def write_object_schema(package_name, object_name)
-    Ree.logger.debug("write_object_schema(package_name: #{package_name}, object_name: #{object_name})")
-    object = get_object(package_name, object_name)
-
-    if !object || (object && !object&.schema_rpath)
-      raise Ree::Error.new("Object :#{object_name} schema path not found")
-    end
-
-    schema_path = Ree::PathHelper.abs_object_schema_path(object)
-
-    if !File.exist?(schema_path)
-      only_dir_path = schema_path.split('/')[0..-2]
-      FileUtils.mkdir_p(File.join(only_dir_path))
-    end
-
-    schema = Ree::ObjectSchemaBuilder.new.call(object)
-    json = JSON.pretty_generate(schema)
-    File.write(schema_path, json, mode: 'w')
-
-    json
-  end
-
-  # @param [Symbol] package_name
   # @return nil
   def load_package_entry(package_name)
     package = @packages_store.get(package_name)

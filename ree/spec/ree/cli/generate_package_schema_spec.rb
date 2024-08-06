@@ -9,7 +9,6 @@ RSpec.describe Ree::CLI::GeneratePackageSchema do
       subject.run(
         package_name: package_name,
         project_path: project_dir,
-        include_objects: true,
         silence: true
       )
 
@@ -25,7 +24,6 @@ RSpec.describe Ree::CLI::GeneratePackageSchema do
         subject.run(
           package_name: package_name,
           project_path: project_dir,
-          include_objects: true,
           silence: false
         )
       }
