@@ -27,6 +27,107 @@ module ReeDto::DSL
     end
   end
 
+  class CollectionMeta
+    attr_reader :name, :contract, :filter_proc
+
+    def initialize(name, contract, filter_proc)
+      @name = name
+      @contract = contract
+      @filter_proc = filter_proc
+    end
+  end
+
+  class DtoCollection
+    include Enumerable
+
+    LoadError = Class.new(ArgumentError)
+
+    attr_reader :name, :parent_class
+
+    def initialize(name, parent_class)
+      @parent_class = parent_class
+      @name = name
+      @list = nil
+    end
+
+    def reset
+      @list = []
+    end
+
+    def each(&block)
+      if @list.nil?
+        raise LoadError.new("collection :#{@name} for #{@parent_class} is not loaded")
+      end
+
+      @list.each(&block)
+    end
+
+    def size
+      @list.size
+    end
+
+    def add(item)
+      @list ||= []
+      @list.push(item)
+    end
+
+    def remove(item)
+      @list.delete(item)
+    end
+
+    alias :<< :add
+    alias :push :add
+
+    class << self
+      def filter(name, filter_proc)
+        define_method name do
+          CollectionFilter.new(self, name, filter_proc)
+        end
+      end
+    end
+  end
+
+  class CollectionFilter
+    include Enumerable
+
+    InvalidFilterItemErr = Class.new(ArgumentError)
+
+    def initialize(collection, name, filter_proc)
+      @collection = collection
+      @name = name
+      @filter_proc = filter_proc
+    end
+
+    def each(&block)
+      @collection.select(&@filter_proc).each(&block)
+    end
+
+    def add(item)
+      check_item(item)
+      @collection.add(item)
+    end
+
+    def size
+      to_a.size
+    end
+
+    def remove(item)
+      check_item(item)
+      @collection.remove(item)
+    end
+
+    alias :<< :add
+    alias :push :add
+
+    private
+
+    def check_item(item)
+      if !@filter_proc.call(item)
+        raise InvalidFilterItemErr.new("invalid item for #{@collection.parent_class}##{@name} filter")
+      end
+    end
+  end
+
   module InstanceMethods
     include Ree::Contracts::Core
     include Ree::Contracts::ArgContracts
@@ -130,10 +231,16 @@ module ReeDto::DSL
       @fields ||= []
     end
 
+    def collections
+      @collections ||= []
+    end
+
     def build_dto(&proc)
       builder = DtoBuilder.new(self)
       builder.instance_exec(&proc)
+
       set_fields(builder.fields)
+      set_collections(builder.collections)
 
       builder.fields.each do |field|
         define_method field.name do
@@ -146,31 +253,67 @@ module ReeDto::DSL
           end
         end
       end
+
+      parent_class = self
+
+      builder.collections.each do |collection|
+        col_class = Class.new(DtoCollection)
+        col_class.class_exec(&collection.filter_proc)
+
+        define_method collection.name do
+          @collections ||= {}
+          @collections[collection.name] ||= col_class.new(collection.name, parent_class)
+        end
+      end
     end
 
     private
 
     class DtoBuilder
-      attr_reader :fields
+      include Ree::Contracts::Core
+      include Ree::Contracts::ArgContracts
+
+      attr_reader :fields, :collections
 
       def initialize(klass)
         @klass = klass
         @fields = []
+        @collections = []
       end
 
+      contract Symbol, Any, Kwargs[setter: Bool, default: Any] => FieldMeta
       def field(name, contract, setter: true, default: FieldMeta::NONE)
         existing = @fields.find { _1.name == name }
 
         if existing
-          raise ArgumentError.new("field :#{name} already defined for #{klass}")
+          raise ArgumentError.new("field :#{name} already defined for #{@klass}")
         end
 
-        @fields.push << FieldMeta.new(name, contract, setter, default)
+        field = FieldMeta.new(name, contract, setter, default)
+        @fields.push << field
+        field
+      end
+
+      contract Symbol, Any, Optblock => CollectionMeta
+      def collection(name, contract, &proc)
+        existing = @collections.find { _1.name == name }
+
+        if existing
+          raise ArgumentError.new("collection :#{name} already defined for #{@klass}")
+        end
+
+        collection = CollectionMeta.new(name, contract, proc)
+        @collections.push(collection)
+        collection
       end
     end
 
     def set_fields(v)
       @fields = v
+    end
+
+    def set_collections(v)
+      @collections = v
     end
   end
 end
