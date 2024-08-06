@@ -71,6 +71,7 @@ module ReeDao
         end
 
         key = insert_conflict(conflict_opts).insert(raw)
+        return if key.nil?
 
         set_entity_primary_key(entity, raw, key)
         set_persistence_state(entity, raw)
