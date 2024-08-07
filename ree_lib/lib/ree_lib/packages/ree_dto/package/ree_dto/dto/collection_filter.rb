@@ -25,7 +25,7 @@ class ReeDto::CollectionFilter
 
   contract None => Integer
   def size
-    to_a.size
+    count
   end
 
   contract Any => Any
