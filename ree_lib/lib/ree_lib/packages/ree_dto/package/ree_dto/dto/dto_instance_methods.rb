@@ -26,7 +26,7 @@ module ReeDto::DtoInstanceMethods
 
   contract None => Set
   def reset_changes
-    @changed_fields = Set.new
+    @changed_fields = nil
   end
 
   contract Symbol => ReeDto::FieldMeta
