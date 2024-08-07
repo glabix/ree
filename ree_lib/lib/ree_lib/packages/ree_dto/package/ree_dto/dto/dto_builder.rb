@@ -23,7 +23,7 @@ class ReeDto::DtoBuilder
     end
 
     field = FieldMeta.new(name, contract, setter, default)
-    @fields.push << field
+    @fields << field
     field
   end
 
