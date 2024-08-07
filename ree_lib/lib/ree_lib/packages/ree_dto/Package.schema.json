@@ -7,7 +7,9 @@
     "ree_dto"
   ],
   "depends_on": [
-
+    {
+      "name": "ree_object"
+    }
   ],
   "env_vars": [
 

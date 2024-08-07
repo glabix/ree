@@ -8,7 +8,7 @@ class ReeMapper::ReeDtoOutput < ReeMapper::StrategyOutput
 
   contract(Object, ReeMapper::Field, Any => nil)
   def assign_value(object, field, value)
-    object.send(:"#{field.name}=", value)
+    object.set_attr(field.name, value)
     nil
   end
 end

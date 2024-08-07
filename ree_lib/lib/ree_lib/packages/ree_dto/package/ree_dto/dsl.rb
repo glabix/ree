@@ -152,6 +152,10 @@ module ReeDto::DSL
       end
     end
 
+    def reset_changes
+      @changed_fields = Set.new
+    end
+
     contract Symbol => FieldMeta
     def get_meta(name)
       self
@@ -175,6 +179,11 @@ module ReeDto::DSL
 
     def attrs
       @_attrs
+    end
+
+    contract Symbol, Any => Any
+    def set_attr(name, val)
+      @_attrs[name] = val
     end
 
     contract Symbol, Any => Any

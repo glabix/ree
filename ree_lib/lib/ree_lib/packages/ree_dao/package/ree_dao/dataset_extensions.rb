@@ -115,14 +115,20 @@ module ReeDao
       end
 
       def update(hash_or_entity)
-        return __original_update(hash_or_entity) if !opts[:schema_mapper]
-        return __original_update(hash_or_entity) if hash_or_entity.is_a?(Hash)
+        if !opts[:schema_mapper] || hash_or_entity.is_a?(Hash)
+          return __original_update(hash_or_entity)
+        end
 
         dump = dump_entity(hash_or_entity)
         raw = extract_changes(hash_or_entity, dump)
 
-        unless raw.empty?
-          update_persistence_state(hash_or_entity, raw)
+        if !raw.empty?
+          if is_ree_dto?(hash_or_entity)
+            hash_or_entity.reset_changes
+          else
+            update_persistence_state(hash_or_entity, raw)
+          end
+
           key_condition = prepare_key_condition_from_entity(hash_or_entity)
           where(key_condition).__original_update(raw)
         end
@@ -219,22 +225,26 @@ module ReeDao
       end
 
       def extract_changes(entity, hash)
-        return hash unless entity.instance_variable_defined?(PERSISTENCE_STATE_VARIABLE)
-        changes = {}
+        if is_ree_dto?(entity)
+          hash.slice(*entity.changed_fields)
+        else
+          return hash unless entity.instance_variable_defined?(PERSISTENCE_STATE_VARIABLE)
+          changes = {}
 
-        persistence_state = entity.instance_variable_get(PERSISTENCE_STATE_VARIABLE)
+          persistence_state = entity.instance_variable_get(PERSISTENCE_STATE_VARIABLE)
 
-        hash.each do |column, value|
-          previous_column_value = persistence_state[column]
+          hash.each do |column, value|
+            previous_column_value = persistence_state[column]
 
-          if persistence_state.has_key?(column)
-            if previous_column_value != value || value.respond_to?(:each)
-              changes[column] = value
+            if persistence_state.has_key?(column)
+              if previous_column_value != value || value.respond_to?(:each)
+                changes[column] = value
+              end
             end
           end
-        end
 
-        changes
+          changes
+        end
       end
 
       def set_entity_primary_key(entity, raw, key)

@@ -54,7 +54,7 @@ RSpec.describe ReeDto::DSL do
       expect {
         dto.string
       }.to raise_error do |e|
-        expect(e.message).to eq("field :string not set for DtoClass")
+        expect(e.message).to eq("field :string not set for:\nDtoClass\n  with_default   = 1")
       end
     }
 
