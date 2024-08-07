@@ -24,7 +24,7 @@ module ReeDto::DtoInstanceMethods
     end
   end
 
-  contract None => Set
+  contract None => nil
   def reset_changes
     @changed_fields = nil
   end
