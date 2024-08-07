@@ -27,7 +27,7 @@ RSpec.describe 'Mapper Hash' do
     }
 
     it {
-      expect { mapper.cast({ point: 1 }) }.to raise_error(ReeMapper::TypeError, /`point\[x\]` is missing (required field)/)
+      expect { mapper.cast({ point: 1 }) }.to raise_error(ReeMapper::TypeError, /`point\[x\]` is missing \(required field\)/)
     }
 
     it {
