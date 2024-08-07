@@ -11,6 +11,9 @@
       "name": "ree_datetime"
     },
     {
+      "name": "ree_dto"
+    },
+    {
       "name": "ree_string"
     }
   ],

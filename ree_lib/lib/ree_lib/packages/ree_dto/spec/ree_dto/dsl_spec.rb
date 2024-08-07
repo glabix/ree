@@ -2,7 +2,7 @@
 package_require("ree_dto/dsl")
 
 RSpec.describe ReeDto::DSL do
-  class DtoClass
+  class ReeDto::DtoClass
     include ReeDto::DSL
 
     User = Data.define(:id, :name, :status)
@@ -12,7 +12,7 @@ RSpec.describe ReeDto::DSL do
       field :string, String
       field :without_setter, Integer, setter: false
 
-      collection :numbers, ArrayOf[Integer] do
+      collection :numbers, Integer do
         filter :odd, -> { _1.odd? }
 
         def to_s
@@ -20,7 +20,7 @@ RSpec.describe ReeDto::DSL do
         end
       end
 
-      collection :users, ArrayOf[User] do
+      collection :users, User do
         filter :active, -> { _1.status == "active" }
         filter :inactive, -> { _1.status != "active" }
       end
@@ -29,37 +29,37 @@ RSpec.describe ReeDto::DSL do
 
   context "fields" do
     it {
-      dto = DtoClass.new
+      dto = ReeDto::DtoClass.new
       expect(dto.with_default).to eq(1)
 
-      dto = DtoClass.new({})
+      dto = ReeDto::DtoClass.new({})
       expect(dto.with_default).to eq(1)
       expect(dto.get_value(:with_default)).to eq(1)
     }
 
     it {
-      dto = DtoClass.new
+      dto = ReeDto::DtoClass.new
       expect(dto.has_value?(:with_default)).to eq(true)
       expect(dto.has_value?(:string)).to eq(false)
     }
 
     it {
-      dto = DtoClass.new({with_default: 1, string: "string", without_setter: 22})
-      expect(dto.to_s).to include("DtoClass")
+      dto = ReeDto::DtoClass.new({with_default: 1, string: "string", without_setter: 22})
+      expect(dto.to_s).to include("ReeDto::DtoClass")
     }
 
     it {
-      dto = DtoClass.new
+      dto = ReeDto::DtoClass.new
 
       expect {
         dto.string
       }.to raise_error do |e|
-        expect(e.message).to eq("field :string not set for:\nDtoClass\n  with_default   = 1")
+        expect(e.message).to eq("field :string not set for:\nReeDto::DtoClass\n  with_default   = 1")
       end
     }
 
     it {
-      dto = DtoClass.new(string: "string")
+      dto = ReeDto::DtoClass.new(string: "string")
       expect(dto.string).to eq("string")
 
       dto.string = "changed"
@@ -68,7 +68,7 @@ RSpec.describe ReeDto::DSL do
     }
 
     it {
-      dto = DtoClass.new
+      dto = ReeDto::DtoClass.new
       fields = []
       values = []
 
@@ -84,7 +84,7 @@ RSpec.describe ReeDto::DSL do
 
   context "collections" do
     it {
-      dto = DtoClass.new
+      dto = ReeDto::DtoClass.new
 
       dto.numbers << 1
       dto.numbers << 2
@@ -93,21 +93,21 @@ RSpec.describe ReeDto::DSL do
     }
 
     it {
-      dto = DtoClass.new
+      dto = ReeDto::DtoClass.new
 
-      dto.users.push(DtoClass::User.new(1, "John", "active"))
-      dto.users.push(DtoClass::User.new(1, "Adam", "inactive"))
+      dto.users.push(ReeDto::DtoClass::User.new(1, "John", "active"))
+      dto.users.push(ReeDto::DtoClass::User.new(1, "Adam", "inactive"))
 
       expect(dto.users.active.size).to eq(1)
 
-      peter = DtoClass::User.new(1, "Peter", "active")
+      peter = ReeDto::DtoClass::User.new(1, "Peter", "active")
       dto.users.active << peter
 
       expect(dto.users.size).to eq(3)
 
       expect {
-        dto.users.active << DtoClass::User.new(1, "John", "inactive")
-      }.to raise_error(ReeDto::DSL::CollectionFilter::InvalidFilterItemErr)
+        dto.users.active << ReeDto::DtoClass::User.new(1, "John", "inactive")
+      }.to raise_error(ReeDto::CollectionFilter::InvalidFilterItemErr)
 
       dto.users.active.remove(peter)
       expect(dto.users.size).to eq(2)

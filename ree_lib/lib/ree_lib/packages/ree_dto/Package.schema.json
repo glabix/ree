@@ -15,6 +15,19 @@
 
   ],
   "objects": [
-
+    {
+      "name": "build_dto",
+      "schema": "packages/ree_dto/schemas/ree_dto/functions/build_dto.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
+      "name": "build_dto_collection_class",
+      "schema": "packages/ree_dto/schemas/ree_dto/functions/build_dto_collection_class.schema.json",
+      "tags": [
+        "fn"
+      ]
+    }
   ]
 }
