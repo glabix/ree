@@ -5,7 +5,7 @@ RSpec.describe ReeDto::DSL do
   class ReeDto::DtoClass
     include ReeDto::DSL
 
-    User = Data.define(:id, :name, :status)
+    User = Struct.new(:id, :name, :status)
 
     build_dto do
       field :with_default, Nilor[Integer], default: 1
