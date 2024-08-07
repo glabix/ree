@@ -51,10 +51,4 @@ class ReeDao::PersistAssoc
 
     nil
   end
-
-  private
-
-  def is_ree_dto?(entity)
-    entity.class.include?(ReeDto::DSL)
-  end
 end
