@@ -123,14 +123,14 @@ module ReeDao
         raw = extract_changes(hash_or_entity, dump)
 
         if !raw.empty?
+          key_condition = prepare_key_condition_from_entity(hash_or_entity)
+          where(key_condition).__original_update(raw)
+
           if is_ree_dto?(hash_or_entity)
             hash_or_entity.reset_changes
           else
             update_persistence_state(hash_or_entity, raw)
           end
-
-          key_condition = prepare_key_condition_from_entity(hash_or_entity)
-          where(key_condition).__original_update(raw)
         end
 
         hash_or_entity
