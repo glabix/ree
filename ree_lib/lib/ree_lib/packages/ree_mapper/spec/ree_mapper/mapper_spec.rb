@@ -57,6 +57,34 @@ RSpec.describe ReeMapper::Mapper do
     }
   end
 
+  describe 'ree_dto dto' do
+    class ReeMapper::TestDto
+      include ReeDto::DSL
+
+      build_dto do
+        field :my_field, Integer
+      end
+    end
+
+    let(:mapper) {
+      build_mapper_factory(
+        strategies: [
+          build_mapper_strategy(method: :cast, dto: ReeMapper::TestDto),
+        ]
+      ).call.use(:cast) do
+        integer :my_field
+      end
+    }
+
+    it {
+      expect(mapper.cast({ my_field: 1 }).my_field).to eq(1)
+    }
+
+    it {
+      expect(mapper.cast({ my_field: 1 })).to be_a(ReeMapper::TestDto)
+    }
+  end
+
   describe 'ostruct dto' do
     let(:mapper) {
       build_mapper_factory(

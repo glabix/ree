@@ -68,7 +68,7 @@ class ReeMapper::MapperStrategy
       ReeMapper::HashOutput.new(dto)
     elsif dto == Struct
       ReeMapper::StructOutput.new
-    elsif dto.ancestors.include?(ReeDto::DSL)
+    elsif dto.include?(ReeDto::DSL)
       ReeMapper::ReeDtoOutput.new(dto)
     else
       ReeMapper::ObjectOutput.new(dto)
