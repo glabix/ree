@@ -45,6 +45,7 @@ RSpec.describe :one_to_one do
 
       package do
         depends_on :ree_dao
+        depends_on :ree_dto
       end
 
       class Db
