@@ -79,7 +79,7 @@ module ReeDto::DtoInstanceMethods
 
   contract None => ArrayOf[Symbol]
   def changed_fields
-    @changed_fields&.to_a || []
+    @changed_fields.to_a
   end
 
   contract Block => Any
