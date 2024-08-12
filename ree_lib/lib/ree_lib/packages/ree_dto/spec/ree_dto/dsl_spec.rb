@@ -91,11 +91,16 @@ RSpec.describe ReeDto::DSL do
       dto.numbers << 1
       dto.numbers << 2
 
+      expect(dto.numbers.first).to eq(1)
+      expect(dto.numbers.last).to eq(2)
+      expect(dto.numbers.find { _1 == 1 }).to eq(1)
       expect(dto.numbers.class).to eq(ReeDto::DtoClass::NumbersCollectionDto)
       expect(dto.users.class).to eq(ReeDto::DtoClass::UsersCollectionDto)
       expect(dto.active_users.class).to eq(ReeDto::DtoClass::ActiveUsersCollectionDto)
       expect(dto.numbers.sum).to eq(3)
       expect(dto.numbers.to_s).to eq("odd_collection")
+      dto.numbers.clear
+      expect(dto.numbers.size).to eq(0)
     }
 
     it {

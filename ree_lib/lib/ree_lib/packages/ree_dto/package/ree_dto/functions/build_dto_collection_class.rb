@@ -25,6 +25,7 @@ class ReeDto::BuildDtoCollectionClass
 
       alias :<< :add
       alias :push :add
+      alias :remove :delete
     end
 
     const_name = "#{name}CollectionDto"

@@ -2,6 +2,9 @@ require_relative "./collection_filter"
 
 class ReeDto::DtoCollection
   include Enumerable
+  extend Forwardable
+
+  def_delegators *([:@list] + Array.public_instance_methods - Object.public_instance_methods)
 
   LoadError = Class.new(ArgumentError)
 
@@ -18,11 +21,6 @@ class ReeDto::DtoCollection
   contract Optblock => Any
   def each(&block)
     @list.each(&block)
-  end
-
-  contract None => Integer
-  def size
-    @list.size
   end
 
   class << self
