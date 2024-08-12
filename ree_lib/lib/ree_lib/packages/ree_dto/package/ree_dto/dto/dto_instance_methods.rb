@@ -64,7 +64,7 @@ module ReeDto::DtoInstanceMethods
   def set_value(name, val)
     if has_value?(name)
       old = get_value(name)
-      return if old == val
+      return old if old == val
     end
 
     @changed_fields ||= Set.new
