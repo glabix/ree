@@ -2,12 +2,15 @@ class ReeDto::BuildDtoCollectionClass
   include Ree::FnDSL
 
   fn :build_dto_collection_class do
+    link :camelize, from: :ree_string
     link "ree_dto/dto/dto_collection", -> { DtoCollection }
   end
 
-  contract Any => Class
-  def call(entity_contract)
-    Class.new(DtoCollection) do
+  contract Class, Symbol, Any => Class
+  def call(klass, collection_name, entity_contract)
+    name = camelize(collection_name.to_s)
+
+    const = Class.new(DtoCollection) do
       contract entity_contract => nil
       def add(item)
         @list ||= []
@@ -23,5 +26,9 @@ class ReeDto::BuildDtoCollectionClass
       alias :<< :add
       alias :push :add
     end
+
+    const_name = "#{name}CollectionDto"
+    klass.const_set(const_name, const)
+    klass.const_get(const_name)
   end
 end

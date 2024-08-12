@@ -90,6 +90,10 @@ RSpec.describe ReeDto::DSL do
 
       dto.numbers << 1
       dto.numbers << 2
+
+      expect(dto.numbers.class).to eq(ReeDto::DtoClass::NumbersCollectionDto)
+      expect(dto.users.class).to eq(ReeDto::DtoClass::UsersCollectionDto)
+      expect(dto.active_users.class).to eq(ReeDto::DtoClass::ActiveUsersCollectionDto)
       expect(dto.numbers.sum).to eq(3)
       expect(dto.numbers.to_s).to eq("odd_collection")
     }

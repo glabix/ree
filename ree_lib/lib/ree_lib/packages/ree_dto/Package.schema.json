@@ -9,6 +9,9 @@
   "depends_on": [
     {
       "name": "ree_object"
+    },
+    {
+      "name": "ree_string"
     }
   ],
   "env_vars": [

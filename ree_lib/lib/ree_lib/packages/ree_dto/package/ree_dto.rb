@@ -3,6 +3,7 @@ module ReeDto
 
   package do
     depends_on :ree_object
+    depends_on :ree_string
   end
 
   class << self
