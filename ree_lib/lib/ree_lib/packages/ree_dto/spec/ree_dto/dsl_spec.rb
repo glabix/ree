@@ -20,6 +20,8 @@ RSpec.describe ReeDto::DSL do
         end
       end
 
+      collection :active_users, User
+
       collection :users, User do
         filter :active, -> { _1.status == "active" }
         filter :inactive, -> { _1.status != "active" }

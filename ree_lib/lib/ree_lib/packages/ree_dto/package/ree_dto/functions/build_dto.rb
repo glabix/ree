@@ -47,7 +47,7 @@ class ReeDto::BuildDto
 
     builder.collections.each do |collection|
       col_class = build_dto_collection_class(collection.contract)
-      col_class.class_exec(&collection.filter_proc)
+      col_class.class_exec(&collection.filter_proc) if collection.filter_proc
 
       klass.instance_exec do
         contract ArrayOf[collection.contract] => DtoCollection

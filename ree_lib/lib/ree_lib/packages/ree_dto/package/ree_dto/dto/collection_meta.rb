@@ -4,7 +4,7 @@ class ReeDto::CollectionMeta
 
   attr_reader :name, :contract, :filter_proc
 
-  contract Symbol, Any, Proc => Any
+  contract Symbol, Any, Nilor[Proc] => Any
   def initialize(name, contract, filter_proc)
     @name = name
     @contract = contract
