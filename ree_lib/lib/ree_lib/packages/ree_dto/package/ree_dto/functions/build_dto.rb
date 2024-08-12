@@ -10,6 +10,7 @@ class ReeDto::BuildDto
     link "ree_dto/dto/dto_instance_methods", -> { DtoInstanceMethods }
     link "ree_dto/dto/dto_class_methods", -> { DtoClassMethods }
     link "ree_dto/dto/dto_builder", -> { DtoBuilder }
+    link "ree_dto/dto/dto_collection", -> { DtoCollection }
   end
 
   contract(Block => nil)
@@ -47,6 +48,24 @@ class ReeDto::BuildDto
     builder.collections.each do |collection|
       col_class = build_dto_collection_class(collection.contract)
       col_class.class_exec(&collection.filter_proc)
+
+      klass.instance_exec do
+        contract ArrayOf[collection.contract] => DtoCollection
+      end
+
+      klass.define_method "#{collection.name}=" do |list|
+        col = send(collection.name)
+
+        list.each do |item|
+          col.add(item)
+        end
+
+        col
+      end
+
+      klass.instance_exec do
+        contract None => DtoCollection
+      end
 
       klass.define_method collection.name do
         @collections ||= {}

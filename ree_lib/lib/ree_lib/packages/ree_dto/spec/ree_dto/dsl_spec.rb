@@ -95,6 +95,13 @@ RSpec.describe ReeDto::DSL do
     it {
       dto = ReeDto::DtoClass.new
 
+      dto.numbers = [1, 2, 3, 4]
+      expect(dto.numbers.to_a).to eq([1, 2, 3, 4])
+    }
+
+    it {
+      dto = ReeDto::DtoClass.new
+
       dto.users.push(ReeDto::DtoClass::User.new(1, "John", "active"))
       dto.users.push(ReeDto::DtoClass::User.new(1, "Adam", "inactive"))
 
