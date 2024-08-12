@@ -8,24 +8,24 @@ class ReeArray::InGroups
   doc(<<~DOC)
     Splits or iterates over the array in +number+ of groups, padding any
     remaining slots with +fill_with+ unless it is +false+.
-    
+
       in_groups(%w(1 2 3 4 5 6 7 8 9 10), 3, fill_with: nil) {|group| p group}
       ["1", "2", "3", "4"]
       ["5", "6", "7", nil]
       ["8", "9", "10", nil]
-    
+
       in_groups(%w(1 2 3 4 5 6 7 8 9 10, 3, fill_with: '&nbsp;') {|group| p group}
       ["1", "2", "3", "4"]
       ["5", "6", "7", "&nbsp;"]
       ["8", "9", "10", "&nbsp;"]
-    
+
       in_groups(%w(1 2 3 4 5 6 7), 3) {|group| p group}
       ["1", "2", "3"]
       ["4", "5"]
       ["6", "7"]
   DOC
   contract(
-    ArrayOf[Any],
+    Or[ArrayOf[Any], Enumerable],
     Integer,
     Ksplat[fill_with?: Any],
     Optblock => Or[ArrayOf[Any], Any]
