@@ -12,21 +12,11 @@ class ReeDto::DtoCollection
     @parent_class = parent_class
     @contract = contract
     @name = name
-    @list = nil
-  end
-
-  contract None => nil
-  def reset
     @list = []
-    nil
   end
 
   contract Optblock => Any
   def each(&block)
-    if @list.nil?
-      raise LoadError.new("collection :#{@name} for #{@parent_class} is not loaded")
-    end
-
     @list.each(&block)
   end
 
