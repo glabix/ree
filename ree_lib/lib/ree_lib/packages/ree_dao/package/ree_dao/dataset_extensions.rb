@@ -32,7 +32,7 @@ module ReeDao
       end
 
       def last(mapper: nil)
-        with_mapper(mapper).__original_last
+        with_mapper(mapper).reverse_order(:id).first
       end
 
       def all(mapper: nil)
@@ -41,6 +41,32 @@ module ReeDao
 
       def delete_all
         where({}).__original_delete
+      end
+
+      # @args [ReeDto::Dto, ReeDto::DtoCollection]
+      def persist(*args, set: nil)
+        args.each do |arg|
+          case arg
+          when ReeDto::DSL
+            put_or_update(arg, set: set)
+          when ReeDto::DtoCollection, Array
+            arg.each { put_or_update(_1, set: set) }
+          end
+        end
+      end
+
+      def put_or_update(entity, set: nil)
+        if set
+          set.each do |key, val|
+            entity.send("#{key}=", val)
+          end
+        end
+
+        if entity.id
+          update(entity)
+        else
+          put(entity)
+        end
       end
 
       def put(entity)
