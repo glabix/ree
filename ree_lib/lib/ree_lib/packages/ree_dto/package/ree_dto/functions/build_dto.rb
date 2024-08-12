@@ -25,11 +25,19 @@ class ReeDto::BuildDto
     klass.send(:set_collections, builder.collections)
 
     builder.fields.each do |field|
+      klass.instance_exec do
+        contract None => field.contract
+      end
+
       klass.define_method field.name do
         get_value(field.name)
       end
 
       if field.setter
+        klass.instance_exec do
+          contract field.contract => field.contract
+        end
+
         klass.define_method :"#{field.name}=" do |val|
           set_value(field.name, val)
         end
