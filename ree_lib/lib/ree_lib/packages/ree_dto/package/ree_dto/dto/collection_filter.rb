@@ -2,8 +2,11 @@ class ReeDto::CollectionFilter
   include Ree::Contracts::Core
   include Ree::Contracts::ArgContracts
   include Enumerable
+  extend Forwardable
 
   InvalidFilterItemErr = Class.new(ArgumentError)
+
+  def_delegators *([:all] + Array.public_instance_methods - Object.public_instance_methods)
 
   contract Any, Symbol, Proc => Any
   def initialize(collection, name, filter_proc)
@@ -17,15 +20,14 @@ class ReeDto::CollectionFilter
     @collection.select(&@filter_proc).each(&block)
   end
 
+  def all
+    @collection.select(&@filter_proc)
+  end
+
   contract Any => Any
   def add(item)
     check_item(item)
     @collection.add(item)
-  end
-
-  contract None => Integer
-  def size
-    count
   end
 
   def inspect

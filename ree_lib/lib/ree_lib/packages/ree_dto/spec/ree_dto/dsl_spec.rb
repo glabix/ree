@@ -122,6 +122,8 @@ RSpec.describe ReeDto::DSL do
       dto.users.active << peter
 
       expect(dto.users.size).to eq(3)
+      expect(dto.users.active.empty?).to eq(false)
+      expect(dto.users.active.size).to eq(2)
 
       expect {
         dto.users.active << ReeDto::DtoClass::User.new(1, "John", "inactive")
