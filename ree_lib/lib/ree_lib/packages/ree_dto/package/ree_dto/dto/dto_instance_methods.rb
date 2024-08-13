@@ -1,4 +1,5 @@
 require_relative "./field_meta"
+require "date"
 
 module ReeDto::DtoInstanceMethods
   include Ree::Contracts::Core
@@ -43,7 +44,7 @@ module ReeDto::DtoInstanceMethods
       meta = get_meta(name)
 
       if !meta.has_default?
-        raise FieldNotSetError.new("field :#{name} not set for:#{self}")
+        raise FieldNotSetError.new("field `#{name}` not set for: #{self}")
       else
         @_attrs[name] = meta.default
       end
@@ -91,21 +92,32 @@ module ReeDto::DtoInstanceMethods
 
   contract None => String
   def to_s
-    fields = self.class.fields
-    max_length = fields.map(&:name).sort_by(&:size).last.size
-    result     = "\n#{self.class}\n"
+    result = "#<dto #{self.class} "
 
-    data = fields.select { has_value?(_1.name) }.map do |field|
-      name = field.name.to_s
-      extra_spaces = ' ' * (max_length - name.size)
-      %Q(  #{name}#{extra_spaces} = #{get_value(field.name).inspect})
+    data = self.class.fields.select { has_value?(_1.name) }.map do |field|
+      "#{field.name}=#{inspect_value(get_value(field.name))}"
     end
 
-    result << data.join("\n")
+    data += self.class.collections.select { send(_1.name).size > 0 }.map do |col|
+      "#{col.name}=#{send(col.name).inspect}"
+    end
+
+    result << data.join(", ")
+    result << ">"
   end
 
   contract None => String
   def inspect
     to_s
+  end
+
+  private
+
+  def inspect_value(v)
+    if v.is_a?(DateTime) || v.is_a?(Date) || v.is_a?(Time)
+      v.to_s.inspect
+    else
+      v.inspect
+    end
   end
 end

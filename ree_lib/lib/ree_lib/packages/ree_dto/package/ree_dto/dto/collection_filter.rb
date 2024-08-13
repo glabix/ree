@@ -28,6 +28,10 @@ class ReeDto::CollectionFilter
     count
   end
 
+  def inspect
+    to_a.inspect
+  end
+
   contract Any => Any
   def remove(item)
     check_item(item)

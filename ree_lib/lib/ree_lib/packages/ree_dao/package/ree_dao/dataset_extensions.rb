@@ -46,10 +46,9 @@ module ReeDao
       # @args [ReeDto::Dto, ReeDto::DtoCollection]
       def persist(*args, set: nil)
         args.each do |arg|
-          case arg
-          when ReeDto::DSL
+          if arg.is_a?(ReeDto::DSL)
             put_or_update(arg, set: set)
-          when ReeDto::DtoCollection, Array
+          elsif arg.is_a?(ReeDto::DtoCollection) || arg.is_a?(Array) || arg.is_a?(Enumerable)
             arg.each { put_or_update(_1, set: set) }
           end
         end

@@ -23,6 +23,16 @@ class ReeDto::DtoCollection
     @list.each(&block)
   end
 
+  contract None => String
+  def to_s
+    inspect
+  end
+
+  contract None => String
+  def inspect
+    @list.inspect
+  end
+
   class << self
     def filter(name, filter_proc)
       define_method name do
