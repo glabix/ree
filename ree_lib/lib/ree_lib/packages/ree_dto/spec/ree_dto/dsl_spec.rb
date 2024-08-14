@@ -31,6 +31,13 @@ RSpec.describe ReeDto::DSL do
 
   context "fields" do
     it {
+      dto = ReeDto::DtoClass.new(string: "str")
+      expect(dto.changed_fields).to eq([])
+      dto.set_as_changed(:string)
+      expect(dto.changed_fields).to eq([:string])
+    }
+
+    it {
       dto = ReeDto::DtoClass.new
       expect(dto.with_default).to eq(1)
 

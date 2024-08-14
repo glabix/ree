@@ -83,6 +83,13 @@ module ReeDto::DtoInstanceMethods
     @changed_fields.to_a
   end
 
+  def set_as_changed(name)
+    if has_value?(name)
+      @changed_fields ||= Set.new
+      @changed_fields << name
+    end
+  end
+
   contract Block => Any
   def each_field(&proc)
     self.class.fields.select { has_value?(_1.name) }.each do |field|
