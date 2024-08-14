@@ -251,7 +251,16 @@ module ReeDao
 
       def extract_changes(entity, hash)
         if is_ree_dto?(entity)
-          hash.slice(*entity.changed_fields)
+          result = {}
+          changed = entity.changed_fields
+
+          hash.each do |k, v|
+            if changed.include?(k) || v.respond_to?(:each)
+              result[k] = v
+            end
+          end
+
+          result
         else
           return hash unless entity.instance_variable_defined?(PERSISTENCE_STATE_VARIABLE)
           changes = {}
