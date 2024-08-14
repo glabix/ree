@@ -8,7 +8,7 @@ class ReeDao::OneToMany
   end
 
   contract(
-    ArrayOf[ -> (v) { v.class.ancestors.include?(ReeDto::EntityDSL) } ],
+    ArrayOf[ -> (v) { v.class.ancestors.include?(ReeDto::EntityDSL) || v.class.ancestors.include?(ReeDto::DSL) } ],
     Sequel::Dataset,
     Ksplat[
       foreign_key?: Symbol,
