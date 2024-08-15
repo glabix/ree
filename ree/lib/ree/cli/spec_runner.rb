@@ -6,11 +6,12 @@ module Ree
       attr_reader :packages_to_run
 
       class << self
-        def run(path:, package_names:, spec_matcher:, tag_name:,
-                with_children:, with_ancestors:, run_all: false)
+        def run(path:, package_names: [], spec_matcher: nil, filenames: [], tag_name: nil,
+        with_children: false, with_ancestors: false, run_all: false)
           SpecRunner.new(
             package_names: package_names,
             spec_matcher: spec_matcher,
+            filenames: filenames,
             tag_name: tag_name,
             with_children: with_children,
             with_ancestors: with_ancestors,
@@ -20,9 +21,10 @@ module Ree
         end
       end
 
-      def initialize(package_names:, spec_matcher:, tag_name:, with_children:,
-                     with_ancestors:, run_all: false, path:, stdout: STDOUT)
+      def initialize(package_names: [], spec_matcher: nil, filenames: [], tag_name: nil, with_children: false,
+                     with_ancestors: false, run_all: false, path:, stdout: STDOUT)
         @package_names = package_names || []
+        @filenames = filenames || []
         @packages_to_run = @package_names
         @spec_matcher = spec_matcher
         @tag_name = tag_name
@@ -34,6 +36,10 @@ module Ree
       end
 
       def run
+        if @spec_matcher && @filenames.size > 0
+          raise Ree::Error.new("Filenames option cannot be used with SPEC_MATCHER")
+        end
+
         schema_path = Ree.locate_packages_schema(@path)
         schema_dir = Pathname.new(schema_path).dirname.to_s
 
@@ -97,6 +103,7 @@ module Ree
             path: Ree::PathHelper.project_root_dir(ree_package),
             package: package,
             spec_matcher: @spec_matcher,
+            filenames: @filenames,
             stdout: $stdout
           ).run
         end
@@ -107,7 +114,7 @@ module Ree
       def project_packages(packages)
         packages.reject(&:gem?)
       end
-      
+
       def non_existent_packages
         @package_names ? @package_names - packages.map(&:name) : []
       end
@@ -148,7 +155,7 @@ module Ree
 
         unless acc.include?(package.name)
           acc << package.name
-          
+
           package.deps.map(&:name).each do |pack|
             next if !packages_set.include?(pack)
             recursively_find_children_packages(pack, acc)
