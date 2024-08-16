@@ -55,7 +55,7 @@ class ReeMapper::Mapper
                 else
                   if !field.optional && !@#{method}_strategy.always_optional
                     raise ReeMapper::TypeError.new(
-                      "is missing required field",
+                      "is missing (required field)",
                       field.location,
                       [field.from_as_str]
                     )

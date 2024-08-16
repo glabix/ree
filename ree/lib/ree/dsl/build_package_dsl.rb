@@ -127,7 +127,7 @@ class Ree::BuildPackageDsl
     name = Ree::StringUtils.underscore(list[0]).to_sym
 
     if !Ree.irb_mode? && name != name_from_path
-      raise Ree::Error.new("Package module '#{module_name}' does not correspond to package name 'name'. Fix file name or module name.")
+      raise Ree::Error.new("Package module '#{module_name}' does not correspond to package name '#{name}'. Fix file name or module name.")
     end
 
     package = @packages_facade.get_package(name, false)

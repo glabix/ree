@@ -40,6 +40,7 @@ RSpec.describe :persist_assoc do
 
       package do
         depends_on :ree_dao
+        depends_on :ree_dto
       end
 
       class Db
@@ -74,16 +75,11 @@ RSpec.describe :persist_assoc do
       end
 
       class ProjectUser
-        include ReeDto::EntityDSL
+        include ReeDto::DSL
 
-        properties(
-          id: Nilor[Integer],
-          project_id: Nilor[Integer]
-        )
-
-        contract Integer => Integer
-        def project_id=(id)
-          @project_id = id
+        build_dto do
+          field :id, Nilor[Integer], default: nil
+          field :project_id, Integer
         end
       end
 
@@ -125,7 +121,12 @@ RSpec.describe :persist_assoc do
 
     TestPersistAssoc::ProjectsDao.new.put(project)
 
-    persist_assoc(project, TestPersistAssoc::ProjectUsersDao.new)
+    TestPersistAssoc::ProjectUsersDao.new.persist(
+      project.project_users.first,
+      project.project_users,
+      project.project_users.to_a,
+      set: {project_id: project.id}
+    )
 
     expect(project.id).to be_a(Integer)
     expect(project.project_users.first.id).to be_a(Integer)

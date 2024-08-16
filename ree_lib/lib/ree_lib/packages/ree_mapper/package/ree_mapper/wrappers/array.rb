@@ -9,7 +9,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     ] => Array
   ).throws(ReeMapper::TypeError)
   def serialize(value, role: nil, fields_filters: nil)
-    if !value.is_a?(Array)
+    if !check_value(value)
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
 
@@ -40,7 +40,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     ] => Array
   ).throws(ReeMapper::TypeError)
   def cast(value, role: nil, fields_filters: nil)
-    if !value.is_a?(Array)
+    if !check_value(value)
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
 
@@ -71,7 +71,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     ] => Array
   ).throws(ReeMapper::TypeError)
   def db_dump(value, role: nil, fields_filters: nil)
-    if !value.is_a?(Array)
+    if !check_value(value)
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
 
@@ -102,7 +102,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     ] => Array
   ).throws(ReeMapper::TypeError)
   def db_load(value, role: nil, fields_filters: nil)
-    if !value.is_a?(Array)
+    if !check_value(value)
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
 
@@ -123,5 +123,11 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
       e.location ||= subject.location
       raise e
     end
+  end
+
+  private
+
+  def check_value(value)
+    value.is_a?(Array) || value.class.include?(Enumerable)
   end
 end

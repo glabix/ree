@@ -6,7 +6,7 @@ class ReeArray::GroupBy
   fn :group_by
 
   contract(
-    ArrayOf[Any], Block => HashOf[Any, ArrayOf[Any]]
+    Or[ArrayOf[Any], Enumerable], Block => HashOf[Any, ArrayOf[Any]]
   )
   def call(list, &proc)
     result = {}

@@ -32,7 +32,7 @@ module ReeDao
       end
 
       def last(mapper: nil)
-        with_mapper(mapper).__original_last
+        with_mapper(mapper).reverse_order(:id).first
       end
 
       def all(mapper: nil)
@@ -43,8 +43,34 @@ module ReeDao
         where({}).__original_delete
       end
 
+      # @args [ReeDto::Dto, ReeDto::DtoCollection]
+      def persist(*args, set: nil)
+        args.each do |arg|
+          if arg.is_a?(ReeDto::DSL)
+            put_or_update(arg, set: set)
+          elsif arg.is_a?(ReeDto::DtoCollection) || arg.is_a?(Array) || arg.is_a?(Enumerable)
+            arg.each { put_or_update(_1, set: set) }
+          end
+        end
+      end
+
+      def put_or_update(entity, set: nil)
+        if set
+          set.each do |key, val|
+            entity.send("#{key}=", val)
+          end
+        end
+
+        if entity.id
+          update(entity)
+        else
+          put(entity)
+        end
+      end
+
       def put(entity)
-        raw = opts[:schema_mapper].db_dump(entity)
+        raw = dump_entity(entity)
+
         remove_null_primary_key(raw)
         key = insert(raw)
 
@@ -82,7 +108,6 @@ module ReeDao
       def import_all(entities, batch_size: IMPORT_BATCH_SIZE)
         return if entities.empty?
 
-        mapper = opts[:schema_mapper]
         columns = self.columns
         raw = {}
 
@@ -90,7 +115,7 @@ module ReeDao
         columns.delete(:row)
 
         data = entities.map do |entity|
-          hash = mapper.db_dump(entity)
+          hash = dump_entity(entity)
           raw[entity] = hash
 
           columns.map { hash[_1] }
@@ -116,16 +141,22 @@ module ReeDao
       end
 
       def update(hash_or_entity)
-        return __original_update(hash_or_entity) if !opts[:schema_mapper]
-        return __original_update(hash_or_entity) if hash_or_entity.is_a?(Hash)
+        if !opts[:schema_mapper] || hash_or_entity.is_a?(Hash)
+          return __original_update(hash_or_entity)
+        end
 
-        raw = opts[:schema_mapper].db_dump(hash_or_entity)
-        raw = extract_changes(hash_or_entity, raw)
+        dump = dump_entity(hash_or_entity)
+        raw = extract_changes(hash_or_entity, dump)
 
-        unless raw.empty?
-          update_persistence_state(hash_or_entity, raw)
+        if !raw.empty?
           key_condition = prepare_key_condition_from_entity(hash_or_entity)
           where(key_condition).__original_update(raw)
+
+          if is_ree_dto?(hash_or_entity)
+            hash_or_entity.reset_changes
+          else
+            update_persistence_state(hash_or_entity, raw)
+          end
         end
 
         hash_or_entity
@@ -160,9 +191,7 @@ module ReeDao
 
             if m
               entity = m.db_load(hash)
-
               self.set_persistence_state(entity, hash)
-
               entity
             else
               hash
@@ -206,6 +235,8 @@ module ReeDao
       end
 
       def set_persistence_state(entity, raw)
+        return if is_ree_dto?(entity)
+
         if !entity.is_a?(Integer) && !entity.is_a?(Symbol)
           entity.instance_variable_set(PERSISTENCE_STATE_VARIABLE, raw)
         end
@@ -220,22 +251,35 @@ module ReeDao
       end
 
       def extract_changes(entity, hash)
-        return hash unless entity.instance_variable_defined?(PERSISTENCE_STATE_VARIABLE)
-        changes = {}
+        if is_ree_dto?(entity)
+          result = {}
+          changed = entity.changed_fields
 
-        persistence_state = entity.instance_variable_get(PERSISTENCE_STATE_VARIABLE)
-
-        hash.each do |column, value|
-          previous_column_value = persistence_state[column]
-
-          if persistence_state.has_key?(column)
-            if previous_column_value != value || value.respond_to?(:each)
-              changes[column] = value
+          hash.each do |k, v|
+            if changed.include?(k) || v.respond_to?(:each)
+              result[k] = v
             end
           end
-        end
 
-        changes
+          result
+        else
+          return hash unless entity.instance_variable_defined?(PERSISTENCE_STATE_VARIABLE)
+          changes = {}
+
+          persistence_state = entity.instance_variable_get(PERSISTENCE_STATE_VARIABLE)
+
+          hash.each do |column, value|
+            previous_column_value = persistence_state[column]
+
+            if persistence_state.has_key?(column)
+              if previous_column_value != value || value.respond_to?(:each)
+                changes[column] = value
+              end
+            end
+          end
+
+          changes
+        end
       end
 
       def set_entity_primary_key(entity, raw, key)
@@ -247,8 +291,17 @@ module ReeDao
           else
             entity.instance_variable_set("@#{primary_key}", key)
           end
+
           raw[primary_key] = key
         end
+      end
+
+      def dump_entity(entity_or_hash)
+        opts[:schema_mapper].db_dump(entity_or_hash)
+      end
+
+      def is_ree_dto?(entity)
+        entity.class.include?(ReeDto::DSL)
       end
 
       def prepare_key_condition_from_entity(entity)

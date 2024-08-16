@@ -5,7 +5,7 @@ class ReeArray::IndexBy
 
   fn :index_by
 
-  contract(ArrayOf[Any], Block => Hash)
+  contract(Or[ArrayOf[Any], Enumerable], Block => Hash)
   def call(list, &proc)
     result = {}
     list.each { result[yield(_1)] = _1 }

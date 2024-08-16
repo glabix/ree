@@ -6,6 +6,7 @@ module ReeMapper
   package do
     depends_on :ree_string
     depends_on :ree_datetime
+    depends_on :ree_dto
   end
 
   package_require('ree_string/functions/underscore')
@@ -40,6 +41,7 @@ module ReeMapper
 
   require_relative 'ree_mapper/strategy_outputs/strategy_output'
   require_relative 'ree_mapper/strategy_outputs/object_output'
+  require_relative 'ree_mapper/strategy_outputs/ree_dto_output'
   require_relative 'ree_mapper/strategy_outputs/hash_output'
   require_relative 'ree_mapper/strategy_outputs/struct_output'
 
