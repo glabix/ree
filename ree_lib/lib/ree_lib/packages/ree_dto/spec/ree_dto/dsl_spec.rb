@@ -186,7 +186,7 @@ RSpec.describe ReeDto::DSL do
   describe "#dup" do
     it {
       dto = ReeDto::DtoClass.new(string: "str")
-      dto.string = "changed"
+      dto.string = +"changed"
       expect(dto.changed_fields).to eq([:string])
 
       dup = dto.dup      
@@ -194,8 +194,11 @@ RSpec.describe ReeDto::DSL do
       expect(dup.object_id).not_to eq(dto.object_id)
       expect(dup.changed_fields).to eq([])
 
-      dup.string = "changed2"
-      expect(dup).not_to eq(dto)
+      dup.string.concat("2")
+      expect(dto.string).to eq("changed")
+
+      dup.string = "changed3"
+      expect(dto.string).to eq("changed")
 
       dto.freeze
       expect(dto.dup.frozen?).to eq(false)
@@ -213,8 +216,13 @@ RSpec.describe ReeDto::DSL do
       expect(clone.object_id).not_to eq(dto.object_id)
       expect(clone.changed_fields).to eq([:string])
 
+      clone.string.concat("2")
+      expect(dto.string).to eq("changed")
+
+      clone.string = "changed3"
+      expect(dto.string).to eq("changed")
+
       clone.with_default = 2
-      expect(clone).not_to eq(dto)
       expect(dto.changed_fields).to eq([:string])
 
       dto.freeze
