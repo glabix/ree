@@ -7,11 +7,12 @@ class ReeDao::Agg
     link "ree_dao/associations", -> { Associations }
     link "ree_dao/contract/dao_dataset_contract", -> { DaoDatasetContract }
     link "ree_dao/contract/entity_contract", -> { EntityContract }
+    link "ree_dao/contract/dto_contract", -> { DtoContract }
   end
 
   contract(
     DaoDatasetContract,
-    Or[Sequel::Dataset, ArrayOf[Integer], ArrayOf[EntityContract], Integer],
+    Or[Sequel::Dataset, ArrayOf[Integer], ArrayOf[EntityContract], ArrayOf[DtoContract], Integer],
     Ksplat[
       only?: ArrayOf[Symbol],
       except?: ArrayOf[Symbol],

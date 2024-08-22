@@ -90,8 +90,10 @@ module ReeDto::DtoInstanceMethods
     end
   end
 
-  contract Block => Any
+  contract Optblock => Any
   def each_field(&proc)
+    return enum_for(:each_field) unless block_given?
+    
     self.class.fields.select { has_value?(_1.name) }.each do |field|
       proc.call(field.name, get_value(field.name))
     end
@@ -101,8 +103,8 @@ module ReeDto::DtoInstanceMethods
   def to_s
     result = "#<dto #{self.class} "
 
-    data = self.class.fields.select { has_value?(_1.name) }.map do |field|
-      "#{field.name}=#{inspect_value(get_value(field.name))}"
+    data = each_field.map do |name, value|
+      "#{name}=#{inspect_value(value)}"
     end
 
     data += self.class.collections.select { send(_1.name).size > 0 }.map do |col|
@@ -116,6 +118,15 @@ module ReeDto::DtoInstanceMethods
   contract None => String
   def inspect
     to_s
+  end
+
+  contract Any => Bool
+  def ==(other)
+    return false unless other.is_a?(self.class)
+
+    each_field.all? do |name, value|
+      other.get_value(name) == value
+    end
   end
 
   private

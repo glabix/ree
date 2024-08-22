@@ -141,4 +141,38 @@ RSpec.describe ReeDto::DSL do
       expect(dto.users.active.size).to eq(1)
     }
   end
+
+  describe "#==" do
+    it {
+      expect(
+        ReeDto::DtoClass.new(string: "str")
+      ).to eq(
+        ReeDto::DtoClass.new(string: "str")
+      )
+    }
+
+    it {
+      expect(
+        ReeDto::DtoClass.new(string: "str")
+      ).to eq(
+        ReeDto::DtoClass.new(string: "str", without_setter: 0)
+      )
+    }
+
+    it {
+      expect(
+        ReeDto::DtoClass.new(string: "str")
+      ).not_to eq(
+        ReeDto::DtoClass.new(string: "str2")
+      )
+    }
+
+    it {
+      expect(
+        ReeDto::DtoClass.new(string: "str")
+      ).not_to eq(
+        ReeDto::DtoClass.new(string: "str", with_default: 2)
+      )
+    }
+  end
 end

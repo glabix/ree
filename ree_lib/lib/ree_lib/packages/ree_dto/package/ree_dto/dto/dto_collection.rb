@@ -33,6 +33,15 @@ class ReeDto::DtoCollection
     @list.inspect
   end
 
+  contract Any => Bool
+  def ==(other)
+    if other.is_a?(self.class)
+      @list == other.instance_variable_get(:@list)
+    else
+      @list == other
+    end
+  end
+
   class << self
     def filter(name, filter_proc)
       define_method name do

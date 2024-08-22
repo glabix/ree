@@ -5,6 +5,7 @@ module ReeDaoAggTest
 
   package do
     depends_on :ree_dao
+    depends_on :ree_dto
     depends_on :ree_array
     depends_on :ree_string
     depends_on :ree_hash
@@ -36,13 +37,15 @@ class ReeDaoAggTest::Db
 end
 
 class ReeDaoAggTest::Book
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    user_id: Integer,
-    title: Nilor[String]
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :user_id, Integer
+    field :title, Nilor[String], default: nil
+
+    field :author, Any
+  end
 
   def set_chapters(chapters)
     @chapters = chapters; nil
@@ -67,58 +70,22 @@ class ReeDaoAggTest::Book
   def reviews
     @reviews
   end
-
-  def title=(t)
-    @title = t
-  end
-
-  attr_accessor :title, :user_id
 end
 
 class ReeDaoAggTest::BookDto < SimpleDelegator
 end
 
 class ReeDaoAggTest::User
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    name: String,
-    age: Integer,
-    organization_id: Integer
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :name, String
+    field :age, Integer
+    field :organization_id, Integer
 
-  def set_organization(org)
-    @organization = org
-  end
-
-  def organization
-    @organization
-  end
-
-  def set_passport(passport)
-    @passport = passport
-  end
-
-  def passport
-    @passport
-  end
-
-  def books
-    @books
-  end
-
-  def set_active_books(books)
-    @active_books = books
-  end
-
-  def active_books
-    @active_books
-  end
-
-  contract(ArrayOf[ReeDaoAggTest::Book] => nil)
-  def set_books(books)
-    @books = books; nil
+    collection :books, ReeDaoAggTest::Book
+    collection :active_books, ReeDaoAggTest::Book
   end
 
   [
@@ -141,34 +108,20 @@ class ReeDaoAggTest::User
       instance_variable_get("@#{attr}")
     end
   end
-
-  attr_accessor :name, :age, :organization_id
 end
 
 class ReeDaoAggTest::UserDto
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Integer,
-    organization_id: Integer,
-    name: String,
-    full_name: String,
-  )
+  build_dto do
+    field :id, Integer
+    field :organization_id, Integer
+    field :name, String
+    field :full_name, String
 
-  def set_organization(org)
-    @organization = org; nil
-  end
+    field :organization, Any
 
-  def organization
-    @organization
-  end
-
-  def set_books(books)
-    @books = books; nil
-  end
-
-  def books
-    @books
+    collection :books, ReeDaoAggTest::BookDto
   end
 end
 
@@ -194,145 +147,131 @@ end
 
 
 class ReeDaoAggTest::UserPassport
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    user_id: Integer,
-    info: Nilor[String]
-  )
-
-  attr_accessor :info, :user_id
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :user_id, Integer
+    field :info, Nilor[String], default: nil
+  end
 end
 
 class ReeDaoAggTest::Movie
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    user_id: Integer,
-    title: Nilor[String]
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :user_id, Integer
+    field :title, Nilor[String], default: nil
+  end
 end
 
 class ReeDaoAggTest::Videogame
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    user_id: Integer,
-    title: Nilor[String]
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :user_id, Integer
+    field :title, Nilor[String], default: nil
+  end
 end
 
 class ReeDaoAggTest::Hobby
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    user_id: Integer,
-    title: Nilor[String]
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :user_id, Integer
+    field :title, Nilor[String], default: nil
+  end
 end
 
 class ReeDaoAggTest::Vinyl
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    user_id: Integer,
-    title: Nilor[String]
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :user_id, Integer
+    field :title, Nilor[String], default: nil
+  end
 end
 
 class ReeDaoAggTest::Pet
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    user_id: Integer,
-    name: Nilor[String]
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :user_id, Integer
+    field :name, Nilor[String], default: nil
+  end
 end
 
 class ReeDaoAggTest::Skill
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    user_id: Integer,
-    title: Nilor[String]
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :user_id, Integer
+    field :title, Nilor[String], default: nil
+  end
 end
 
 class ReeDaoAggTest::Dream
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    user_id: Integer,
-    description: Nilor[String]
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :user_id, Integer
+    field :description, Nilor[String], default: nil
+  end
 end
 
 class ReeDaoAggTest::Chapter
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    book_id: Integer,
-    title: Nilor[String]
-  )
-
-  attr_accessor :title, :book_id
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :book_id, Integer
+    field :title, Nilor[String], default: nil
+  end
 end
 
 class ReeDaoAggTest::ChapterDto < SimpleDelegator
 end
 
 class ReeDaoAggTest::Author
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    book_id: Integer,
-    name: Nilor[String]
-  )
-
-  attr_accessor :name, :book_id
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :book_id, Integer
+    field :name, Nilor[String], default: nil
+  end
 end
 
 class ReeDaoAggTest::AuthorDto < SimpleDelegator
 end
 
-class ReeDaoAggTest::Review
-  include ReeDto::EntityDSL
+class ReeDaoAggTest::ReviewAuthor
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    book_id: Integer,
-    rating: Nilor[Integer]
-  )
-
-  def set_review_author(review_author)
-    @review_author = review_author
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :review_id, Integer
+    field :name, String, default: nil
   end
-
-  def review_author
-    @review_author
-  end
-
-  attr_accessor :rating, :book_id
 end
 
-class ReeDaoAggTest::ReviewAuthor
-  include ReeDto::EntityDSL
+class ReeDaoAggTest::Review
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    review_id: Integer,
-    name: String
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :book_id, Integer
+    field :rating, Nilor[Integer], default: nil
+
+    field :review_author, Nilor[ReeDaoAggTest::ReviewAuthor], default: nil
+  end
 end
 
 class ReeDaoAggTest::Users
