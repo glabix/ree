@@ -50,29 +50,18 @@ module Ree::LinkDSL
         raise Ree::Error.new("target should be one of [:object, :class, :both]", :invalid_dsl_usage)
       end
 
-      package_name = Ree::StringUtils.underscore(self.name.split('::').first).to_sym
-      link_package_name = from.nil? ? package_name : from
+      packages = Ree.container.packages_facade
+      link_package_name = get_link_package_name(from, object_name)
       link_object_name = object_name
       link_as = as ? as : object_name
 
-      _check_package_dependency_added(link_package_name, package_name)
-
       if import
-        Ree::LinkImportBuilder
-          .new(Ree.container.packages_facade)
-          .build(
-            self,
-            link_package_name,
-            link_object_name,
-            import
-          )
+        Ree::LinkImportBuilder.new(packages).build(
+          self, link_package_name, link_object_name, import
+        )
       end
 
-      obj = Ree
-        .container
-        .packages_facade
-        .load_package_object(link_package_name, link_object_name)
-
+      obj = packages.load_package_object(link_package_name, link_object_name)
       target ||= obj.target
 
       if target == :both
@@ -133,12 +122,9 @@ module Ree::LinkDSL
 
       list = path.split('/')
       package_name = File.basename(list[0], ".*").to_sym
-      current_package_name = Ree::StringUtils.underscore(self.name.split('::').first).to_sym
-
-      _check_package_dependency_added(package_name, current_package_name)
-
-      Ree.container.packages_facade.load_package_entry(package_name)
-      package = Ree.container.packages_facade.get_package(package_name)
+      packages = Ree.container.packages_facade
+      packages.load_package_entry(package_name)
+      package = packages.get_package(package_name)
 
       file_path = File.join(
         Ree::PathHelper.abs_package_dir(package),
@@ -153,7 +139,7 @@ module Ree::LinkDSL
         end
       end
 
-      Ree.container.packages_facade.load_file(file_path, package.name)
+      packages.load_file(file_path, package.name)
 
       const_list = path.split('/').map { |_| Ree::StringUtils.camelize(_) }
       const_short = [const_list[0], const_list.last].join("::")
@@ -168,13 +154,9 @@ module Ree::LinkDSL
       end
 
       if import_proc
-        Ree::LinkImportBuilder
-          .new(Ree.container.packages_facade)
-          .build_for_const(
-            self,
-            file_const,
-            import_proc
-          )
+        Ree::LinkImportBuilder.new(packages).build_for_const(
+          self, file_const, import_proc
+        )
       end
 
       nil
@@ -182,33 +164,24 @@ module Ree::LinkDSL
 
     def _raise_error(text, code = :invalid_dsl_usage)
       msg = <<~DOC
-        object: :#{@object.name}
-        path: #{Ree::PathHelper.abs_object_path(@object)}
+        class: :#{self}
         error: #{text}
       DOC
 
       raise Ree::Error.new(msg, code)
     end
 
-    def _check_package_dependency_added(package_name, current_package_name)
-      return if package_name == current_package_name
+    def get_link_package_name(from, object_name)
+      return from if from
 
-      facade = Ree.container.packages_facade
-      facade.load_package_entry(package_name)
-      facade.load_package_entry(current_package_name)
+      package_name = Ree::StringUtils.underscore(self.name.split('::').first).to_sym
+      result = Ree.container.packages_facade.has_package?(package_name) ? package_name : nil
 
-      current_package = facade.get_package(current_package_name)
-
-      dep_package = current_package.deps.detect do |d|
-        d.name == package_name
+      if result.nil?
+        raise Ree::Error.new("package is not provided for link :#{object_name}", :invalid_dsl_usage)
       end
 
-      if dep_package.nil?
-        raise Ree::Error.new(
-          "Package :#{package_name} is not added as dependency for :#{current_package_name} package\npackage path: #{File.join(Ree.root_dir, current_package.entry_rpath || "")}\nclass:#{self.name}",
-          :invalid_dsl_usage
-        )
-      end
+      result
     end
   end
 end

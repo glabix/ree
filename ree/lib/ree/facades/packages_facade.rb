@@ -208,6 +208,13 @@ class Ree::PackagesFacade
   end
 
   # @param [Symbol] package_name
+  # @return [Bool]
+  def has_package?(package_name)
+    check_arg(package_name, :package_name, Symbol)
+    !!@packages_store.get(package_name)
+  end
+
+  # @param [Symbol] package_name
   # @return [Ree::Package]
   def get_package(package_name, raise_if_missing = true)
     check_arg(package_name, :package_name, Symbol)

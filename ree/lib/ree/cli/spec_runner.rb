@@ -107,7 +107,7 @@ module Ree
       def project_packages(packages)
         packages.reject(&:gem?)
       end
-      
+
       def non_existent_packages
         @package_names ? @package_names - packages.map(&:name) : []
       end
@@ -148,7 +148,7 @@ module Ree
 
         unless acc.include?(package.name)
           acc << package.name
-          
+
           package.deps.map(&:name).each do |pack|
             next if !packages_set.include?(pack)
             recursively_find_children_packages(pack, acc)
