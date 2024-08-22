@@ -56,7 +56,10 @@ module ReeDto::DtoInstanceMethods
     @_attrs
   end
 
-  alias :to_h :attrs
+  contract None => Hash
+  def to_h
+    each_field.to_h
+  end
 
   contract Symbol, Any => Any
   def set_attr(name, val)
