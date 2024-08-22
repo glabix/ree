@@ -181,7 +181,7 @@ RSpec.describe :agg do
       {
         to_dto: -> (book) { ReeDaoAggTest::BookDto.new(book) },
         setter: -> (item, child_index) {
-          item.set_books(child_index[item.id] || [])
+          item.books = child_index[item.id] || []
         }
       }
     end
@@ -286,7 +286,7 @@ RSpec.describe :agg do
       {
         setter: -> (item, items_index) {
           b = items_index[item.id].each { |b| b.title = "Changed" }
-          item.set_books(b)
+          item.books = b
         }
       }
     end
@@ -990,7 +990,7 @@ RSpec.describe :agg do
       expect(user).to receive(:some_field=).with(:some_value)
 
       ENV['REE_DAO_SYNC_ASSOCIATIONS'] = "true"
-      res = agg_users.([user])
+      agg_users.([user])
       ENV.delete('REE_DAO_SYNC_ASSOCIATIONS')
     }
   end
