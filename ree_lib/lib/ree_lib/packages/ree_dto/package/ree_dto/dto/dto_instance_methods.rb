@@ -138,6 +138,7 @@ module ReeDto::DtoInstanceMethods
 
   def initialize_copy(_other)
     @_attrs = ReeObject::DeepDup.new.call(@_attrs)
+    @collections = ReeObject::DeepDup.new.call(@collections) if defined?(@collections)
   end
 
   def initialize_dup(_other)

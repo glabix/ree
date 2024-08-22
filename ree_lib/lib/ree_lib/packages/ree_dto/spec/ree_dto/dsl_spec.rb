@@ -189,10 +189,16 @@ RSpec.describe ReeDto::DSL do
       dto.string = +"changed"
       expect(dto.changed_fields).to eq([:string])
 
+      dto.numbers = [1]
+
       dup = dto.dup      
       expect(dup).to eq(dto)
       expect(dup.object_id).not_to eq(dto.object_id)
       expect(dup.changed_fields).to eq([])
+      expect(dup.numbers).to eq([1])
+
+      dup.numbers << 2
+      expect(dto.numbers).to eq([1])
 
       dup.string.concat("2")
       expect(dto.string).to eq("changed")
@@ -211,10 +217,16 @@ RSpec.describe ReeDto::DSL do
       dto.string = "changed"
       expect(dto.changed_fields).to eq([:string])
 
+      dto.numbers = [1]
+
       clone = dto.clone
       expect(clone).to eq(dto)
       expect(clone.object_id).not_to eq(dto.object_id)
       expect(clone.changed_fields).to eq([:string])
+      expect(clone.numbers).to eq([1])
+
+      clone.numbers << 2
+      expect(dto.numbers).to eq([1])
 
       clone.string.concat("2")
       expect(dto.string).to eq("changed")
