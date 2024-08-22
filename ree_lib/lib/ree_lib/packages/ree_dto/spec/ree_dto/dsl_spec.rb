@@ -213,8 +213,9 @@ RSpec.describe ReeDto::DSL do
       expect(clone.object_id).not_to eq(dto.object_id)
       expect(clone.changed_fields).to eq([:string])
 
-      clone.string = "changed2"
+      clone.with_default = 2
       expect(clone).not_to eq(dto)
+      expect(dto.changed_fields).to eq([:string])
 
       dto.freeze
       expect(dto.clone.frozen?).to eq(true)
