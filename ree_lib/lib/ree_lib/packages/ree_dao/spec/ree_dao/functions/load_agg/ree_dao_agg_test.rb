@@ -84,21 +84,23 @@ class ReeDaoAggTest::User
     field :age, Integer
     field :organization_id, Integer
 
+    field :organization, Any, default: nil
+    field :passport, Any, default: nil
+    field :custom_field, Any, default: nil
+    
+    collection :movies, Any
+    collection :videogames, Any
+    collection :hobbies, Any
+    collection :vinyls, Any
+    collection :pets, Any
+    collection :skills, Any
+    collection :dreams, Any
     collection :books, ReeDaoAggTest::Book
     collection :active_books, ReeDaoAggTest::Book
   end
 
   [
-    :organization,
-    :passport,
-    :movies,
-    :videogames,
-    :hobbies,
-    :vinyls,
-    :pets,
-    :skills,
-    :dreams,
-    :custom_field
+    
   ].each do |attr|
     define_method("set_#{attr}") do |*args|
       instance_variable_set("@#{attr}", *args)
@@ -126,23 +128,14 @@ class ReeDaoAggTest::UserDto
 end
 
 class ReeDaoAggTest::Organization
-  include ReeDto::EntityDSL
+  include ReeDto::DSL
 
-  properties(
-    id: Nilor[Integer],
-    name: String
-  )
+  build_dto do
+    field :id, Nilor[Integer], default: nil
+    field :name, String
 
-  contract(Array[ReeDaoAggTest::User] => nil)
-  def set_users(users)
-    @users = users; nil
+    collection :users, ReeDaoAggTest::User
   end
-
-  def users
-    @users ||= []
-  end
-
-  attr_accessor :name
 end
 
 
