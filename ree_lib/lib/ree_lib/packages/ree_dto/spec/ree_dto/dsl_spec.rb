@@ -175,4 +175,11 @@ RSpec.describe ReeDto::DSL do
       )
     }
   end
+
+  describe "#to_h" do
+    it {
+      dto = ReeDto::DtoClass.new(string: "str")
+      expect(dto.to_h).to eq({ string: "str", with_default: 1 })
+    }
+  end
 end
