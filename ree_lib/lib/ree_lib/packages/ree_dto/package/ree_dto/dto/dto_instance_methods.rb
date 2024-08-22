@@ -56,6 +56,8 @@ module ReeDto::DtoInstanceMethods
     @_attrs
   end
 
+  alias :to_h :attrs
+
   contract Symbol, Any => Any
   def set_attr(name, val)
     @_attrs[name] = val
