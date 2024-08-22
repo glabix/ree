@@ -134,6 +134,20 @@ module ReeDto::DtoInstanceMethods
     end
   end
 
+  def initialize_copy(other)
+    @_attrs = @_attrs.dup
+  end
+
+  def initialize_dup(other)
+    super
+    @changed_fields = nil
+  end
+
+  def initialize_clone(other)
+    super
+    @changed_fields = @changed_fields.dup if defined?(@changed_fields)
+  end
+
   private
 
   def inspect_value(v)

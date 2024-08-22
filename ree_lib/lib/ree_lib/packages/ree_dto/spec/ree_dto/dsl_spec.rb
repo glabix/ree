@@ -182,4 +182,42 @@ RSpec.describe ReeDto::DSL do
       expect(dto.to_h).to eq({ string: "str", with_default: 1 })
     }
   end
+
+  describe "#dup" do
+    it {
+      dto = ReeDto::DtoClass.new(string: "str")
+      dto.string = "changed"
+      expect(dto.changed_fields).to eq([:string])
+
+      dup = dto.dup      
+      expect(dup).to eq(dto)
+      expect(dup.object_id).not_to eq(dto.object_id)
+      expect(dup.changed_fields).to eq([])
+
+      dup.string = "changed2"
+      expect(dup).not_to eq(dto)
+
+      dto.freeze
+      expect(dto.dup.frozen?).to eq(false)
+    }
+  end
+
+  describe "#clone" do
+    it {
+      dto = ReeDto::DtoClass.new(string: "str")
+      dto.string = "changed"
+      expect(dto.changed_fields).to eq([:string])
+
+      clone = dto.clone
+      expect(clone).to eq(dto)
+      expect(clone.object_id).not_to eq(dto.object_id)
+      expect(clone.changed_fields).to eq([:string])
+
+      clone.string = "changed2"
+      expect(clone).not_to eq(dto)
+
+      dto.freeze
+      expect(dto.clone.frozen?).to eq(true)
+    }
+  end
 end
