@@ -1,6 +1,8 @@
 require_relative "./field_meta"
 require "date"
 
+package_require("ree_object/functions/deep_dup")
+
 module ReeDto::DtoInstanceMethods
   include Ree::Contracts::Core
   include Ree::Contracts::ArgContracts
@@ -132,6 +134,22 @@ module ReeDto::DtoInstanceMethods
     each_field.all? do |name, value|
       other.get_value(name) == value
     end
+  end
+
+  def initialize_copy(_other)
+    deep_dupper = ReeObject::DeepDup.new
+    @_attrs = deep_dupper.call(@_attrs)
+    @collections = deep_dupper.call(@collections) if defined?(@collections)
+  end
+
+  def initialize_dup(_other)
+    super
+    @changed_fields = nil
+  end
+
+  def initialize_clone(_other)
+    super
+    @changed_fields = @changed_fields.dup if defined?(@changed_fields)
   end
 
   private
