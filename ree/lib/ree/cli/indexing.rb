@@ -106,6 +106,8 @@ module Ree
         def index_public_methods_for_package_classes(package, index_hash)
           package.objects.each do |obj|
             klass = obj.klass
+            next if klass.nil?
+
             klass_name = demodulize(klass.to_s)
             obj_name = obj.name.to_s
             rpath = obj.rpath
