@@ -44,31 +44,10 @@ class ReeDaoAggTest::Book
     field :user_id, Integer
     field :title, Nilor[String], default: nil
 
-    field :author, Any
-  end
+    field :author, Any, default: nil
 
-  def set_chapters(chapters)
-    @chapters = chapters; nil
-  end
-
-  def chapters
-    @chapters
-  end
-
-  def set_author(author)
-    @author = author
-  end
-
-  def author
-    @author
-  end
-
-  def set_reviews(reviews)
-    @reviews = reviews; nil
-  end
-
-  def reviews
-    @reviews
+    collection :chapters, Any
+    collection :reviews, Any
   end
 end
 
@@ -87,7 +66,7 @@ class ReeDaoAggTest::User
     field :organization, Any, default: nil
     field :passport, Any, default: nil
     field :custom_field, Any, default: nil
-    
+
     collection :movies, Any
     collection :videogames, Any
     collection :hobbies, Any
@@ -100,7 +79,7 @@ class ReeDaoAggTest::User
   end
 
   [
-    
+
   ].each do |attr|
     define_method("set_#{attr}") do |*args|
       instance_variable_set("@#{attr}", *args)

@@ -233,7 +233,7 @@ module ReeDao
           foreign_key = foreign_key_from_dao(parent_dao)
         end
 
-        root_ids = list.map(&:"#{primary_key}")
+        root_ids = list.map(&primary_key)
 
         scope ||= assoc_dao
         scope = scope.where(foreign_key => root_ids)
@@ -278,8 +278,11 @@ module ReeDao
       assoc_setter = if setter
         setter
       else
-        "set_#{assoc_name}"
+        "#{assoc_name}="
       end
+
+      fallback_assoc_setter = nil
+      fallback_fk = nil
 
       list.each do |item|
         if setter && setter.is_a?(Proc)
@@ -305,7 +308,7 @@ module ReeDao
             if reverse
               primary_key
             else
-              foreign_key ? foreign_key : "#{assoc_name}_id"
+              foreign_key ? foreign_key : (fallback_fk ||= "#{assoc_name}_id")
             end
           end
 
@@ -321,10 +324,13 @@ module ReeDao
 
           value = [] if value.nil? && multiple
 
-          begin
+          if item.respond_to?(assoc_setter)
             item.send(assoc_setter, value)
-          rescue NoMethodError
-            item.send("#{assoc_name}=", value)
+          else
+            item.send(
+              fallback_assoc_setter ||= "set_#{assoc_name}", 
+              value
+            )
           end
         end
       end
