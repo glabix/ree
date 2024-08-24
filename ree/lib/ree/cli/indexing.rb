@@ -40,26 +40,26 @@ module Ree
           if !object.fn?
             return []
           end
-  
+
           klass = object.klass
 
           object_is_action = object.tags.include?("action")
           action_caster = object.klass.const_get(:ActionCaster) if object.klass.const_defined?(:ActionCaster)
-      
+
           method_name = object_is_action ? :__original_call : :call
           method_decorator = Ree::Contracts.get_method_decorator(
             klass, method_name, scope: :instance
           )
-      
+
           begin
             if method_decorator.nil?
               parameters = klass.instance_method(:call).parameters
-      
+
               args = parameters.inject({}) do |res, param|
                 res[param.last] = Ree::Contracts::CalledArgsValidator::Arg.new(
                   param.last, param.first, nil, nil
                 )
-      
+
                 res
               end
             else
@@ -70,7 +70,7 @@ module Ree
             raise Ree::Error.new("method call is not defined for #{klass}")
           end
 
-          
+
           arg_list = parameters.map do |param|
             arg = args[param.last]
             validator = arg.validator
@@ -78,21 +78,21 @@ module Ree
 
             type = if object_is_action && action_caster && arg.name == :attrs
               map_mapper_fields(action_caster.fields).to_s.gsub(/\\*\"/, "").gsub(/\=\>/, ' => ')
-            else 
+            else
               if validator
                 validator.to_s
               else
                 arg_type == :block ? "Block" : "Any"
               end
             end
-      
+
             {
               Ree::ObjectSchema::Methods::Args::ARG => arg.name,
               Ree::ObjectSchema::Methods::Args::ARG_TYPE => arg.type,
               Ree::ObjectSchema::Methods::Args::TYPE => type
             }
           end
-      
+
           [
             {
               Ree::ObjectSchema::Methods::DOC => method_decorator&.doc || "",
@@ -137,53 +137,53 @@ module Ree
         def recursively_index_module(mod, index_hsh, package, mod_index)
             return if !mod.is_a?(Module)
             return if mod_index[mod]
-  
+
             mod_index[mod] = true
-  
+
             mod.constants.each do |const_name|
               const = mod.const_get(const_name)
-  
+
               recursively_index_module(const, index_hsh, package, mod_index)
-  
+
               next if !const.is_a?(Class)
               next if package.objects.any? { |o| o.klass == const }
               next if index_hsh[:classes].has_key?(demodulize(const.name))
-  
+
               const_abs_path = mod.const_source_location(const.name)&.first
               next if !const_abs_path
-  
+
               rpath = Pathname.new(const_abs_path).relative_path_from(Ree.root_dir).to_s
               hsh = index_class(const, rpath, package.name)
               class_name = demodulize(const.name)
-  
+
               index_hsh[:classes][class_name] ||= []
               index_hsh[:classes][class_name] << hsh
             end
           end
-  
+
           def index_class(klass, rpath, package_name)
             all_methods = klass.public_instance_methods(false)
             orig_methods = all_methods.grep(/original/)
-  
+
             methods = (all_methods - orig_methods) # remove aliases defined by contracts
               .map { |m|
                 orig_method_name = orig_methods.find { |om| om.match(/original_#{Regexp.escape(m.name)}_[0-9a-fA-F]+/) }
                 orig_method = orig_method_name ? klass.public_instance_method(orig_method_name) : nil
-  
+
                 {
                   name: m,
                   parameters: orig_method&.parameters&.map { |param| { name: param.last, required: param.first } },
                   location: orig_method&.source_location&.last,
                 }
               }
-  
+
             {
               path: rpath,
               package: package_name,
               methods: methods
             }
           end
-  
+
           def index_dao(klass, rpath, package_name)
             filters = (klass.instance_variable_get(:@filters) || []).map do
               {
@@ -194,14 +194,14 @@ module Ree
                 location: _1.proc&.source_location&.last
               }
             end
-  
+
             {
               path: rpath,
               package: package_name,
               methods: filters
             }
           end
-  
+
           def index_exceptions(errors_package, index_hash)
             errors_package.objects.each do |obj|
               const_name = demodulize(obj.class_name)
@@ -209,17 +209,17 @@ module Ree
                 Ree::PathHelper.abs_package_module_dir(errors_package),
                 obj.name.to_s + ".rb"
               )
-  
+
               hsh = {
                 path: file_name,
                 package: errors_package.name,
                 methods: []
               }
-  
+
               index_hash[:classes][const_name] ||= []
               index_hash[:classes][const_name] << hsh
             end
-  
+
             index_hash
           end
 
