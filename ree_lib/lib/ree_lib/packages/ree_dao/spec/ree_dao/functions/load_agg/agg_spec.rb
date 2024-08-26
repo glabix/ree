@@ -864,7 +864,7 @@ RSpec.describe :agg do
 
     u = res[0]
     expect(u.books).to_not eq(nil)
-    expect(u.books[0].chapters).to eq(nil)
+    expect(u.books[0].chapters).to eq([])
     expect(u.books[0].author).to eq(nil)
     expect(u.books[0].reviews).to_not eq(nil)
     expect(u.books[0].reviews[0].review_author).to_not eq(nil)
