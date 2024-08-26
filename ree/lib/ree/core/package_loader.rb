@@ -35,8 +35,8 @@ class Ree::PackageLoader
   private
 
   def recursively_load_package(name, loaded_packages)
-    @loaded_packages[name] = true
     package = @packages_store.get(name)
+    @loaded_packages[name] = package
 
     if !package
       raise Ree::Error.new(
