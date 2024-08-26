@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module Ree
-  VERSION = "1.0.44"
+  VERSION = "1.0.45"
 end
