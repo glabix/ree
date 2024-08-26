@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ree (1.0.45)
+    ree (1.0.46)
       commander (~> 5.0.0)
 
 GEM
