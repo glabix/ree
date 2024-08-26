@@ -93,6 +93,8 @@ module Ree
         @packages_to_run.each do |package|
           ree_package = Ree.container.packages_facade.get_package(package)
 
+          next if ree_package.dir.nil?
+
           Ree::SpecRunner::Runner.new(
             path: Ree::PathHelper.project_root_dir(ree_package),
             package: package,
