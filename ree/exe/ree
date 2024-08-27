@@ -184,8 +184,8 @@ class ReeCliRunner
       c.option      '-x', TrueClass, "run 'chmod +X' before the command"
 
       c.action do |args, options|
-        package_name    = args[0]&.to_sym || (raise Ree::Error.new("package name should be provided"))
-        executable_path = args[1]         || (raise Ree::Error.new("executable path should be provided"))
+        package_name    = args[0]&.to_sym || (raise Ree::Error.new("Package name should be provided"))
+        executable_path = args[1]         || (raise Ree::Error.new("Executable path should be provided"))
         run_chmod_x     = options.x
 
         puts("Executing #{executable_path} for :#{package_name} package")
@@ -218,12 +218,20 @@ class ReeCliRunner
         @package_names ||= []
         @package_names << o.to_sym
       end
+      c.option '-f SPEC_FILE_NAME', '--file SPEC_FILE_NAME', String, 'Spec filenames' do |o|
+        @filenames ||= []
+        @filenames << o
+      end
 
       c.action do |args, options|
         @package_names ||= []
 
         package_name = args[0]&.to_sym
         spec_matcher = args[1]
+
+        if spec_matcher && filenames.size > 0
+          raise Ree::Error.new("Filenames option cannot be used with SPEC_MATCHER")
+        end
 
         options_hash = options.__hash__
         options_hash.delete(:trace)
@@ -245,6 +253,7 @@ class ReeCliRunner
         Ree::CLI::SpecRunner.run(
           package_names: @package_names,
           spec_matcher: spec_matcher,
+          filenames: @filenames,
           tag_name: options_hash[:tag],
           with_children: options_hash[:with_children],
           with_ancestors: options_hash[:with_ancestors],
@@ -305,7 +314,7 @@ class ReeCliRunner
       c.example     'ree gen.index_package /app/bc/accounts/commands/create_account_cmd.rb --project_path=/project_dir/', ''
       c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
       c.action do |args, options|
-        package_name = args[0]&.to_sym || (raise Ree::Error.new("package name should be provided"))
+        package_name = args[0]&.to_sym || (raise Ree::Error.new("Package name should be provided"))
         options_hash = options.__hash__
 
         if options_hash[:project_path]

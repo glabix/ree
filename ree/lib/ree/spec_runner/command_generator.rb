@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 class Ree::SpecRunner::CommandGenerator
-  attr_accessor :package_name, :package_path, :spec_matcher, :spec_string_number
+  attr_accessor :package_name, :package_path, :spec_matcher, :filenames, :spec_string_number
 
-  def initialize(package_name:, package_path:, spec_matcher:, spec_string_number:, show_output: true)
+  def initialize(package_name:, package_path:, spec_matcher:, filenames:, spec_string_number:, show_output: true)
     @package_name = package_name
     @package_path = File.expand_path(package_path)
     @spec_matcher = spec_matcher
+    @filenames = filenames
     @spec_string_number = spec_string_number
     @output = show_output ? '$stdout' : 'File::NULL'
   end
@@ -23,6 +24,13 @@ class Ree::SpecRunner::CommandGenerator
     if spec_matcher
       matched_file = File.expand_path(spec_matcher, package_path)
       matcher = File.exist?(matched_file) ? matcher_with_number(matched_file, spec_string_number) : matcher_with_number(spec_matcher, spec_string_number)
+    end
+
+    if filenames.size > 0
+      glob_pattern = filenames.map { |filename| File.join(@package_path, "**/#{filename}") }
+      matcher = Dir.glob(glob_pattern)
+        .select { |fn| File.file?(fn) }
+        .join(" ")
     end
 
     "print_message(
