@@ -1,0 +1,40 @@
+{
+  "schema_type": "package",
+  "schema_version": "1.1",
+  "name": "ree_spec_cli",
+  "entry_path": "packages/ree_spec_cli/package/ree_spec_cli.rb",
+  "tags": [
+    "ree_spec_cli"
+  ],
+  "depends_on": [
+    {
+      "name": "ree_array"
+    }
+  ],
+  "env_vars": [
+
+  ],
+  "objects": [
+    {
+      "name": "run_command",
+      "schema": "packages/ree_spec_cli/schemas/ree_spec_cli/run_command.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
+      "name": "run_package_specs",
+      "schema": "packages/ree_spec_cli/schemas/ree_spec_cli/services/run_package_specs.schema.json",
+      "tags": [
+        "fn"
+      ]
+    },
+    {
+      "name": "run_specs",
+      "schema": "packages/ree_spec_cli/schemas/ree_spec_cli/services/run_specs.schema.json",
+      "tags": [
+        "fn"
+      ]
+    }
+  ]
+}

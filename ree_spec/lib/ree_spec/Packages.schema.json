@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "schema_type": "packages",
+  "packages": [
+    {
+      "name": "ree_spec_cli",
+      "schema": "packages/ree_spec_cli/Package.schema.json"
+    }
+  ],
+  "gem_packages": [
+    {
+      "gem": "ree_lib",
+      "name": "ree_actions",
+      "schema": "packages/ree_actions/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_array",
+      "schema": "packages/ree_array/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_dao",
+      "schema": "packages/ree_dao/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_date",
+      "schema": "packages/ree_date/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_datetime",
+      "schema": "packages/ree_datetime/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_dto",
+      "schema": "packages/ree_dto/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_enum",
+      "schema": "packages/ree_enum/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_errors",
+      "schema": "packages/ree_errors/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_hash",
+      "schema": "packages/ree_hash/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_http",
+      "schema": "packages/ree_http/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_i18n",
+      "schema": "packages/ree_i18n/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_json",
+      "schema": "packages/ree_json/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_logger",
+      "schema": "packages/ree_logger/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_mapper",
+      "schema": "packages/ree_mapper/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_migrator",
+      "schema": "packages/ree_migrator/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_number",
+      "schema": "packages/ree_number/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_object",
+      "schema": "packages/ree_object/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_roda",
+      "schema": "packages/ree_roda/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_routes",
+      "schema": "packages/ree_routes/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_std",
+      "schema": "packages/ree_std/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_string",
+      "schema": "packages/ree_string/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_swagger",
+      "schema": "packages/ree_swagger/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_text",
+      "schema": "packages/ree_text/Package.schema.json"
+    },
+    {
+      "gem": "ree_lib",
+      "name": "ree_validator",
+      "schema": "packages/ree_validator/Package.schema.json"
+    }
+  ]
+}

@@ -6,7 +6,4 @@ require "ree"
 module ReeLib
 end
 
-Ree.register_gem(
-  :ree_lib,
-  File.join(__dir__, "ree_lib")
-)
+Ree.register_gem(:ree_lib, File.join(__dir__, "ree_lib"))
