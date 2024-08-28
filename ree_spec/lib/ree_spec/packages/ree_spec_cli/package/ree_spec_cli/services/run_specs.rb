@@ -2,21 +2,23 @@ class ReeSpecCli::RunSpecs
   include Ree::FnDSL
 
   fn :run_specs do
-    link :in_groups_of, from: :ree_array
     link :run_package_specs
+    link :from_json, from: :ree_json
+    link :symbolize_keys, from: :ree_hash
+    link :group_by, from: :ree_array
+    link :index_by, from: :ree_array
+    link :to_hash, from: :ree_object
+    link :to_json, from: :ree_json
   end
 
-  MAX_SPECS_PER_PROCESS = 1000
+  SPEC_META_FILENAME = "ree_spec_meta.json"
 
-  contract ArrayOf[Symbol], Nilor[String], Nilor[String], ArrayOf[String], Bool, String, Integer, Integer => nil
-  def call(package_names, spec_matcher, tag, files, run_all, project_path,
-           process_count, specs_per_process)
+  contract ArrayOf[Symbol], Nilor[String], Nilor[String], ArrayOf[String], Bool, Bool, String, Integer => nil
+  def call(package_names, spec_matcher, tag, files, run_all, only_failed, project_path, process_count)
     init_ree_project(project_path)
 
     packages = filter_packages_to_run(package_names, tag, run_all)
-    specs_per_process = calculate_specs_per_process(process_count, specs_per_process)
-    jobs = get_jobs(packages, specs_per_process, spec_matcher, files)
-
+    jobs, meta_index = get_jobs(packages, spec_matcher, files, only_failed)
     processes = build_processes(process_count)
     error_files = []
     success_files = []
@@ -29,9 +31,35 @@ class ReeSpecCli::RunSpecs
 
       processes[number] = Process.fork do
         print_start_message(job)
-        result = run_package_specs(job.package, job.files, number)
 
-        if result.status.exitstatus != 0
+        prev_meta = meta_index[job.abs_path]
+        start_time = Time.now
+
+        result = run_package_specs(job.package, [job.abs_path], number)
+
+        end_time = Time.now
+        exec_time = end_time - start_time
+        is_success = result.status.exitstatus == 0
+
+        duration = if is_success
+          exec_time
+        elsif prev_meta
+          prev_meta.duration
+        else
+          exec_time
+        end
+
+        update_scan_metadata(
+          SpecMeta.new(
+            package: job.package.name.to_s,
+            abs_path: job.abs_path,
+            duration: duration,
+            last_scan_at: Time.now,
+            success: is_success
+          )
+        )
+
+        if !is_success
           error_file.write(result.out)
           error_file.rewind
           puts(result.out)
@@ -83,7 +111,7 @@ class ReeSpecCli::RunSpecs
   end
 
   def print_start_message(job)
-    puts("\n**** Running #{job.files.size} spec#{job.files.size == 1 ? "" : "s"} for #{job.package.name} ****\n")
+    puts("Running spec for :#{job.package.name}:\n#{job.abs_path}")
   end
 
   def print_messages(error_files, success_files)
@@ -119,23 +147,53 @@ class ReeSpecCli::RunSpecs
     number
   end
 
-  class Job < Struct.new(:package, :dir, :files); end
+  class Job
+    include ReeDto::DSL
 
-  def get_jobs(package_names, specs_per_process, spec_matcher, files)
+    build_dto do
+      field :package, Ree::Package
+      field :abs_path, String
+    end
+  end
+
+  def get_jobs(package_names, spec_matcher, files, only_failed)
+    prev_scan_meta = read_prev_scan_metadata
     result = []
     packages = package_names.map { packages_facade.get_package(_1) }
+    scan_index = index_by(prev_scan_meta) { _1.abs_path }
 
     packages.each do |package|
-      dir = Ree::PathHelper.abs_package_module_dir(package)
-
       spec_files = get_spec_files(package, spec_matcher, files)
 
-      in_groups_of(spec_files, specs_per_process).each do |specs_group|
-        result << Job.new(package, dir, specs_group)
+      spec_files.each do |abs_path|
+        result << Job.new(package:, abs_path:)
       end
     end
 
-    result
+    if only_failed
+      result = result.select do |item|
+        if scan_index[item.abs_path]
+          !scan_index[item.abs_path].success
+        else
+          false
+        end
+      end
+    end
+
+    cur_min_duration = prev_scan_meta.min { _1.duration }&.duration || 0
+
+    result.sort_by do |item|
+      dur = if el = scan_index[item.abs_path]
+        el.duration
+      else
+        cur_min_duration -= 1
+        cur_min_duration
+      end
+
+      -dur
+    end
+
+    [result, scan_index]
   end
 
   def get_spec_files(package, spec_matcher, files)
@@ -172,18 +230,8 @@ class ReeSpecCli::RunSpecs
           result
         end
       end
-    elsif files && files.size > 0
-      files
     else
       all_specs
-    end
-  end
-
-  def calculate_specs_per_process(process_count, specs_per_process)
-    if process_count > 1
-      specs_per_process
-    else
-      MAX_SPECS_PER_PROCESS
     end
   end
 
@@ -237,5 +285,61 @@ class ReeSpecCli::RunSpecs
       package = packages_facade.read_package_schema_json(package_name)
       package.tags.include?(tag)
     end
+  end
+
+  def spec_meta_file_name
+    dir = Dir.pwd
+    File.join(dir, SPEC_META_FILENAME)
+  end
+
+  def read_prev_scan_metadata
+    path = spec_meta_file_name
+
+    if File.exist?(path)
+      result = begin
+        from_json(File.read(path))
+      rescue
+        []
+      end
+
+      build_metadata(result)
+    else
+      build_metadata([])
+    end
+  end
+
+  def update_scan_metadata(spec_meta)
+    meta = read_prev_scan_metadata
+    prev_spec = meta.find { _1.abs_path == spec_meta.abs_path }
+    meta.delete(prev_spec) if prev_spec
+    meta << spec_meta
+
+    result = to_json(meta.map { to_hash(_1) })
+
+    File.open(spec_meta_file_name, "w") do |f|
+      f.flock(File::LOCK_EX)
+      f.write(result)
+      f.flock(File::LOCK_UN)
+    end
+  end
+
+  class SpecMeta
+    include ReeDto::DSL
+
+    build_dto do
+      field :package, String
+      field :abs_path, String
+      field :duration, Float
+      field :last_scan_at, Time
+      field :success, Bool
+    end
+  end
+
+  def build_metadata(data)
+    data.map do |d|
+      SpecMeta.new(symbolize_keys(d))
+    end.compact
+  rescue
+    []
   end
 end

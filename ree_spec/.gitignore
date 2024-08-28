@@ -10,3 +10,4 @@ TAGS
 
 # rspec failure tracking
 .rspec_status
+ree_spec_meta.json

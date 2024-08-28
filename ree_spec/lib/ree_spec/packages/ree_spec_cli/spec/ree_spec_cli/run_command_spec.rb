@@ -13,6 +13,8 @@ RSpec.describe :run_command do
     ARGV << "accounts"
     ARGV << "--project_path"
     ARGV << project_path
+    ARGV << "--parallel"
+    ARGV << "2"
 
     run_command()
   }

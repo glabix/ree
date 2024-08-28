@@ -2,14 +2,12 @@ class ReeSpecCli::CommandBuilder
   include Commander::Methods
 
   DEFAULT_PROCESS_COUNT = 1
-  DEFAULT_SPECS_PER_PROCESS_COUNT = 5
 
   def build(&action_proc)
     files = []
     package_names = []
     run_all = false
     process_count = DEFAULT_PROCESS_COUNT
-    specs_per_process = DEFAULT_SPECS_PER_PROCESS_COUNT
 
     program :name, "Ree Spec"
     program :version, "1.0"
@@ -25,7 +23,8 @@ class ReeSpecCli::CommandBuilder
       c.example "ree spec --tag wip", "Run specs for packages which have \"wip\" tag"
       c.option "--project_path [ROOT_DIR]", String, "Root project dir path"
       c.option "--tag TAG_NAME", String, "Run specs for packages with specified tag"
-      c.option "--parallel OPTS", String, "Run specs in parallel processes (e.g. --parallel 15:5, 15 processes, max 5 package spec files per process)"
+      c.option "--parallel PROCESS_COUNT", String, "Run specs in parallel processes (e.g. --parallel 15, 15 processes)"
+      c.option "--only-failed", "Run only failed specs from previous run"
 
       c.option "-f SPEC_FILE", "--fule SPEC_FILE", String, "List of spec files" do |f|
         files ||= []
@@ -39,11 +38,16 @@ class ReeSpecCli::CommandBuilder
       c.action do |args, options|
         package_name = args[0]&.to_sym
         spec_matcher = args[1]
-        options_hash = options.__hash__
-        options_hash.delete(:trace)
 
-        if options_hash[:project_path]
-          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
+        if options.project_path
+          path = File.expand_path(options.project_path.to_s)
+
+          if !File.directory?(path)
+            puts("Project path not found: #{options.project_path}")
+            exit 1
+          end
+
+          options.project_path = File.expand_path(options.project_path.to_s)
         end
 
         if package_name
@@ -54,13 +58,8 @@ class ReeSpecCli::CommandBuilder
           run_all = true
         end
 
-        if options_hash[:parallel]
-          parallel = options_hash[:parallel].split(":")[0..1]
-          process_count = Integer(parallel.first)
-
-          if parallel.size > 1
-            specs_per_process = Integer(parallel.last)
-          end
+        if options.parallel
+          process_count = Integer(options.parallel)
         end
 
         if package_names.size > 1
@@ -68,9 +67,9 @@ class ReeSpecCli::CommandBuilder
         end
 
         action_proc.call(
-          package_names, spec_matcher, options_hash[:tag], files,
-          run_all, options_hash[:project_path] || File.expand_path(Dir.pwd),
-          process_count, specs_per_process
+          package_names, spec_matcher, options.tag, files,
+          run_all, !!options.only_failed, options.project_path || File.expand_path(Dir.pwd),
+          process_count
         )
       end
     end
