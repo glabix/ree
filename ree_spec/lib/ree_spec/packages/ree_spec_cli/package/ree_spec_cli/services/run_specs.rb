@@ -58,7 +58,28 @@ class ReeSpecCli::RunSpecs
       result[i+1] = nil
     end
 
+    ['INT', 'TERM'].each do |signal|
+      trap(signal) do
+        shutdown(processes)
+        exit
+      end
+    end
+
     result
+  end
+
+  def shutdown(processes)
+    processes.each do |number, pid|
+      Process.kill('TERM', pid) if !pid.nil?
+    rescue Errno::ESRCH
+    end
+
+    processes.each do |number, pid|
+      Process.wait(pid) if !pid.nil?
+    rescue Errno::ECHILD
+    end
+
+    puts "All child processes terminated"
   end
 
   def print_start_message(job)
@@ -92,15 +113,9 @@ class ReeSpecCli::RunSpecs
       return process.first
     end
 
-    number = nil
-
-    processes.each do |k, v|
-      Process.wait(v)
-      processes[k] = nil
-      number = k
-      break
-    end
-
+    pid = Process.wait
+    number = processes.find { |_, v| v == pid }
+    processes[number] = nil
     number
   end
 
