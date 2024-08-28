@@ -88,7 +88,7 @@ class ReeSpecCli::RunSpecs
 
     ['INT', 'TERM'].each do |signal|
       trap(signal) do
-        shutdown(processes)
+        shutdown(result)
         exit
       end
     end
@@ -182,7 +182,7 @@ class ReeSpecCli::RunSpecs
 
     cur_min_duration = prev_scan_meta.min { _1.duration }&.duration || 0
 
-    result.sort_by do |item|
+    result = result.sort_by do |item|
       dur = if el = scan_index[item.abs_path]
         el.duration
       else
