@@ -114,7 +114,7 @@ class ReeSpecCli::RunSpecs
     end
 
     pid = Process.wait
-    number = processes.find { |_, v| v == pid }
+    number = processes.find { |_, v| v == pid }.first
     processes[number] = nil
     number
   end
