@@ -12,7 +12,7 @@ class ReeSpecCli::CommandBuilder
     specs_per_process = DEFAULT_SPECS_PER_PROCESS_COUNT
 
     program :name, "Ree Spec"
-    program :version, ReeSpec::VERSION
+    program :version, "1.0"
     program :description, "Ree extensions for Rspec framework"
     program :help, "Author", "Ruslan Gatiyatov"
 
