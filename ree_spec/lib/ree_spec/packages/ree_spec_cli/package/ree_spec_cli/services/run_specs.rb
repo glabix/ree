@@ -55,7 +55,7 @@ class ReeSpecCli::RunSpecs
     result = {}
 
     process_count.times do |i|
-      result[i] = nil
+      result[i+1] = nil
     end
 
     result
