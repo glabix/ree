@@ -9,7 +9,7 @@ RSpec.describe :run_command do
     )
 
     ARGV.clear
-    ARGV << "spec"
+    ARGV << "run"
     ARGV << "accounts"
     ARGV << "--project_path"
     ARGV << project_path
@@ -23,7 +23,7 @@ RSpec.describe :run_command do
     )
 
     ARGV.clear
-    ARGV << "spec"
+    ARGV << "run"
     ARGV << "accounts"
     ARGV << "build_user"
     ARGV << "--project_path"

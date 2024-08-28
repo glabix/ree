@@ -16,7 +16,7 @@ class ReeSpecCli::CommandBuilder
     program :description, "Ree extensions for Rspec framework"
     program :help, "Author", "Ruslan Gatiyatov"
 
-    command :"spec" do |c|
+    command :run do |c|
       c.syntax  = "ree spec PACKAGE_NAME SPEC_MATCHER [options]"
       c.description = "run tests for specified package"
       c.example "ree spec accounts", "Run specs for \"accounts\" package"
@@ -25,7 +25,7 @@ class ReeSpecCli::CommandBuilder
       c.example "ree spec --tag wip", "Run specs for packages which have \"wip\" tag"
       c.option "--project_path [ROOT_DIR]", String, "Root project dir path"
       c.option "--tag TAG_NAME", String, "Run specs for packages with specified tag"
-      c.option "--parallel", String, "Run specs in parallel processes (e.g. --parallel 15:5, 15 processes, max 5 package spec files per process)"
+      c.option "--parallel OPTS", String, "Run specs in parallel processes (e.g. --parallel 15:5, 15 processes, max 5 package spec files per process)"
 
       c.option "-f SPEC_FILE", "--fule SPEC_FILE", String, "List of spec files" do |f|
         files ||= []
@@ -50,12 +50,12 @@ class ReeSpecCli::CommandBuilder
           package_names << package_name
         end
 
-        if package_name.nil? && options_hash.keys.empty? && spec_matcher.nil? && package_names.empty?
+        if package_name.nil? && package_names.empty?
           run_all = true
         end
 
-        if options[:parallel]
-          parallel = options[:parallel].split(":")[0..1]
+        if options_hash[:parallel]
+          parallel = options_hash[:parallel].split(":")[0..1]
           process_count = Integer(parallel.first)
 
           if parallel.size > 1

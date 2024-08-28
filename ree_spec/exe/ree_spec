@@ -3,7 +3,13 @@
 
 require "rubygems"
 require "bundler/setup"
-require "ree_spec"
+require "ree"
 
-package_require "ree_rspec/run_cli"
-ReeSpec::CLI.new.call
+Ree.init(
+  File.expand_path(
+    File.join(__dir__, "../lib/ree_spec" )
+  )
+)
+
+package_require "ree_spec_cli/run_command"
+ReeSpecCli::RunCommand.new.call

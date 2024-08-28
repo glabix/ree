@@ -14,20 +14,95 @@ class ReeSpecCli::RunSpecs
     init_ree_project(project_path)
 
     packages = filter_packages_to_run(package_names, tag, run_all)
-
-    print_message(packages, tag, run_all)
-
     specs_per_process = calculate_specs_per_process(process_count, specs_per_process)
     jobs = get_jobs(packages, specs_per_process, spec_matcher, files)
 
+    processes = build_processes(process_count)
+    error_files = []
+    success_files = []
+
     jobs.each do |job|
-      run_package_specs(job.package, job.files)
+      number = wait_for_vailable_process(processes)
+      error_file, success_file = Tempfile.new, Tempfile.new
+      error_files.push(error_file)
+      success_files.push(success_file)
+
+      processes[number] = Process.fork do
+        print_start_message(job)
+        result = run_package_specs(job.package, job.files, number)
+
+        if result.status.exitstatus != 0
+          error_file.write(result.out)
+          error_file.rewind
+          puts(result.out)
+        else
+          success_file.write(result.out)
+          success_file.rewind
+        end
+      end
     end
+
+    processes.each { |k, v| Process.wait(v) if !v.nil? }
+
+    print_messages(error_files, success_files)
 
     nil
   end
 
   private
+
+  def build_processes(process_count)
+    result = {}
+
+    process_count.times do |i|
+      result[i] = nil
+    end
+
+    result
+  end
+
+  def print_start_message(job)
+    puts("\n**** Running #{job.files.size} spec#{job.files.size == 1 ? "" : "s"} for #{job.package.name} ****\n")
+  end
+
+  def print_messages(error_files, success_files)
+    success_files.each { puts(_1.read) }
+
+    errors = error_files.map { _1.read }
+    return if errors.empty?
+
+    failures = errors
+      .map { _1.split("Failed examples:")[1].to_s.strip }
+      .compact
+      .reject(&:empty?)
+      .join("\n")
+
+    puts("**** Failed examples from all specs: ****\n\n")
+    puts(failures)
+    puts("\n\n")
+  ensure
+    error_files.each(&:close)
+    success_files.each(&:close)
+  end
+
+  def wait_for_vailable_process(processes)
+    process = processes.find { |k, v| v.nil? }
+
+    if process
+      return process.first
+    end
+
+    number = nil
+
+    processes.each do |k, v|
+      Process.wait(v)
+      processes[k] = nil
+      number = k
+      break
+    end
+
+    number
+  end
 
   class Job < Struct.new(:package, :dir, :files); end
 
@@ -63,7 +138,9 @@ class ReeSpecCli::RunSpecs
 
       file_path = File.join(package_dir, spec_matcher)
 
-      if File.exist?(file_path)
+      if File.directory?(file_path)
+        Dir["#{file_path}/**/*_spec.rb"]
+      elsif File.exist?(file_path)
         if line_number
           ["#{file_path}:#{line_number}"]
         else
@@ -95,22 +172,6 @@ class ReeSpecCli::RunSpecs
     end
   end
 
-  def print_message(packages, tag, run_all)
-    if tag
-      puts("Mode: Tagged packages")
-    elsif run_all
-      puts "Mode: All packages"
-    else
-      puts "Mode: Selected packages"
-    end
-
-    if packages.size == 1
-      puts("Running specs for #{packages.size} package")
-    else
-      puts("Running specs for #{packages.size} packages")
-    end
-  end
-
   def filter_packages_to_run(package_names, tag, run_all)
     packages_to_run = []
 
@@ -118,24 +179,14 @@ class ReeSpecCli::RunSpecs
       package_names = filter_existing_packages(package_names)
       tagged_packages = filter_packages_by_tag(package_names, tag)
       packages_to_run += tagged_packages
-      puts("Tagged packages run")
     elsif run_all
       packages_to_run += all_packages.map(&:name)
-      puts "All packages run"
     else
       package_names = filter_existing_packages(package_names)
       packages_to_run += package_names
     end
 
-    packages_to_run = packages_to_run.uniq
-
-    if packages_to_run.size == 1
-      puts("Running specs for #{packages_to_run.size} package")
-    else
-      puts("Running specs for #{packages_to_run.size} packages")
-    end
-
-    packages_to_run
+    packages_to_run.uniq
   end
 
   def init_ree_project(project_path)
