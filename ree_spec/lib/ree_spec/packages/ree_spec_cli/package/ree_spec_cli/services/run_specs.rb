@@ -13,10 +13,11 @@ class ReeSpecCli::RunSpecs
 
   SPEC_META_FILENAME = "ree_spec_meta.json"
 
-  contract ArrayOf[Symbol], Nilor[String], Nilor[String], ArrayOf[String], Bool, Bool, String, Integer => nil
-  def call(package_names, spec_matcher, tag, files, run_all, only_failed, project_path, process_count)
+  contract ArrayOf[Symbol], Nilor[String], Nilor[String], ArrayOf[String], Bool, String, Integer => nil
+  def call(package_names, spec_matcher, tag, files, only_failed, project_path, process_count)
     init_ree_project(project_path)
 
+    run_all = package_names.empty?
     packages = filter_packages_to_run(package_names, tag, run_all)
     jobs, meta_index = get_jobs(packages, spec_matcher, files, only_failed)
     processes = build_processes(process_count)

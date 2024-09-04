@@ -9,9 +9,9 @@ class ReeSpecCli::RunCommand
   end
 
   def call
-    action_proc = Proc.new do |package_names, spec_matcher, tag, files, run_all, only_failed, project_path, process_count|
+    action_proc = Proc.new do |package_names, spec_matcher, tag, files, only_failed, project_path, process_count|
       run_specs(
-        package_names, spec_matcher, tag, files, run_all, only_failed,
+        package_names, spec_matcher, tag, files, only_failed,
         project_path, process_count
       )
     end

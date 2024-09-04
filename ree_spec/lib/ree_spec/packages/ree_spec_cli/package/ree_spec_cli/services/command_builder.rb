@@ -54,10 +54,6 @@ class ReeSpecCli::CommandBuilder
           package_names << package_name
         end
 
-        if package_name.nil? && package_names.empty?
-          run_all = true
-        end
-
         if options.parallel
           process_count = Integer(options.parallel)
         end
@@ -66,10 +62,11 @@ class ReeSpecCli::CommandBuilder
           files = []
         end
 
+        project_path = options.project_path || File.expand_path(Dir.pwd)
+
         action_proc.call(
           package_names, spec_matcher, options.tag, files,
-          run_all, !!options.only_failed, options.project_path || File.expand_path(Dir.pwd),
-          process_count
+          !!options.only_failed, project_path, process_count
         )
       end
     end

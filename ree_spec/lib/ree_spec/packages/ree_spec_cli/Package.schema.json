@@ -9,6 +9,18 @@
   "depends_on": [
     {
       "name": "ree_array"
+    },
+    {
+      "name": "ree_dto"
+    },
+    {
+      "name": "ree_hash"
+    },
+    {
+      "name": "ree_json"
+    },
+    {
+      "name": "ree_object"
     }
   ],
   "env_vars": [
