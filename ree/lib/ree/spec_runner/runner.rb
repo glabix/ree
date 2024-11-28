@@ -4,9 +4,10 @@ class Ree::SpecRunner::Runner
   attr_accessor :no_specs_packages
   attr_accessor :prepared_command_params
 
-  def initialize(path: nil, package: nil, spec_matcher: nil, show_missing_packages: true,
+  def initialize(path: nil, package: nil, spec_matcher: nil, filenames: [], show_missing_packages: true,
                 stdout: $stdout, show_output: true )
     @package_name = package
+    @filenames = filenames
     @no_specs_packages = []
     @spec_matcher = spec_matcher.to_s.split(':')[0]
     @spec_string_number = spec_matcher.to_s.split(':')[1].to_i
@@ -51,6 +52,7 @@ class Ree::SpecRunner::Runner
         Ree::SpecRunner::CommandGenerator.new(
           package_name: selected_package.name,
           package_path: File.join(@path, selected_package.dir),
+          filenames: @filenames,
           spec_matcher: @spec_matcher,
           spec_string_number: @spec_string_number,
           show_output:  @show_output
@@ -131,7 +133,8 @@ class Ree::SpecRunner::Runner
   def find_matched_files(package_name)
     @spec_file_matches = Ree::SpecRunner::SpecFilenameMatcher.find_matches(
       package_path: File.join(@path, selected_package.dir),
-      spec_matcher: @spec_matcher
+      spec_matcher: @spec_matcher,
+      filenames: @filenames
     )
 
     case @spec_file_matches.size
