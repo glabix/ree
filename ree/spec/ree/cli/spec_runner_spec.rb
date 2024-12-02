@@ -105,5 +105,22 @@ RSpec.describe Ree::CLI::SpecRunner do
 
       expect(spec_runner.packages_to_run.size).to be >= 1
     end
+
+    it 'exit on failed specs' do
+      allow($stdout).to receive(:puts).and_call_original
+      expect {
+        subject.run(
+          path: project_dir,
+          run_all: true,
+          package_names: ["accounts"],
+          spec_matcher: "failed",
+          with_ancestors: nil,
+          with_children: nil,
+          tag_name: nil
+        )
+      }.to raise_error(SystemExit)
+      expect($stdout).to have_received(:puts).with("1 of 1 packages failed:").exactly(1)
+      expect($stdout).to have_received(:puts).with([:accounts]).exactly(1)
+    end
   end
 end

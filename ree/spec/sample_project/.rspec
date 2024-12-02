@@ -1,3 +1,4 @@
 --format documentation
 --color
 --require ./spec.init.rb
+--exclude-pattern "**/failed_spec.rb"
