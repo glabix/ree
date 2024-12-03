@@ -10,7 +10,6 @@ Bootsnap.setup(
 
 require 'rspec'
 require 'ree'
-require 'ostruct'
 
 ENV["RUBY_ENV"] = "test"
 

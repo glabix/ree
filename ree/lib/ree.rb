@@ -48,6 +48,7 @@ module Ree
   autoload :RSpecLinkDSL, 'ree/rspec_link_dsl'
   autoload :SpecRunner, 'ree/spec_runner'
   autoload :StringUtils, 'ree/utils/string_utils'
+  autoload :ShadowLoader, 'ree/core/shadow_loader'
   autoload :TemplateDetector, 'ree/templates/template_detector'
   autoload :TemplateHandler, 'ree/handlers/template_handler'
   autoload :TemplateRenderer, 'ree/templates/template_renderer'
@@ -106,6 +107,14 @@ module Ree
 
     def enable_contracts
       ENV['NO_CONTRACTS'] = nil
+    end
+
+    def enable_shadow_load
+      ShadowLoader.enable
+    end
+
+    def disable_shadow_load
+      ShadowLoader.disable
     end
 
     def irb_mode?
