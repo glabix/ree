@@ -30,6 +30,11 @@ class Ree::ImportDsl
     retry
   end
 
+  def const_missing(const_name)
+    puts "import dsl const missing"
+    raise NameError.new("class not found #{const_name.to_s}", const_name)
+  end
+
   private def extract_constants(class_constant)
     [class_constant] + class_constant.constants
   end

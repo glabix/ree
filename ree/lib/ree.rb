@@ -48,7 +48,7 @@ module Ree
   autoload :RSpecLinkDSL, 'ree/rspec_link_dsl'
   autoload :SpecRunner, 'ree/spec_runner'
   autoload :StringUtils, 'ree/utils/string_utils'
-  autoload :ShadowLoader, 'ree/core/shadow_loader'
+  autoload :ShadowLoader, 'ree/shadow_loader'
   autoload :TemplateDetector, 'ree/templates/template_detector'
   autoload :TemplateHandler, 'ree/handlers/template_handler'
   autoload :TemplateRenderer, 'ree/templates/template_renderer'
@@ -110,6 +110,8 @@ module Ree
     end
 
     def enable_shadow_load
+      puts "enable_shadow_load1!!!!!"
+
       ShadowLoader.enable
     end
 
