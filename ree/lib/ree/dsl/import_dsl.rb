@@ -44,6 +44,7 @@ class Ree::ImportDsl
   def cancel_patch_const_missing
     puts "cancel_patch_const_missing"
     Module.define_method(:const_missing, @_original_const_missing)
+    @_original_const_missing = nil
   end
   
   private def extract_constants(class_constant)
