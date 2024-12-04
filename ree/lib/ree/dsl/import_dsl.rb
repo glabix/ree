@@ -44,7 +44,6 @@ class Ree::ImportDsl
     Module.define_method(:const_missing, @_original_const_missing)
   end
   
-
   private def extract_constants(class_constant)
     [class_constant] + class_constant.constants
   end
