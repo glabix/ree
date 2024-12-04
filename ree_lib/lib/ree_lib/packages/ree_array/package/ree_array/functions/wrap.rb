@@ -17,13 +17,14 @@ class ReeArray::Wrap
         wrap(nil)       # => []
         wrap([1, 2, 3]) # => [1, 2, 3]
         wrap(0)         # => [0]
+        wrap({ foo: :bar })  # => [{ foo: :bar }]
   DOC
   contract(Any => ArrayOf[Any])
   def call(object)
     if object.nil?
       []
-    elsif object.is_a?(Array) || object.is_a?(Enumerable)
-      object
+    elsif object.respond_to?(:to_ary)
+      object.to_ary || [object]
     else
       [object]
     end
