@@ -110,8 +110,6 @@ module Ree
     end
 
     def enable_shadow_load
-      puts "enable_shadow_load1!!!!!"
-
       ShadowLoader.enable
     end
 

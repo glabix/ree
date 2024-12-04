@@ -23,8 +23,6 @@ module Ree
     end
 
     def const_missing(const_name)
-      puts "in const missing1!!!!! #{ const_name }"
-
       raise_error(const_name) if @@_ree_shadow_in_const_missing
 
       @@_ree_shadow_semaphore.synchronize{

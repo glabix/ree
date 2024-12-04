@@ -35,14 +35,12 @@ class Ree::ImportDsl
   end
 
   def patch_const_missing
-    puts "patch const missing"
     return if @_original_const_missing
-    pp @_original_const_missing = Module.instance_method(:const_missing)
-    Module.define_method(:const_missing){ |const_name| puts 'in patched const_missing'; raise NameError.new("class not found #{const_name.to_s}", const_name) }
+    @_original_const_missing = Module.instance_method(:const_missing)
+    Module.define_method(:const_missing){ |const_name| raise NameError.new("class not found #{const_name.to_s}", const_name) }
   end
 
   def cancel_patch_const_missing
-    puts "cancel_patch_const_missing"
     Module.define_method(:const_missing, @_original_const_missing)
     @_original_const_missing = nil
   end
