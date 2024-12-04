@@ -6,6 +6,8 @@ class Ree::ImportDsl
   end
 
   def execute(klass, proc)
+    patch_const_missing
+    
     class_constant = self.class.instance_exec(&proc)
 
     [
@@ -28,12 +30,20 @@ class Ree::ImportDsl
       .eval("#{e.name} = Ree::ImportDsl::ClassConstant.new('#{e.name}')")
 
     retry
+  ensure
+    cancel_patch_const_missing
   end
 
-  def const_missing(const_name)
-    puts "import dsl const missing"
-    raise NameError.new("class not found #{const_name.to_s}", const_name)
+  def patch_const_missing
+    @_original_const_missing = Module.instance_method(:const_missing)
+    Module.remove_method(:const_missing)
+    Module.define_method(:const_missing){ |const_name| raise NameError.new("class not found #{const_name.to_s}", const_name) }
   end
+
+  def cancel_patch_const_missing
+    Module.define_method(:const_missing, @_original_const_missing)
+  end
+  
 
   private def extract_constants(class_constant)
     [class_constant] + class_constant.constants
