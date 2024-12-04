@@ -40,7 +40,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'rack-test'
   spec.add_development_dependency 'roda', "~> 3.76.0"
-  spec.add_development_dependency 'sqlite3', "~> 1.4.4"
+  spec.add_development_dependency 'sqlite3', "~> 1.7.3"
   spec.add_development_dependency 'pg', "~> 1.5.4"
   spec.add_development_dependency 'warden', "~> 1.2.9"
   spec.add_development_dependency 'timecop', "~> 0.9.5"

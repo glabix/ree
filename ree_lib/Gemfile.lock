@@ -65,22 +65,23 @@ GEM
       rack
     rollbar (3.5.2)
     rspec (3.13.0)
-      rspec-core (~> 3.13.0)
+      rspec-core (~> 3.13.2)
       rspec-expectations (~> 3.13.0)
       rspec-mocks (~> 3.13.0)
     rspec-core (3.13.0)
       rspec-support (~> 3.13.0)
-    rspec-expectations (3.13.2)
+    rspec-expectations (3.13.3)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-mocks (3.13.1)
+    rspec-mocks (3.13.2)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.1)
     ruby-prof (1.7.0)
     sequel (5.76.0)
       bigdecimal
-    sqlite3 (1.4.4)
+    sqlite3 (1.7.3-x86_64-darwin)
+    sqlite3 (1.7.3-x86_64-linux)
     strscan (3.1.0)
     timecop (0.9.10)
     tzinfo (2.0.6)
@@ -109,7 +110,7 @@ DEPENDENCIES
   rollbar (~> 3.5.1)
   rspec
   ruby-prof
-  sqlite3 (~> 1.4.4)
+  sqlite3 (~> 1.7.3)
   timecop (~> 0.9.5)
   warden (~> 1.2.9)
   webmock
