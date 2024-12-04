@@ -159,4 +159,50 @@ RSpec.describe Ree::ImportDsl do
     expect(removed_consts.first.name).to eq(:EXISTING_CONST)
     expect(removed_consts.last.name).to eq(:ExistingClass)
   }
+
+  context "modules with const_missing" do
+    it {
+      # setup module with const missing
+      module ConstMissMod
+        def self.append_features(base)
+          base.class_eval do
+            remove_method(:const_missing)
+          end
+          super
+        end
+
+        def const_missing(const_name)
+          raise "inConstMissMod"
+        end
+      end
+
+      Module.class_eval { include ConstMissMod }
+
+      expect{ SomeConstant }.to raise_error("inConstMissMod")
+
+      module TestModule1
+        class TestClass
+          ExistingClass = Class.new
+          EXISTING_CONST = 'const'
+
+          class << self
+            def result
+              Ree::ImportDsl.new.execute(
+                self,
+                Proc.new {
+                  MissingClass.as(Missing) & ExistingClass & FOO.as(FOO_CONST) & EXISTING_CONST
+                }
+              )
+            end
+          end
+        end
+      end
+
+      list, removed_consts = TestModule1::TestClass.result
+
+      # check that original const missing was set up again
+      
+      expect{ SomeConstant }.to raise_error("inConstMissMod")
+    }
+  end
 end
