@@ -17,8 +17,10 @@ module Ree
     # return original const_missing
     def self.exclude_from(base)
       base.class_eval do
-        define_method :const_missing, @_const_missing
-        @_const_missing = nil
+        if @_const_missing
+          define_method :const_missing, @_const_missing
+          @_const_missing = nil
+        end
       end
     end
 
