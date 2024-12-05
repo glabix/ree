@@ -166,9 +166,18 @@ RSpec.describe Ree::ImportDsl do
       module ConstMissMod
         def self.append_features(base)
           base.class_eval do
+            return if defined?(@_const_missing) && @_const_missing
+            @_const_missing = instance_method(:const_missing)
             remove_method(:const_missing)
           end
           super
+        end
+
+        def self.exclude_from(base)
+          base.class_eval do
+            define_method :const_missing, @_const_missing
+            @_const_missing = nil
+          end
         end
 
         def const_missing(const_name)
@@ -203,6 +212,8 @@ RSpec.describe Ree::ImportDsl do
       # check that original const missing was set up again
       
       expect{ SomeConstant }.to raise_error("inConstMissMod")
+
+      ConstMissMod.exclude_from(Module)
     }
   end
 end
