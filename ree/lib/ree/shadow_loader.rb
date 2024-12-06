@@ -31,6 +31,8 @@ module Ree
         load_package_object(self.to_s, const_name.to_s)
       }
 
+      raise_error(const_name) unless self.const_defined?(const_name)
+
       return self.const_get(const_name)
     end
 

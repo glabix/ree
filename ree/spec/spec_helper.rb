@@ -21,6 +21,12 @@ def sample_project_dir
   )
 end
 
+def shadow_load_project_dir
+  @shadow_load_project_dir ||= File.expand_path(
+    File.join(__dir__, 'shadow_load_project')
+  )
+end
+
 def ensure_exists(file)
   expect(File.exist?(file)).to be true
 end
