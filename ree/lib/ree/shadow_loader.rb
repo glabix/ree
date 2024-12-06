@@ -8,8 +8,8 @@ module Ree
         @_const_missing = instance_method(:const_missing)
         remove_method(:const_missing)
 
-        @@_ree_shadow_in_const_missing = false
-        @@_ree_shadow_semaphore = Mutex.new
+        @@_ree_shadow_in_const_missing ||= false
+        @@_ree_shadow_semaphore ||= Mutex.new
       end
       super
     end
@@ -25,9 +25,9 @@ module Ree
     end
 
     def const_missing(const_name)
-      raise_error(const_name) if @@_ree_shadow_in_const_missing
-
       @@_ree_shadow_semaphore.synchronize{
+        raise_error(const_name) if @@_ree_shadow_in_const_missing
+
         load_package_object(self.to_s, const_name.to_s)
       }
 
