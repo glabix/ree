@@ -1,0 +1,1 @@
+Ree.preload_for(:production)

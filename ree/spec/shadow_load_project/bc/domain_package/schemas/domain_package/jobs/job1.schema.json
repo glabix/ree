@@ -1,0 +1,13 @@
+{
+  "schema_type": "object",
+  "schema_version": "1.1",
+  "name": "job1",
+  "path": "bc/domain_package/package/domain_package/jobs/job1.rb",
+  "mount_as": "fn",
+  "class": "DomainPackage::Job1",
+  "factory": null,
+  "methods": [
+  ],
+  "links": [
+  ]
+}
