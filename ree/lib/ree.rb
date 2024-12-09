@@ -32,6 +32,7 @@ module Ree
   autoload :BuildPackageDsl, 'ree/dsl/build_package_dsl'
   autoload :PackageDSL, 'ree/package_dsl'
   autoload :PackageEnvVar, 'ree/core/package_env_var'
+  autoload :PackageFileStructureLoader, 'ree/core/package_file_structure_loader'
   autoload :PackageLoader, 'ree/core/package_loader'
   autoload :PackageSchema, 'ree/core/package_schema'
   autoload :PackageSchemaBuilder, 'ree/core/package_schema_builder'
