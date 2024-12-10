@@ -51,6 +51,8 @@ class Ree::PackagesFacade
   end
 
   def schema_exists?(package)
+    return false unless package.schema_rpath
+    
     schema_path = Ree::PathHelper.abs_package_schema_path(package)
     File.exist?(schema_path)
   end
@@ -204,6 +206,9 @@ class Ree::PackagesFacade
   end
 
   def read_package_file_structure(package_name)
+    @loaded_schemas ||= {} # TODO rename instance var
+    return @loaded_schemas[package_name] if @loaded_schemas[package_name]
+
     Ree.logger.debug("read_package_file_structure(:#{package_name})")
     package = get_package(package_name)
 
