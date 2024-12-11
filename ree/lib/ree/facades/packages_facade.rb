@@ -38,11 +38,7 @@ class Ree::PackagesFacade
     return package if package.schema_loaded?
 
     if perf_mode?(package)
-      if schema_exists?(package)
-        read_package_schema_json(package_name) 
-      else
-        read_package_file_structure(package_name)
-      end
+      read_package_structure(package_name)
     else
       load_entire_package(package_name)
     end
@@ -189,37 +185,14 @@ class Ree::PackagesFacade
 
   # @param [Symbol] package_name
   # @return [Ree::Package]
-  def read_package_schema_json(package_name)
-    @loaded_schemas ||= {}
-    return @loaded_schemas[package_name] if @loaded_schemas[package_name]
-
-    Ree.logger.debug("read_package_schema_json(:#{package_name})")
+  def read_package_structure(package_name)
     package = get_package(package_name)
 
-    if !package.dir
-      package.set_schema_loaded
-      return package
+    if schema_exists?(package)
+      read_package_schema_json(package_name) 
+    else
+      read_package_file_structure(package_name)
     end
-
-    schema_path = Ree::PathHelper.abs_package_schema_path(package)
-    @loaded_schemas[package_name] = Ree::PackageSchemaLoader.new.call(schema_path, package)
-  end
-
-  def read_package_file_structure(package_name)
-    @loaded_schemas ||= {} # TODO rename instance var
-    return @loaded_schemas[package_name] if @loaded_schemas[package_name]
-
-    Ree.logger.debug("read_package_file_structure(:#{package_name})")
-    package = get_package(package_name)
-
-    if !package.dir
-      package.set_schema_loaded # TODO set file_structure_loaded ?
-      return package
-    end
-
-    Ree.logger.debug("read_package_file_structure package #{package})")
-
-    @loaded_schemas[package_name] = Ree::PackageFileStructureLoader.new.call(package)
   end
 
   # @return [Ree::PackagesStore]
@@ -267,5 +240,44 @@ class Ree::PackagesFacade
   # @return [nil]
   def load_file(path, package_name)
     @package_loader.load_file(path, package_name)
+  end
+
+  private
+
+  # @param [Symbol] package_name
+  # @return [Ree::Package]
+  def read_package_schema_json(package_name)
+    @loaded_schemas ||= {}
+    return @loaded_schemas[package_name] if @loaded_schemas[package_name]
+
+    Ree.logger.debug("read_package_schema_json(:#{package_name})")
+    package = get_package(package_name)
+
+    if !package.dir
+      package.set_schema_loaded
+      return package
+    end
+
+    schema_path = Ree::PathHelper.abs_package_schema_path(package)
+    @loaded_schemas[package_name] = Ree::PackageSchemaLoader.new.call(schema_path, package)
+  end
+
+  # @param [Symbol] package_name
+  # @return [Ree::Package]
+  def read_package_file_structure(package_name)
+    @loaded_schemas ||= {} # TODO rename instance var
+    return @loaded_schemas[package_name] if @loaded_schemas[package_name]
+
+    Ree.logger.debug("read_package_file_structure(:#{package_name})")
+    package = get_package(package_name)
+
+    if !package.dir
+      package.set_schema_loaded # TODO set file_structure_loaded ?
+      return package
+    end
+
+    Ree.logger.debug("read_package_file_structure package #{package})")
+
+    @loaded_schemas[package_name] = Ree::PackageFileStructureLoader.new.call(package)
   end
 end
