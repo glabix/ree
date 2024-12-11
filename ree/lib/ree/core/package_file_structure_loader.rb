@@ -19,7 +19,7 @@ class Ree::PackageFileStructureLoader
 
     package
       .set_schema_version('0')
-      .set_schema_rpath(package.entry_rpath)
+      .set_schema_rpath(package.dir + "/" + 'Package.schema.json')
 
     object_store = {}
     package.set_schema_loaded
