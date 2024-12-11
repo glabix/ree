@@ -12,9 +12,6 @@
       "name": "clock"
     },
     {
-      "name": "documents"
-    },
-    {
       "name": "errors"
     },
     {
@@ -46,13 +43,6 @@
       ]
     },
     {
-      "name": "accounts",
-      "schema": "bc/accounts/package/accounts.rb",
-      "tags": [
-
-      ]
-    },
-    {
       "name": "accounts_cfg",
       "schema": "bc/accounts/schemas/accounts/services/accounts_cfg.schema.json",
       "tags": [
@@ -67,31 +57,10 @@
       ]
     },
     {
-      "name": "build_user_spec",
-      "schema": "bc/accounts/spec/accounts/services/build_user_spec.rb",
-      "tags": [
-
-      ]
-    },
-    {
       "name": "deliver_email",
       "schema": "bc/accounts/schemas/accounts/services/deliver_email.schema.json",
       "tags": [
         "fn"
-      ]
-    },
-    {
-      "name": "deliver_email_spec",
-      "schema": "bc/accounts/spec/accounts/services/deliver_email_spec.rb",
-      "tags": [
-
-      ]
-    },
-    {
-      "name": "entity",
-      "schema": "bc/accounts/package/accounts/entities/entity.rb",
-      "tags": [
-
       ]
     },
     {
@@ -123,24 +92,10 @@
       ]
     },
     {
-      "name": "spec_helper",
-      "schema": "bc/accounts/spec/spec_helper.rb",
-      "tags": [
-
-      ]
-    },
-    {
       "name": "transaction",
       "schema": "bc/accounts/schemas/accounts/services/transaction.schema.json",
       "tags": [
         "fn"
-      ]
-    },
-    {
-      "name": "user",
-      "schema": "bc/accounts/package/accounts/entities/user.rb",
-      "tags": [
-
       ]
     },
     {

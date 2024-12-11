@@ -19,6 +19,10 @@
       "schema": "bc/roles/Package.schema.json"
     },
     {
+      "name": "documents",
+      "schema": "bc/documents/Package.schema.json"
+    },
+    {
       "name": "test_utils",
       "schema": "bc/shared/test_utils/Package.schema.json"
     }

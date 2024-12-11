@@ -11,6 +11,10 @@
       "schema": "bc/tools/clock/Package.schema.json"
     },
     {
+      "name": "documents",
+      "schema": "bc/documents/Package.schema.json"
+    },
+    {
       "name": "errors",
       "schema": "bc/tools/errors/Package.schema.json"
     },
