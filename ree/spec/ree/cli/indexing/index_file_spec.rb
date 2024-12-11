@@ -5,7 +5,7 @@ RSpec.describe Ree::CLI::Indexing::IndexFile do
   let(:object_path) { "bc/accounts/package/accounts/entities/user.rb"}
 
   context "run" do
-    xit "generates valid file index JSON" do
+    it "generates valid file index JSON" do
       result = subject.run(
         file_path: object_path,
         project_path: project_dir

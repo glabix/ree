@@ -5,7 +5,7 @@ RSpec.describe Ree::CLI::GeneratePackageSchema do
   let(:package_name) { "accounts" }
 
   context "run" do
-    xit "generates Package.schema.json for specified package" do
+    it "generates Package.schema.json for specified package" do
       subject.run(
         package_name: package_name,
         project_path: project_dir,
@@ -19,7 +19,7 @@ RSpec.describe Ree::CLI::GeneratePackageSchema do
       end
     end
 
-    xit "output path for package schema" do
+    it "output path for package schema" do
       output = with_captured_stdout {
         subject.run(
           package_name: package_name,
