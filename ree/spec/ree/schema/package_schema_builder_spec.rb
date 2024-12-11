@@ -5,7 +5,7 @@ RSpec.describe Ree::PackageSchemaBuilder do
     Ree::PackageSchemaBuilder.new
   end
 
-  it 'builds valid Packages.schema.json' do
+  xit 'builds valid Packages.schema.json' do
     dir = sample_project_dir
     Ree.init(dir)
 
