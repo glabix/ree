@@ -110,6 +110,7 @@ class Ree::PackagesFacade
 
       if !File.exist?(schema_path)
         Ree.logger.debug("no schema for package: #{package_name}. skip write package schema")
+        return
       end
 
       schema = Ree::PackageSchemaBuilder.new.call(package)
