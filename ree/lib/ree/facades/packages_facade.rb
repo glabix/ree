@@ -113,7 +113,7 @@ class Ree::PackagesFacade
       schema_path = Ree::PathHelper.abs_package_schema_path(package)
 
       if !File.exist?(schema_path)
-        raise Ree::Error.new("File does not exist: #{schema_path}", :invalid_path)
+        Ree.logger.debug("no schema for package: #{package_name}. skip write package schema")
       end
 
       schema = Ree::PackageSchemaBuilder.new.call(package)
