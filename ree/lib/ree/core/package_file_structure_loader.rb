@@ -7,6 +7,7 @@ class Ree::PackageFileStructureLoader
   # @param [Nilor[Ree::Package]] existing_package Loaded package
   # @return [Ree::Package]
   def call(existing_package)
+    # TODO add spec
     package_dir = if existing_package && existing_package.gem?
       Ree.gem(existing_package.gem_name).dir
     elsif existing_package
