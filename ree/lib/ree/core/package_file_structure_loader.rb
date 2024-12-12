@@ -17,9 +17,7 @@ class Ree::PackageFileStructureLoader
 
     package = existing_package # TODO build package if no existing package?
 
-    package
-      .set_schema_version('0')
-      .set_schema_rpath(package.dir + "/" + 'Package.schema.json')
+    package.set_schema_version('0')
 
     object_store = {}
     package.set_schema_loaded
