@@ -5,5 +5,6 @@ module Documents
     tags       ['roles']
 
     depends_on :accounts
+    depends_on :string_utils
   end
 end

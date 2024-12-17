@@ -32,6 +32,11 @@
       "gem": "sample_gem",
       "name": "hash_utils",
       "schema": "packages/hash_utils/Package.schema.json"
+    },
+    {
+      "gem": "sample_gem",
+      "name": "string_utils",
+      "schema": "packages/string_utils/Package.schema.json"
     }
   ]
 }
