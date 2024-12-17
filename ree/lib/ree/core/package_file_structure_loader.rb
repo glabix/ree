@@ -6,20 +6,20 @@ require 'find'
 class Ree::PackageFileStructureLoader
   PACKAGE_FOLDER = 'package'
 
-  # @param [Nilor[Ree::Package]] existing_package Loaded package
+  # @param [Ree::Package] package Loaded package
   # @return [Ree::Package]
-  def call(existing_package)
-    package_dir = if existing_package && existing_package.gem?
-      Ree.gem(existing_package.gem_name).dir
-    elsif existing_package
-      "#{Ree.root_dir}/#{existing_package.dir}"
+  def call(package)
+    package_dir = if package && package.gem?
+      File.join(Ree.gem(package.gem_name).dir, package.dir)
+    else
+      File.join(Ree.root_dir, package.dir)
+    end
+
+    root_dir = if package.gem?
+      Ree.gem(package.gem_name).dir
     else
       Ree.root_dir
     end
-
-    package = existing_package # TODO build package if no existing package?
-
-    package.set_schema_version('0')
 
     object_store = {}
     package.set_schema_loaded
@@ -29,7 +29,7 @@ class Ree::PackageFileStructureLoader
       if path.match(/\A*.rb\Z/)
         file_path = Pathname.new(path)
         object_name = File.basename(path, '.rb')
-        rpath = file_path.relative_path_from(Ree.root_dir)
+        rpath = file_path.relative_path_from(root_dir)
 
         object = Ree::Object.new(
           object_name.to_sym,
@@ -49,6 +49,6 @@ class Ree::PackageFileStructureLoader
       end
     end
 
-    existing_package
+    package
   end
 end
