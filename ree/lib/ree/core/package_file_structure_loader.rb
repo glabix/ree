@@ -4,10 +4,11 @@ require 'pathname'
 require 'find'
 
 class Ree::PackageFileStructureLoader
+  PACKAGE_FOLDER = 'package'
+
   # @param [Nilor[Ree::Package]] existing_package Loaded package
   # @return [Ree::Package]
   def call(existing_package)
-    # TODO add spec
     package_dir = if existing_package && existing_package.gem?
       Ree.gem(existing_package.gem_name).dir
     elsif existing_package
@@ -22,8 +23,9 @@ class Ree::PackageFileStructureLoader
 
     object_store = {}
     package.set_schema_loaded
-      
-    Find.find(package_dir) do |path|
+   
+    files_dir = File.join(package_dir, PACKAGE_FOLDER)
+    Find.find(files_dir) do |path|
       if path.match(/\A*.rb\Z/)
         file_path = Pathname.new(path)
         object_name = File.basename(path, '.rb')
