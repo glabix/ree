@@ -25,11 +25,11 @@ module Ree
     end
 
     def const_missing(const_name)
-      pp "shadow load: in const_missing" if !@@_ree_shadow_in_const_missing
+      pp "shadow load: in const_missing #{const_name} #{Thread.current}" if !@@_ree_shadow_in_const_missing
       @@_ree_shadow_semaphore.synchronize{
         raise_error(const_name) if @@_ree_shadow_in_const_missing
 
-        pp "shadow load: in semaphore"
+        pp "shadow load: in semaphore #{const_name} #{Thread.current}"
         load_package_object(self.to_s, const_name.to_s)
       }
 
@@ -48,7 +48,7 @@ module Ree
 
       facade = Ree.container.packages_facade
       facade.load_package_object(package_name.to_sym, file_name.to_sym)
-      pp "shadow load: package #{package_name} loaded"
+      pp "shadow load: package #{package_name} loaded #{Thread.current}"
     ensure
       @@_ree_shadow_in_const_missing = false
     end
