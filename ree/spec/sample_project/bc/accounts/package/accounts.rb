@@ -12,6 +12,7 @@ module Accounts
     depends_on :errors
     depends_on :test_utils
     depends_on :hash_utils
+    depends_on :documents
 
     env_var 'accounts.string_var'
     env_var 'accounts.integer_var'

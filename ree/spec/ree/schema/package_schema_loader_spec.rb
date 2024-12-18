@@ -10,7 +10,7 @@ RSpec.describe Ree::PackageSchemaLoader do
     expect(package.schema_version).to eq("1.1")
     expect(package.name).to eq(:accounts)
     expect(package.entry_rpath).to eq("bc/accounts/package/accounts.rb")
-    expect(package.deps.size).to eq(5)
+    expect(package.deps.size).to eq(6)
     expect(package.env_vars.size).to eq(2)
     expect(package.objects.size).to eq(12)
   end

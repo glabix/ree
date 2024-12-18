@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "irb"
+require "ree"
+
+Ree.enable_irb_mode
+Ree.init(__dir__)
+IRB.start(__FILE__)
