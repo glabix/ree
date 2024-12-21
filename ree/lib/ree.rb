@@ -34,9 +34,6 @@ module Ree
   autoload :PackageEnvVar, 'ree/core/package_env_var'
   autoload :PackageFileStructureLoader, 'ree/core/package_file_structure_loader'
   autoload :PackageLoader, 'ree/core/package_loader'
-  autoload :PackageSchema, 'ree/core/package_schema'
-  autoload :PackageSchemaBuilder, 'ree/core/package_schema_builder'
-  autoload :PackageSchemaLoader, 'ree/core/package_schema_loader'
   autoload :PackagesDetector, 'ree/core/packages_detector'
   autoload :PackagesFacade, 'ree/facades/packages_facade'
   autoload :PackagesSchema, 'ree/core/packages_schema'
@@ -228,23 +225,6 @@ module Ree
 
     def root_dir
       @root_dir || (raise Ree::Error.new(ROOT_DIR_MESSAGE, :invalid_root_dir))
-    end
-
-    def generate_schemas_for_all_packages(silence = false)
-      Ree.logger.debug("generate_schemas_for_all_packages") if !silence
-      facade = container.packages_facade
-
-      facade.class.write_packages_schema
-      facade.load_packages_schema
-
-      facade.packages_store.packages.each do |package|
-        next if package.gem?
-        next if package.dir.nil?
-        puts("Generating Package.schema.json for :#{package.name} package") if !silence
-
-        facade.load_entire_package(package.name)
-        facade.write_package_schema(package.name)
-      end
     end
   end
 end
