@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'pathname'
-require 'find'
 
 class Ree::PackageFileStructureLoader
   PACKAGE_FOLDER = 'package'
@@ -25,28 +24,26 @@ class Ree::PackageFileStructureLoader
     package.set_schema_loaded
    
     files_dir = File.join(package_dir, PACKAGE_FOLDER)
-    Find.find(files_dir) do |path|
-      if path.match(/\A*.rb\Z/)
-        file_path = Pathname.new(path)
-        object_name = File.basename(path, '.rb')
-        rpath = file_path.relative_path_from(root_dir)
+    Dir[File.join(files_dir, '**', '*.rb')].each do |path|
+      file_path = Pathname.new(path)
+      object_name = File.basename(path, '.rb')
+      rpath = file_path.relative_path_from(root_dir)
 
-        object = Ree::Object.new(
-          object_name.to_sym,
-          rpath,
-          rpath,
-        )
+      object = Ree::Object.new(
+        object_name.to_sym,
+        rpath,
+        rpath,
+      )
 
-        if object_store.has_key?(object_name)
-          raise Ree::Error.new("duplicate object name for '#{object_name}': #{rpath}", :invalid_package_file_structure)
-        end
-  
-        object_store[object_name] = true
-
-        object.set_package(package.name)
-
-        package.set_object(object)
+      if object_store.has_key?(object_name)
+        raise Ree::Error.new("duplicate object name for '#{object_name}': #{rpath}", :invalid_package_file_structure)
       end
+
+      object_store[object_name] = true
+
+      object.set_package(package.name)
+
+      package.set_object(object)
     end
 
     package
