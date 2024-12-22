@@ -57,13 +57,7 @@ class Ree::PackageLoader
     )
 
     if not_loaded.include?(name)
-      load_file(
-        Ree::PathHelper.abs_package_entry_path(package), name
-      )
-
-      Dir[File.join(Ree::PathHelper.abs_package_module_dir(package), '**/*.rb')].each do |path|
-        load_file(path, name)
-      end
+      Ree::PackageFileStructureLoader.new.call(package)
 
       loaded_packages[name] = true
     end

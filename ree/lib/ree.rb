@@ -114,19 +114,6 @@ module Ree
       logger.level = Logger::DEBUG
     end
 
-    # Ree will use schema files to load packages and registered objects
-    def set_performance_mode
-      @performance_mode = true
-    end
-
-    def set_dev_mode
-      @performance_mode = false
-    end
-
-    def performance_mode?
-      !!@performance_mode
-    end
-
     # Define preload context for registered objects
     def preload_for(env)
       check_arg(env, :env, Symbol)

@@ -27,21 +27,13 @@ class Ree::PackagesFacade
     end
   end
 
-  def perf_mode?(package)
-    package.gem? ? true : Ree.performance_mode?
-  end
-
   # @param [Symbol] package_name
   # @return [Ree::Package]
   def get_loaded_package(package_name)
     package = get_package(package_name)
     return package if package.schema_loaded?
 
-    if perf_mode?(package)
-      read_package_structure(package_name)
-    else
-      load_entire_package(package_name)
-    end
+    load_entire_package(package_name)
 
     package
   end
@@ -52,10 +44,6 @@ class Ree::PackagesFacade
   def get_object(package_name, object_name)
     package = get_loaded_package(package_name)
     object = package.get_object(object_name)
-
-    if !object && perf_mode?(package)
-      raise Ree::Error.new("Ree object :#{object_name} for package :#{package_name} not found")
-    end
 
     object
   end
@@ -97,7 +85,7 @@ class Ree::PackagesFacade
     object = get_object(package_name, object_name)
     return object if object && object.loaded?
 
-    if !object && !perf_mode?(package)
+    if !object
       Dir[
         File.join(
           Ree::PathHelper.abs_package_module_dir(package),
