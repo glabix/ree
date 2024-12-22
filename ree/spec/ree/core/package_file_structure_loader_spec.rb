@@ -7,6 +7,7 @@ RSpec.describe Ree::PackageFileStructureLoader do
 
   it 'loads valid package' do
     package = Ree.container.packages_facade.get_package(:documents)
+    package.reset
 
     loaded_package = subject.call(package)
 
@@ -16,6 +17,7 @@ RSpec.describe Ree::PackageFileStructureLoader do
 
   it 'raises errors on duplicates' do
     package = Ree.container.packages_facade.get_package(:documents)
+    package.reset
 
     duplicate_file_path = File.join(sample_project_dir, package.dir, "package/documents/services/create_document_cmd.rb")
     FileUtils.mkdir_p(File.dirname(duplicate_file_path))

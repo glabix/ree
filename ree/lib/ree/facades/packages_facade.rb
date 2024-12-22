@@ -190,14 +190,14 @@ class Ree::PackagesFacade
   # @param [Symbol] package_name
   # @return [Ree::Package]
   def read_package_file_structure(package_name)
-    @loaded_schemas ||= {} # TODO rename instance var
+    @loaded_schemas ||= {}
     return @loaded_schemas[package_name] if @loaded_schemas[package_name]
 
     Ree.logger.debug("read_package_file_structure(:#{package_name})")
     package = get_package(package_name)
 
     if !package.dir
-      package.set_schema_loaded # TODO set file_structure_loaded ?
+      package.set_schema_loaded
       return package
     end
 

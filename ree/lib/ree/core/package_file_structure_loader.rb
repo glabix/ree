@@ -8,6 +8,8 @@ class Ree::PackageFileStructureLoader
   # @param [Ree::Package] package Loaded package
   # @return [Ree::Package]
   def call(package)
+    return if package.schema_loaded?
+
     package_dir = if package && package.gem?
       File.join(Ree.gem(package.gem_name).dir, package.dir)
     else
