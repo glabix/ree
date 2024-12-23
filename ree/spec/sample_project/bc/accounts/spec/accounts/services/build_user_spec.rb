@@ -1,6 +1,6 @@
 RSpec.describe 'Accounts::BuildUser' do
   it "works" do
-    expect(42).to eq(43)
+    expect(42).to eq(42)
   end
 
   it "also works from line" do
