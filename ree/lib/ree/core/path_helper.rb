@@ -55,14 +55,12 @@ class Ree::PathHelper
     # @param [String] directory inside package
     # @return [String] name of package
     def package_name_from_dir(dir)
-      package_schema = File.join(dir, Ree::PACKAGE_SCHEMA_FILE)
-
-      if File.exist?(package_schema)
-        return package_schema.split('/')[-2]
-      end
-
       if dir == '/'
         return nil
+      end
+
+      if dir == 'package'
+        return File.expand_path('..', dir)
       end
 
       package_name_from_dir(File.expand_path('..', dir))

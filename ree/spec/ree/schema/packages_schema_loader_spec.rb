@@ -7,7 +7,7 @@ RSpec.describe Ree::PackagesSchemaLoader do
 
   it 'loads valid file' do
     result = subject.call(File.join(__dir__, 'samples/packages_schemas/valid.packages.json'))
-    expect(result.packages.size).to eq(5)
+    expect(result.packages.size).to eq(6)
   end
 
   it 'does not load file with duplicates' do

@@ -5,6 +5,10 @@
     {
       "name": "hash_utils",
       "schema": "packages/hash_utils/Package.schema.json"
+    },
+    {
+      "name": "string_utils",
+      "schema": "packages/string_utils/Package.schema.json"
     }
   ],
   "gem_packages": [
