@@ -30,12 +30,10 @@ module Ree
                 gem_package_hsh = {}
                 gem_package_hsh[:name] = package.name
                 gem_package_hsh[:gem] = package.gem_name
-                gem_package_hsh[:schema_rpath] = package.schema_rpath
                 gem_package_hsh[:entry_rpath] = package.entry_rpath
                 gem_package_hsh[:objects] = package.objects.map {
                   {
                     name: _1.name,
-                    schema_rpath: _1.schema_rpath,
                     file_rpath: _1.rpath,
                     mount_as: _1.mount_as,
                     methods: map_fn_methods(_1),

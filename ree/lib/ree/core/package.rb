@@ -3,13 +3,12 @@
 require 'pathname'
 
 class Ree::Package
-  attr_reader :schema_version, :name, :schema_rpath, :entry_rpath,
+  attr_reader :schema_version, :name, :entry_rpath,
               :module, :tags, :preload, :default_links, :gem_name
 
   def initialize(schema_version, name, entry_rpath, gem_name = nil)
     @schema_version = schema_version
     @name = name
-    @schema_rpath = nil
     @entry_rpath = entry_rpath
     @objects_store = {}
     @deps_store = {}
@@ -49,11 +48,6 @@ class Ree::Package
   # @param [ArrayOf[String]] list
   def set_tags(list)
     @tags = (@tags + list).map(&:to_s).uniq; self
-  end
-
-  # @param [String] val
-  def set_schema_rpath(val)
-    @schema_rpath = val; self
   end
 
   def reset

@@ -12,13 +12,11 @@ module Ree
         def index_package_entry(package)
           package_hsh = {}
           package_hsh[:name] = package.name
-          package_hsh[:schema_rpath] = package.schema_rpath
           package_hsh[:entry_rpath] = package.entry_rpath
           package_hsh[:tags] = package.tags
           package_hsh[:objects] = package.objects.map {
             {
               name: _1.name,
-              schema_rpath: _1.schema_rpath,
               file_rpath: _1.rpath,
               mount_as: _1.mount_as,
               methods: map_fn_methods(_1),

@@ -89,12 +89,6 @@ class Ree::PathHelper
     end
 
     # @param [Ree::Package] package Package schema
-    # @return [String] Absolute package schema path
-    def abs_package_schema_path(package)
-      File.join(project_root_dir(package), package.schema_rpath)
-    end
-
-    # @param [Ree::Package] package Package schema
     # @return [String] Absolute package folder path (ex. /data/project/bc/accounts)
     def abs_package_dir(package)
       File.join(project_root_dir(package), package.dir)
