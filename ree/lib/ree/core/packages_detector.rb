@@ -4,7 +4,7 @@ require 'pathname'
 
 class Ree::PackagesDetector
   # @param [String] dir Packages root dir
-  # @return [ArrayOf[{name: String, entry_path: String, package_schema_path: String, gem_name: Nilor[String]}]]
+  # @return [ArrayOf[{name: String, entry_path: String, gem_name: Nilor[String]}]]
   def call(dir, gem_name = nil)
     if !Dir.exist?(dir)
       raise Ree::Error.new("dir does not exist: #{dir}", :invalid_dir)
@@ -32,7 +32,6 @@ class Ree::PackagesDetector
       packages << {
         name: name.to_sym,
         entry_path: entry_path,
-        package_schema_path: File.join(parent_rel_path, Ree::PACKAGE_SCHEMA_FILE),
         gem_name: gem_name
       }
     end

@@ -54,7 +54,6 @@ module Ree
   SCHEMAS = 'schemas'
   SCHEMA = 'schema'
   REE_SETUP = 'ree.setup.rb'
-  PACKAGE_SCHEMA_FILE = 'Package.schema.json'
   PACKAGES_SCHEMA_FILE = 'Packages.schema.json'
   ROOT_DIR_MESSAGE = 'Ree.root_dir is not set. Use Ree.init(DIR) to set project dir'
 

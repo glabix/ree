@@ -4,39 +4,39 @@
   "packages": [
     {
       "name": "accounts",
-      "schema": "bc/accounts/Package.schema.json"
+      "entry_path": "bc/accounts/package/accounts.rb"
     },
     {
       "name": "clock",
-      "schema": "bc/tools/clock/Package.schema.json"
+      "entry_path": "bc/tools/clock/package/clock.rb"
     },
     {
       "name": "documents",
-      "schema": "bc/documents/Package.schema.json"
+      "entry_path": "bc/documents/package/documents.rb"
     },
     {
       "name": "errors",
-      "schema": "bc/tools/errors/Package.schema.json"
+      "entry_path": "bc/tools/errors/package/errors.rb"
     },
     {
       "name": "roles",
-      "schema": "bc/roles/Package.schema.json"
+      "entry_path": "bc/roles/package/roles.rb"
     },
     {
       "name": "test_utils",
-      "schema": "bc/shared/test_utils/Package.schema.json"
+      "entry_path": "bc/shared/test_utils/package/test_utils.rb"
     }
   ],
   "gem_packages": [
     {
       "gem": "sample_gem",
       "name": "hash_utils",
-      "schema": "packages/hash_utils/Package.schema.json"
+      "entry_path": "packages/hash_utils/package/hash_utils.rb"
     },
     {
       "gem": "sample_gem",
       "name": "string_utils",
-      "schema": "packages/string_utils/Package.schema.json"
+      "entry_path": "packages/string_utils/package/string_utils.rb"
     }
   ]
 }

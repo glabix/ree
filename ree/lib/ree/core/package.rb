@@ -6,10 +6,10 @@ class Ree::Package
   attr_reader :schema_version, :name, :schema_rpath, :entry_rpath,
               :module, :tags, :preload, :default_links, :gem_name
 
-  def initialize(schema_version, name, entry_rpath, schema_rpath, gem_name = nil)
+  def initialize(schema_version, name, entry_rpath, gem_name = nil)
     @schema_version = schema_version
     @name = name
-    @schema_rpath = schema_rpath
+    @schema_rpath = nil
     @entry_rpath = entry_rpath
     @objects_store = {}
     @deps_store = {}
@@ -94,7 +94,7 @@ class Ree::Package
   end
 
   def dir
-    @dir ||= @schema_rpath ? Pathname.new(@schema_rpath).dirname.to_s : nil
+    @dir ||= @entry_rpath ? Pathname.new(@entry_rpath).dirname.parent.to_s : nil
   end
 
   def gem?

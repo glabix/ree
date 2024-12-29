@@ -133,7 +133,7 @@ class Ree::BuildPackageDsl
     package = @packages_facade.get_package(name, false)
 
     if package.nil?
-      package = Ree::Package.new(Ree::VERSION, name, nil, nil, nil)
+      package = Ree::Package.new(Ree::VERSION, name, nil, nil)
       @packages_facade.store_package(package)
     end
 

@@ -65,12 +65,6 @@ module Ree
           end
   
           def find_package(dir)
-            package_schema = File.join(dir, Ree::PACKAGE_SCHEMA_FILE)
-  
-            if File.exist?(package_schema)
-              return package_schema
-            end
-  
             if dir == '/'
               return nil
             end
