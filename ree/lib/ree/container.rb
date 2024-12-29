@@ -62,6 +62,6 @@ class Ree::Container
   # @param [Symbol] package_name
   # @return [Ree::Package]
   def load_package(package_name)
-    @packages_facade.load_entire_package(package_name)
+    @packages_facade.read_package_structure(package_name)
   end
 end

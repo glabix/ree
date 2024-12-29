@@ -55,7 +55,7 @@ module Ree
   
               next if package.dir.nil?
   
-              facade.load_entire_package(package.name)
+              facade.read_package_structure(package.name)
   
               package_hsh = index_package_entry(package)
   

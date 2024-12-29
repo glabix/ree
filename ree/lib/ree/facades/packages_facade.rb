@@ -7,7 +7,7 @@ class Ree::PackagesFacade
 
   def initialize
     load_packages_schema
-    @package_loader = Ree::PackageLoader.new(@packages_store)
+    @package_loader = Ree::PackageLoader.new
   end
 
   class << self
@@ -33,7 +33,7 @@ class Ree::PackagesFacade
     package = get_package(package_name)
     return package if package.schema_loaded?
 
-    load_entire_package(package_name)
+    read_package_structure(package_name)
 
     package
   end
@@ -114,16 +114,23 @@ class Ree::PackagesFacade
 
   # @param [Symbol] package_name
   # @return [Ree::Package]
-  def load_entire_package(package_name)
-    @package_loader.call(package_name)
-  end
-
-  # @param [Symbol] package_name
-  # @return [Ree::Package]
   def read_package_structure(package_name)
     package = get_package(package_name)
 
-    read_package_file_structure(package_name)
+    @loaded_schemas ||= {}
+    return @loaded_schemas[package_name] if @loaded_schemas[package_name]
+
+    Ree.logger.debug("read_package_file_structure(:#{package_name})")
+    package = get_package(package_name)
+
+    if !package.dir
+      package.set_schema_loaded
+      return package
+    end
+
+    Ree.logger.debug("read_package_file_structure package #{package})")
+
+    @loaded_schemas[package_name] = Ree::PackageFileStructureLoader.new.call(package)
   end
 
   # @return [Ree::PackagesStore]
@@ -171,26 +178,5 @@ class Ree::PackagesFacade
   # @return [nil]
   def load_file(path, package_name)
     @package_loader.load_file(path, package_name)
-  end
-
-  private
-
-  # @param [Symbol] package_name
-  # @return [Ree::Package]
-  def read_package_file_structure(package_name)
-    @loaded_schemas ||= {}
-    return @loaded_schemas[package_name] if @loaded_schemas[package_name]
-
-    Ree.logger.debug("read_package_file_structure(:#{package_name})")
-    package = get_package(package_name)
-
-    if !package.dir
-      package.set_schema_loaded
-      return package
-    end
-
-    Ree.logger.debug("read_package_file_structure package #{package})")
-
-    @loaded_schemas[package_name] = Ree::PackageFileStructureLoader.new.call(package)
   end
 end
