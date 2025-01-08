@@ -80,27 +80,13 @@ class Ree::PackagesFacade
   # @return [Ree::Object]
   def load_package_object(package_name, object_name)
     package = get_loaded_package(package_name)
-    load_package_entry(package_name)
-
     object = get_object(package_name, object_name)
-    return object if object && object.loaded?
 
-    if !object
-      Dir[
-        File.join(
-          Ree::PathHelper.abs_package_module_dir(package),
-          "**/#{object_name}.rb"
-        )
-      ].each do |path|
-        load_file(path, package_name)
-      end
-
-      object = get_object(package_name, object_name)
-    end
-
-    if !object
+    unless object
       raise Ree::Error.new("object :#{object_name} from :#{package_name} was not found")
     end
+
+    return object if object.loaded?
 
     Ree.logger.debug("load_package_object(:#{package_name}, :#{object_name})")
 
