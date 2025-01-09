@@ -8,6 +8,12 @@ def package_require(path)
 
   return false if package.dir.nil?
 
+  pp list
+  pp package_name
+  pp package
+  pp package.dir
+  pp package.name
+
   path = File.join(
     Ree::PathHelper.abs_package_module_dir(package), list.join('/')
   )
