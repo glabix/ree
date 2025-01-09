@@ -36,7 +36,7 @@
     },
     {
       "name": "ree_hash",
-      "schema": "packages/ree_hash/package/ree_hash.rb"
+      "entry_path": "packages/ree_hash/package/ree_hash.rb"
     },
     {
       "name": "ree_http",
