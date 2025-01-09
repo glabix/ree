@@ -83,10 +83,6 @@ class Ree::PackagesFacade
     object = get_object(package_name, object_name)
 
     unless object
-      pp package
-      pp package.objects
-      pp package.instance_varaible_get(:@objects_store)
-
       raise Ree::Error.new("object :#{object_name} from :#{package_name} was not found")
     end
 
