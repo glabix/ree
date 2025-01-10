@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe Ree::PackagesFacade do
-  subject do
-    Ree::PackagesFacade.new
-  end
-
   describe '#self.write_packages_schema' do
     it 'writes Packages.schema.json file' do
       dir = sample_project_dir
@@ -20,7 +16,9 @@ RSpec.describe Ree::PackagesFacade do
 
   describe '#load_entire_package' do
     it 'loads package objects' do
-      package = Ree.container.packages_facade.load_entire_package(:documents)
+      facade = Ree.container.packages_facade 
+
+      package = facade.load_entire_package(:documents)
   
       expect{ Documents::CreateDocumentCmd }.not_to raise_error
       expect{ Accounts::DeliverEmail }.not_to raise_error
