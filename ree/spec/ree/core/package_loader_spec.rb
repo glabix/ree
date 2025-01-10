@@ -6,13 +6,35 @@ RSpec.describe Ree::PackageLoader do
   end
 
   it 'loads package objects' do
-    pp package = Ree.container.packages_facade.get_loaded_package(:documents)
+    expect{ Documents::CreateDocumentCmd }.to raise_error(NameError)
 
-    loaded_package = subject.call(package)
+    package = Ree.container.packages_facade.get_loaded_package(:documents)
 
-    expect(Documents::CreateDocumentCmd).not_to raise_error
+    # TODO move all specs to facade specs
+    loader = Ree::PackageLoader.new(Ree.container.packages_facade.packages_store)
+
+    loaded_package = loader.load_entire_package(package.name)
+
+    expect{ Documents::CreateDocumentCmd }.not_to raise_error
   end
 
-  # it "loads dependency objects" do
-  # it "loads gems dependency objects" do
+  it "loads dependency objects" do
+    package = Ree.container.packages_facade.get_loaded_package(:documents)
+
+    loader = Ree::PackageLoader.new(Ree.container.packages_facade.packages_store)
+
+    loaded_package = loader.load_entire_package(package.name)
+
+    expect{ Accounts::DeliverEmail }.not_to raise_error
+  end
+
+  it "loads gems dependency objects" do
+    package = Ree.container.packages_facade.get_loaded_package(:documents)
+
+    loader = Ree::PackageLoader.new(Ree.container.packages_facade.packages_store)
+
+    loaded_package = loader.load_entire_package(package.name)
+
+    expect{ HashUtils::Except }.not_to raise_error
+  end
 end
