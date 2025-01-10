@@ -68,9 +68,6 @@ class Ree::Container
   # @param [Symbol] package_name
   # @return [Ree::Package]
   def load_entire_package(package_name)
-    package = @packages_facade.get_loaded_package(package_name)
-    @packages_facade.load_package_objects_recursive(package)
-
-    package
+    @packages_facade.load_entire_package(package_name)
   end
 end

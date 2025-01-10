@@ -7,7 +7,7 @@ class Ree::PackagesFacade
 
   def initialize
     load_packages_schema
-    @package_loader = Ree::PackageLoader.new
+    @package_loader = Ree::PackageLoader.new(@packages_store)
   end
 
   class << self
@@ -30,14 +30,7 @@ class Ree::PackagesFacade
   # @param [Symbol] package_name
   # @return [Ree::Package]
   def get_loaded_package(package_name)
-    package = get_package(package_name)
-    load_package_entry(package_name)
-    
-    return package if package.schema_loaded?
-
-    read_package_structure(package_name)
-
-    package
+    @package_loader.get_loaded_package(package_name)
   end
 
   # @param [Symbol] package_name
@@ -60,20 +53,7 @@ class Ree::PackagesFacade
   # @param [Symbol] package_name
   # @return nil
   def load_package_entry(package_name)
-    package = @packages_store.get(package_name)
-
-    if package.nil?
-      raise Ree::Error.new("package :#{package_name} not found in Packages.schema.json")
-    end
-
-    return if package.loaded?
-
-    Ree.logger.debug("load_package_entry(:#{package_name})")
-
-    load_file(
-      Ree::PathHelper.abs_package_entry_path(package),
-      package_name
-    )
+    @package_loader.load_package_entry(package_name)
   end
 
 
@@ -103,28 +83,13 @@ class Ree::PackagesFacade
   # @param [Symbol] package_name
   # @return [Ree::Package]
   def read_package_structure(package_name)
-    package = get_package(package_name)
-
-    @loaded_schemas ||= {}
-    return @loaded_schemas[package_name] if @loaded_schemas[package_name]
-
-    Ree.logger.debug("read_package_file_structure(:#{package_name})")
-    package = get_package(package_name)
-
-    if !package.dir
-      package.set_schema_loaded
-      return package
-    end
-
-    Ree.logger.debug("read_package_file_structure package #{package})")
-
-    @loaded_schemas[package_name] = Ree::PackageFileStructureLoader.new.call(package)
+    @package_loader.read_package_structure(package_name)
   end
 
-  # @param [Ree::Package]
+  # @param [Symbol] package_name
   # @return [Ree::Package]
-  def load_package_objects_recursive(package)
-    @package_loader.call(package)
+  def load_entire_package(package_name)
+    @package_loader.load_entire_package(package_name)
   end
 
   # @return [Ree::PackagesStore]
@@ -151,14 +116,7 @@ class Ree::PackagesFacade
   # @param [Symbol] package_name
   # @return [Ree::Package]
   def get_package(package_name, raise_if_missing = true)
-    check_arg(package_name, :package_name, Symbol)
-    package = @packages_store.get(package_name)
-
-    if !package && raise_if_missing
-      raise Ree::Error.new("Package :#{package_name} is not found in Packages.schema.json. Run `ree gen.packages_json` to update schema.", :package_schema_not_found)
-    end
-
-    package
+    @package_loader.get_package(package_name, raise_if_missing)
   end
 
   # @param [Ree::Package] package

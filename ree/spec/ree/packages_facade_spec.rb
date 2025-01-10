@@ -17,4 +17,14 @@ RSpec.describe Ree::PackagesFacade do
       ensure_exists(packages_schema)
     end
   end
+
+  describe '#load_entire_package' do
+    it 'loads package objects' do
+      package = Ree.container.packages_facade.load_entire_package(:documents)
+  
+      expect{ Documents::CreateDocumentCmd }.not_to raise_error
+      expect{ Accounts::DeliverEmail }.not_to raise_error
+      expect{ HashUtils::Except }.not_to raise_error
+    end
+  end
 end
