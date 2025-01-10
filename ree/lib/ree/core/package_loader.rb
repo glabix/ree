@@ -90,9 +90,17 @@ class Ree::PackageLoader
   end
 
   def load_file(path, package_name)
+    if package_name == :documents
+      puts "load file #{path}"
+    end
+
     @loaded_paths[package_name] ||= {}
     return if @loaded_paths[package_name][path]
     @loaded_paths[package_name][path] = true
+
+    if package_name == :documents
+      puts "load file require"
+    end
 
     Ree.logger.debug("load_file(:#{package_name}, '#{path}')")
     Kernel.require(path)
