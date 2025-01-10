@@ -199,6 +199,11 @@ module Ree
       container.load_package(name)
     end
 
+    def load_entire_package(name)
+      check_arg(name, :name, Symbol)
+      container.load_entire_package(name)
+    end
+
     def locate_packages_schema(path)
       check_arg(path, :path, String)
       Ree.logger.debug("locate_packages_schema: #{path}")

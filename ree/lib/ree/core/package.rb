@@ -3,7 +3,7 @@
 require 'pathname'
 
 class Ree::Package
-  attr_reader :schema_version, :name, :entry_rpath,
+  attr_reader :schema_version, :name, :entry_rpath, :objects_store,
               :module, :tags, :preload, :default_links, :gem_name
 
   def initialize(schema_version, name, entry_rpath, gem_name = nil)

@@ -6,6 +6,25 @@ require 'pathname'
 class Ree::PackageLoader
   def initialize()
     @loaded_paths = {}
+    @loaded_packages = {}
+  end
+
+  def call(package)
+    return if @loaded_packages[package.name]
+
+    package_dir = Ree::PathHelper.abs_package_module_dir(package)
+
+    package.objects.each do |package_object|
+      object_path = Ree::PathHelper.abs_object_path(package_object)
+
+      load_file(object_path, package.name)
+    end
+
+    @loaded_packages[package.name] = true
+
+    package.deps.each do |dep|
+      call(dep)
+    end 
   end
 
   def reset

@@ -31,6 +31,8 @@ class Ree::PackagesFacade
   # @return [Ree::Package]
   def get_loaded_package(package_name)
     package = get_package(package_name)
+    load_package_entry(package_name)
+    
     return package if package.schema_loaded?
 
     read_package_structure(package_name)
@@ -117,6 +119,12 @@ class Ree::PackagesFacade
     Ree.logger.debug("read_package_file_structure package #{package})")
 
     @loaded_schemas[package_name] = Ree::PackageFileStructureLoader.new.call(package)
+  end
+
+  # @param [Ree::Package]
+  # @return [Ree::Package]
+  def load_package_objects_recursive(package)
+    @package_loader.call(package)
   end
 
   # @return [Ree::PackagesStore]
