@@ -56,7 +56,7 @@ class Ree::PackagesSchemaLoader
       end
 
       if names.has_key?(name)
-        raise Ree::Error.new("duplicate package name for '#{item[:name]}'", :invalid_packages_schema)
+        raise Ree::Error.new("duplicate package name for '#{name}'", :invalid_packages_schema)
       end
 
       names[name] = true
