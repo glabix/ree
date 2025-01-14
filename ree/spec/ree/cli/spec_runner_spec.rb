@@ -90,7 +90,7 @@ RSpec.describe Ree::CLI::SpecRunner do
       expect(spec_runner.packages_to_run.size).to be >= 1
     end
 
-    xit 'run tests for packages with specified tag' do
+    it 'run tests for packages with specified tag' do
       spec_runner = subject.new(
         path: project_dir,
         package_names: nil,

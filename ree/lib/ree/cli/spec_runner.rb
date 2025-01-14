@@ -118,7 +118,7 @@ module Ree
         names = packages.map(&:name)
 
         names.select do |package_name|
-          package = container.packages_facade.read_package_structure(package_name)
+          package = container.packages_facade.get_loaded_package(package_name)
           package.tags.include?(@tag_name)
         end.compact
       end
