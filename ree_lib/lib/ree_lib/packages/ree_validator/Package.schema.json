@@ -14,9 +14,7 @@
       "name": "ree_object"
     }
   ],
-  "env_vars": [
-
-  ],
+  "env_vars": [],
   "objects": [
     {
       "name": "validate_email",

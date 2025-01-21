@@ -6,12 +6,8 @@
   "tags": [
     "errors"
   ],
-  "depends_on": [
-
-  ],
-  "env_vars": [
-
-  ],
+  "depends_on": [],
+  "env_vars": [],
   "objects": [
     {
       "name": "raise_error",

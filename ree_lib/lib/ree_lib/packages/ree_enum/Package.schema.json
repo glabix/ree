@@ -17,10 +17,6 @@
       "name": "ree_validator"
     }
   ],
-  "env_vars": [
-
-  ],
-  "objects": [
-
-  ]
+  "env_vars": [],
+  "objects": []
 }

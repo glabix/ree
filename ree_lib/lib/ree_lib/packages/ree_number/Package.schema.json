@@ -14,9 +14,7 @@
       "name": "ree_i18n"
     }
   ],
-  "env_vars": [
-
-  ],
+  "env_vars": [],
   "objects": [
     {
       "name": "digit_count",

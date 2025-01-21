@@ -11,9 +11,7 @@
       "name": "ree_hash"
     }
   ],
-  "env_vars": [
-
-  ],
+  "env_vars": [],
   "objects": [
     {
       "name": "from_json",

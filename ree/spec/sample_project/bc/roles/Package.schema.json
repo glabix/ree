@@ -11,10 +11,6 @@
       "name": "accounts"
     }
   ],
-  "env_vars": [
-
-  ],
-  "objects": [
-
-  ]
+  "env_vars": [],
+  "objects": []
 }

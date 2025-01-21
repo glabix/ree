@@ -20,9 +20,7 @@
       "name": "ree_number"
     }
   ],
-  "env_vars": [
-
-  ],
+  "env_vars": [],
   "objects": [
     {
       "name": "advance",

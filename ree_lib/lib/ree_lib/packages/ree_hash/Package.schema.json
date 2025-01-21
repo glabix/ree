@@ -14,9 +14,7 @@
       "name": "ree_validator"
     }
   ],
-  "env_vars": [
-
-  ],
+  "env_vars": [],
   "objects": [
     {
       "name": "build_filter_keys",

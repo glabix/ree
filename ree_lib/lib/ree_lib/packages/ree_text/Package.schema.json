@@ -17,9 +17,7 @@
       "name": "ree_object"
     }
   ],
-  "env_vars": [
-
-  ],
+  "env_vars": [],
   "objects": [
     {
       "name": "escape_html",
