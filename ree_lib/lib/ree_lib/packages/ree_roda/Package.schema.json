@@ -29,9 +29,7 @@
       "name": "ree_swagger"
     }
   ],
-  "env_vars": [
-
-  ],
+  "env_vars": [],
   "objects": [
     {
       "name": "build_route_errors",

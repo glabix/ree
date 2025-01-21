@@ -23,9 +23,7 @@
       "name": "ree_mapper"
     }
   ],
-  "env_vars": [
-
-  ],
+  "env_vars": [],
   "objects": [
     {
       "name": "build_endpoint_schema",

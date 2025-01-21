@@ -14,9 +14,7 @@
       "name": "ree_string"
     }
   ],
-  "env_vars": [
-
-  ],
+  "env_vars": [],
   "objects": [
     {
       "name": "auth_error",

@@ -44,8 +44,15 @@ RSpec.describe ReeLogger::ColorizedFormatter do
   }
 
   it {
+    if RUBY_VERSION >= '3.4'
+      colored_expected = "[05/11/05 00:00:00] \e[31merror:\e[0m Some error message\n\e[34mPARAMETERS:\e[0m {some_error: \"params\"}\n\e[31mEXCEPTION:\e[0m StandardError (Help me, I am error)\n"
+      expected = "[05/11/05 00:00:00] error: Some error message\nPARAMETERS: {some_error: \"params\"}\nEXCEPTION: StandardError (Help me, I am error)\n"
+    else
+      colored_expected = "[05/11/05 00:00:00] \e[31merror:\e[0m Some error message\n\e[34mPARAMETERS:\e[0m {:some_error=>\"params\"}\n\e[31mEXCEPTION:\e[0m StandardError (Help me, I am error)\n"
+      expected = "[05/11/05 00:00:00] error: Some error message\nPARAMETERS: {:some_error=>\"params\"}\nEXCEPTION: StandardError (Help me, I am error)\n"
+    end
     expect(formatter.format(error_log_event, nil))
-      .to eq("[05/11/05 00:00:00] \e[31merror:\e[0m Some error message\n\e[34mPARAMETERS:\e[0m {:some_error=>\"params\"}\n\e[31mEXCEPTION:\e[0m StandardError (Help me, I am error)\n")
-      .or eq("[05/11/05 00:00:00] error: Some error message\nPARAMETERS: {:some_error=>\"params\"}\nEXCEPTION: StandardError (Help me, I am error)\n")
+      .to eq(colored_expected)
+      .or eq(expected)
   }
 end

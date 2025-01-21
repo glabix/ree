@@ -91,7 +91,12 @@ RSpec.describe ReeLogger::MultiLogger do
     expect { logger_with_appenders.info('hello world', { param: 1, another_param: { name: 'John'}, password: 'password01' }) }.to output(/John/).to_stdout
     expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("John")
-    expect(File.read(log_file_path)).to match(":password=>\"FILTERED\"")
+    expected = if RUBY_VERSION >= '3.4'
+      'password: "FILTERED"'
+    else
+      ':password=>"FILTERED"'
+    end
+    expect(File.read(log_file_path)).to match(expected)
   }
 
   it {
@@ -121,7 +126,12 @@ RSpec.describe ReeLogger::MultiLogger do
     expect { logger_with_appenders.fatal('some fatal message', { email: 'some@mail.com', password: 'password01' }, exception) }.to output(/some fatal message/).to_stdout
     expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("some fatal message")
-    expect(File.read(log_file_path)).to match(":password=>\"FILTERED\"")
+    expected = if RUBY_VERSION >= '3.4'
+      'password: "FILTERED"'
+    else
+      ':password=>"FILTERED"'
+    end
+    expect(File.read(log_file_path)).to match(expected)
   }
 
   it {

@@ -11,10 +11,6 @@
       "name": "ree_mapper"
     }
   ],
-  "env_vars": [
-
-  ],
-  "objects": [
-
-  ]
+  "env_vars": [],
+  "objects": []
 }

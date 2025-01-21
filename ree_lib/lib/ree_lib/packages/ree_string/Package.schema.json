@@ -11,9 +11,7 @@
       "name": "ree_text"
     }
   ],
-  "env_vars": [
-
-  ],
+  "env_vars": [],
   "objects": [
     {
       "name": "acronyms_camelize_regex",
