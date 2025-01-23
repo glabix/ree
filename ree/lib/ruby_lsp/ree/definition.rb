@@ -3,6 +3,8 @@ module RubyLsp
     class Definition
       include Requests::Support::Common
 
+      REE_PREFIX = '__ree_object_'
+
       def initialize(response_builder, node_context, index, dispatcher)
         @response_builder = response_builder
         @node_context = node_context
@@ -19,9 +21,7 @@ module RubyLsp
 
         return unless message
 
-        method = @index[message].detect{ !_1.location.nil? }
-
-        $stderr.puts method.inspect
+        method = @index[REE_PREFIX + message].detect{ !_1.location.nil? }
 
         return unless method
 
