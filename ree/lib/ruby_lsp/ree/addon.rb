@@ -2,6 +2,7 @@ require "ruby_lsp/addon"
 require_relative "basic_listener"
 require_relative "definition"
 require_relative "completion"
+require_relative "ree_indexing_enhancement"
 
 module RubyLsp
   module Ree
@@ -35,7 +36,7 @@ module RubyLsp
 
       def create_completion_listener(response_builder, node_context, dispatcher, uri)
         $stderr.puts("create_completion_listener")
-        
+
         index = @global_state.index
         RubyLsp::Ree::Completion.new(response_builder, node_context, index, dispatcher, uri)
       end
