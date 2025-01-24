@@ -29,9 +29,7 @@ module RubyLsp
 
           fn_name = ree_object.name.delete_prefix(REE_PREFIX)
 
-          uri_parts = ree_object.uri.to_s.split('/')
-          package_index = uri_parts.find_index('package') + 1
-          package_name = uri_parts[package_index]
+          package_name = package_name_from_uri(ree_object.uri)
 
           params_str = ree_object.signatures.first.parameters.map(&:name).join(', ')
 
@@ -72,7 +70,11 @@ module RubyLsp
         fn_line = doc_info.fn_node.location.start_line
         position = 80 # TODO calc
 
-        link_text = "\n\s\s\s\slink :#{fn_name}, from: :#{package_name}"
+        link_text = if doc_info.package_name == package_name
+          "\n\s\s\s\slink :#{fn_name}"
+        else
+          "\n\s\s\s\slink :#{fn_name}, from: :#{package_name}"
+        end
 
         range = Interface::Range.new(
           start: Interface::Position.new(line: fn_line - 1, character: position),
@@ -101,6 +103,12 @@ module RubyLsp
         """
 
         Interface::MarkupContent.new(kind: 'markdown', value: documentation)
+      end
+
+      def package_name_from_uri(uri)
+        uri_parts = uri.to_s.split('/')
+        package_index = uri_parts.find_index('package') + 1
+        uri_parts[package_index]
       end
 
       def parse_doc_info
@@ -135,6 +143,7 @@ module RubyLsp
 
         return OpenStruct.new(
           ast: ast,
+          package_name: package_name_from_uri(@uri),
           class_node: class_node,
           fn_node: fn_node,
           block_node: block_node,
