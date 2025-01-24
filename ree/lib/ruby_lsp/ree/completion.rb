@@ -60,20 +60,29 @@ module RubyLsp
       end
 
       def get_additional_text_edits(doc_info, fn_name, package_name)
-        return [] unless doc_info.block_node # TODO handle no block
-        
         if doc_info.linked_objects.map(&:name).include?(fn_name)
           $stderr.puts("links already include #{fn_name}")
           return []
         end
 
         fn_line = doc_info.fn_node.location.start_line
-        position = 80 # TODO calc
+
+        position = if doc_info.block_node
+          doc_info.block_node.opening_loc.end_column + 1
+        else
+          doc_info.fn_node.arguments.location.end_column + 1
+        end
 
         link_text = if doc_info.package_name == package_name
           "\n\s\s\s\slink :#{fn_name}"
         else
           "\n\s\s\s\slink :#{fn_name}, from: :#{package_name}"
+        end
+        
+        new_text = link_text
+
+        unless doc_info.block_node
+          new_text = "\sdo#{link_text}\n\s\send\n"
         end
 
         range = Interface::Range.new(
@@ -86,7 +95,7 @@ module RubyLsp
         [
           Interface::TextEdit.new(
             range:    range,
-            new_text: link_text,
+            new_text: new_text,
           )
         ]
       end
