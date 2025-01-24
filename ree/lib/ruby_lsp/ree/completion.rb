@@ -3,7 +3,6 @@ module RubyLsp
     class Completion
       include Requests::Support::Common
 
-      REE_PREFIX = '__ree_object_'
       CHARS_COUNT = 4
       
       def initialize(response_builder, node_context, index, dispatcher, uri)
@@ -18,17 +17,17 @@ module RubyLsp
         return if node.receiver
         return if node.name.to_s.size < CHARS_COUNT
 
-        ree_objects = @index.prefix_search(REE_PREFIX + node.name.to_s).take(10)
+        ree_objects = @index.prefix_search(node.name.to_s)
+          .take(50).map(&:first)
+          .select{ _1.comments }
+          .select{ _1.comments.to_s.lines.first&.chomp == 'ree_object' }
+          .take(10)
 
         return if ree_objects.size == 0
 
         doc_info = parse_doc_info()
 
-        ree_objects.each do |ree_obj|
-          ree_object = ree_obj.first
-
-          fn_name = ree_object.name.delete_prefix(REE_PREFIX)
-
+        ree_objects.each do |ree_object|
           package_name = package_name_from_uri(ree_object.uri)
 
           params_str = ree_object.signatures.first.parameters.map(&:name).join(', ')

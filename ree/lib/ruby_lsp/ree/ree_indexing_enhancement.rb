@@ -1,6 +1,4 @@
 class ReeIndexingEnhancement < RubyIndexer::Enhancement
-  REE_PREFIX = '__ree_object_'
-
   def on_call_node_enter(node)
     return unless @listener.current_owner
 
@@ -14,10 +12,10 @@ class ReeIndexingEnhancement < RubyIndexer::Enhancement
     signatures = parse_signatures(fn_name)
 
     @listener.add_method(
-      REE_PREFIX + fn_name,
+      fn_name,
       location, 
       signatures,
-      comments: "ree object"
+      comments: "ree_object\nsome_documentation"
     )
   end
 
