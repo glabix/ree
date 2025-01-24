@@ -5,17 +5,33 @@ class ReeIndexingEnhancement < RubyIndexer::Enhancement
     # Return early unless the method call is the one we want to handle
     return unless node.name == :fn
     return unless node.arguments
-     
+
+    # index = @listener.instance_variable_get(:@index)
+    
     location = node.location
     fn_name = node.arguments.child_nodes.first.unescaped
-
     signatures = parse_signatures(fn_name)
+    comments = "ree_object\nsome_documentation"
+   
+    # visibility = RubyIndexer::Entry::Visibility::PUBLIC
+    # owner = index['Object'].first
+
+    # index.add(RubyIndexer::Entry::Method.new(
+    #   fn_name,
+    #   @listener.instance_variable_get(:@uri),
+    #   location,
+    #   location,
+    #   comments,
+    #   signatures,
+    #   visibility,
+    #   owner,
+    # ))
 
     @listener.add_method(
       fn_name,
       location, 
       signatures,
-      comments: "ree_object\nsome_documentation"
+      comments: comments
     )
   end
 

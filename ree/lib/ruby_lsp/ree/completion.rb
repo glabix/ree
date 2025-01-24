@@ -28,6 +28,8 @@ module RubyLsp
         doc_info = parse_doc_info()
 
         ree_objects.each do |ree_object|
+          fn_name = ree_object.name
+
           package_name = package_name_from_uri(ree_object.uri)
 
           params_str = ree_object.signatures.first.parameters.map(&:name).join(', ')
@@ -36,6 +38,8 @@ module RubyLsp
             description: "from: :#{package_name}",
             detail: "(#{params_str})"
           )
+
+          $stderr.puts("ree object #{ree_object.inspect}")
 
           @response_builder << Interface::CompletionItem.new(
             label: fn_name,
@@ -126,7 +130,7 @@ module RubyLsp
         fn_node = class_node.body.body.detect{ |node| node.name == :fn }
         block_node = fn_node.block
 
-        link_nodes = if block_node
+        link_nodes = if block_node && block_node.body
           block_node.body.body.select{ |node| node.name == :link }
         else
           []
