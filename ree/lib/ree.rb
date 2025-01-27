@@ -32,10 +32,8 @@ module Ree
   autoload :BuildPackageDsl, 'ree/dsl/build_package_dsl'
   autoload :PackageDSL, 'ree/package_dsl'
   autoload :PackageEnvVar, 'ree/core/package_env_var'
+  autoload :PackageFileStructureLoader, 'ree/core/package_file_structure_loader'
   autoload :PackageLoader, 'ree/core/package_loader'
-  autoload :PackageSchema, 'ree/core/package_schema'
-  autoload :PackageSchemaBuilder, 'ree/core/package_schema_builder'
-  autoload :PackageSchemaLoader, 'ree/core/package_schema_loader'
   autoload :PackagesDetector, 'ree/core/packages_detector'
   autoload :PackagesFacade, 'ree/facades/packages_facade'
   autoload :PackagesSchema, 'ree/core/packages_schema'
@@ -56,7 +54,6 @@ module Ree
   SCHEMAS = 'schemas'
   SCHEMA = 'schema'
   REE_SETUP = 'ree.setup.rb'
-  PACKAGE_SCHEMA_FILE = 'Package.schema.json'
   PACKAGES_SCHEMA_FILE = 'Packages.schema.json'
   ROOT_DIR_MESSAGE = 'Ree.root_dir is not set. Use Ree.init(DIR) to set project dir'
 
@@ -114,19 +111,6 @@ module Ree
 
     def set_logger_debug
       logger.level = Logger::DEBUG
-    end
-
-    # Ree will use schema files to load packages and registered objects
-    def set_performance_mode
-      @performance_mode = true
-    end
-
-    def set_dev_mode
-      @performance_mode = false
-    end
-
-    def performance_mode?
-      !!@performance_mode
     end
 
     # Define preload context for registered objects
@@ -215,6 +199,11 @@ module Ree
       container.load_package(name)
     end
 
+    def load_entire_package(name)
+      check_arg(name, :name, Symbol)
+      container.load_entire_package(name)
+    end
+
     def locate_packages_schema(path)
       check_arg(path, :path, String)
       Ree.logger.debug("locate_packages_schema: #{path}")
@@ -227,23 +216,6 @@ module Ree
 
     def root_dir
       @root_dir || (raise Ree::Error.new(ROOT_DIR_MESSAGE, :invalid_root_dir))
-    end
-
-    def generate_schemas_for_all_packages(silence = false)
-      Ree.logger.debug("generate_schemas_for_all_packages") if !silence
-      facade = container.packages_facade
-
-      facade.class.write_packages_schema
-      facade.load_packages_schema
-
-      facade.packages_store.packages.each do |package|
-        next if package.gem?
-        next if package.dir.nil?
-        puts("Generating Package.schema.json for :#{package.name} package") if !silence
-
-        facade.load_entire_package(package.name)
-        facade.write_package_schema(package.name)
-      end
     end
   end
 end

@@ -4,99 +4,99 @@
   "packages": [
     {
       "name": "ree_actions",
-      "schema": "packages/ree_actions/Package.schema.json"
+      "entry_path": "packages/ree_actions/package/ree_actions.rb"
     },
     {
       "name": "ree_array",
-      "schema": "packages/ree_array/Package.schema.json"
+      "entry_path": "packages/ree_array/package/ree_array.rb"
     },
     {
       "name": "ree_dao",
-      "schema": "packages/ree_dao/Package.schema.json"
+      "entry_path": "packages/ree_dao/package/ree_dao.rb"
     },
     {
       "name": "ree_date",
-      "schema": "packages/ree_date/Package.schema.json"
+      "entry_path": "packages/ree_date/package/ree_date.rb"
     },
     {
       "name": "ree_datetime",
-      "schema": "packages/ree_datetime/Package.schema.json"
+      "entry_path": "packages/ree_datetime/package/ree_datetime.rb"
     },
     {
       "name": "ree_dto",
-      "schema": "packages/ree_dto/Package.schema.json"
+      "entry_path": "packages/ree_dto/package/ree_dto.rb"
     },
     {
       "name": "ree_enum",
-      "schema": "packages/ree_enum/Package.schema.json"
+      "entry_path": "packages/ree_enum/package/ree_enum.rb"
     },
     {
       "name": "ree_errors",
-      "schema": "packages/ree_errors/Package.schema.json"
+      "entry_path": "packages/ree_errors/package/ree_errors.rb"
     },
     {
       "name": "ree_hash",
-      "schema": "packages/ree_hash/Package.schema.json"
+      "entry_path": "packages/ree_hash/package/ree_hash.rb"
     },
     {
       "name": "ree_http",
-      "schema": "packages/ree_http/Package.schema.json"
+      "entry_path": "packages/ree_http/package/ree_http.rb"
     },
     {
       "name": "ree_i18n",
-      "schema": "packages/ree_i18n/Package.schema.json"
+      "entry_path": "packages/ree_i18n/package/ree_i18n.rb"
     },
     {
       "name": "ree_json",
-      "schema": "packages/ree_json/Package.schema.json"
+      "entry_path": "packages/ree_json/package/ree_json.rb"
     },
     {
       "name": "ree_logger",
-      "schema": "packages/ree_logger/Package.schema.json"
+      "entry_path": "packages/ree_logger/package/ree_logger.rb"
     },
     {
       "name": "ree_mapper",
-      "schema": "packages/ree_mapper/Package.schema.json"
+      "entry_path": "packages/ree_mapper/package/ree_mapper.rb"
     },
     {
       "name": "ree_migrator",
-      "schema": "packages/ree_migrator/Package.schema.json"
+      "entry_path": "packages/ree_migrator/package/ree_migrator.rb"
     },
     {
       "name": "ree_number",
-      "schema": "packages/ree_number/Package.schema.json"
+      "entry_path": "packages/ree_number/package/ree_number.rb"
     },
     {
       "name": "ree_object",
-      "schema": "packages/ree_object/Package.schema.json"
+      "entry_path": "packages/ree_object/package/ree_object.rb"
     },
     {
       "name": "ree_roda",
-      "schema": "packages/ree_roda/Package.schema.json"
+      "entry_path": "packages/ree_roda/package/ree_roda.rb"
     },
     {
       "name": "ree_routes",
-      "schema": "packages/ree_routes/Package.schema.json"
+      "entry_path": "packages/ree_routes/package/ree_routes.rb"
     },
     {
       "name": "ree_std",
-      "schema": "packages/ree_std/Package.schema.json"
+      "entry_path": "packages/ree_std/package/ree_std.rb"
     },
     {
       "name": "ree_string",
-      "schema": "packages/ree_string/Package.schema.json"
+      "entry_path": "packages/ree_string/package/ree_string.rb"
     },
     {
       "name": "ree_swagger",
-      "schema": "packages/ree_swagger/Package.schema.json"
+      "entry_path": "packages/ree_swagger/package/ree_swagger.rb"
     },
     {
       "name": "ree_text",
-      "schema": "packages/ree_text/Package.schema.json"
+      "entry_path": "packages/ree_text/package/ree_text.rb"
     },
     {
       "name": "ree_validator",
-      "schema": "packages/ree_validator/Package.schema.json"
+      "entry_path": "packages/ree_validator/package/ree_validator.rb"
     }
   ],
   "gem_packages": [

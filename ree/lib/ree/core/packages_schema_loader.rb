@@ -48,7 +48,7 @@ class Ree::PackagesSchemaLoader
 
     data.each do |item|
       name = item[Schema::Packages::NAME].to_s
-      schema_rpath = item[Schema::Packages::SCHEMA].to_s
+      entry_path = item[Schema::Packages::ENTRY_PATH].to_s
       list = [name, schema]
 
       if list.reject(&:empty?).size != list.size
@@ -56,7 +56,7 @@ class Ree::PackagesSchemaLoader
       end
 
       if names.has_key?(name)
-        raise Ree::Error.new("duplicate package name for '#{item[:name]}'", :invalid_packages_schema)
+        raise Ree::Error.new("duplicate package name for '#{name}'", :invalid_packages_schema)
       end
 
       names[name] = true
@@ -64,8 +64,7 @@ class Ree::PackagesSchemaLoader
       package = Ree::Package.new(
         schema_version,
         name.to_sym,
-        Ree::PathHelper.package_entry_path(schema_rpath),
-        schema_rpath,
+        entry_path,
         gem_name
       )
 
@@ -83,8 +82,7 @@ class Ree::PackagesSchemaLoader
         Ree::Package.new(
           schema_version,
           name.to_sym,
-          Ree::PathHelper.package_entry_path(schema_rpath),
-          schema_rpath,
+          entry_path,
           gem_name
         )
       )

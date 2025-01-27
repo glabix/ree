@@ -23,7 +23,7 @@ module Ree
             hsh[:objects] = {}
   
             package_name = package_name.to_sym
-            facade.load_entire_package(package_name)
+            facade.read_package_structure(package_name)
             package = facade.get_loaded_package(package_name)
             package_hsh = index_package_entry(package)
   

@@ -55,14 +55,12 @@ class Ree::PathHelper
     # @param [String] directory inside package
     # @return [String] name of package
     def package_name_from_dir(dir)
-      package_schema = File.join(dir, Ree::PACKAGE_SCHEMA_FILE)
-
-      if File.exist?(package_schema)
-        return package_schema.split('/')[-2]
-      end
-
       if dir == '/'
         return nil
+      end
+
+      if dir == 'package'
+        return File.expand_path('..', dir)
       end
 
       package_name_from_dir(File.expand_path('..', dir))
@@ -88,12 +86,6 @@ class Ree::PathHelper
       File.join(
         project_root_dir(package), package.dir, Ree::SCHEMAS
       )
-    end
-
-    # @param [Ree::Package] package Package schema
-    # @return [String] Absolute package schema path
-    def abs_package_schema_path(package)
-      File.join(project_root_dir(package), package.schema_rpath)
     end
 
     # @param [Ree::Package] package Package schema

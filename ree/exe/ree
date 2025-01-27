@@ -85,12 +85,6 @@ class ReeCliRunner
 
         Ree::CLI::GeneratePackage.run(**options_with_defaults)
         Ree::CLI::GeneratePackagesSchema.run(options_with_defaults[:project_path])
-
-        Ree::CLI::GeneratePackageSchema.run(
-          package_name: options_with_defaults[:package_name],
-          project_path: options_with_defaults[:project_path],
-          silence: false
-        )
       end
     end
 
@@ -109,31 +103,6 @@ class ReeCliRunner
 
         project_path = options_hash[:project_path] || Dir.pwd
         Ree::CLI::GeneratePackagesSchema.run(project_path)
-      end
-    end
-
-    command :"gen.package_json" do |c|
-      c.syntax      = 'ree gen.package_json PACKAGE_NAME'
-      c.description = 'generates Package.schema.json for specific package'
-      c.summary     = '> ' + c.description
-      c.example     'ree gen.package_json PACKAGE_NAME', ''
-      c.option      '--silence', String, 'Silence all logs'
-      c.option      '--project_path [ROOT_PROJECT_DIR]', String, 'Root project dir path'
-      c.action do |args, options|
-        package_name = args.first || ""
-        options_hash = options.__hash__
-
-        if options_hash[:project_path]
-          options_hash[:project_path] = File.expand_path(options_hash[:project_path])
-        end
-
-        default_options = {
-          package_name: package_name,
-          project_path: options_hash[:project_path] || File.expand_path(Dir.pwd),
-          silence: options_hash.has_key?(:silence)
-        }
-
-        Ree::CLI::GeneratePackageSchema.run(**default_options)
       end
     end
 

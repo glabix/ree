@@ -11,12 +11,12 @@ module Ree::PackagesSchema
 
   module Packages
     NAME = 'name'
-    SCHEMA = 'schema'
+    ENTRY_PATH = 'entry_path'
     GEM = 'gem'
   end
 
   module GemPackages
     NAME = 'name'
-    SCHEMA = 'schema'
+    ENTRY_PATH = 'entry_path'
   end
 end

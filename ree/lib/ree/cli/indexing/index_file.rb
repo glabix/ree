@@ -19,7 +19,7 @@ module Ree
   
             current_package_schema = self.find_package(File.dirname(file_path))
   
-            return {} unless current_package_schema
+            return '{}' unless current_package_schema
   
             package_schema = JSON.load_file(current_package_schema)
             current_package_name = package_schema["name"].to_sym
@@ -65,12 +65,6 @@ module Ree
           end
   
           def find_package(dir)
-            package_schema = File.join(dir, Ree::PACKAGE_SCHEMA_FILE)
-  
-            if File.exist?(package_schema)
-              return package_schema
-            end
-  
             if dir == '/'
               return nil
             end
