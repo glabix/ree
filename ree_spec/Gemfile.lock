@@ -1,10 +1,10 @@
 PATH
   remote: .
   specs:
-    ree_spec (0.0.7)
+    ree_spec (0.0.8)
       commander (~> 5.0.0)
-      ree (~> 1.0.47)
-      ree_lib (~> 1.0.124)
+      ree (~> 1.1.0)
+      ree_lib (~> 1.1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -45,16 +45,16 @@ GEM
     racc (1.8.1)
     rainbow (3.1.1)
     rake (13.2.1)
-    ree (1.0.47)
+    ree (1.1.0)
       commander (~> 5.0.0)
-    ree_lib (1.0.124)
+    ree_lib (1.1.0)
       bigdecimal (~> 3.1.6)
       binding_of_caller (~> 1.0.0)
       i18n (~> 1.14.1)
       loofah (~> 2.22.0)
       oj (~> 3.16.3)
       rainbow (~> 3.1.1)
-      ree (~> 1.0.0)
+      ree (~> 1.1.0)
       sequel (~> 5.76.0)
       tzinfo (~> 2.0.5)
     rexml (3.3.6)
