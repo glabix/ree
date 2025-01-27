@@ -11,6 +11,38 @@ module RubyLsp
         @uri = uri
 
         dispatcher.register(self, :on_call_node_enter)
+        dispatcher.register(self, :on_constant_read_node_enter)
+      end
+
+      def on_constant_read_node_enter(node)
+        node_name = node.name.to_s
+        return if node_name.size < CHARS_COUNT
+
+        class_name_objects = @index.instance_variable_get(:@entries).keys.select{ _1.split('::').last[0...node_name.size] == node_name}
+        class_name_objects.take(15).each do |full_class_name|
+          entry = @index[full_class_name].first
+          class_name = full_class_name.split('::').last
+
+          package_name = package_name_from_uri(entry.uri)
+
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: "from: :#{package_name}",
+            detail: ""
+          )
+
+          @response_builder << Interface::CompletionItem.new(
+            label: class_name,
+            label_details: label_details,
+            filter_text: class_name,
+            text_edit: Interface::TextEdit.new(
+              range:  range_from_location(node.location),
+              new_text: class_name,
+            ),
+            kind: Constant::CompletionItemKind::CLASS,
+          )
+        end
+
+        nil
       end
 
       def on_call_node_enter(node)
