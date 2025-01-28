@@ -19,6 +19,10 @@ module RubyLsp
         return if node_name.size < CHARS_COUNT
 
         class_name_objects = @index.instance_variable_get(:@entries).keys.select{ _1.split('::').last[0...node_name.size] == node_name}
+        return if class_name_objects.size == 0
+
+        doc_info = parse_doc_info()
+
         class_name_objects.take(15).each do |full_class_name|
           entry = @index[full_class_name].first
           class_name = full_class_name.split('::').last
@@ -39,6 +43,7 @@ module RubyLsp
               new_text: class_name,
             ),
             kind: Constant::CompletionItemKind::CLASS,
+            additional_text_edits: get_additional_text_edits_for_constant(doc_info, class_name, package_name, entry)
           )
         end
 
@@ -92,6 +97,45 @@ module RubyLsp
         end
         
         nil
+      end
+
+      def get_additional_text_edits_for_constant(doc_info, class_name, package_name, entry)
+        fn_line = doc_info.fn_node.location.start_line
+
+        position = if doc_info.block_node
+          doc_info.block_node.opening_loc.end_column + 1
+        else
+          doc_info.fn_node.arguments.location.end_column + 1
+        end
+
+        entry_uri = entry.uri.to_s
+        link_text = if doc_info.package_name == package_name
+          fn_name = File.basename(entry_uri, ".*")
+          "\n\s\s\s\slink :#{fn_name}, import: -> { #{class_name} }"
+        else
+          uri_parts = entry_uri.chomp(File.extname(entry_uri)).split('/')
+          pack_folder_index =  uri_parts.index('package')
+          path_from_package = uri_parts.drop(pack_folder_index+1).join('/')
+          "\n\s\s\s\slink \"#{path_from_package}\", import: -> { #{class_name} }"
+        end
+
+        new_text = link_text
+
+        unless doc_info.block_node
+          new_text = "\sdo#{link_text}\n\s\send\n"
+        end
+
+        range = Interface::Range.new(
+          start: Interface::Position.new(line: fn_line - 1, character: position),
+          end: Interface::Position.new(line: fn_line - 1, character: position + link_text.size),
+        )
+
+        [
+          Interface::TextEdit.new(
+            range:    range,
+            new_text: new_text,
+          )
+        ]
       end
 
       def get_additional_text_edits(doc_info, fn_name, package_name)
