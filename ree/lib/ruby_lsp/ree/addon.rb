@@ -3,6 +3,7 @@ require_relative "basic_listener"
 require_relative "definition"
 require_relative "completion"
 require_relative "ree_indexing_enhancement"
+require_relative "ree_lsp_utils"
 
 module RubyLsp
   module Ree
