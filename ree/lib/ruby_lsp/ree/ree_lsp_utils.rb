@@ -51,7 +51,8 @@ module RubyLsp
           end
 
           OpenStruct.new(
-            name: name_val
+            name: name_val,
+            imports: parse_link_node_imports(link_node)
           )
         end
 
@@ -78,6 +79,26 @@ module RubyLsp
           start: Interface::Position.new(line: fn_line - 1, character: position),
           end: Interface::Position.new(line: fn_line - 1, character: position + link_text.size),
         )
+      end
+
+      def parse_link_node_imports(node)
+        return [] if node.arguments.arguments.size == 1
+        
+        last_arg = node.arguments.arguments.last
+
+        if last_arg.is_a?(Prism::KeywordHashNode)
+          import_arg = last_arg.elements.detect{ _1.key.unescaped == 'import' }
+          return [] unless import_arg
+
+          [import_arg.value.body.body.first.name.to_s]
+        elsif last_arg.is_a?(Prism::LambdaNode)
+          [last_arg.body.body.first.name.to_s]
+        else
+          return []
+        end
+      rescue => e
+        $stderr.puts("can't parse imports: #{e.message}")
+        return []
       end
     end
   end

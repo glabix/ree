@@ -102,6 +102,11 @@ module RubyLsp
       end
 
       def get_additional_text_edits_for_constant(doc_info, class_name, package_name, entry)
+        if doc_info.linked_objects.map(&:imports).flatten.include?(class_name)
+          $stderr.puts("links already include #{class_name}")
+          return []
+        end
+
         entry_uri = entry.uri.to_s
 
         link_text = if doc_info.package_name == package_name
