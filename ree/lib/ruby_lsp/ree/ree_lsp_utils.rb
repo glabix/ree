@@ -13,9 +13,21 @@ module RubyLsp
         uri_parts.drop(pack_folder_index+1).join('/')
       end
 
-      def parse_doc_info(uri)
+      def parse_document_from_uri(uri)
         ast = Prism.parse_file(uri.path).value
+        result = parse_document(ast)
 
+        result.package_name = package_name_from_uri(uri)
+
+        result
+      end
+
+      def parse_document_from_source(source)
+        ast = Prism.parse(source).value
+        parse_document(ast)
+      end
+
+      def parse_document(ast)
         class_node = ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
         fn_node = class_node.body.body.detect{ |node| node.name == :fn }
         block_node = fn_node.block
@@ -45,7 +57,6 @@ module RubyLsp
 
         return OpenStruct.new(
           ast: ast,
-          package_name: package_name_from_uri(uri),
           class_node: class_node,
           fn_node: fn_node,
           block_node: block_node,

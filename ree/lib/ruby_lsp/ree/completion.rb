@@ -24,7 +24,7 @@ module RubyLsp
         class_name_objects = @index.instance_variable_get(:@entries).keys.select{ _1.split('::').last[0...node_name.size] == node_name}
         return if class_name_objects.size == 0
 
-        doc_info = parse_doc_info(@uri)
+        doc_info = parse_document_from_uri(@uri)
 
         class_name_objects.take(15).each do |full_class_name|
           entry = @index[full_class_name].first
@@ -65,7 +65,7 @@ module RubyLsp
 
         return if ree_objects.size == 0
 
-        doc_info = parse_doc_info(@uri)
+        doc_info = parse_document_from_uri(@uri)
 
         ree_objects.each do |ree_object|
           fn_name = ree_object.name
