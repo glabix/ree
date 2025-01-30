@@ -4,15 +4,16 @@ require_relative "definition"
 require_relative "completion"
 require_relative "ree_indexing_enhancement"
 require_relative "ree_lsp_utils"
+require_relative "ree_formatter"
 
 module RubyLsp
   module Ree
     class Addon < ::RubyLsp::Addon
       def activate(global_state, message_queue)
-        $stderr.puts "in activate"
-
         @global_state = global_state
         @message_queue = message_queue
+
+        global_state.register_formatter("ree_formatter", ReeFormatter.new)
       end
 
       def deactivate
@@ -37,7 +38,7 @@ module RubyLsp
 
       def create_completion_listener(response_builder, node_context, dispatcher, uri)
         $stderr.puts("create_completion_listener")
-
+        
         index = @global_state.index
         RubyLsp::Ree::Completion.new(response_builder, node_context, index, dispatcher, uri)
       end
