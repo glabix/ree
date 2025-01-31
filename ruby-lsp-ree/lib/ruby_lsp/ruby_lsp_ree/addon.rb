@@ -1,5 +1,4 @@
 require "ruby_lsp/addon"
-require_relative "basic_listener"
 require_relative "definition"
 require_relative "completion"
 require_relative "ree_indexing_enhancement"
