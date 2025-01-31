@@ -13,7 +13,7 @@ module RubyLsp
         @global_state = global_state
         @message_queue = message_queue
 
-        global_state.register_formatter("ree_formatter", ReeFormatter.new)
+        global_state.register_formatter("ree_formatter", RubyLsp::Ree::ReeFormatter.new)
       end
 
       def deactivate
@@ -21,12 +21,6 @@ module RubyLsp
 
       def name
         "Ree Addon"
-      end
-
-      def create_hover_listener(response_builder, node_context, dispatcher)
-        $stderr.puts "in create_hover_listener"
-
-        BasicListener.new(dispatcher, response_builder)
       end
 
       def create_definition_listener(response_builder, uri, node_context, dispatcher)
