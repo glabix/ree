@@ -1,39 +1,24 @@
 # Ruby::Lsp::Ree
 
-TODO: Delete this and the text below, and describe your gem
+Ree addon for Ruby LSP
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ruby/lsp/ree`. To experiment with that code, run `bin/console` for an interactive prompt.
+## How to use it:
 
-## Installation
+1. Install Ruby LSP for your editor [link](https://github.com/Shopify/ruby-lsp?tab=readme-ov-file#getting-started)
+2. Add `ree` gem into the Gemfile and run `bundle install`. Ruby LSP will detect the addon and run it.
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+If everything was installed successfully, you should see Ree in the list of Ruby LSP addons.
+(In VS Code click `{}` brackets in the bottom right corner)
 
-Install the gem and add to the application's Gemfile by executing:
+To use ree_formatter, add the following line into you `settings.json` file (e.g. `.vscode/settings.json`)
+```json
+"rubyLsp.formatter": "ree_formatter"
+```
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+## Functions
 
-If bundler is not being used to manage dependencies, install the gem by executing:
-
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/ruby-lsp-ree. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/ruby-lsp-ree/blob/main/CODE_OF_CONDUCT.md).
-
-## License
-
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-## Code of Conduct
-
-Everyone interacting in the Ruby::Lsp::Ree project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/ruby-lsp-ree/blob/main/CODE_OF_CONDUCT.md).
+- autocomplete for Ree functions
+- autocomplete for constants
+- adds links to the links section on autocomplete
+- sort links on document save or format (with ree_formatter enabled)
+- Go To Definition for Ree functions
