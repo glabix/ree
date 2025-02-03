@@ -30,10 +30,21 @@ module RubyLsp
       def parse_document(ast)
         class_node = ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
         fn_node = class_node.body.body.detect{ |node| node.name == :fn }
-        block_node = fn_node.block
+        block_node = fn_node&.block
+
+        class_includes = class_node.body.body.select{ _1.name == :include }.map do |class_include|
+          parent_name = class_include.arguments.arguments.first.parent.name.to_s
+          module_name = class_include.arguments.arguments.first.name
+        
+          OpenStruct.new(
+            name: [parent_name, module_name].compact.join('::')
+          )          
+        end
 
         link_nodes = if block_node && block_node.body
           block_node.body.body.select{ |node| node.name == :link }
+        elsif class_includes.any?{ _1.name == 'Ree::LinkDSL' }
+          class_node.body.body.select{ |node| node.name == :link }
         else
           []
         end
@@ -62,17 +73,26 @@ module RubyLsp
           fn_node: fn_node,
           block_node: block_node,
           link_nodes: link_nodes,
+          class_includes: class_includes,
           linked_objects: linked_objects
         )
       end   
 
       def get_range_for_fn_insert(doc_info, link_text)
-        fn_line = doc_info.fn_node.location.start_line
+        fn_line = nil
+        position = nil
 
-        position = if doc_info.block_node
-          doc_info.block_node.opening_loc.end_column + 1
-        else
-          doc_info.fn_node.arguments.location.end_column + 1
+        if doc_info.fn_node
+          fn_line = doc_info.fn_node.location.start_line
+
+          position = if doc_info.block_node
+            doc_info.block_node.opening_loc.end_column + 1
+          else
+            doc_info.fn_node.arguments.location.end_column + 1
+          end
+        elsif doc_info.class_includes.any?{ _1.name == 'Ree::LinkDSL' }
+          fn_line = doc_info.link_nodes.first.location.start_line - 1
+          position = doc_info.link_nodes.first.location.start_column
         end
 
         Interface::Range.new(

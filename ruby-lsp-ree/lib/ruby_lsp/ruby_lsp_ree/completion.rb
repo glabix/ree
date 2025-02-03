@@ -111,15 +111,19 @@ module RubyLsp
 
         link_text = if doc_info.package_name == package_name
           fn_name = File.basename(entry_uri, ".*")
-          "\n\s\s\s\slink :#{fn_name}, import: -> { #{class_name} }"
+          "\s\slink :#{fn_name}, import: -> { #{class_name} }"
         else
           path = path_from_package(entry_uri)
-          "\n\s\s\s\slink \"#{path}\", import: -> { #{class_name} }"
+          "\s\slink \"#{path}\", import: -> { #{class_name} }"
         end
 
-        new_text = link_text
+        if doc_info.fn_node
+          link_text = "\s\s" + link_text
+        end
+        
+        new_text = "\n" + link_text
 
-        unless doc_info.block_node
+        if doc_info.fn_node && !doc_info.block_node
           new_text = "\sdo#{link_text}\n\s\send\n"
         end
 
@@ -140,14 +144,18 @@ module RubyLsp
         end
 
         link_text = if doc_info.package_name == package_name
-          "\n\s\s\s\slink :#{fn_name}"
+          "\s\slink :#{fn_name}"
         else
-          "\n\s\s\s\slink :#{fn_name}, from: :#{package_name}"
+          "\s\slink :#{fn_name}, from: :#{package_name}"
+        end
+
+        if doc_info.fn_node
+          link_text = "\s\s" + link_text
         end
         
-        new_text = link_text
+        new_text = "\n" + link_text
 
-        unless doc_info.block_node
+        if doc_info.fn_node && !doc_info.block_node
           new_text = "\sdo#{link_text}\n\s\send\n"
         end
 
