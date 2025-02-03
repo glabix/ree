@@ -19,14 +19,8 @@ module RubyLsp
       def sort_links(source)
         doc_info = parse_document_from_source(source)
       
-        return source unless doc_info.fn_node
-        return source if doc_info.fn_node && !doc_info.block_node
-        
-        if doc_info.link_nodes.size < doc_info.block_node.body.body.size
-          $stderr.puts("block contains not only link, don't sort")
-          return source
-        end
-    
+        return source if doc_info.link_nodes.size == 0
+       
         if doc_info.link_nodes.any?{ _1.location.start_line != _1.location.end_line }
           $stderr.puts("multiline link definitions, don't sort")
           return source
