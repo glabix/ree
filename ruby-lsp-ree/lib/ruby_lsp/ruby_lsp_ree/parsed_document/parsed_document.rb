@@ -8,6 +8,22 @@ class RubyLsp::Ree::ParsedDocument
     @ast = ast
   end
 
+  def includes_link_dsl?
+    @class_includes.any?{ _1.name == LINK_DSL_MODULE }
+  end
+
+  def includes_linked_constant?(const_name)
+    @linked_objects.map(&:imports).flatten.include?(const_name)
+  end
+
+  def includes_linked_object?(obj_name)
+    @linked_objects.map(&:name).include?(obj_name)
+  end
+
+  def has_blank_fn?
+    @fn_node && !@fn_block_node
+  end
+
   def set_package_name(package_name)
     @package_name = package_name
   end

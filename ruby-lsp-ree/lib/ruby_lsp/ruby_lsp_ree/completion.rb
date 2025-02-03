@@ -69,17 +69,13 @@ module RubyLsp
 
         ree_objects.each do |ree_object|
           fn_name = ree_object.name
-
           package_name = package_name_from_uri(ree_object.uri)
-
-          params_str = ree_object.signatures.first.parameters.map(&:name).join(', ')
+          signature = ree_object.signatures.first
 
           label_details = Interface::CompletionItemLabelDetails.new(
             description: "from: :#{package_name}",
-            detail: "(#{params_str})"
+            detail: "(#{get_parameters_string(signature)})"
           )
-
-          $stderr.puts("ree object #{ree_object.inspect}")
 
           @response_builder << Interface::CompletionItem.new(
             label: fn_name,
@@ -87,9 +83,10 @@ module RubyLsp
             filter_text: fn_name,
             text_edit: Interface::TextEdit.new(
               range:  range_from_location(node.location),
-              new_text: "#{fn_name}(#{params_str})",
+              new_text: "#{fn_name}(#{get_parameters_placeholder(signature)})",
             ),
             kind: Constant::CompletionItemKind::METHOD,
+            insert_text_format: Constant::InsertTextFormat::SNIPPET,
             data: {
               owner_name: "Object",
               guessed_type: false,
@@ -102,7 +99,7 @@ module RubyLsp
       end
 
       def get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
-        if parsed_doc.linked_objects.map(&:imports).flatten.include?(class_name)
+        if parsed_doc.includes_linked_constant?(class_name)
           $stderr.puts("links already include #{class_name}")
           return []
         end
@@ -123,7 +120,7 @@ module RubyLsp
         
         new_text = "\n" + link_text
 
-        if parsed_doc.fn_node && parsed_doc.fn_block_node
+        if parsed_doc.has_blank_fn?
           new_text = "\sdo#{link_text}\n\s\send\n"
         end
 
@@ -138,7 +135,7 @@ module RubyLsp
       end
 
       def get_additional_text_edits_for_method(parsed_doc, fn_name, package_name)
-        if parsed_doc.linked_objects.map(&:name).include?(fn_name)
+        if parsed_doc.includes_linked_object?(fn_name)
           $stderr.puts("links already include #{fn_name}")
           return []
         end
@@ -155,7 +152,7 @@ module RubyLsp
         
         new_text = "\n" + link_text
 
-        if parsed_doc.fn_node && parsed_doc.fn_block_node
+        if parsed_doc.has_blank_fn?
           new_text = "\sdo#{link_text}\n\s\send\n"
         end
 
@@ -167,6 +164,21 @@ module RubyLsp
             new_text: new_text,
           )
         ]
+      end
+
+      def get_parameters_string(signature)
+        signature.parameters.map(&:decorated_name).join(', ')
+      end
+
+      def get_parameters_placeholder(signature)
+        signature.parameters.to_enum.with_index.map do |signature_param, index|
+          case signature_param          
+          when RubyIndexer::Entry::KeywordParameter, RubyIndexer::Entry::OptionalKeywordParameter
+            "#{signature_param.name}: ${#{index+1}:#{signature_param.name}}"
+          else
+            "${#{index+1}:#{signature_param.name}}"
+          end
+        end.join(', ')
       end
     end
   end

@@ -25,7 +25,7 @@ module RubyLsp
           else
             parsed_doc.fn_node.arguments.location.end_column + 1
           end
-        elsif parsed_doc.class_includes.any?{ _1.name == 'Ree::LinkDSL' }
+        elsif parsed_doc.includes_link_dsl?
           fn_line = parsed_doc.link_nodes.first.location.start_line - 1
           position = parsed_doc.link_nodes.first.location.start_column
         end
