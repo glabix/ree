@@ -24,7 +24,7 @@ module RubyLsp
         class_name_objects = @index.instance_variable_get(:@entries).keys.select{ _1.split('::').last[0...node_name.size] == node_name}
         return if class_name_objects.size == 0
 
-        doc_info = parse_document_from_uri(@uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
 
         class_name_objects.take(15).each do |full_class_name|
           entry = @index[full_class_name].first
@@ -46,7 +46,7 @@ module RubyLsp
               new_text: class_name,
             ),
             kind: Constant::CompletionItemKind::CLASS,
-            additional_text_edits: get_additional_text_edits_for_constant(doc_info, class_name, package_name, entry)
+            additional_text_edits: get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
           )
         end
 
@@ -65,7 +65,7 @@ module RubyLsp
 
         return if ree_objects.size == 0
 
-        doc_info = parse_document_from_uri(@uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
 
         ree_objects.each do |ree_object|
           fn_name = ree_object.name
@@ -94,22 +94,22 @@ module RubyLsp
               owner_name: "Object",
               guessed_type: false,
             },
-            additional_text_edits: get_additional_text_edits_for_method(doc_info, fn_name, package_name)
+            additional_text_edits: get_additional_text_edits_for_method(parsed_doc, fn_name, package_name)
           )
         end
         
         nil
       end
 
-      def get_additional_text_edits_for_constant(doc_info, class_name, package_name, entry)
-        if doc_info.linked_objects.map(&:imports).flatten.include?(class_name)
+      def get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
+        if parsed_doc.linked_objects.map(&:imports).flatten.include?(class_name)
           $stderr.puts("links already include #{class_name}")
           return []
         end
 
         entry_uri = entry.uri.to_s
 
-        link_text = if doc_info.package_name == package_name
+        link_text = if parsed_doc.package_name == package_name
           fn_name = File.basename(entry_uri, ".*")
           "\s\slink :#{fn_name}, import: -> { #{class_name} }"
         else
@@ -117,17 +117,17 @@ module RubyLsp
           "\s\slink \"#{path}\", import: -> { #{class_name} }"
         end
 
-        if doc_info.fn_node
+        if parsed_doc.fn_node
           link_text = "\s\s" + link_text
         end
         
         new_text = "\n" + link_text
 
-        if doc_info.fn_node && !doc_info.block_node
+        if parsed_doc.fn_node && parsed_doc.fn_block_node
           new_text = "\sdo#{link_text}\n\s\send\n"
         end
 
-        range = get_range_for_fn_insert(doc_info, link_text)
+        range = get_range_for_fn_insert(parsed_doc, link_text)
 
         [
           Interface::TextEdit.new(
@@ -137,29 +137,29 @@ module RubyLsp
         ]
       end
 
-      def get_additional_text_edits_for_method(doc_info, fn_name, package_name)
-        if doc_info.linked_objects.map(&:name).include?(fn_name)
+      def get_additional_text_edits_for_method(parsed_doc, fn_name, package_name)
+        if parsed_doc.linked_objects.map(&:name).include?(fn_name)
           $stderr.puts("links already include #{fn_name}")
           return []
         end
 
-        link_text = if doc_info.package_name == package_name
+        link_text = if parsed_doc.package_name == package_name
           "\s\slink :#{fn_name}"
         else
           "\s\slink :#{fn_name}, from: :#{package_name}"
         end
 
-        if doc_info.fn_node
+        if parsed_doc.fn_node
           link_text = "\s\s" + link_text
         end
         
         new_text = "\n" + link_text
 
-        if doc_info.fn_node && !doc_info.block_node
+        if parsed_doc.fn_node && parsed_doc.fn_block_node
           new_text = "\sdo#{link_text}\n\s\send\n"
         end
 
-        range = get_range_for_fn_insert(doc_info, link_text)
+        range = get_range_for_fn_insert(parsed_doc, link_text)
 
         [
           Interface::TextEdit.new(

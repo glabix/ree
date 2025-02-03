@@ -4,6 +4,7 @@ require_relative "completion"
 require_relative "ree_indexing_enhancement"
 require_relative "ree_lsp_utils"
 require_relative "ree_formatter"
+require_relative "parsed_document/parsed_document_builder"
 
 module RubyLsp
   module Ree

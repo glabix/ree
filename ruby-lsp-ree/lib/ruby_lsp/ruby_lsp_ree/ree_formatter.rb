@@ -17,17 +17,17 @@ module RubyLsp
       private
     
       def sort_links(source)
-        doc_info = parse_document_from_source(source)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
       
-        return source if doc_info.link_nodes.size == 0
+        return source if parsed_doc.link_nodes.size == 0
        
-        if doc_info.link_nodes.any?{ _1.location.start_line != _1.location.end_line }
+        if parsed_doc.link_nodes.any?{ _1.location.start_line != _1.location.end_line }
           $stderr.puts("multiline link definitions, don't sort")
           return source
         end
     
         # sort link nodes
-        sorted_link_nodes = doc_info.link_nodes.sort{ |a, b|
+        sorted_link_nodes = parsed_doc.link_nodes.sort{ |a, b|
           a_name = a.arguments.arguments.first
           b_name = b.arguments.arguments.first
           
@@ -41,12 +41,12 @@ module RubyLsp
         }
           
         # check if no re-order
-        if doc_info.link_nodes.map{ _1.arguments.arguments.first.unescaped } == sorted_link_nodes.map{ _1.arguments.arguments.first.unescaped }
+        if parsed_doc.link_nodes.map{ _1.arguments.arguments.first.unescaped } == sorted_link_nodes.map{ _1.arguments.arguments.first.unescaped }
           return source
         end
     
         # insert nodes to source
-        link_lines = doc_info.link_nodes.map{ _1.location.start_line }
+        link_lines = parsed_doc.link_nodes.map{ _1.location.start_line }
     
         source_lines = source.lines
     
