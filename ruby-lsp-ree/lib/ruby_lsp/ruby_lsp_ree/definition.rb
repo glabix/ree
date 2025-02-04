@@ -14,8 +14,7 @@ module RubyLsp
         @index = index
         @uri = uri
 
-        # dispatcher.register(self, :on_call_node_enter, :on_symbol_node_enter, :on_string_node_enter)
-        dispatcher.register(self, :on_call_node_enter, :on_symbol_node_enter)
+        dispatcher.register(self, :on_call_node_enter, :on_symbol_node_enter, :on_string_node_enter)
       end
 
       def on_call_node_enter(node)
@@ -63,9 +62,22 @@ module RubyLsp
         nil
       end
 
-      private
+      def on_string_node_enter(node)
+        file_name = node.unescaped + ".rb"
+        local_path = Dir[File.join('**', file_name)].first
 
-    
+        if local_path
+          @response_builder << Interface::Location.new(
+            uri: File.join(Dir.pwd, local_path),
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: 0, character: 0),
+              end: Interface::Position.new(line: 0, character: 0),
+            ),
+          )
+        end
+
+        nil
+      end
     end
   end
 end

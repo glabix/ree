@@ -9,3 +9,4 @@
 - sort links for objects with FnDSL
 - autocomplete for objects with FnDSL
 - improve params in autocomplete
+- Go To Definition for symbols in link section
