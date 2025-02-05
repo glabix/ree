@@ -1,19 +1,20 @@
 module RubyLsp
   module Ree
     class ReeIndexingEnhancement < RubyIndexer::Enhancement
+      REE_INDEXED_OBJECTS = [:fn, :enum]
+
       def on_call_node_enter(node)
         return unless @listener.current_owner
 
-        # Return early unless the method call is the one we want to handle
-        return unless node.name == :fn
+        return unless REE_INDEXED_OBJECTS.include?(node.name)
         return unless node.arguments
 
         # index = @listener.instance_variable_get(:@index)
         
         location = node.location
-        fn_name = node.arguments.child_nodes.first.unescaped
-        signatures = parse_signatures(fn_name)
-        comments = "ree_object\nsome_documentation"
+        obj_name = node.arguments.child_nodes.first.unescaped
+        signatures = parse_signatures(obj_name)
+        comments = "ree_object\ntype: #{node.name}"
       
         # visibility = RubyIndexer::Entry::Visibility::PUBLIC
         # owner = index['Object'].first
@@ -30,7 +31,7 @@ module RubyLsp
         # ))
 
         @listener.add_method(
-          fn_name,
+          obj_name,
           location, 
           signatures,
           comments: comments
