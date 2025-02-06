@@ -1,3 +1,5 @@
+require 'prism'
+
 module RubyLsp
   module Ree
     class ReeIndexingEnhancement < RubyIndexer::Enhancement
@@ -8,6 +10,7 @@ module RubyLsp
 
         return unless REE_INDEXED_OBJECTS.include?(node.name)
         return unless node.arguments
+        return unless node.arguments.child_nodes.first.is_a?(Prism::SymbolNode)
 
         # index = @listener.instance_variable_get(:@index)
         

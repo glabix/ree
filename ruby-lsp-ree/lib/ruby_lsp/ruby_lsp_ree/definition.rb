@@ -46,7 +46,7 @@ module RubyLsp
         package_name = link_node.link_package_name
 
         method_candidates = @index[node.unescaped]
-        return if method_candidates.size == 0
+        return if !method_candidates || method_candidates.size == 0
         
         method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
         return unless method

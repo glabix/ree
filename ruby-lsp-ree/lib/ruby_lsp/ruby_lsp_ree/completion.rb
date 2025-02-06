@@ -12,6 +12,7 @@ module RubyLsp
         @response_builder = response_builder
         @index = index
         @uri = uri
+        @node_context = node_context
 
         dispatcher.register(self, :on_call_node_enter)
         dispatcher.register(self, :on_constant_read_node_enter)
@@ -64,6 +65,7 @@ module RubyLsp
           .take(10)
 
         return if ree_objects.size == 0
+        $stderr.puts("node context #{@node_context.inspect}")
 
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
 
@@ -74,7 +76,7 @@ module RubyLsp
 
           label_details = Interface::CompletionItemLabelDetails.new(
             description: "from: :#{package_name}",
-            detail: "(#{get_parameters_string(signature)})"
+            detail: get_detail_string(signature)
           )
 
           @response_builder << Interface::CompletionItem.new(
@@ -83,7 +85,7 @@ module RubyLsp
             filter_text: fn_name,
             text_edit: Interface::TextEdit.new(
               range:  range_from_location(node.location),
-              new_text: "#{fn_name}(#{get_parameters_placeholder(signature)})",
+              new_text: get_method_string(fn_name, signature)
             ),
             kind: Constant::CompletionItemKind::METHOD,
             insert_text_format: Constant::InsertTextFormat::SNIPPET,
@@ -166,11 +168,27 @@ module RubyLsp
         ]
       end
 
+      def get_detail_string(signature)
+        return '' unless signature
+
+        "(#{get_parameters_string(signature)})"
+      end
+
+      def get_method_string(fn_name, signature)
+        return fn_name unless signature
+        
+        "#{fn_name}(#{get_parameters_placeholder(signature)})"
+      end
+
       def get_parameters_string(signature)
+        return '' unless signature
+
         signature.parameters.map(&:decorated_name).join(', ')
       end
 
       def get_parameters_placeholder(signature)
+        return '' unless signature
+
         signature.parameters.to_enum.with_index.map do |signature_param, index|
           case signature_param          
           when RubyIndexer::Entry::KeywordParameter, RubyIndexer::Entry::OptionalKeywordParameter
