@@ -4,7 +4,7 @@ class RubyLsp::Ree::ParsedDocument
   LINK_DSL_MODULE = 'Ree::LinkDSL'
 
   attr_reader :ast, :package_name, :class_node, :fn_node, :fn_block_node, :class_includes,
-    :link_nodes
+    :link_nodes, :values
 
   def initialize(ast)
     @ast = ast
@@ -70,5 +70,18 @@ class RubyLsp::Ree::ParsedDocument
       link_node.parse_imports
       link_node
     end
+  end
+
+  def parse_values
+    return unless class_node
+    
+    @values ||= class_node.body.body
+      .select{ _1.name == :val }
+      .map{ OpenStruct.new(name: _1.arguments.arguments.first.unescaped) }
+  end
+
+  def get_class_name
+    name_parts = [class_node.constant_path&.parent&.name, class_node.constant_path.name]
+    name_parts.compact.map(&:to_s).join('::')
   end
 end

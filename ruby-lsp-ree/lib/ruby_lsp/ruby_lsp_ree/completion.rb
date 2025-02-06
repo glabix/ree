@@ -1,4 +1,5 @@
 require_relative "ree_lsp_utils"
+require_relative "ree_object_finder"
 
 module RubyLsp
   module Ree
@@ -55,6 +56,11 @@ module RubyLsp
       end
 
       def on_call_node_enter(node)
+        if receiver_is_enum?(node)
+          enum_value_completion(node)
+          return
+        end
+
         return if node.receiver
         return if node.name.to_s.size < CHARS_COUNT
 
@@ -197,6 +203,45 @@ module RubyLsp
             "${#{index+1}:#{signature_param.name}}"
           end
         end.join(', ')
+      end
+
+      def receiver_is_enum?(node)
+        node.receiver && node.receiver.is_a?(Prism::CallNode) && ReeObjectFinder.find_enum(@index, node.receiver.name.to_s)
+      end
+
+      def enum_value_completion(node)
+        enum_obj = ReeObjectFinder.find_enum(@index, node.receiver.name.to_s)
+        enum_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(enum_obj.uri, :enum)
+
+        location = node.receiver.location
+        class_name = enum_node.get_class_name
+
+        label_details = Interface::CompletionItemLabelDetails.new(
+          description: "from: #{class_name}",
+          detail: ''
+        )
+
+        range = Interface::Range.new(
+          start: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
+          end: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
+        )
+
+        enum_node.values.each do |val|
+          @response_builder << Interface::CompletionItem.new(
+            label: val.name,
+            label_details: label_details,
+            filter_text: val.name,
+            text_edit: Interface::TextEdit.new(
+              range:  range,
+              new_text: val.name
+            ),
+            kind: Constant::CompletionItemKind::METHOD,
+            data: {
+              owner_name: "Object",
+              guessed_type: false,
+            }
+          )
+        end
       end
     end
   end

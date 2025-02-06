@@ -17,7 +17,7 @@ module RubyLsp
         location = node.location
         obj_name = node.arguments.child_nodes.first.unescaped
         signatures = parse_signatures(obj_name)
-        comments = "ree_object\ntype: #{node.name}"
+        comments = "ree_object\ntype: :#{node.name}"
       
         # visibility = RubyIndexer::Entry::Visibility::PUBLIC
         # owner = index['Object'].first
