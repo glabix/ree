@@ -3,7 +3,7 @@ require 'prism'
 module RubyLsp
   module Ree
     class ReeIndexingEnhancement < RubyIndexer::Enhancement
-      REE_INDEXED_OBJECTS = [:fn, :enum]
+      REE_INDEXED_OBJECTS = [:fn, :enum, :action]
 
       def on_call_node_enter(node)
         return unless @listener.current_owner
@@ -12,10 +12,10 @@ module RubyLsp
         return unless node.arguments
         return unless node.arguments.child_nodes.first.is_a?(Prism::SymbolNode)
 
-        # index = @listener.instance_variable_get(:@index)
-        
-        location = node.location
         obj_name = node.arguments.child_nodes.first.unescaped
+        return unless current_filename == obj_name
+
+        location = node.location
         signatures = parse_signatures(obj_name)
         comments = "ree_object\ntype: :#{node.name}"
       
@@ -41,6 +41,8 @@ module RubyLsp
         )
       end
 
+      private
+
       def parse_signatures(fn_name)
         uri = @listener.instance_variable_get(:@uri)
         ast = Prism.parse_file(uri.path).value
@@ -54,6 +56,11 @@ module RubyLsp
         signature_params = @listener.send(:list_params, call_node.parameters)
 
         [RubyIndexer::Entry::Signature.new(signature_params)]
+      end
+
+      def current_filename
+        uri = @listener.instance_variable_get(:@uri)
+        File.basename(uri.path, '.rb')  
       end
     end
   end

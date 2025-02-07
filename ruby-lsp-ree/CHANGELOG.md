@@ -15,3 +15,4 @@
 - autocomplete for enum values
 - Add Link for enums
 - Go To Definition for enums
+- autocomplete for ree actions

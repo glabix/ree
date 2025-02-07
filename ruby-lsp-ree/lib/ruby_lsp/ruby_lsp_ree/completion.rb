@@ -71,7 +71,6 @@ module RubyLsp
           .take(10)
 
         return if ree_objects.size == 0
-        $stderr.puts("node context #{@node_context.inspect}")
 
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
 
