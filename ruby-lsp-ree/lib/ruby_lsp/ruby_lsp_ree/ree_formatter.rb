@@ -18,7 +18,6 @@ module RubyLsp
     
       def sort_links(source)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
-      
         return source if parsed_doc.link_nodes.size == 0
        
         if parsed_doc.link_nodes.any?{ _1.location.start_line != _1.location.end_line }

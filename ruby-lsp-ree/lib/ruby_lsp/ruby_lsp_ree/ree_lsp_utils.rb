@@ -17,13 +17,14 @@ module RubyLsp
         fn_line = nil
         position = nil
 
-        if parsed_doc.fn_node
-          fn_line = parsed_doc.fn_node.location.start_line
+        if parsed_doc.links_container_node
+          links_container_node = parsed_doc.links_container_node
+          fn_line = links_container_node.location.start_line
 
-          position = if parsed_doc.fn_block_node
-            parsed_doc.fn_block_node.opening_loc.end_column + 1
+          position = if parsed_doc.links_container_block_node
+            parsed_doc.links_container_block_node.opening_loc.end_column + 1
           else
-            parsed_doc.fn_node.arguments.location.end_column + 1
+            links_container_node.arguments.location.end_column + 1
           end
         elsif parsed_doc.includes_link_dsl?
           fn_line = parsed_doc.link_nodes.first.location.start_line - 1

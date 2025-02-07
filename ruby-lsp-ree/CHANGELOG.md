@@ -16,3 +16,5 @@
 - Add Link for enums
 - Go To Definition for enums
 - autocomplete for ree actions
+- Add Link for ree actions
+- sort links in ree actions

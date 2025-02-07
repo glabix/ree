@@ -121,13 +121,14 @@ module RubyLsp
           "\s\slink \"#{path}\", import: -> { #{class_name} }"
         end
 
-        if parsed_doc.fn_node
+        if parsed_doc.links_container_node
           link_text = "\s\s" + link_text
         end
         
         new_text = "\n" + link_text
 
-        if parsed_doc.has_blank_fn?
+
+        if parsed_doc.has_blank_links_container?
           new_text = "\sdo#{link_text}\n\s\send\n"
         end
 
@@ -153,13 +154,13 @@ module RubyLsp
           "\s\slink :#{fn_name}, from: :#{package_name}"
         end
 
-        if parsed_doc.fn_node
+        if parsed_doc.links_container_node
           link_text = "\s\s" + link_text
         end
         
         new_text = "\n" + link_text
 
-        if parsed_doc.has_blank_fn?
+        if parsed_doc.has_blank_links_container?
           new_text = "\sdo#{link_text}\n\s\send\n"
         end
 
