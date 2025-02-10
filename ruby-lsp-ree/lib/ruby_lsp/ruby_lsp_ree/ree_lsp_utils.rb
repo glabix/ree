@@ -13,6 +13,13 @@ module RubyLsp
         uri_parts.drop(pack_folder_index+1).join('/')
       end
 
+      def get_ree_type(ree_object)
+        type_comment = ree_object.comments.to_s.lines[1]
+        return unless type_comment
+
+        type_comment.split(' ').last
+      end
+
       def get_range_for_fn_insert(parsed_doc, link_text)
         fn_line = nil
         position = nil

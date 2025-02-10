@@ -79,9 +79,10 @@ module RubyLsp
           fn_name = ree_object.name
           package_name = package_name_from_uri(ree_object.uri)
           signature = ree_object.signatures.first
+          ree_type = get_ree_type(ree_object)
 
           label_details = Interface::CompletionItemLabelDetails.new(
-            description: "from: :#{package_name}",
+            description: "#{ree_type}, from: :#{package_name}",
             detail: get_detail_string(signature)
           )
 
