@@ -4,7 +4,7 @@
 
 - Initial release
 
-## [0.1.1] - 2025-02-07
+## [0.1.1] - 2025-02-10
 
 - sort links for objects with FnDSL
 - autocomplete for objects with FnDSL
