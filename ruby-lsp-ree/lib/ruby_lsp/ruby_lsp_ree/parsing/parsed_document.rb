@@ -1,10 +1,12 @@
 require_relative 'parsed_link_node'
 
 class RubyLsp::Ree::ParsedDocument
+  include RubyLsp::Ree::ReeLspUtils
+
   LINK_DSL_MODULE = 'Ree::LinkDSL'
 
   attr_reader :ast, :package_name, :class_node, :fn_node, :fn_block_node, :class_includes,
-    :link_nodes, :values, :action_node, :action_block_node, :dao_node, :dao_block_node
+    :link_nodes, :values, :action_node, :action_block_node, :dao_node, :dao_block_node, :filters
 
   def initialize(ast)
     @ast = ast
@@ -100,6 +102,28 @@ class RubyLsp::Ree::ParsedDocument
     @values ||= class_node.body.body
       .select{ _1.name == :val }
       .map{ OpenStruct.new(name: _1.arguments.arguments.first.unescaped) }
+  end
+
+  def parse_filters
+    return unless class_node
+    
+    @filters ||= class_node.body.body
+      .select{ _1.name == :filter }
+      .map{ OpenStruct.new(name: _1.arguments.arguments.first.unescaped, signatures: parse_filter_signature(_1)) }
+
+  end
+
+  def parse_filter_signature(filter_node)
+    return [] unless filter_node
+
+    lambda_node = filter_node.arguments&.arguments[1]
+    return [] unless lambda_node
+
+    $stderr.puts("==parse_filter_signature #{lambda_node.inspect}")
+    
+    signature_params = signature_params_from_node(lambda_node.parameters.parameters)
+        
+    [RubyIndexer::Entry::Signature.new(signature_params)]
   end
 
   def get_class_name

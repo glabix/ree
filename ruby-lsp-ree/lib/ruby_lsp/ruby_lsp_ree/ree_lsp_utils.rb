@@ -1,6 +1,8 @@
 module RubyLsp
   module Ree
     module ReeLspUtils
+      Entry = RubyIndexer::Entry
+
       def package_name_from_uri(uri)
         uri_parts = uri.to_s.split('/')
         package_index = uri_parts.find_index('package') + 1
@@ -42,6 +44,96 @@ module RubyLsp
           start: Interface::Position.new(line: fn_line - 1, character: position),
           end: Interface::Position.new(line: fn_line - 1, character: position + link_text.size),
         )
+      end
+
+
+      # params(parameters_node: Prism::ParametersNode).returns(Array[Entry::Parameter])
+      # copied from ruby-lsp DeclarationListener#list_params
+      def signature_params_from_node(parameters_node)
+        return [] unless parameters_node
+  
+        parameters = []
+  
+        parameters_node.requireds.each do |required|
+          name = parameter_name(required)
+          next unless name
+  
+          parameters << Entry::RequiredParameter.new(name: name)
+        end
+  
+        parameters_node.optionals.each do |optional|
+          name = parameter_name(optional)
+          next unless name
+  
+          parameters << Entry::OptionalParameter.new(name: name)
+        end
+  
+        rest = parameters_node.rest
+  
+        if rest.is_a?(Prism::RestParameterNode)
+          rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
+          parameters << Entry::RestParameter.new(name: rest_name)
+        end
+  
+        parameters_node.keywords.each do |keyword|
+          name = parameter_name(keyword)
+          next unless name
+  
+          case keyword
+          when Prism::RequiredKeywordParameterNode
+            parameters << Entry::KeywordParameter.new(name: name)
+          when Prism::OptionalKeywordParameterNode
+            parameters << Entry::OptionalKeywordParameter.new(name: name)
+          end
+        end
+  
+        keyword_rest = parameters_node.keyword_rest
+  
+        case keyword_rest
+        when Prism::KeywordRestParameterNode
+          keyword_rest_name = parameter_name(keyword_rest) || Entry::KeywordRestParameter::DEFAULT_NAME
+          parameters << Entry::KeywordRestParameter.new(name: keyword_rest_name)
+        when Prism::ForwardingParameterNode
+          parameters << Entry::ForwardingParameter.new
+        end
+  
+        parameters_node.posts.each do |post|
+          name = parameter_name(post)
+          next unless name
+  
+          parameters << Entry::RequiredParameter.new(name: name)
+        end
+  
+        block = parameters_node.block
+        parameters << Entry::BlockParameter.new(name: block.name || Entry::BlockParameter::DEFAULT_NAME) if block
+  
+        parameters
+      end
+
+      # params(node: Prism::Node).returns(Symbol)
+      # copied from ruby-lsp DeclarationListener#parameter_name
+      def parameter_name(node)
+        case node
+        when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
+          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode,
+          Prism::RestParameterNode, Prism::KeywordRestParameterNode
+          node.name
+        when Prism::MultiTargetNode
+          names = node.lefts.map { |parameter_node| parameter_name(parameter_node) }
+
+          rest = node.rest
+          if rest.is_a?(Prism::SplatNode)
+            name = rest.expression&.slice
+            names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
+          end
+
+          names << nil if rest.is_a?(Prism::ImplicitRestNode)
+
+          names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
+
+          names_with_commas = names.join(", ")
+          :"(#{names_with_commas})"
+        end
       end
     end
   end

@@ -19,3 +19,4 @@
 - Add Link for ree actions
 - sort links in ree actions
 - autocomplete for ree dao
+- autocomplete for dao filters

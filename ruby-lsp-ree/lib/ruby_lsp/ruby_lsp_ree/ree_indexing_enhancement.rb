@@ -1,8 +1,11 @@
 require 'prism'
+require_relative "ree_lsp_utils"
 
 module RubyLsp
   module Ree
     class ReeIndexingEnhancement < RubyIndexer::Enhancement
+      include RubyLsp::Ree::ReeLspUtils
+
       REE_INDEXED_OBJECTS = [:fn, :enum, :action, :dao]
 
       def on_call_node_enter(node)
@@ -39,8 +42,8 @@ module RubyLsp
         call_node = class_node.body.body.detect{ |node| node.name == :call }
         return [] unless call_node
         
-        signature_params = @listener.send(:list_params, call_node.parameters)
-
+        signature_params = signature_params_from_node(call_node.parameters)
+        
         [RubyIndexer::Entry::Signature.new(signature_params)]
       end
 

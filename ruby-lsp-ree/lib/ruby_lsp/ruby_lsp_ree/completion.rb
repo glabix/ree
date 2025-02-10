@@ -58,8 +58,11 @@ module RubyLsp
 
       def on_call_node_enter(node)
         if receiver_is_enum?(node)
-          enum_value_completion(node)
-          return
+          return enum_value_completion(node)
+        end
+
+        if receiver_is_dao?(node)
+          return dao_filter_completion(node)
         end
 
         return if node.receiver
@@ -211,6 +214,10 @@ module RubyLsp
         node.receiver && node.receiver.is_a?(Prism::CallNode) && ReeObjectFinder.find_enum(@index, node.receiver.name.to_s)
       end
 
+      def receiver_is_dao?(node)
+        node.receiver && node.receiver.is_a?(Prism::CallNode) && ReeObjectFinder.find_dao(@index, node.receiver.name.to_s)
+      end
+
       def enum_value_completion(node)
         enum_obj = ReeObjectFinder.find_enum(@index, node.receiver.name.to_s)
         enum_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(enum_obj.uri, :enum)
@@ -238,6 +245,43 @@ module RubyLsp
               new_text: val.name
             ),
             kind: Constant::CompletionItemKind::METHOD,
+            data: {
+              owner_name: "Object",
+              guessed_type: false,
+            }
+          )
+        end
+      end
+
+      def dao_filter_completion(node)
+        dao_obj = ReeObjectFinder.find_dao(@index, node.receiver.name.to_s)
+        dao_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(dao_obj.uri, :dao)
+        
+        location = node.receiver.location
+
+        range = Interface::Range.new(
+          start: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
+          end: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
+        )
+
+        dao_node.filters.each do |filter|
+          signature = filter.signatures.first
+
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: "filter",
+            detail: get_detail_string(signature)
+          )
+
+          @response_builder << Interface::CompletionItem.new(
+            label: filter.name,
+            label_details: label_details,
+            filter_text: filter.name,
+            text_edit: Interface::TextEdit.new(
+              range:  range,
+              new_text: get_method_string(filter.name, signature)
+            ),
+            kind: Constant::CompletionItemKind::METHOD,
+            insert_text_format: Constant::InsertTextFormat::SNIPPET,
             data: {
               owner_name: "Object",
               guessed_type: false,
