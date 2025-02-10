@@ -1,6 +1,8 @@
 module RubyLsp
   module Ree
     module ReeLspUtils
+      Entry = RubyIndexer::Entry
+
       def package_name_from_uri(uri)
         uri_parts = uri.to_s.split('/')
         package_index = uri_parts.find_index('package') + 1
@@ -13,66 +15,29 @@ module RubyLsp
         uri_parts.drop(pack_folder_index+1).join('/')
       end
 
-      def parse_document_from_uri(uri)
-        ast = Prism.parse_file(uri.path).value
-        result = parse_document(ast)
+      def get_ree_type(ree_object)
+        type_comment = ree_object.comments.to_s.lines[1]
+        return unless type_comment
 
-        result.package_name = package_name_from_uri(uri)
-
-        result
+        type_comment.split(' ').last
       end
 
-      def parse_document_from_source(source)
-        ast = Prism.parse(source).value
-        parse_document(ast)
-      end
+      def get_range_for_fn_insert(parsed_doc, link_text)
+        fn_line = nil
+        position = nil
 
-      def parse_document(ast)
-        class_node = ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
-        fn_node = class_node.body.body.detect{ |node| node.name == :fn }
-        block_node = fn_node.block
+        if parsed_doc.links_container_node
+          links_container_node = parsed_doc.links_container_node
+          fn_line = links_container_node.location.start_line
 
-        link_nodes = if block_node && block_node.body
-          block_node.body.body.select{ |node| node.name == :link }
-        else
-          []
-        end
-
-        linked_objects = link_nodes.map do |link_node|
-          name_arg_node = link_node.arguments.arguments.first
-
-          name_val = case name_arg_node
-          when Prism::SymbolNode
-            name_arg_node.value
-          when Prism::StringNode
-            name_arg_node.unescaped
+          position = if parsed_doc.links_container_block_node
+            parsed_doc.links_container_block_node.opening_loc.end_column + 1
           else
-            ""
+            links_container_node.arguments.location.end_column + 1
           end
-
-          OpenStruct.new(
-            name: name_val,
-            imports: parse_link_node_imports(link_node)
-          )
-        end
-
-        return OpenStruct.new(
-          ast: ast,
-          class_node: class_node,
-          fn_node: fn_node,
-          block_node: block_node,
-          link_nodes: link_nodes,
-          linked_objects: linked_objects
-        )
-      end   
-
-      def get_range_for_fn_insert(doc_info, link_text)
-        fn_line = doc_info.fn_node.location.start_line
-
-        position = if doc_info.block_node
-          doc_info.block_node.opening_loc.end_column + 1
-        else
-          doc_info.fn_node.arguments.location.end_column + 1
+        elsif parsed_doc.includes_link_dsl?
+          fn_line = parsed_doc.link_nodes.first.location.start_line - 1
+          position = parsed_doc.link_nodes.first.location.start_column
         end
 
         Interface::Range.new(
@@ -81,24 +46,94 @@ module RubyLsp
         )
       end
 
-      def parse_link_node_imports(node)
-        return [] if node.arguments.arguments.size == 1
-        
-        last_arg = node.arguments.arguments.last
 
-        if last_arg.is_a?(Prism::KeywordHashNode)
-          import_arg = last_arg.elements.detect{ _1.key.unescaped == 'import' }
-          return [] unless import_arg
-
-          [import_arg.value.body.body.first.name.to_s]
-        elsif last_arg.is_a?(Prism::LambdaNode)
-          [last_arg.body.body.first.name.to_s]
-        else
-          return []
+      # params(parameters_node: Prism::ParametersNode).returns(Array[Entry::Parameter])
+      # copied from ruby-lsp DeclarationListener#list_params
+      def signature_params_from_node(parameters_node)
+        return [] unless parameters_node
+  
+        parameters = []
+  
+        parameters_node.requireds.each do |required|
+          name = parameter_name(required)
+          next unless name
+  
+          parameters << Entry::RequiredParameter.new(name: name)
         end
-      rescue => e
-        $stderr.puts("can't parse imports: #{e.message}")
-        return []
+  
+        parameters_node.optionals.each do |optional|
+          name = parameter_name(optional)
+          next unless name
+  
+          parameters << Entry::OptionalParameter.new(name: name)
+        end
+  
+        rest = parameters_node.rest
+  
+        if rest.is_a?(Prism::RestParameterNode)
+          rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
+          parameters << Entry::RestParameter.new(name: rest_name)
+        end
+  
+        parameters_node.keywords.each do |keyword|
+          name = parameter_name(keyword)
+          next unless name
+  
+          case keyword
+          when Prism::RequiredKeywordParameterNode
+            parameters << Entry::KeywordParameter.new(name: name)
+          when Prism::OptionalKeywordParameterNode
+            parameters << Entry::OptionalKeywordParameter.new(name: name)
+          end
+        end
+  
+        keyword_rest = parameters_node.keyword_rest
+  
+        case keyword_rest
+        when Prism::KeywordRestParameterNode
+          keyword_rest_name = parameter_name(keyword_rest) || Entry::KeywordRestParameter::DEFAULT_NAME
+          parameters << Entry::KeywordRestParameter.new(name: keyword_rest_name)
+        when Prism::ForwardingParameterNode
+          parameters << Entry::ForwardingParameter.new
+        end
+  
+        parameters_node.posts.each do |post|
+          name = parameter_name(post)
+          next unless name
+  
+          parameters << Entry::RequiredParameter.new(name: name)
+        end
+  
+        block = parameters_node.block
+        parameters << Entry::BlockParameter.new(name: block.name || Entry::BlockParameter::DEFAULT_NAME) if block
+  
+        parameters
+      end
+
+      # params(node: Prism::Node).returns(Symbol)
+      # copied from ruby-lsp DeclarationListener#parameter_name
+      def parameter_name(node)
+        case node
+        when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
+          Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode,
+          Prism::RestParameterNode, Prism::KeywordRestParameterNode
+          node.name
+        when Prism::MultiTargetNode
+          names = node.lefts.map { |parameter_node| parameter_name(parameter_node) }
+
+          rest = node.rest
+          if rest.is_a?(Prism::SplatNode)
+            name = rest.expression&.slice
+            names << (rest.operator == "*" ? "*#{name}".to_sym : name&.to_sym)
+          end
+
+          names << nil if rest.is_a?(Prism::ImplicitRestNode)
+
+          names.concat(node.rights.map { |parameter_node| parameter_name(parameter_node) })
+
+          names_with_commas = names.join(", ")
+          :"(#{names_with_commas})"
+        end
       end
     end
   end

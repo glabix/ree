@@ -1,41 +1,36 @@
+require 'prism'
+require_relative "ree_lsp_utils"
+
 module RubyLsp
   module Ree
     class ReeIndexingEnhancement < RubyIndexer::Enhancement
+      include RubyLsp::Ree::ReeLspUtils
+
+      REE_INDEXED_OBJECTS = [:fn, :enum, :action, :dao]
+
       def on_call_node_enter(node)
         return unless @listener.current_owner
 
-        # Return early unless the method call is the one we want to handle
-        return unless node.name == :fn
+        return unless REE_INDEXED_OBJECTS.include?(node.name)
         return unless node.arguments
+        return unless node.arguments.child_nodes.first.is_a?(Prism::SymbolNode)
 
-        # index = @listener.instance_variable_get(:@index)
-        
+        obj_name = node.arguments.child_nodes.first.unescaped
+        return unless current_filename == obj_name
+
         location = node.location
-        fn_name = node.arguments.child_nodes.first.unescaped
-        signatures = parse_signatures(fn_name)
-        comments = "ree_object\nsome_documentation"
-      
-        # visibility = RubyIndexer::Entry::Visibility::PUBLIC
-        # owner = index['Object'].first
-
-        # index.add(RubyIndexer::Entry::Method.new(
-        #   fn_name,
-        #   @listener.instance_variable_get(:@uri),
-        #   location,
-        #   location,
-        #   comments,
-        #   signatures,
-        #   visibility,
-        #   owner,
-        # ))
+        signatures = parse_signatures(obj_name)
+        comments = "ree_object\ntype: :#{node.name}"
 
         @listener.add_method(
-          fn_name,
+          obj_name,
           location, 
           signatures,
           comments: comments
         )
       end
+
+      private
 
       def parse_signatures(fn_name)
         uri = @listener.instance_variable_get(:@uri)
@@ -47,9 +42,14 @@ module RubyLsp
         call_node = class_node.body.body.detect{ |node| node.name == :call }
         return [] unless call_node
         
-        signature_params = @listener.send(:list_params, call_node.parameters)
-
+        signature_params = signature_params_from_node(call_node.parameters)
+        
         [RubyIndexer::Entry::Signature.new(signature_params)]
+      end
+
+      def current_filename
+        uri = @listener.instance_variable_get(:@uri)
+        File.basename(uri.path, '.rb')  
       end
     end
   end

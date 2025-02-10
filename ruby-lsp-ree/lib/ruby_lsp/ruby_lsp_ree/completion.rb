@@ -1,17 +1,22 @@
 require_relative "ree_lsp_utils"
+require_relative "completion_utils"
+require_relative "ree_object_finder"
 
 module RubyLsp
   module Ree
     class Completion
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
+      include RubyLsp::Ree::CompletionUtils
 
-      CHARS_COUNT = 4
+      CHARS_COUNT = 3
+      CANDIDATES_LIMIT = 20
       
       def initialize(response_builder, node_context, index, dispatcher, uri)
         @response_builder = response_builder
         @index = index
         @uri = uri
+        @node_context = node_context
 
         dispatcher.register(self, :on_call_node_enter)
         dispatcher.register(self, :on_constant_read_node_enter)
@@ -24,141 +29,61 @@ module RubyLsp
         class_name_objects = @index.instance_variable_get(:@entries).keys.select{ _1.split('::').last[0...node_name.size] == node_name}
         return if class_name_objects.size == 0
 
-        doc_info = parse_document_from_uri(@uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
 
-        class_name_objects.take(15).each do |full_class_name|
-          entry = @index[full_class_name].first
-          class_name = full_class_name.split('::').last
-
-          package_name = package_name_from_uri(entry.uri)
-
-          label_details = Interface::CompletionItemLabelDetails.new(
-            description: "from: :#{package_name}",
-            detail: ""
-          )
-
-          @response_builder << Interface::CompletionItem.new(
-            label: class_name,
-            label_details: label_details,
-            filter_text: class_name,
-            text_edit: Interface::TextEdit.new(
-              range:  range_from_location(node.location),
-              new_text: class_name,
-            ),
-            kind: Constant::CompletionItemKind::CLASS,
-            additional_text_edits: get_additional_text_edits_for_constant(doc_info, class_name, package_name, entry)
-          )
-        end
-
-        nil
+        completion_items = get_class_name_completion_items(class_name_objects, parsed_doc, node, @index, CANDIDATES_LIMIT)
+        puts_items_into_response(completion_items)
       end
 
       def on_call_node_enter(node)
+        if receiver_is_enum?(node)
+          return enum_value_completion(node)
+        end
+
+        if receiver_is_dao?(node)
+          return dao_filter_completion(node)
+        end
+
         return if node.receiver
         return if node.name.to_s.size < CHARS_COUNT
 
-        ree_objects = @index.prefix_search(node.name.to_s)
-          .take(50).map(&:first)
-          .select{ _1.comments }
-          .select{ _1.comments.to_s.lines.first&.chomp == 'ree_object' }
-          .take(10)
-
+        ree_objects = ReeObjectFinder.search_objects(@index, node.name.to_s, CANDIDATES_LIMIT)
         return if ree_objects.size == 0
 
-        doc_info = parse_document_from_uri(@uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
 
-        ree_objects.each do |ree_object|
-          fn_name = ree_object.name
-
-          package_name = package_name_from_uri(ree_object.uri)
-
-          params_str = ree_object.signatures.first.parameters.map(&:name).join(', ')
-
-          label_details = Interface::CompletionItemLabelDetails.new(
-            description: "from: :#{package_name}",
-            detail: "(#{params_str})"
-          )
-
-          $stderr.puts("ree object #{ree_object.inspect}")
-
-          @response_builder << Interface::CompletionItem.new(
-            label: fn_name,
-            label_details: label_details,
-            filter_text: fn_name,
-            text_edit: Interface::TextEdit.new(
-              range:  range_from_location(node.location),
-              new_text: "#{fn_name}(#{params_str})",
-            ),
-            kind: Constant::CompletionItemKind::METHOD,
-            data: {
-              owner_name: "Object",
-              guessed_type: false,
-            },
-            additional_text_edits: get_additional_text_edits_for_method(doc_info, fn_name, package_name)
-          )
-        end
-        
-        nil
+        completion_items = get_ree_objects_completions_items(ree_objects, parsed_doc, node)
+        puts_items_into_response(completion_items)
       end
 
-      def get_additional_text_edits_for_constant(doc_info, class_name, package_name, entry)
-        if doc_info.linked_objects.map(&:imports).flatten.include?(class_name)
-          $stderr.puts("links already include #{class_name}")
-          return []
-        end
-
-        entry_uri = entry.uri.to_s
-
-        link_text = if doc_info.package_name == package_name
-          fn_name = File.basename(entry_uri, ".*")
-          "\n\s\s\s\slink :#{fn_name}, import: -> { #{class_name} }"
-        else
-          path = path_from_package(entry_uri)
-          "\n\s\s\s\slink \"#{path}\", import: -> { #{class_name} }"
-        end
-
-        new_text = link_text
-
-        unless doc_info.block_node
-          new_text = "\sdo#{link_text}\n\s\send\n"
-        end
-
-        range = get_range_for_fn_insert(doc_info, link_text)
-
-        [
-          Interface::TextEdit.new(
-            range:    range,
-            new_text: new_text,
-          )
-        ]
+      def receiver_is_enum?(node)
+        node.receiver && node.receiver.is_a?(Prism::CallNode) && ReeObjectFinder.find_enum(@index, node.receiver.name.to_s)
       end
 
-      def get_additional_text_edits_for_method(doc_info, fn_name, package_name)
-        if doc_info.linked_objects.map(&:name).include?(fn_name)
-          $stderr.puts("links already include #{fn_name}")
-          return []
-        end
+      def receiver_is_dao?(node)
+        node.receiver && node.receiver.is_a?(Prism::CallNode) && ReeObjectFinder.find_dao(@index, node.receiver.name.to_s)
+      end
 
-        link_text = if doc_info.package_name == package_name
-          "\n\s\s\s\slink :#{fn_name}"
-        else
-          "\n\s\s\s\slink :#{fn_name}, from: :#{package_name}"
-        end
+      def enum_value_completion(node)
+        enum_obj = ReeObjectFinder.find_enum(@index, node.receiver.name.to_s)
+        location = node.receiver.location
         
-        new_text = link_text
+        completion_items = get_enum_values_completion_items(enum_obj, location)
+        puts_items_into_response(completion_items)
+      end
 
-        unless doc_info.block_node
-          new_text = "\sdo#{link_text}\n\s\send\n"
+      def dao_filter_completion(node)
+        dao_obj = ReeObjectFinder.find_dao(@index, node.receiver.name.to_s)
+        location = node.receiver.location
+
+        completion_items = get_dao_filters_completion_items(dao_obj, location)
+        puts_items_into_response(completion_items)
+      end
+
+      def puts_items_into_response(items)
+        items.each do |item|
+          @response_builder << item
         end
-
-        range = get_range_for_fn_insert(doc_info, link_text)
-
-        [
-          Interface::TextEdit.new(
-            range:    range,
-            new_text: new_text,
-          )
-        ]
       end
     end
   end
