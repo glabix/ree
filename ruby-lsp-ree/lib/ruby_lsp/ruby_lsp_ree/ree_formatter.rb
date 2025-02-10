@@ -17,25 +17,18 @@ module RubyLsp
       private
     
       def sort_links(source)
-        doc_info = parse_document_from_source(source)
-      
-        return source unless doc_info.fn_node
-        return source if doc_info.fn_node && !doc_info.block_node
-        
-        if doc_info.link_nodes.size < doc_info.block_node.body.body.size
-          $stderr.puts("block contains not only link, don't sort")
-          return source
-        end
-    
-        if doc_info.link_nodes.any?{ _1.location.start_line != _1.location.end_line }
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
+        return source if parsed_doc.link_nodes.size == 0
+       
+        if parsed_doc.link_nodes.any?{ _1.location.start_line != _1.location.end_line }
           $stderr.puts("multiline link definitions, don't sort")
           return source
         end
     
         # sort link nodes
-        sorted_link_nodes = doc_info.link_nodes.sort{ |a, b|
-          a_name = a.arguments.arguments.first
-          b_name = b.arguments.arguments.first
+        sorted_link_nodes = parsed_doc.link_nodes.sort{ |a, b|
+          a_name = a.node.arguments.arguments.first
+          b_name = b.node.arguments.arguments.first
           
           if a_name.is_a?(Prism::SymbolNode) && !b_name.is_a?(Prism::SymbolNode)
             -1
@@ -47,12 +40,12 @@ module RubyLsp
         }
           
         # check if no re-order
-        if doc_info.link_nodes.map{ _1.arguments.arguments.first.unescaped } == sorted_link_nodes.map{ _1.arguments.arguments.first.unescaped }
+        if parsed_doc.link_nodes.map{ _1.node.arguments.arguments.first.unescaped } == sorted_link_nodes.map{ _1.node.arguments.arguments.first.unescaped }
           return source
         end
     
         # insert nodes to source
-        link_lines = doc_info.link_nodes.map{ _1.location.start_line }
+        link_lines = parsed_doc.link_nodes.map{ _1.location.start_line }
     
         source_lines = source.lines
     
