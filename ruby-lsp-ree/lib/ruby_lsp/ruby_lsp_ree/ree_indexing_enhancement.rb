@@ -3,7 +3,7 @@ require 'prism'
 module RubyLsp
   module Ree
     class ReeIndexingEnhancement < RubyIndexer::Enhancement
-      REE_INDEXED_OBJECTS = [:fn, :enum, :action]
+      REE_INDEXED_OBJECTS = [:fn, :enum, :action, :dao]
 
       def on_call_node_enter(node)
         return unless @listener.current_owner
@@ -18,20 +18,6 @@ module RubyLsp
         location = node.location
         signatures = parse_signatures(obj_name)
         comments = "ree_object\ntype: :#{node.name}"
-      
-        # visibility = RubyIndexer::Entry::Visibility::PUBLIC
-        # owner = index['Object'].first
-
-        # index.add(RubyIndexer::Entry::Method.new(
-        #   fn_name,
-        #   @listener.instance_variable_get(:@uri),
-        #   location,
-        #   location,
-        #   comments,
-        #   signatures,
-        #   visibility,
-        #   owner,
-        # ))
 
         @listener.add_method(
           obj_name,

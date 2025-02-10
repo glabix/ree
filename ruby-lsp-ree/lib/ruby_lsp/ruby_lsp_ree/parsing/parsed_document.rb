@@ -4,18 +4,18 @@ class RubyLsp::Ree::ParsedDocument
   LINK_DSL_MODULE = 'Ree::LinkDSL'
 
   attr_reader :ast, :package_name, :class_node, :fn_node, :fn_block_node, :class_includes,
-    :link_nodes, :values, :action_node, :action_block_node
+    :link_nodes, :values, :action_node, :action_block_node, :dao_node, :dao_block_node
 
   def initialize(ast)
     @ast = ast
   end
 
   def links_container_node
-    @fn_node || @action_node
+    @fn_node || @action_node || @dao_node
   end
 
   def links_container_block_node
-    @fn_block_node || @action_block_node
+    @fn_block_node || @action_block_node || @dao_block_node
   end
 
   def includes_link_dsl?
@@ -54,6 +54,13 @@ class RubyLsp::Ree::ParsedDocument
 
     @action_node ||= class_node.body.body.detect{ |node| node.name == :action }
     @action_block_node = @action_node&.block
+  end
+
+  def parse_dao_node
+    return unless class_node
+
+    @dao_node ||= class_node.body.body.detect{ |node| node.name == :dao }
+    @dao_block_node = @dao_node&.block
   end
 
   def parse_class_includes

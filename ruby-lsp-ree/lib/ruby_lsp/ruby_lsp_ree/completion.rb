@@ -7,7 +7,8 @@ module RubyLsp
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
 
-      CHARS_COUNT = 4
+      CHARS_COUNT = 3
+      CANDIDATES_LIMIT = 20
       
       def initialize(response_builder, node_context, index, dispatcher, uri)
         @response_builder = response_builder
@@ -28,7 +29,7 @@ module RubyLsp
 
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
 
-        class_name_objects.take(15).each do |full_class_name|
+        class_name_objects.take(CANDIDATES_LIMIT).each do |full_class_name|
           entry = @index[full_class_name].first
           class_name = full_class_name.split('::').last
 
@@ -65,10 +66,10 @@ module RubyLsp
         return if node.name.to_s.size < CHARS_COUNT
 
         ree_objects = @index.prefix_search(node.name.to_s)
-          .take(50).map(&:first)
+          .take(100).map(&:first)
           .select{ _1.comments }
           .select{ _1.comments.to_s.lines.first&.chomp == 'ree_object' }
-          .take(10)
+          .take(CANDIDATES_LIMIT)
 
         return if ree_objects.size == 0
 
