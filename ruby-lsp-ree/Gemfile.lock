@@ -1,0 +1,19 @@
+PATH
+  remote: .
+  specs:
+    ruby-lsp-ree (0.1.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    rake (13.2.1)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  rake (~> 13.0)
+  ruby-lsp-ree!
+
+BUNDLED WITH
+   2.4.20
