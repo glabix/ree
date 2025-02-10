@@ -119,10 +119,7 @@ class RubyLsp::Ree::ParsedDocument
     lambda_node = filter_node.arguments&.arguments[1]
     return [] unless lambda_node
 
-    $stderr.puts("==parse_filter_signature #{lambda_node.inspect}")
-    
     signature_params = signature_params_from_node(lambda_node.parameters.parameters)
-        
     [RubyIndexer::Entry::Signature.new(signature_params)]
   end
 

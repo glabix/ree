@@ -1,8 +1,19 @@
 module RubyLsp
   module Ree
     class ReeObjectFinder
+      MAX_LIMIT = 100
+
+      REE_OBJECT_STRING = 'ree_object'
       ENUM_TYPE_STRING = 'type: :enum'
       DAO_TYPE_STRING = 'type: :dao'
+
+      def self.search_objects(index, name, limit)
+        index.prefix_search(name)
+          .take(MAX_LIMIT).map(&:first)
+          .select{ _1.comments }
+          .select{ _1.comments.to_s.lines.first&.chomp == REE_OBJECT_STRING }
+          .take(limit)
+      end
 
       def self.find_enum(index, name)
         objects_by_name = index[name]
