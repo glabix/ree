@@ -23,9 +23,9 @@ class Ree::PackagesDetector
       next if names.has_key?(name)
 
       package_rel_path = dir_path.relative_path_from(dir)
-      parent_rel_path = dir_path.parent.relative_path_from(dir)
 
       entry_path = Ree::PathHelper.package_entry_path(package_rel_path)
+      next unless File.exist?(File.join(dir, entry_path))
 
       names[name] = entry_path
 
