@@ -7,7 +7,7 @@ class RubyLsp::Ree::ParsedDocument
 
   attr_reader :ast, :package_name, :class_node, :fn_node, :fn_block_node, :class_includes,
     :link_nodes, :values, :action_node, :action_block_node, :dao_node, :dao_block_node, :filters,
-    :bean_node, :bean_block_node
+    :bean_node, :bean_block_node, :bean_methods
 
   def initialize(ast)
     @ast = ast
@@ -121,13 +121,25 @@ class RubyLsp::Ree::ParsedDocument
 
   end
 
+  def parse_bean_methods
+    return unless class_node
+    
+    @bean_methods ||= class_node.body.body
+      .select{ _1.is_a?(Prism::DefNode) }
+      .map{ OpenStruct.new(name: _1.name.to_s, signatures: parse_signatures_from_params(_1.parameters)) }
+  end
+
   def parse_filter_signature(filter_node)
     return [] unless filter_node
 
     lambda_node = filter_node.arguments&.arguments[1]
     return [] unless lambda_node
 
-    signature_params = signature_params_from_node(lambda_node.parameters.parameters)
+    parse_signatures_from_params(lambda_node.parameters.parameters)
+  end
+
+  def parse_signatures_from_params(parameters)
+    signature_params = signature_params_from_node(parameters)
     [RubyIndexer::Entry::Signature.new(signature_params)]
   end
 

@@ -44,6 +44,10 @@ module RubyLsp
           return dao_filter_completion(node)
         end
 
+        if receiver_is_bean?(node)
+          return bean_method_completion(node)
+        end
+
         return if node.receiver
         return if node.name.to_s.size < CHARS_COUNT
 
@@ -65,6 +69,10 @@ module RubyLsp
         node.receiver && node.receiver.is_a?(Prism::CallNode) && ReeObjectFinder.find_dao(@index, node.receiver.name.to_s)
       end
 
+      def receiver_is_bean?(node)
+        node.receiver && node.receiver.is_a?(Prism::CallNode) && ReeObjectFinder.find_bean(@index, node.receiver.name.to_s)
+      end
+
       def enum_value_completion(node)
         enum_obj = ReeObjectFinder.find_enum(@index, node.receiver.name.to_s)
         location = node.receiver.location
@@ -78,6 +86,15 @@ module RubyLsp
         location = node.receiver.location
 
         completion_items = get_dao_filters_completion_items(dao_obj, location)
+        puts_items_into_response(completion_items)
+      end
+
+      def bean_method_completion(node)
+        bean_obj = ReeObjectFinder.find_bean(@index, node.receiver.name.to_s)
+        location = node.receiver.location
+
+        completion_items = get_bean_methods_completion_items(bean_obj, location)
+
         puts_items_into_response(completion_items)
       end
 

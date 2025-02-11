@@ -24,6 +24,8 @@ class RubyLsp::Ree::ParsedDocumentBuilder
       build_enum_document(ast)
     when :dao
       build_dao_document(ast)
+    when :bean
+      build_bean_document(ast)
     else
       build_regular_document(ast)
     end
@@ -59,5 +61,14 @@ class RubyLsp::Ree::ParsedDocumentBuilder
     document.parse_filters
 
     document
-  end   
+  end  
+  
+  def self.build_bean_document(ast)
+    document = RubyLsp::Ree::ParsedDocument.new(ast)
+    
+    document.parse_class_node
+    document.parse_bean_methods
+
+    document
+  end  
 end

@@ -6,6 +6,40 @@ module RubyLsp
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
 
+      def get_bean_methods_completion_items(bean_obj, location)
+        bean_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(bean_obj.uri, :bean)
+        
+        range = Interface::Range.new(
+          start: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
+          end: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
+        )
+
+        bean_node.bean_methods.map do |bean_method|
+          signature = bean_method.signatures.first
+
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: "method",
+            detail: get_detail_string(signature)
+          )
+
+          Interface::CompletionItem.new(
+            label: bean_method.name,
+            label_details: label_details,
+            filter_text: bean_method.name,
+            text_edit: Interface::TextEdit.new(
+              range:  range,
+              new_text: get_method_string(bean_method.name, signature)
+            ),
+            kind: Constant::CompletionItemKind::METHOD,
+            insert_text_format: Constant::InsertTextFormat::SNIPPET,
+            data: {
+              owner_name: "Object",
+              guessed_type: false,
+            }
+          )
+        end
+      end
+
       def get_dao_filters_completion_items(dao_obj, location)
         dao_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(dao_obj.uri, :dao)
         
