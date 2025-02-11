@@ -5,8 +5,11 @@ module RubyLsp
 
       def package_name_from_uri(uri)
         uri_parts = uri.to_s.split('/')
-        package_index = uri_parts.find_index('package') + 1
-        uri_parts[package_index]
+        
+        package_folder_index = uri_parts.find_index('package')
+        return unless package_folder_index
+
+        uri_parts[package_folder_index + 1]
       end
 
       def path_from_package(uri)

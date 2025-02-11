@@ -6,7 +6,7 @@ module RubyLsp
     class ReeIndexingEnhancement < RubyIndexer::Enhancement
       include RubyLsp::Ree::ReeLspUtils
 
-      REE_INDEXED_OBJECTS = [:fn, :enum, :action, :dao]
+      REE_INDEXED_OBJECTS = [:fn, :enum, :action, :dao, :bean]
 
       def on_call_node_enter(node)
         return unless @listener.current_owner

@@ -35,6 +35,8 @@ class RubyLsp::Ree::ParsedDocumentBuilder
     document.parse_class_node
     document.parse_fn_node
     document.parse_action_node
+    document.parse_bean_node
+    document.parse_dao_node
     document.parse_class_includes
     document.parse_links
 
