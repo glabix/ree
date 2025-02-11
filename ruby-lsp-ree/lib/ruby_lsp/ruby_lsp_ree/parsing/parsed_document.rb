@@ -59,11 +59,11 @@ class RubyLsp::Ree::ParsedDocument
     @action_block_node = @action_node&.block
   end
 
-  def parse_action_node
+  def parse_dao_node
     return unless class_node
 
-    @action_node ||= class_node.body.body.detect{ |node| node.name == :action }
-    @action_block_node = @action_node&.block
+    @dao_node ||= class_node.body.body.detect{ |node| node.name == :dao }
+    @dao_block_node = @dao_node&.block
   end
 
   def parse_bean_node

@@ -8,8 +8,6 @@ module RubyLsp
       end
     
       def run_formatting(uri, document)
-        $stderr.puts("run_formating")
-    
         source = document.source
         sort_links(source)
       end

@@ -163,7 +163,6 @@ module RubyLsp
 
       def get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
         if parsed_doc.includes_linked_constant?(class_name)
-          $stderr.puts("links already include #{class_name}")
           return []
         end
 
@@ -200,7 +199,6 @@ module RubyLsp
 
       def get_additional_text_edits_for_method(parsed_doc, fn_name, package_name)
         if parsed_doc.includes_linked_object?(fn_name)
-          $stderr.puts("links already include #{fn_name}")
           return []
         end
 

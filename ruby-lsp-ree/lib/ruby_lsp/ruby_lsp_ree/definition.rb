@@ -19,12 +19,9 @@ module RubyLsp
 
       def on_call_node_enter(node)
         message = node.message
-        $stderr.puts("definition on_call_node_enter #{message}")
-
         return unless message
 
         method = @index[message].detect{ !_1.location.nil? }
-
         return unless method
 
         @response_builder << Interface::Location.new(

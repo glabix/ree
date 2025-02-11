@@ -29,8 +29,6 @@ module RubyLsp
       end
 
       def create_completion_listener(response_builder, node_context, dispatcher, uri)
-        $stderr.puts("create_completion_listener")
-        
         index = @global_state.index
         RubyLsp::Ree::Completion.new(response_builder, node_context, index, dispatcher, uri)
       end

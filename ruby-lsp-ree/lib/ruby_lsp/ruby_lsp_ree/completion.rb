@@ -48,6 +48,7 @@ module RubyLsp
         return if node.name.to_s.size < CHARS_COUNT
 
         ree_objects = ReeObjectFinder.search_objects(@index, node.name.to_s, CANDIDATES_LIMIT)
+
         return if ree_objects.size == 0
 
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
