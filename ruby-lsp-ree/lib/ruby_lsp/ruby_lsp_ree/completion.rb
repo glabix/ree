@@ -32,7 +32,7 @@ module RubyLsp
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
 
         completion_items = get_class_name_completion_items(class_name_objects, parsed_doc, node, @index, CANDIDATES_LIMIT)
-        puts_items_into_response(completion_items)
+        put_items_into_response(completion_items)
       end
 
       def on_call_node_enter(node)
@@ -45,7 +45,8 @@ module RubyLsp
         end
 
         if receiver_is_bean?(node)
-          return bean_method_completion(node)
+          return
+          # return bean_method_completion(node)
         end
 
         return if node.receiver
@@ -58,7 +59,7 @@ module RubyLsp
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
 
         completion_items = get_ree_objects_completions_items(ree_objects, parsed_doc, node)
-        puts_items_into_response(completion_items)
+        put_items_into_response(completion_items)
       end
 
       def receiver_is_enum?(node)
@@ -78,7 +79,7 @@ module RubyLsp
         location = node.receiver.location
         
         completion_items = get_enum_values_completion_items(enum_obj, location)
-        puts_items_into_response(completion_items)
+        put_items_into_response(completion_items)
       end
 
       def dao_filter_completion(node)
@@ -86,7 +87,7 @@ module RubyLsp
         location = node.receiver.location
 
         completion_items = get_dao_filters_completion_items(dao_obj, location)
-        puts_items_into_response(completion_items)
+        put_items_into_response(completion_items)
       end
 
       def bean_method_completion(node)
@@ -95,10 +96,10 @@ module RubyLsp
 
         completion_items = get_bean_methods_completion_items(bean_obj, location)
 
-        puts_items_into_response(completion_items)
+        put_items_into_response(completion_items)
       end
 
-      def puts_items_into_response(items)
+      def put_items_into_response(items)
         items.each do |item|
           @response_builder << item
         end
