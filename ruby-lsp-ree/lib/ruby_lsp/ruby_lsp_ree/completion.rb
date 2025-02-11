@@ -45,8 +45,7 @@ module RubyLsp
         end
 
         if receiver_is_bean?(node)
-          return
-          # return bean_method_completion(node)
+          return bean_method_completion(node)
         end
 
         return if node.receiver
