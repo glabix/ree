@@ -14,7 +14,40 @@ module RubyLsp
         @index = index
         @uri = uri
 
-        dispatcher.register(self, :on_call_node_enter, :on_symbol_node_enter, :on_string_node_enter)
+        dispatcher.register(self, :on_call_node_enter, :on_symbol_node_enter, :on_string_node_enter, :on_constant_read_node_enter)
+      end
+
+      def on_constant_read_node_enter(node)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
+        parsed_doc.link_nodes.each do |link_node|
+          if link_node.imports.include?(node.name.to_s)
+            uri = ''
+            if link_node.file_path_type?
+              path = find_local_file_path(link_node.name)  
+              next unless path
+
+              uri = File.join(Dir.pwd, path)
+            else
+              package_name = link_node.link_package_name || package_name_from_uri(@uri)
+
+              method_candidates = @index[link_node.name]
+              next if !method_candidates || method_candidates.size == 0
+        
+              method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
+              next unless method
+
+              uri = method.uri.to_s
+            end
+
+            @response_builder << Interface::Location.new(
+              uri: uri,
+              range: Interface::Range.new(
+                start: Interface::Position.new(line: 0, character: 0),
+                end: Interface::Position.new(line: 0, character: 0),
+              ),
+            )
+          end
+        end
       end
 
       def on_call_node_enter(node)
@@ -60,8 +93,7 @@ module RubyLsp
       end
 
       def on_string_node_enter(node)
-        file_name = node.unescaped + ".rb"
-        local_path = Dir[File.join('**', file_name)].first
+        local_path = find_local_file_path(node.unescaped)
 
         if local_path
           @response_builder << Interface::Location.new(

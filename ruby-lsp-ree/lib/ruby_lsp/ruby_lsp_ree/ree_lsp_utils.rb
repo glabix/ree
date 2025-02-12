@@ -3,6 +3,11 @@ module RubyLsp
     module ReeLspUtils
       Entry = RubyIndexer::Entry
 
+      def find_local_file_path(file_path)
+        file_name = file_path + ".rb"
+        Dir[File.join('**', file_name)].first
+      end
+
       def package_name_from_uri(uri)
         uri_parts = uri.to_s.split('/')
         
