@@ -11,7 +11,7 @@ module RubyLsp
 
       CHARS_COUNT = 3
       CANDIDATES_LIMIT = 20
-      
+
       def initialize(response_builder, node_context, index, dispatcher, uri)
         @response_builder = response_builder
         @index = index
@@ -29,7 +29,7 @@ module RubyLsp
         class_name_objects = @index.instance_variable_get(:@entries).keys.select{ _1.split('::').last[0...node_name.size] == node_name}
         return if class_name_objects.size == 0
 
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
 
         completion_items = get_class_name_completion_items(class_name_objects, parsed_doc, node, @index, CANDIDATES_LIMIT)
         puts_items_into_response(completion_items)
@@ -50,7 +50,7 @@ module RubyLsp
         ree_objects = ReeObjectFinder.search_objects(@index, node.name.to_s, CANDIDATES_LIMIT)
         return if ree_objects.size == 0
 
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
 
         completion_items = get_ree_objects_completions_items(ree_objects, parsed_doc, node)
         puts_items_into_response(completion_items)
@@ -67,7 +67,7 @@ module RubyLsp
       def enum_value_completion(node)
         enum_obj = ReeObjectFinder.find_enum(@index, node.receiver.name.to_s)
         location = node.receiver.location
-        
+
         completion_items = get_enum_values_completion_items(enum_obj, location)
         puts_items_into_response(completion_items)
       end
