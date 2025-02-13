@@ -30,9 +30,32 @@ class RubyLsp::Ree::ParsedLinkNode
     @from_param.value.unescaped
   end
 
-  def parse_name
-    name_arg_node = @node.arguments.arguments.first
+  def name_arg_node
+    @node.arguments.arguments.first
+  end
 
+  def link_type
+    return @link_type if @link_type
+    
+    @link_type = case name_arg_node
+    when Prism::SymbolNode
+      :object_name
+    when Prism::StringNode
+      :file_path
+    else
+      nil
+    end
+  end
+
+  def file_path_type?
+    link_type == :file_path
+  end
+
+  def object_name_type?
+    link_type == :object_name
+  end
+
+  def parse_name
     case name_arg_node
     when Prism::SymbolNode
       name_arg_node.value
