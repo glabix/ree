@@ -113,10 +113,11 @@ module RubyLsp
           class_name = full_class_name.split('::').last
 
           package_name = package_name_from_uri(entry.uri)
-
+          file_name = File.basename(entry.uri.to_s)
+          
           label_details = Interface::CompletionItemLabelDetails.new(
             description: "from: :#{package_name}",
-            detail: ""
+            detail: " #{file_name}"
           )
 
           Interface::CompletionItem.new(
@@ -206,7 +207,7 @@ module RubyLsp
           fn_name = File.basename(entry_uri, ".*")
           "\s\slink :#{fn_name}, import: -> { #{class_name} }"
         else
-          path = path_from_package(entry_uri)
+          path = path_from_package_folder(entry_uri)
           "\s\slink \"#{path}\", import: -> { #{class_name} }"
         end
 
