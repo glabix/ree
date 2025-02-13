@@ -9,6 +9,7 @@ GEM
     rake (13.2.1)
 
 PLATFORMS
+  x86_64-darwin-23
   x86_64-linux
 
 DEPENDENCIES
@@ -16,4 +17,4 @@ DEPENDENCIES
   ruby-lsp-ree!
 
 BUNDLED WITH
-   2.4.20
+   2.6.3
