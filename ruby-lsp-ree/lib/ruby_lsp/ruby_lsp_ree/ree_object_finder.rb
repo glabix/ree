@@ -1,7 +1,7 @@
 module RubyLsp
   module Ree
     class ReeObjectFinder
-      MAX_LIMIT = 100
+      MAX_LIMIT = 500
 
       REE_OBJECT_STRING = 'ree_object'
       ENUM_TYPE_STRING = 'type: :enum'
@@ -10,9 +10,11 @@ module RubyLsp
 
       def self.search_objects(index, name, limit)
         index.prefix_search(name)
-          .take(MAX_LIMIT).map(&:first)
+          .take(MAX_LIMIT)
+          .flatten
           .select{ _1.comments }
           .select{ _1.comments.to_s.lines.first&.chomp == REE_OBJECT_STRING }
+          .sort_by{ _1.name.length }
           .take(limit)
       end
 

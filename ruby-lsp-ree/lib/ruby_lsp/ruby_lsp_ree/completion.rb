@@ -9,9 +9,9 @@ module RubyLsp
       include RubyLsp::Ree::ReeLspUtils
       include RubyLsp::Ree::CompletionUtils
 
-      CHARS_COUNT = 3
+      CHARS_COUNT = 1
       CANDIDATES_LIMIT = 20
-
+      
       def initialize(response_builder, node_context, index, dispatcher, uri)
         @response_builder = response_builder
         @index = index
@@ -76,7 +76,7 @@ module RubyLsp
       def enum_value_completion(node)
         enum_obj = ReeObjectFinder.find_enum(@index, node.receiver.name.to_s)
         location = node.receiver.location
-
+        
         completion_items = get_enum_values_completion_items(enum_obj, location)
         put_items_into_response(completion_items)
       end
