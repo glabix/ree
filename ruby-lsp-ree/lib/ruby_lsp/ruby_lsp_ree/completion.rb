@@ -10,7 +10,7 @@ module RubyLsp
       include RubyLsp::Ree::CompletionUtils
 
       CHARS_COUNT = 1
-      CANDIDATES_LIMIT = 20
+      CANDIDATES_LIMIT = 100
       
       def initialize(response_builder, node_context, index, dispatcher, uri)
         @response_builder = response_builder

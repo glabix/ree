@@ -1,7 +1,7 @@
 module RubyLsp
   module Ree
     class ReeObjectFinder
-      MAX_LIMIT = 500
+      MAX_LIMIT = 1000
 
       REE_OBJECT_STRING = 'ree_object'
       ENUM_TYPE_STRING = 'type: :enum'
