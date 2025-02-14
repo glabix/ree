@@ -6,6 +6,40 @@ module RubyLsp
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
 
+      def get_bean_methods_completion_items(bean_obj, location)
+        bean_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(bean_obj.uri, :bean)
+        
+        range = Interface::Range.new(
+          start: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
+          end: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
+        )
+
+        bean_node.bean_methods.map do |bean_method|
+          signature = bean_method.signatures.first
+
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: "method",
+            detail: get_detail_string(signature)
+          )
+
+          Interface::CompletionItem.new(
+            label: bean_method.name,
+            label_details: label_details,
+            filter_text: bean_method.name,
+            text_edit: Interface::TextEdit.new(
+              range:  range,
+              new_text: get_method_string(bean_method.name, signature)
+            ),
+            kind: Constant::CompletionItemKind::METHOD,
+            insert_text_format: Constant::InsertTextFormat::SNIPPET,
+            data: {
+              owner_name: "Object",
+              guessed_type: false,
+            }
+          )
+        end
+      end
+
       def get_dao_filters_completion_items(dao_obj, location)
         dao_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(dao_obj.uri, :dao)
         
@@ -79,10 +113,11 @@ module RubyLsp
           class_name = full_class_name.split('::').last
 
           package_name = package_name_from_uri(entry.uri)
-
+          file_name = File.basename(entry.uri.to_s)
+          
           label_details = Interface::CompletionItemLabelDetails.new(
             description: "from: :#{package_name}",
-            detail: ""
+            detail: " #{file_name}"
           )
 
           Interface::CompletionItem.new(
@@ -163,7 +198,6 @@ module RubyLsp
 
       def get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
         if parsed_doc.includes_linked_constant?(class_name)
-          $stderr.puts("links already include #{class_name}")
           return []
         end
 
@@ -173,7 +207,7 @@ module RubyLsp
           fn_name = File.basename(entry_uri, ".*")
           "\s\slink :#{fn_name}, import: -> { #{class_name} }"
         else
-          path = path_from_package(entry_uri)
+          path = path_from_package_folder(entry_uri)
           "\s\slink \"#{path}\", import: -> { #{class_name} }"
         end
 
@@ -200,7 +234,6 @@ module RubyLsp
 
       def get_additional_text_edits_for_method(parsed_doc, fn_name, package_name)
         if parsed_doc.includes_linked_object?(fn_name)
-          $stderr.puts("links already include #{fn_name}")
           return []
         end
 

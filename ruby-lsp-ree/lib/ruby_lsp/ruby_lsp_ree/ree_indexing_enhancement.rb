@@ -6,7 +6,7 @@ module RubyLsp
     class ReeIndexingEnhancement < RubyIndexer::Enhancement
       include RubyLsp::Ree::ReeLspUtils
 
-      REE_INDEXED_OBJECTS = [:fn, :enum, :action, :dao]
+      REE_INDEXED_OBJECTS = [:fn, :enum, :action, :dao, :bean]
 
       def on_call_node_enter(node)
         return unless @listener.current_owner
@@ -39,11 +39,11 @@ module RubyLsp
         class_node = ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
         return [] unless class_node
 
-        call_node = class_node.body.body.detect{ |node| node.name == :call }
+        call_node = class_node.body.body.detect{ |node| node.respond_to?(:name) && node.name == :call }
         return [] unless call_node
-        
+
         signature_params = signature_params_from_node(call_node.parameters)
-        
+
         [RubyIndexer::Entry::Signature.new(signature_params)]
       end
 
