@@ -18,8 +18,17 @@ module RubyLsp
       end
 
       def on_constant_read_node_enter(node)
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
-        parsed_doc.link_nodes.each do |link_node|
+        link_nodes = if @node_context.parent.is_a?(Prism::CallNode)
+          # inside link node
+          link_node = RubyLsp::Ree::ParsedLinkNode.new(@node_context.parent)
+          link_node.parse_imports
+          [link_node]
+        else
+          parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
+          parsed_doc.link_nodes
+        end
+        
+        link_nodes.each do |link_node|
           if link_node.imports.include?(node.name.to_s)
             uri = ''
             if link_node.file_path_type?
