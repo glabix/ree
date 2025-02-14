@@ -20,3 +20,13 @@
 - sort links in ree actions
 - autocomplete for ree dao
 - autocomplete for dao filters
+
+## [0.1.2] - 2025-02-14
+
+- support for :bean objects
+- Go To Definition for imported constants
+- use current (no saved) version of the document in autocomplete
+- use current (no saved) version of the document in definition
+- increase autocomplete list limits (affects short functions)
+- improved const autocomplete
+- improved ree errors handling

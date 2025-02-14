@@ -9,8 +9,8 @@ module RubyLsp
       include RubyLsp::Ree::ReeLspUtils
       include RubyLsp::Ree::CompletionUtils
 
-      CHARS_COUNT = 3
-      CANDIDATES_LIMIT = 20
+      CHARS_COUNT = 1
+      CANDIDATES_LIMIT = 100
       
       def initialize(response_builder, node_context, index, dispatcher, uri)
         @response_builder = response_builder
@@ -29,10 +29,10 @@ module RubyLsp
         class_name_objects = @index.instance_variable_get(:@entries).keys.select{ _1.split('::').last[0...node_name.size] == node_name}
         return if class_name_objects.size == 0
 
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
 
         completion_items = get_class_name_completion_items(class_name_objects, parsed_doc, node, @index, CANDIDATES_LIMIT)
-        puts_items_into_response(completion_items)
+        put_items_into_response(completion_items)
       end
 
       def on_call_node_enter(node)
@@ -44,16 +44,21 @@ module RubyLsp
           return dao_filter_completion(node)
         end
 
+        if receiver_is_bean?(node)
+          return bean_method_completion(node)
+        end
+
         return if node.receiver
         return if node.name.to_s.size < CHARS_COUNT
 
         ree_objects = ReeObjectFinder.search_objects(@index, node.name.to_s, CANDIDATES_LIMIT)
+
         return if ree_objects.size == 0
 
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
 
         completion_items = get_ree_objects_completions_items(ree_objects, parsed_doc, node)
-        puts_items_into_response(completion_items)
+        put_items_into_response(completion_items)
       end
 
       def receiver_is_enum?(node)
@@ -64,12 +69,16 @@ module RubyLsp
         node.receiver && node.receiver.is_a?(Prism::CallNode) && ReeObjectFinder.find_dao(@index, node.receiver.name.to_s)
       end
 
+      def receiver_is_bean?(node)
+        node.receiver && node.receiver.is_a?(Prism::CallNode) && ReeObjectFinder.find_bean(@index, node.receiver.name.to_s)
+      end
+
       def enum_value_completion(node)
         enum_obj = ReeObjectFinder.find_enum(@index, node.receiver.name.to_s)
         location = node.receiver.location
         
         completion_items = get_enum_values_completion_items(enum_obj, location)
-        puts_items_into_response(completion_items)
+        put_items_into_response(completion_items)
       end
 
       def dao_filter_completion(node)
@@ -77,10 +86,19 @@ module RubyLsp
         location = node.receiver.location
 
         completion_items = get_dao_filters_completion_items(dao_obj, location)
-        puts_items_into_response(completion_items)
+        put_items_into_response(completion_items)
       end
 
-      def puts_items_into_response(items)
+      def bean_method_completion(node)
+        bean_obj = ReeObjectFinder.find_bean(@index, node.receiver.name.to_s)
+        location = node.receiver.location
+
+        completion_items = get_bean_methods_completion_items(bean_obj, location)
+
+        put_items_into_response(completion_items)
+      end
+
+      def put_items_into_response(items)
         items.each do |item|
           @response_builder << item
         end

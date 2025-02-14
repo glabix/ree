@@ -3,16 +3,27 @@ module RubyLsp
     module ReeLspUtils
       Entry = RubyIndexer::Entry
 
-      def package_name_from_uri(uri)
-        uri_parts = uri.to_s.split('/')
-        package_index = uri_parts.find_index('package') + 1
-        uri_parts[package_index]
+      def find_local_file_path(file_path)
+        file_name = file_path + ".rb"
+        Dir[File.join('**', file_name)].first
       end
 
-      def path_from_package(uri)
+      def package_name_from_uri(uri)
+        uri_parts = uri.to_s.split('/')
+        
+        package_folder_index = uri_parts.find_index('package')
+        return unless package_folder_index
+
+        uri_parts[package_folder_index + 1]
+      end
+
+      def path_from_package_folder(uri)
         uri_parts = uri.chomp(File.extname(uri)).split('/')
-        pack_folder_index = uri_parts.index('package')
-        uri_parts.drop(pack_folder_index+1).join('/')
+
+        package_folder_index = uri_parts.index('package')
+        return unless package_folder_index
+
+        uri_parts.drop(package_folder_index+1).join('/')
       end
 
       def get_ree_type(ree_object)
