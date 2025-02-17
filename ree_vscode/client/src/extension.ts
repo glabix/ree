@@ -104,109 +104,109 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   )
 
-  vscode.workspace.onDidSaveTextDocument(document => {
-    if (document) {
-      forest.updateTree(document.uri.toString(), document.getText())
-    }
-  })
+  // vscode.workspace.onDidSaveTextDocument(document => {
+  //   if (document) {
+  //     forest.updateTree(document.uri.toString(), document.getText())
+  //   }
+  // })
 
-  vscode.workspace.onDidCloseTextDocument(document => {
-    if (document) {
-      clearDocumentProblems(document.uri)
-      forest.deleteTree(document.uri.toString())
-    }
-  })
+  // vscode.workspace.onDidCloseTextDocument(document => {
+  //   if (document) {
+  //     clearDocumentProblems(document.uri)
+  //     forest.deleteTree(document.uri.toString())
+  //   }
+  // })
 
-  if (vscode.window.activeTextEditor) {
-    updateStatusBar(vscode.window.activeTextEditor.document.fileName)
-  }
+  // if (vscode.window.activeTextEditor) {
+  //   updateStatusBar(vscode.window.activeTextEditor.document.fileName)
+  // }
 
   context.subscriptions.push(
-    gotoPackageCmd,
-    gotoPackageObjectCmd,
     goToSpecCmd,
-    generatePackageSchemaCmd,
-    generatePackagesSchemaCmd,
-    generatePackageCmd,
-    updatePackageDepsCmd,
-    reindexProjectCmd,
-    onDidOpenTextDocument,
-    onDidChangeActiveTextEditor,
-    onDidCreateFiles,
-    onDidRenameFiles,
-    onDidDeleteFiles,
+    // gotoPackageCmd,
+    // gotoPackageObjectCmd,
+    // generatePackageSchemaCmd,
+    // generatePackagesSchemaCmd,
+    // generatePackageCmd,
+    // updatePackageDepsCmd,
+    // reindexProjectCmd,
+    // onDidOpenTextDocument,
+    // onDidChangeActiveTextEditor,
+    // onDidCreateFiles,
+    // onDidRenameFiles,
+    // onDidDeleteFiles,
   )
 
   if (!isReeProject()) { return } // register commands, but don't go further
 
-  let curPath = getCurrentProjectDir()
-  if (curPath) {
-    getNewProjectIndex()
-  }
+  // let curPath = getCurrentProjectDir()
+  // if (curPath) {
+  //   getNewProjectIndex()
+  // }
 
-  if (isBundleGemsInstalled(curPath)) {
-    isBundleGemsInstalled(curPath).then((res) => {
-      if (res.code !== 0) {
-        vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledError: ${res.message}`)
-      }
-    })
-  }
+  // if (isBundleGemsInstalled(curPath)) {
+  //   isBundleGemsInstalled(curPath).then((res) => {
+  //     if (res.code !== 0) {
+  //       vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledError: ${res.message}`)
+  //     }
+  //   })
+  // }
 
-  if (isBundleGemsInstalledInDocker()) {
-    isBundleGemsInstalledInDocker().then((res) => {
-      if (res && res.code !== 0) {
-        vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledInDockerError: ${res.message}`)
-      }
-    })
-  }
+  // if (isBundleGemsInstalledInDocker()) {
+  //   isBundleGemsInstalledInDocker().then((res) => {
+  //     if (res && res.code !== 0) {
+  //       vscode.window.showWarningMessage(`CheckIsBundleGemsInstalledInDockerError: ${res.message}`)
+  //     }
+  //   })
+  // }
 
   // Language Client
 
-  let serverModule = context.asAbsolutePath(path.join('server', 'out', 'index.js'))
-  // The debug options for the server
-  // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
-  let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] }
+  // let serverModule = context.asAbsolutePath(path.join('server', 'out', 'index.js'))
+  // // The debug options for the server
+  // // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
+  // let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] }
 
-  // If the extension is launched in debug mode then the debug server options are used
-  // Otherwise the run options are used
-  let serverOptions: ServerOptions = {
-    run: { module: serverModule, transport: TransportKind.ipc },
-    debug: {
-      module: serverModule,
-      transport: TransportKind.ipc,
-      options: debugOptions
-    }
-  }
+  // // If the extension is launched in debug mode then the debug server options are used
+  // // Otherwise the run options are used
+  // let serverOptions: ServerOptions = {
+  //   run: { module: serverModule, transport: TransportKind.ipc },
+  //   debug: {
+  //     module: serverModule,
+  //     transport: TransportKind.ipc,
+  //     options: debugOptions
+  //   }
+  // }
 
-  // Options to control the language client
-  let clientOptions: LanguageClientOptions = {
-    // Register the server for ruby documents
-    documentSelector: [{ language: 'ruby' }, { language: 'slim' }],
-    synchronize: {
-      fileEvents: vscode.workspace.createFileSystemWatcher('**.rb')
-    }
-  }
+  // // Options to control the language client
+  // let clientOptions: LanguageClientOptions = {
+  //   // Register the server for ruby documents
+  //   documentSelector: [{ language: 'ruby' }, { language: 'slim' }],
+  //   synchronize: {
+  //     fileEvents: vscode.workspace.createFileSystemWatcher('**.rb')
+  //   }
+  // }
 
-  // Create the language client and start the client.
-  client = new LanguageClient(
-    'reeLanguageServer',
-    'Ree Language Server',
-    serverOptions,
-    clientOptions
-  )
+  // // Create the language client and start the client.
+  // client = new LanguageClient(
+  //   'reeLanguageServer',
+  //   'Ree Language Server',
+  //   serverOptions,
+  //   clientOptions
+  // )
 
-  // Start the client. This will also launch the server
-  client.start().then(() => {
-    client.onNotification('reeLanguageServer/serverLog', (message) => {
-      logDebugServerMessage(message)
-    })
-  })
+  // // Start the client. This will also launch the server
+  // client.start().then(() => {
+  //   client.onNotification('reeLanguageServer/serverLog', (message) => {
+  //     logDebugServerMessage(message)
+  //   })
+  // })
 }
 
-export function deactivate(): Thenable<void> | undefined {
-  if (!client) {
-		return undefined
-	}
-  forest.release()
-	return client.stop()
-}
+// export function deactivate(): Thenable<void> | undefined {
+//   if (!client) {
+// 		return undefined
+// 	}
+//   forest.release()
+// 	return client.stop()
+// }
