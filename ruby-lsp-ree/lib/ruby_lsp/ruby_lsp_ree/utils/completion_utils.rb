@@ -7,6 +7,29 @@ module RubyLsp
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
 
+      RECEIVER_OBJECT_TYPES = [:enum, :dao, :bean]
+
+      def get_ree_receiver(receiver_node, index)
+        return if !receiver_node || !receiver_node.is_a?(Prism::CallNode)
+      
+        ReeObjectFinder.find_objects_by_types(index, receiver_node.name.to_s, RECEIVER_OBJECT_TYPES).first
+      end
+
+      def get_ree_object_methods_completions_items(ree_receiver, receiver_node, node)
+        location = receiver_node.location
+
+        case ReeObjectFinder.object_type(ree_receiver)
+        when :enum
+          get_enum_values_completion_items(ree_receiver, location)
+        when :bean
+          get_bean_methods_completion_items(ree_receiver, location)
+        when :dao
+          get_dao_filters_completion_items(ree_receiver, location)
+        else
+          []
+        end
+      end
+
       def get_bean_methods_completion_items(bean_obj, location)
         bean_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(bean_obj.uri, :bean)
         

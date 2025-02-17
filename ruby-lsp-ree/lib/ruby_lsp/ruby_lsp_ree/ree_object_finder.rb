@@ -32,6 +32,13 @@ module RubyLsp
         objects_by_name.detect{ _1.comments.to_s.lines.first&.chomp == REE_OBJECT_STRING }
       end
 
+      def self.find_objects_by_types(index, name, types)
+        objects_by_name = index[name]
+        return [] unless objects_by_name
+
+        objects_by_name.select{ types.include?(object_type(_1)) }
+      end
+
       def self.find_enum(index, name)
         objects_by_name = index[name]
         return unless objects_by_name
@@ -51,6 +58,19 @@ module RubyLsp
         return unless objects_by_name
 
         objects_by_name.detect{ _1.comments.lines[1]&.chomp == BEAN_TYPE_STRING }
+      end
+
+      def self.object_type(ree_object)
+        case ree_object.comments.lines[1]&.chomp
+        when DAO_TYPE_STRING
+          :dao
+        when BEAN_TYPE_STRING
+          :bean
+        when ENUM_TYPE_STRING
+          :enum
+        else
+          nil
+        end
       end
     end
   end
