@@ -18,11 +18,18 @@ module RubyLsp
           .take(limit)
       end
 
-      def self.search_class_objects(name)
+      def self.search_class_objects(index, name)
         index
           .instance_variable_get(:@entries)
           .keys
           .select{ _1.split('::').last[0...name.size] == name}
+      end
+
+      def self.find_object(index, name)
+        objects_by_name = index[name]
+        return unless objects_by_name
+
+        objects_by_name.detect{ _1.comments.to_s.lines.first&.chomp == REE_OBJECT_STRING }
       end
 
       def self.find_enum(index, name)

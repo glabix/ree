@@ -1,5 +1,7 @@
 require_relative "../utils/ree_lsp_utils"
 require_relative "../parsing/parsed_link_node"
+require_relative "../parsing/parsed_document_builder"
+require_relative "../ree_object_finder"
 
 module RubyLsp
   module Ree
@@ -18,13 +20,18 @@ module RubyLsp
       end
 
       def on_constant_read_node_enter(node)
-        link_nodes = if @node_context.parent.is_a?(Prism::CallNode)
+        link_nodes = if @node_context.parent.is_a?(Prism::CallNode) && @node_context.parent.name == :link
           # inside link node
           link_node = RubyLsp::Ree::ParsedLinkNode.new(@node_context.parent)
           link_node.parse_imports
           [link_node]
         else
-          parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
+          parsed_doc = if @node_context.parent.is_a?(Prism::CallNode)
+            RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(@uri)
+          else
+            RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
+          end
+
           parsed_doc.link_nodes
         end
         
@@ -63,11 +70,20 @@ module RubyLsp
         message = node.message
         return unless message
 
-        method = @index[message].detect{ !_1.location.nil? }
-        return unless method
+        definition_uri = nil
+
+        if node.receiver
+          # ruby lsp handles such cases itself
+          return
+        else
+          definition_item = ReeObjectFinder.find_object(@index, message)
+          definition_uri = definition_item.uri.to_s
+        end
+
+        return unless definition_uri
 
         @response_builder << Interface::Location.new(
-          uri: method.uri.to_s,
+          uri: definition_uri,
           range: Interface::Range.new(
             start: Interface::Position.new(line: 0, character: 0),
             end: Interface::Position.new(line: 0, character: 0),

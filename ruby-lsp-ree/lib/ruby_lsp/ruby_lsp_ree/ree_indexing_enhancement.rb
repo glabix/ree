@@ -1,5 +1,5 @@
 require 'prism'
-require_relative "ree_lsp_utils"
+require_relative "utils/ree_lsp_utils"
 
 module RubyLsp
   module Ree

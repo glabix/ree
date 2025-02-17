@@ -110,7 +110,7 @@ module RubyLsp
 
       def get_class_name_completion_items(node, node_context, index, uri, limit)
         node_name = node.name.to_s
-        class_name_objects = ReeObjectFinder.search_class_objects(@index, node_name)
+        class_name_objects = ReeObjectFinder.search_class_objects(index, node_name)
         
         return [] if class_name_objects.size == 0
 

@@ -33,6 +33,16 @@ class RubyLsp::Ree::ParsedDocument
     @link_nodes.map(&:name).include?(obj_name)
   end
 
+  def find_link_node(name)
+    @link_nodes.detect{ _1.name == name }
+  end
+
+  def find_link_with_imported_object(name)
+    @link_nodes.detect do |link_node|
+      link_node.imports.include?(name)
+    end
+  end
+
   def has_blank_links_container?
     links_container_node && !links_container_block_node
   end
