@@ -31,78 +31,78 @@ export const debugOutputClientChannel = vscode.window.createOutputChannel("Ree D
 export const debugOutputServerChannel = vscode.window.createOutputChannel("Ree Debug Server")
 
 export async function activate(context: vscode.ExtensionContext) {
-  let gotoPackageCmd = vscode.commands.registerCommand(
-    "ree.goToPackage",
-    goToPackage
-  )
+  // let gotoPackageCmd = vscode.commands.registerCommand(
+  //   "ree.goToPackage",
+  //   goToPackage
+  // )
 
-  let gotoPackageObjectCmd = vscode.commands.registerCommand(
-    "ree.goToPackageObject",
-    goToPackageObject
-  )
+  // let gotoPackageObjectCmd = vscode.commands.registerCommand(
+  //   "ree.goToPackageObject",
+  //   goToPackageObject
+  // )
 
   let goToSpecCmd = vscode.commands.registerCommand(
     "ree.goToSpec",
     goToSpec
   )
 
-  let generatePackageSchemaCmd = vscode.commands.registerCommand(
-    "ree.generatePackageSchema",
-    selectAndGeneratePackageSchema
-  )
+  // let generatePackageSchemaCmd = vscode.commands.registerCommand(
+  //   "ree.generatePackageSchema",
+  //   selectAndGeneratePackageSchema
+  // )
 
-  let generatePackagesSchemaCmd = vscode.commands.registerCommand(
-    "ree.generatePackagesSchema",
-    generatePackagesSchema
-  )
+  // let generatePackagesSchemaCmd = vscode.commands.registerCommand(
+  //   "ree.generatePackagesSchema",
+  //   generatePackagesSchema
+  // )
 
-  let generatePackageCmd = vscode.commands.registerCommand(
-    "ree.generatePackage",
-    generatePackage
-  )
+  // let generatePackageCmd = vscode.commands.registerCommand(
+  //   "ree.generatePackage",
+  //   generatePackage
+  // )
 
-  let updatePackageDepsCmd = vscode.commands.registerCommand(
-    "ree.updatePackageDeps",
-    updatePackageDeps
-  )
+  // let updatePackageDepsCmd = vscode.commands.registerCommand(
+  //   "ree.updatePackageDeps",
+  //   updatePackageDeps
+  // )
 
-  let reindexProjectCmd = vscode.commands.registerCommand(
-    "ree.reindexProject",
-    reindexProject
-  )
+  // let reindexProjectCmd = vscode.commands.registerCommand(
+  //   "ree.reindexProject",
+  //   reindexProject
+  // )
 
-  let onDidOpenTextDocument = vscode.workspace.onDidOpenTextDocument(
-    statusBarCallbacks.onDidOpenTextDocument
-  )
+  // let onDidOpenTextDocument = vscode.workspace.onDidOpenTextDocument(
+  //   statusBarCallbacks.onDidOpenTextDocument
+  // )
 
-  let onDidChangeActiveTextEditor = vscode.window.onDidChangeActiveTextEditor(
-    statusBarCallbacks.onDidChangeActiveTextEditor
-  )
+  // let onDidChangeActiveTextEditor = vscode.window.onDidChangeActiveTextEditor(
+  //   statusBarCallbacks.onDidChangeActiveTextEditor
+  // )
 
-  const onDidCreateFiles = vscode.workspace.onDidCreateFiles(
-    (e: vscode.FileCreateEvent) => {
-      onCreatePackageFile(e.files[0].path)
-    }
-  )
+  // const onDidCreateFiles = vscode.workspace.onDidCreateFiles(
+  //   (e: vscode.FileCreateEvent) => {
+  //     onCreatePackageFile(e.files[0].path)
+  //   }
+  // )
 
-  const onDidRenameFiles = vscode.workspace.onDidRenameFiles(
-    (e: vscode.FileRenameEvent) => {
-      onRenamePackageFile(e.files[0].newUri.path)
-      forest.deleteTree(e.files[0].oldUri.toString())
+  // const onDidRenameFiles = vscode.workspace.onDidRenameFiles(
+  //   (e: vscode.FileRenameEvent) => {
+  //     onRenamePackageFile(e.files[0].newUri.path)
+  //     forest.deleteTree(e.files[0].oldUri.toString())
 
-      if (e.files[0].newUri.path.split("/").pop().match(/\.rb/)) {
-        getFileFromManager(e.files[0].newUri.path).then(file => {
-          forest.createTree(e.files[0].newUri.toString(), file.getText())
-        })
-      }
-    }
-  )
+  //     if (e.files[0].newUri.path.split("/").pop().match(/\.rb/)) {
+  //       getFileFromManager(e.files[0].newUri.path).then(file => {
+  //         forest.createTree(e.files[0].newUri.toString(), file.getText())
+  //       })
+  //     }
+  //   }
+  // )
 
-  const onDidDeleteFiles = vscode.workspace.onDidDeleteFiles(
-    (e: vscode.FileDeleteEvent) => {
-      forest.deleteTree(e.files[0].toString())
-    }
-  )
+  // const onDidDeleteFiles = vscode.workspace.onDidDeleteFiles(
+  //   (e: vscode.FileDeleteEvent) => {
+  //     forest.deleteTree(e.files[0].toString())
+  //   }
+  // )
 
   // vscode.workspace.onDidSaveTextDocument(document => {
   //   if (document) {

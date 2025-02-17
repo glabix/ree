@@ -7,41 +7,26 @@ const path = require("path")
 const fs = require("fs")
 
 export function getPackageNameFromPath(pathToFile: string): string | null {
-  const packageSchemaPath = getPackageSchemaPath(
-    path.dirname(pathToFile)
-  )
+  const PACKAGE_FILE_REGEXP = /\/(package|spec)\/([a-zA-Z]+(_[a-zA-Z]+)*)\//
+  const packageName = pathToFile.match(PACKAGE_FILE_REGEXP)?.[2]
   
-  if (!packageSchemaPath) { return null }
-  
-  try {
-    const schemaFile = JSON.parse(fs.readFileSync(packageSchemaPath).toString())
-
-    if (schemaFile.name) {
-      return schemaFile.name
-    } else {
-      return null
-    }
-  } catch(err) {
-    console.log(err)
-    logErrorMessage(`Error: Unable to parse ${PACKAGE_SCHEMA_FILE}`)
-    vscode.window.showErrorMessage(`Error: Unable to parse ${PACKAGE_SCHEMA_FILE}`)
-    return null
-  }
+  return packageName
 }
 
-export function getPackageSchemaPath(dirname: string): string | null {
-  const schemaPath = path.join(dirname, PACKAGE_SCHEMA_FILE)
+export function getPackageFilePath(dirname: string, packageName: string): string | null {
+  const packageFilePath = path.join(dirname, 'package', `${packageName}.rb`)
 
-  if (fs.existsSync(schemaPath)) {
-    return schemaPath
+  if (fs.existsSync(packageFilePath)) {
+    return path.resolve(packageFilePath, '../../')
   }
   
   if (dirname === '/') {
     return null
   }
 
-  return getPackageSchemaPath(
-    path.resolve(dirname, "../")
+
+  return getPackageFilePath(
+    path.resolve(dirname, "../"), packageName
   )
 }
 

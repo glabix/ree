@@ -18,15 +18,6 @@
 			"preLaunchTask": "clean-and-watch-client"
 		},
 		{
-			"type": "node",
-			"request": "attach",
-			"name": "Attach to Language Server",
-			"port": 6009,
-			"restart": true,
-			"outFiles": ["${workspaceRoot}/server/out/**/*.js"],
-			"preLaunchTask": "clean-and-watch-server"
-		},
-		{
 			"name": "Extension Tests",
 			"type": "extensionHost",
 			"request": "launch",
@@ -40,10 +31,4 @@
 			"preLaunchTask": "${defaultBuildTask}"
 		}
 	],
-	"compounds": [
-		{
-			"name": "Extension + Language Server",
-			"configurations": ["Run Extension", "Attach to Language Server"]
-		}
-	]
 }
