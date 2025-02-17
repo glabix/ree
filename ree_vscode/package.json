@@ -2,7 +2,7 @@
   "name": "ree",
   "displayName": "Ree",
   "description": "A set of tools to simplify work with ree gem",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "publisher": "Glabix",
   "repository": {
     "type": "git",
@@ -15,44 +15,14 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:ruby",
-    "onCommand:ree.goToPackage",
-    "onCommand:ree.goToPackageObject",
-    "onCommand:ree.generatePackageSchema",
-    "onCommand:ree.generatePackagesSchema",
-    "onCommand:ree.generatePackage",
-    "onCommand:ree.reindexProject"
+    "onLanguage:ruby"
   ],
   "main": "./client/out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "ree.goToPackage",
-        "title": "Ree: Go To Package"
-      },
-      {
-        "command": "ree.goToPackageObject",
-        "title": "Ree: Go To Package Object"
-      },
-      {
         "command": "ree.goToSpec",
         "title": "Ree: Go To Spec"
-      },
-      {
-        "command": "ree.generatePackageSchema",
-        "title": "Ree: Generate Package Schema (Package.schema.json)"
-      },
-      {
-        "command": "ree.generatePackagesSchema",
-        "title": "Ree: Generate Packages Schema (Packages.schema.json)"
-      },
-      {
-        "command": "ree.generatePackage",
-        "title": "Ree: Generate Package"
-      },
-      {
-        "command": "ree.reindexProject",
-        "title": "Ree: Rebuild Project Autocomplete Index"
       }
     ],
     "keybindings": [
@@ -60,11 +30,6 @@
         "command": "ree.goToSpec",
         "key": "crtl+alt+r",
         "mac": "cmd+alt+r"
-      },
-      {
-        "command": "ree.generatePackage",
-        "key": "crtl+alt+n",
-        "mac": "cmd+alt+n"
       }
     ],
     "configuration": {
