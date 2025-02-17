@@ -42,7 +42,11 @@ RSpec.describe ReeLogger::DefaultFormatter do
   }
 
   it {
-    expected = "[05/11/05 00:00:00] ERROR: Some error message\nPARAMETERS: {:some_error=>\"params\"}\nEXCEPTION: StandardError (Help me, I am error)\n"
+    expected = if RUBY_VERSION >= '3.4'
+      "[05/11/05 00:00:00] ERROR: Some error message\nPARAMETERS: {some_error: \"params\"}\nEXCEPTION: StandardError (Help me, I am error)\n"
+    else
+      "[05/11/05 00:00:00] ERROR: Some error message\nPARAMETERS: {:some_error=>\"params\"}\nEXCEPTION: StandardError (Help me, I am error)\n"
+    end
     expect(formatter.format(error_log_event, nil)).to eq(expected)
   }
 end

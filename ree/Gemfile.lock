@@ -3,6 +3,7 @@ PATH
   specs:
     ree (1.1.1)
       commander (~> 5.0.0)
+      logger (~> 1.6.5)
 
 GEM
   remote: https://rubygems.org/
@@ -18,6 +19,7 @@ GEM
     irb (1.11.1)
       rdoc
       reline (>= 0.4.2)
+    logger (1.6.5)
     psych (5.1.2)
       stringio
     rake (13.1.0)

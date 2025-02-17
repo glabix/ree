@@ -15,13 +15,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.1', '3.2', '3.3']
-        gemfile_folders: ['ree', 'ree_lib']
+        ruby: ['3.2', '3.3', '3.4']
+        gemfile_folders: ['ree', 'ree_lib', 'ree_spec']
         include:
           - gemfile_folders: 'ree'
             rspec_cmd: 'cd ree && bundle exec rspec'
           - gemfile_folders: 'ree_lib'
             rspec_cmd: 'cd ree_lib/lib/ree_lib && bundle exec ree spec'
+          - gemfile_folders: 'ree_spec'
+            rspec_cmd: 'cd ree_spec/lib/ree_spec && bundle exec ree spec'
 
     services:
       postgres:
