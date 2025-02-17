@@ -1,4 +1,5 @@
 require_relative "ree_lsp_utils"
+require_relative "../ree_object_finder"
 
 module RubyLsp
   module Ree
@@ -107,7 +108,14 @@ module RubyLsp
         end
       end
 
-      def get_class_name_completion_items(class_name_objects, parsed_doc, node, index, limit)
+      def get_class_name_completion_items(node, node_context, index, uri, limit)
+        node_name = node.name.to_s
+        class_name_objects = ReeObjectFinder.search_class_objects(@index, node_name)
+        
+        return [] if class_name_objects.size == 0
+
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(node_context.parent, uri)
+
         class_name_objects.take(limit).map do |full_class_name|
           entry = index[full_class_name].first
           class_name = full_class_name.split('::').last

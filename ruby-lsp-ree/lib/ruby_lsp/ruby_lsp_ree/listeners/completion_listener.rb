@@ -26,12 +26,7 @@ module RubyLsp
         node_name = node.name.to_s
         return if node_name.size < CHARS_COUNT
 
-        class_name_objects = @index.instance_variable_get(:@entries).keys.select{ _1.split('::').last[0...node_name.size] == node_name}
-        return if class_name_objects.size == 0
-
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
-
-        completion_items = get_class_name_completion_items(class_name_objects, parsed_doc, node, @index, CANDIDATES_LIMIT)
+        completion_items = get_class_name_completion_items(node, @node_context, @index, @uri, CANDIDATES_LIMIT)
         put_items_into_response(completion_items)
       end
 

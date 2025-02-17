@@ -18,6 +18,13 @@ module RubyLsp
           .take(limit)
       end
 
+      def self.search_class_objects(name)
+        index
+          .instance_variable_get(:@entries)
+          .keys
+          .select{ _1.split('::').last[0...name.size] == name}
+      end
+
       def self.find_enum(index, name)
         objects_by_name = index[name]
         return unless objects_by_name
