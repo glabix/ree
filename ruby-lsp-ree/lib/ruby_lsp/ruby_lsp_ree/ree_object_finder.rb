@@ -26,9 +26,13 @@ module RubyLsp
 
       def search_class_objects(name)
         @index
-          .instance_variable_get(:@entries)
-          .keys
+          .names
           .select{ _1.split('::').last[0...name.size] == name}
+      end
+
+      def search_classes(name)
+        keys = search_class_objects(name)
+        @index.instance_variable_get(:@entries).values_at(*keys)
       end
 
       def find_object(name)
