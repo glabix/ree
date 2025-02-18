@@ -14,18 +14,19 @@ module RubyLsp
         @index = index
         @uri = uri
         @node_context = node_context
+        @finder = ReeObjectFinder.new(@index)
       end
 
       def get_ree_receiver(receiver_node)
         return if !receiver_node || !receiver_node.is_a?(Prism::CallNode)
       
-        ReeObjectFinder.find_objects_by_types(@index, receiver_node.name.to_s, RECEIVER_OBJECT_TYPES).first
+        @finder.find_objects_by_types(receiver_node.name.to_s, RECEIVER_OBJECT_TYPES).first
       end
 
       def get_ree_object_methods_completions_items(ree_receiver, receiver_node, node)
         location = receiver_node.location
 
-        case ReeObjectFinder.object_type(ree_receiver)
+        case @finder.object_type(ree_receiver)
         when :enum
           get_enum_values_completion_items(ree_receiver, location)
         when :bean
@@ -140,7 +141,7 @@ module RubyLsp
 
       def get_class_name_completion_items(node)
         node_name = node.name.to_s
-        class_name_objects = ReeObjectFinder.search_class_objects(@index, node_name)
+        class_name_objects = @finder.search_class_objects(node_name)
         
         return [] if class_name_objects.size == 0
 
@@ -173,7 +174,7 @@ module RubyLsp
       end
 
       def get_ree_objects_completions_items(node)
-        ree_objects = ReeObjectFinder.search_objects(@index, node.name.to_s, CANDIDATES_LIMIT)
+        ree_objects = @finder.search_objects(node.name.to_s, CANDIDATES_LIMIT)
 
         return [] if ree_objects.size == 0
   
