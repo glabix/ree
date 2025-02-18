@@ -8,6 +8,7 @@ module RubyLsp
       DAO_TYPE_STRING = 'type: :dao'
       BEAN_TYPE_STRING = 'type: :bean'
       MAPPER_TYPE_STRING = 'type: :mapper'
+      AGGREGATE_TYPE_STRING = 'type: :aggregate'
 
       def self.search_objects(index, name, limit)
         index.prefix_search(name)
@@ -62,6 +63,7 @@ module RubyLsp
       end
 
       def self.object_type(ree_object)
+        # TODO rewrite to use string split
         case ree_object.comments.lines[1]&.chomp
         when DAO_TYPE_STRING
           :dao
@@ -71,6 +73,8 @@ module RubyLsp
           :enum
         when MAPPER_TYPE_STRING
           :mapper
+        when AGGREGATE_TYPE_STRING
+          :aggregate
         else
           nil
         end

@@ -2,6 +2,7 @@
 
 - improved Go To Definition for ree object methods and imported constants
 - support for :mapper objects
+- support for :aggregate objects
 
 ## [0.1.2] - 2025-02-14
 
