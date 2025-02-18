@@ -7,6 +7,7 @@ module RubyLsp
       ENUM_TYPE_STRING = 'type: :enum'
       DAO_TYPE_STRING = 'type: :dao'
       BEAN_TYPE_STRING = 'type: :bean'
+      MAPPER_TYPE_STRING = 'type: :mapper'
 
       def self.search_objects(index, name, limit)
         index.prefix_search(name)
@@ -68,6 +69,8 @@ module RubyLsp
           :bean
         when ENUM_TYPE_STRING
           :enum
+        when MAPPER_TYPE_STRING
+          :mapper
         else
           nil
         end

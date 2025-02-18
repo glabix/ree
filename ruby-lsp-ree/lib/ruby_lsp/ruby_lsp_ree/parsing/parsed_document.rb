@@ -5,20 +5,16 @@ class RubyLsp::Ree::ParsedDocument
 
   LINK_DSL_MODULE = 'Ree::LinkDSL'
 
-  attr_reader :ast, :package_name, :class_node, :fn_node, :fn_block_node, :class_includes,
-    :link_nodes, :values, :action_node, :action_block_node, :dao_node, :dao_block_node, :filters,
-    :bean_node, :bean_block_node, :bean_methods
+  attr_reader :ast, :package_name, :class_node, :fn_node, :class_includes,
+    :link_nodes, :values, :action_node, :dao_node, :filters,
+    :bean_node, :bean_methods, :mapper_node, :links_container_block_node
 
   def initialize(ast)
     @ast = ast
   end
 
   def links_container_node
-    @fn_node || @action_node || @dao_node || @bean_node
-  end
-
-  def links_container_block_node
-    @fn_block_node || @action_block_node || @dao_block_node || @bean_block_node
+    @fn_node || @action_node || @dao_node || @bean_node || @mapper_node
   end
 
   def includes_link_dsl?
@@ -44,7 +40,7 @@ class RubyLsp::Ree::ParsedDocument
   end
 
   def has_blank_links_container?
-    links_container_node && !links_container_block_node
+    links_container_node && !@links_container_block_node
   end
 
   def set_package_name(package_name)
@@ -59,28 +55,35 @@ class RubyLsp::Ree::ParsedDocument
     return unless class_node
 
     @fn_node ||= class_node.body.body.detect{ |node| node.name == :fn }
-    @fn_block_node = @fn_node&.block
+    @links_container_block_node = @fn_node&.block
   end
 
   def parse_action_node
     return unless class_node
 
     @action_node ||= class_node.body.body.detect{ |node| node.name == :action }
-    @action_block_node = @action_node&.block
+    @links_container_block_node = @action_node&.block
   end
 
   def parse_dao_node
     return unless class_node
 
     @dao_node ||= class_node.body.body.detect{ |node| node.name == :dao }
-    @dao_block_node = @dao_node&.block
+    @links_container_block_node = @dao_node&.block
   end
 
   def parse_bean_node
     return unless class_node
 
     @bean_node ||= class_node.body.body.detect{ |node| node.name == :bean }
-    @bean_block_node = @bean_node&.block
+    @links_container_block_node = @bean_node&.block
+  end
+
+  def parse_mapper_node
+    return unless class_node
+
+    @mapper_node ||= class_node.body.body.detect{ |node| node.name == :mapper }
+    @links_container_block_node = @mapper_node&.block
   end
 
   def parse_class_includes
@@ -99,8 +102,8 @@ class RubyLsp::Ree::ParsedDocument
   def parse_links
     return unless class_node
 
-    nodes = if links_container_node && links_container_block_node.body
-      links_container_block_node.body.body.select{ |node| node.name == :link }
+    nodes = if links_container_node && @links_container_block_node.body
+      @links_container_block_node.body.body.select{ |node| node.name == :link }
     elsif class_includes.any?{ _1.name == LINK_DSL_MODULE }
       class_node.body.body.select{ |node| node.name == :link }
     else

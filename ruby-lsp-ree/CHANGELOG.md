@@ -1,6 +1,7 @@
-## [0.1.3] - 2025-02-14
+## [0.1.3] - 2025-02-21
 
 - improved Go To Definition for ree object methods and imported constants
+- support for :mapper objects
 
 ## [0.1.2] - 2025-02-14
 
