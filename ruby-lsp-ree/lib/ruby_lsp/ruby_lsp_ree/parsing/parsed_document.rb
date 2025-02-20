@@ -40,6 +40,12 @@ class RubyLsp::Ree::ParsedDocument
     end
   end
 
+  def find_import_for_package(name, package_name)
+    @link_nodes.detect do |link_node|
+      link_node.imports.include?(name) && link_node.link_package_name == package_name
+    end
+  end
+
   def has_blank_links_container?
     links_container_node && !@links_container_block_node
   end

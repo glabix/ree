@@ -147,30 +147,58 @@ module RubyLsp
 
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
 
-        class_name_objects.take(CANDIDATES_LIMIT).map do |full_class_name|
-          entry = @index[full_class_name].first
-          class_name = full_class_name.split('::').last
+        imported_consts = []
+        not_imported_consts = []
 
-          package_name = package_name_from_uri(entry.uri)
-          file_name = File.basename(entry.uri.to_s)
-          
-          label_details = Interface::CompletionItemLabelDetails.new(
-            description: "from: :#{package_name}",
-            detail: " #{file_name}"
-          )
+        class_name_objects.take(CANDIDATES_LIMIT).each do |full_class_name|
+          entries = @index[full_class_name]
 
-          Interface::CompletionItem.new(
-            label: class_name,
-            label_details: label_details,
-            filter_text: class_name,
-            text_edit: Interface::TextEdit.new(
-              range:  range_from_location(node.location),
-              new_text: class_name,
-            ),
-            kind: Constant::CompletionItemKind::CLASS,
-            additional_text_edits: get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
-          )
+          entries.each do |entry|
+            class_name = full_class_name.split('::').last
+            package_name = package_name_from_uri(entry.uri)
+            file_name = File.basename(entry.uri.to_s)
+
+            matched_import = parsed_doc.find_import_for_package(class_name, package_name)
+
+            if matched_import   
+              label_details = Interface::CompletionItemLabelDetails.new(
+                description: "imported from: :#{package_name}",
+                detail: ""
+              )
+              
+              imported_consts << Interface::CompletionItem.new(
+                label: class_name,
+                label_details: label_details,
+                filter_text: class_name,
+                text_edit: Interface::TextEdit.new(
+                  range:  range_from_location(node.location),
+                  new_text: class_name,
+                ),
+                kind: Constant::CompletionItemKind::CLASS,
+                additional_text_edits: []
+              )
+            else
+              label_details = Interface::CompletionItemLabelDetails.new(
+                description: "from: :#{package_name}",
+                detail: " #{file_name}"
+              )
+
+              not_imported_consts << Interface::CompletionItem.new(
+                label: class_name,
+                label_details: label_details,
+                filter_text: class_name,
+                text_edit: Interface::TextEdit.new(
+                  range:  range_from_location(node.location),
+                  new_text: class_name,
+                ),
+                kind: Constant::CompletionItemKind::CLASS,
+                additional_text_edits: get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
+              )
+            end
+          end
         end
+
+        imported_consts + not_imported_consts
       end
 
       def get_ree_objects_completions_items(node)
