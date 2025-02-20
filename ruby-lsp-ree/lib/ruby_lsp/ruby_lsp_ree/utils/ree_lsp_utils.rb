@@ -49,6 +49,8 @@ module RubyLsp
         elsif parsed_doc.includes_link_dsl?
           fn_line = parsed_doc.link_nodes.first.location.start_line - 1
           position = parsed_doc.link_nodes.first.location.start_column
+        else
+          return nil
         end
 
         Interface::Range.new(

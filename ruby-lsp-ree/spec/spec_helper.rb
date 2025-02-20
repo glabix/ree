@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "bundler"
 require "sorbet-runtime"
 require "ruby_lsp/test_helper"
 require "ruby_lsp/internal"

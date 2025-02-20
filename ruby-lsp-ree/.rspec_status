@@ -1,0 +1,4 @@
+example_id                                   | status | run_time        |
+-------------------------------------------- | ------ | --------------- |
+./spec/completion/fn_completion_spec.rb[1:1] | passed | 0.09322 seconds |
+./spec/ruby_lsp_ree_spec.rb[1:1]             | passed | 0.0005 seconds  |

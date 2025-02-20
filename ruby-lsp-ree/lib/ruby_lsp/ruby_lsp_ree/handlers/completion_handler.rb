@@ -299,6 +299,7 @@ module RubyLsp
         end
 
         range = get_range_for_fn_insert(parsed_doc, link_text)
+        return unless range
 
         [
           Interface::TextEdit.new(
