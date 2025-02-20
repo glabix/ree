@@ -1,17 +1,18 @@
 import * as vscode from 'vscode'
 import { PACKAGES_SCHEMA_FILE, PACKAGE_DIR, RUBY_EXT, SPEC_EXT, SPEC_FOLDER } from '../core/constants'
-import { getPackageSchemaPath, getProjectRootDir } from "./packageUtils"
+import { getPackageNameFromPath, getPackageFilePath, getProjectRootDir } from "./packageUtils"
 
 const fs = require('fs')
 const path = require("path")
 
 // Extracts package root dir from any package file. Ex: bc/accounts
 export function getPackageDir(filePath: string): string | null {
-  const packageSchemaPath = getPackageSchemaPath(filePath)
+  const packageName = getPackageNameFromPath(filePath)
+  const packageSchemaPath = getPackageFilePath(filePath, packageName)
 
   if (!packageSchemaPath) { return null }
   
-  return path.dirname(packageSchemaPath)
+  return packageSchemaPath
 }
 
 // Converts absolute path to package relative path

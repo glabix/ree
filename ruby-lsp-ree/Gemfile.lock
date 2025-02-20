@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-lsp-ree (0.1.1)
+    ruby-lsp-ree (0.1.2)
 
 GEM
   remote: https://rubygems.org/

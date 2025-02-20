@@ -32,10 +32,10 @@ GEM
     loofah (2.22.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
+    mini_portile2 (2.8.8)
     msgpack (1.7.2)
-    nokogiri (1.16.7-x86_64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.16.7-x86_64-linux)
+    nokogiri (1.16.7)
+      mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     oj (3.16.5)
       bigdecimal (>= 3.0)
@@ -87,6 +87,7 @@ PLATFORMS
   x86_64-darwin-19
   x86_64-darwin-21
   x86_64-darwin-22
+  x86_64-darwin-23
   x86_64-linux
 
 DEPENDENCIES
