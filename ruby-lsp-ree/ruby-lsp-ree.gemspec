@@ -4,7 +4,7 @@ require_relative "lib/ruby_lsp_ree/version"
 
 Gem::Specification.new do |spec|
   spec.name = "ruby-lsp-ree"
-  spec.version = Ruby::Lsp::Ree::VERSION
+  spec.version = RubyLsp::Ree::VERSION
   spec.authors = ["Ruslan Gatiyatov"]
   spec.email = ["ruslan.gatiyatov@gmail.com"]
 
