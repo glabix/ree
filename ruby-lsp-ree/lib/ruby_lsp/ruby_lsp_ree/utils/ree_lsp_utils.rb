@@ -18,7 +18,7 @@ module RubyLsp
       end
 
       def path_from_package_folder(uri)
-        uri_parts = uri.chomp(File.extname(uri)).split('/')
+        uri_parts = uri.to_s.chomp(File.extname(uri)).split('/')
 
         package_folder_index = uri_parts.index('package')
         return unless package_folder_index

@@ -76,7 +76,7 @@ module RubyLsp
           # ruby lsp handles such cases itself
           return
         else
-          definition_item = ReeObjectFinder.new(@index).find_object(@index, message)
+          definition_item = ReeObjectFinder.new(@index).find_object(message)
           definition_uri = definition_item.uri.to_s
         end
 
