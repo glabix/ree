@@ -13,7 +13,12 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   def link_package_name
-    from_arg_value || document_package
+    case link_type
+    when :object_name
+      from_arg_value || document_package
+    when :file_path
+      @name.split('/').first
+    end
   end
 
   def location

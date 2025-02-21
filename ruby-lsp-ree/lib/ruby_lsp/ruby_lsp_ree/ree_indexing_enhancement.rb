@@ -1,12 +1,12 @@
 require 'prism'
-require_relative "ree_lsp_utils"
+require_relative "utils/ree_lsp_utils"
 
 module RubyLsp
   module Ree
     class ReeIndexingEnhancement < RubyIndexer::Enhancement
       include RubyLsp::Ree::ReeLspUtils
 
-      REE_INDEXED_OBJECTS = [:fn, :enum, :action, :dao, :bean]
+      REE_INDEXED_OBJECTS = [:fn, :enum, :action, :dao, :bean, :mapper, :aggregate]
 
       def on_call_node_enter(node)
         return unless @listener.current_owner

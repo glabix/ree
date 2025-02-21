@@ -1,10 +1,42 @@
-require_relative "ree_lsp_utils"
+require_relative "../utils/ree_lsp_utils"
+require_relative "../ree_object_finder"
 
 module RubyLsp
   module Ree
-    module CompletionUtils
+    class CompletionHandler
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
+
+      RECEIVER_OBJECT_TYPES = [:enum, :dao, :bean]
+      CANDIDATES_LIMIT = 100
+
+      def initialize(index, uri, node_context)
+        @index = index
+        @uri = uri
+        @node_context = node_context
+        @finder = ReeObjectFinder.new(@index)
+      end
+
+      def get_ree_receiver(receiver_node)
+        return if !receiver_node || !receiver_node.is_a?(Prism::CallNode)
+      
+        @finder.find_objects_by_types(receiver_node.name.to_s, RECEIVER_OBJECT_TYPES).first
+      end
+
+      def get_ree_object_methods_completions_items(ree_receiver, receiver_node, node)
+        location = receiver_node.location
+
+        case @finder.object_type(ree_receiver)
+        when :enum
+          get_enum_values_completion_items(ree_receiver, location)
+        when :bean
+          get_bean_methods_completion_items(ree_receiver, location)
+        when :dao
+          get_dao_filters_completion_items(ree_receiver, location)
+        else
+          []
+        end
+      end
 
       def get_bean_methods_completion_items(bean_obj, location)
         bean_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(bean_obj.uri, :bean)
@@ -107,34 +139,75 @@ module RubyLsp
         end
       end
 
-      def get_class_name_completion_items(class_name_objects, parsed_doc, node, index, limit)
-        class_name_objects.take(limit).map do |full_class_name|
-          entry = index[full_class_name].first
-          class_name = full_class_name.split('::').last
+      def get_class_name_completion_items(node)
+        node_name = node.name.to_s
+        class_name_objects = @finder.search_class_objects(node_name)
+        
+        return [] if class_name_objects.size == 0
 
-          package_name = package_name_from_uri(entry.uri)
-          file_name = File.basename(entry.uri.to_s)
-          
-          label_details = Interface::CompletionItemLabelDetails.new(
-            description: "from: :#{package_name}",
-            detail: " #{file_name}"
-          )
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
 
-          Interface::CompletionItem.new(
-            label: class_name,
-            label_details: label_details,
-            filter_text: class_name,
-            text_edit: Interface::TextEdit.new(
-              range:  range_from_location(node.location),
-              new_text: class_name,
-            ),
-            kind: Constant::CompletionItemKind::CLASS,
-            additional_text_edits: get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
-          )
+        imported_consts = []
+        not_imported_consts = []
+
+        class_name_objects.take(CANDIDATES_LIMIT).each do |full_class_name|
+          entries = @index[full_class_name]
+
+          entries.each do |entry|
+            class_name = full_class_name.split('::').last
+            package_name = package_name_from_uri(entry.uri)
+            file_name = File.basename(entry.uri.to_s)
+
+            matched_import = parsed_doc.find_import_for_package(class_name, package_name)
+
+            if matched_import   
+              label_details = Interface::CompletionItemLabelDetails.new(
+                description: "imported from: :#{package_name}",
+                detail: ""
+              )
+              
+              imported_consts << Interface::CompletionItem.new(
+                label: class_name,
+                label_details: label_details,
+                filter_text: class_name,
+                text_edit: Interface::TextEdit.new(
+                  range:  range_from_location(node.location),
+                  new_text: class_name,
+                ),
+                kind: Constant::CompletionItemKind::CLASS,
+                additional_text_edits: []
+              )
+            else
+              label_details = Interface::CompletionItemLabelDetails.new(
+                description: "from: :#{package_name}",
+                detail: " #{file_name}"
+              )
+
+              not_imported_consts << Interface::CompletionItem.new(
+                label: class_name,
+                label_details: label_details,
+                filter_text: class_name,
+                text_edit: Interface::TextEdit.new(
+                  range:  range_from_location(node.location),
+                  new_text: class_name,
+                ),
+                kind: Constant::CompletionItemKind::CLASS,
+                additional_text_edits: get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
+              )
+            end
+          end
         end
+
+        imported_consts + not_imported_consts
       end
 
-      def get_ree_objects_completions_items(ree_objects, parsed_doc, node)
+      def get_ree_objects_completions_items(node)
+        ree_objects = @finder.search_objects(node.name.to_s, CANDIDATES_LIMIT)
+
+        return [] if ree_objects.size == 0
+  
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
+
         ree_objects.map do |ree_object|
           ree_object_name = ree_object.name
           package_name = package_name_from_uri(ree_object.uri)
@@ -254,6 +327,7 @@ module RubyLsp
         end
 
         range = get_range_for_fn_insert(parsed_doc, link_text)
+        return unless range
 
         [
           Interface::TextEdit.new(

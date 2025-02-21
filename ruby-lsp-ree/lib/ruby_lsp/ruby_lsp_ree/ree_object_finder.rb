@@ -7,9 +7,15 @@ module RubyLsp
       ENUM_TYPE_STRING = 'type: :enum'
       DAO_TYPE_STRING = 'type: :dao'
       BEAN_TYPE_STRING = 'type: :bean'
+      MAPPER_TYPE_STRING = 'type: :mapper'
+      AGGREGATE_TYPE_STRING = 'type: :aggregate'
 
-      def self.search_objects(index, name, limit)
-        index.prefix_search(name)
+      def initialize(index)
+        @index = index
+      end
+
+      def search_objects(name, limit)
+        @index.prefix_search(name)
           .take(MAX_LIMIT)
           .flatten
           .select{ _1.comments }
@@ -18,25 +24,68 @@ module RubyLsp
           .take(limit)
       end
 
-      def self.find_enum(index, name)
-        objects_by_name = index[name]
+      def search_class_objects(name)
+        @index
+          .names
+          .select{ _1.split('::').last[0...name.size] == name}
+      end
+
+      def search_classes(name)
+        keys = search_class_objects(name)
+        @index.instance_variable_get(:@entries).values_at(*keys)
+      end
+
+      def find_object(name)
+        objects_by_name = @index[name]
+        return unless objects_by_name
+
+        objects_by_name.detect{ _1.comments.to_s.lines.first&.chomp == REE_OBJECT_STRING }
+      end
+
+      def find_objects_by_types(name, types)
+        objects_by_name = @index[name]
+        return [] unless objects_by_name
+
+        objects_by_name.select{ types.include?(object_type(_1)) }
+      end
+
+      def find_enum(name)
+        objects_by_name = @index[name]
         return unless objects_by_name
 
         objects_by_name.detect{ _1.comments.lines[1]&.chomp == ENUM_TYPE_STRING }
       end
 
-      def self.find_dao(index, name)
-        objects_by_name = index[name]
+      def find_dao(name)
+        objects_by_name = @index[name]
         return unless objects_by_name
 
         objects_by_name.detect{ _1.comments.lines[1]&.chomp == DAO_TYPE_STRING }
       end
 
-      def self.find_bean(index, name)
-        objects_by_name = index[name]
+      def find_bean(index, name)
+        objects_by_name = @index[name]
         return unless objects_by_name
 
         objects_by_name.detect{ _1.comments.lines[1]&.chomp == BEAN_TYPE_STRING }
+      end
+
+      def object_type(ree_object)
+        # TODO rewrite to use string split
+        case ree_object.comments.lines[1]&.chomp
+        when DAO_TYPE_STRING
+          :dao
+        when BEAN_TYPE_STRING
+          :bean
+        when ENUM_TYPE_STRING
+          :enum
+        when MAPPER_TYPE_STRING
+          :mapper
+        when AGGREGATE_TYPE_STRING
+          :aggregate
+        else
+          nil
+        end
       end
     end
   end

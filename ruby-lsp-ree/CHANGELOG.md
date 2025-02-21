@@ -1,8 +1,20 @@
-## [Unreleased]
+## [0.1.3] - 2025-02-21
 
-## [0.1.0] - 2025-01-31
+- improved Go To Definition for ree object methods and imported constants
+- support for :mapper objects
+- support for :aggregate objects
+- improved autocompletion for imported constants
+- basic hover information for ree objects
 
-- Initial release
+## [0.1.2] - 2025-02-14
+
+- support for :bean objects
+- Go To Definition for imported constants
+- use current (not saved) version of the document in autocomplete
+- use current (not saved) version of the document in definition
+- increase autocomplete list limits (affects short functions)
+- improved const autocomplete
+- improved ree errors handling
 
 ## [0.1.1] - 2025-02-10
 
@@ -21,12 +33,8 @@
 - autocomplete for ree dao
 - autocomplete for dao filters
 
-## [0.1.2] - 2025-02-14
+## [0.1.0] - 2025-01-31
 
-- support for :bean objects
-- Go To Definition for imported constants
-- use current (no saved) version of the document in autocomplete
-- use current (no saved) version of the document in definition
-- increase autocomplete list limits (affects short functions)
-- improved const autocomplete
-- improved ree errors handling
+- Initial release
+
+## [Unreleased]
