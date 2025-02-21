@@ -3,6 +3,8 @@
 - improved Go To Definition for ree object methods and imported constants
 - support for :mapper objects
 - support for :aggregate objects
+- improved autocompletion for imported constants
+- basic hover information for ree objects
 
 ## [0.1.2] - 2025-02-14
 
