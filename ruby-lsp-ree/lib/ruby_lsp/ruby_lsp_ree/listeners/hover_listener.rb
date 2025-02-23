@@ -1,7 +1,4 @@
-require_relative "../ree_object_finder"
-require_relative "../parsing/parsed_document_builder"
-require_relative "../parsing/parsed_link_node"
-require_relative "../utils/ree_lsp_utils"
+require_relative "../handlers/hover_handler"
 
 module RubyLsp
   module Ree
@@ -10,8 +7,7 @@ module RubyLsp
 
       def initialize(response_builder, node_context, index, dispatcher)
         @response_builder = response_builder
-        @node_context = node_context
-        @finder = ReeObjectFinder.new(index)
+        @handler = RubyLsp::Ree::HoverHandler.new(index, node_context)
 
         dispatcher.register(self, :on_call_node_enter)
         dispatcher.register(self, :on_constant_read_node_enter)
@@ -30,35 +26,14 @@ module RubyLsp
       end
 
       def on_call_node_enter(node)
-        ree_object = @finder.find_object(node.name.to_s)
-
-        return unless ree_object
-
-        documentation =  <<~DOC
-        Ree object, type: :#{@finder.object_type(ree_object)}
-
-        usage: #{node.name.to_s}#{get_detail_string(ree_object)}
-        
-        package: #{package_name_from_uri(ree_object.uri)}
-
-        file: #{path_from_package_folder(ree_object.uri)}
-        DOC
-
-        $stderr.puts(documentation)
-
-        @response_builder.push(documentation, category: :documentation)
+        hover_items = @handler.get_ree_object_hover_items(node)
+        put_items_into_response(hover_items)
       end
 
-      def get_detail_string(ree_object)
-        return '' if ree_object.signatures.size == 0
-
-        "(#{get_parameters_string(ree_object.signatures.first)})"
-      end
-
-      def get_parameters_string(signature)
-        return '' unless signature
-
-        signature.parameters.map(&:decorated_name).join(', ')
+      def put_items_into_response(items)
+        items.each do |item|
+          @response_builder.push(item, category: :documentation)
+        end
       end
     end
   end
