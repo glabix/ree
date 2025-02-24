@@ -14,6 +14,7 @@ module RubyLsp
         @index = index
         @uri = uri
         @node_context = node_context
+        @root_node = @node_context.instance_variable_get(:@nesting_nodes).first
         @finder = ReeObjectFinder.new(@index)
       end
 
@@ -145,7 +146,7 @@ module RubyLsp
         
         return [] if class_name_objects.size == 0
 
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
 
         imported_consts = []
         not_imported_consts = []
@@ -206,7 +207,7 @@ module RubyLsp
 
         return [] if ree_objects.size == 0
   
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@node_context.parent, @uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
 
         ree_objects.map do |ree_object|
           ree_object_name = ree_object.name

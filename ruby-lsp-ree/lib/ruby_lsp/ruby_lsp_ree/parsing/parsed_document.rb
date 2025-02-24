@@ -18,6 +18,10 @@ class RubyLsp::Ree::ParsedDocument
     @fn_node || @action_node || @dao_node || @bean_node || @mapper_node || @aggregate_node
   end
 
+  def allows_root_links?
+    false
+  end
+
   def includes_link_dsl?
     @class_includes.any?{ _1.name == LINK_DSL_MODULE }
   end

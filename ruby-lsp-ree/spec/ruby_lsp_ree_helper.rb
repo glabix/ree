@@ -1,10 +1,14 @@
 module RubyLspReeHelper
-  def index_fn(server, name)
+  def index_fn(server, name, package = nil)
     location = RubyIndexer::Location.new(0, 0, 0, 0)
-    file_uri = URI("file:///fake.rb")
+    file_uri = if package
+      URI("file:///#{package}/package/#{package}/#{name}.rb")
+    else
+      URI("file:///#{name}.rb")
+    end
     
     server.global_state.index.add(RubyIndexer::Entry::Method.new(
-      'seconds_ago',
+      name,
       file_uri,
       location,
       location,
