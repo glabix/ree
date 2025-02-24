@@ -28,6 +28,8 @@ module RubyLsp
       def on_call_node_enter(node)
         hover_items = @handler.get_ree_object_hover_items(node)
         put_items_into_response(hover_items)
+      rescue => e
+        $stderr.puts("error in hover listener(on_call_node_enter): #{e.message}")
       end
 
       def put_items_into_response(items)
