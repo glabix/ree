@@ -22,7 +22,7 @@ module RubyLsp
         definition_items = @handler.get_constant_definition_items(node)
         put_items_into_response(definition_items)
       rescue => e
-        $stderr.puts("error in definition listener(on_constant_read_node_enter): #{e.message}")
+        $stderr.puts("error in definition listener(on_constant_read_node_enter): #{e.message} : #{e.backtrace.first}")
       end
 
       def on_call_node_enter(node)
@@ -36,21 +36,21 @@ module RubyLsp
           put_items_into_response(definition_items)
         end
       rescue => e
-        $stderr.puts("error in definition listener(on_call_node_enter): #{e.message}")
+        $stderr.puts("error in definition listener(on_call_node_enter): #{e.message} : #{e.backtrace.first}")
       end
 
       def on_symbol_node_enter(node)
         definition_items = @handler.get_linked_object_definition_items(node)
         put_items_into_response(definition_items)
       rescue => e
-        $stderr.puts("error in definition listener(on_symbol_node_enter): #{e.message}")
+        $stderr.puts("error in definition listener(on_symbol_node_enter): #{e.message} : #{e.backtrace.first}")
       end
 
       def on_string_node_enter(node)
         definition_items = @handler.get_linked_filepath_definition_items(node)
         put_items_into_response(definition_items)
       rescue => e
-        $stderr.puts("error in definition listener(on_string_node_enter): #{e.message}")
+        $stderr.puts("error in definition listener(on_string_node_enter): #{e.message} : #{e.backtrace.first}")
       end
 
       def put_items_into_response(items)
