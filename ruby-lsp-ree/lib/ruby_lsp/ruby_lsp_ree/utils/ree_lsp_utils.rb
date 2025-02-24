@@ -50,10 +50,10 @@ module RubyLsp
           fn_line = parsed_doc.link_nodes.first.location.start_line - 1
           position = parsed_doc.link_nodes.first.location.start_column
         elsif parsed_doc.allows_root_links?
-          root_link_location = parsed_doc.root_link_location
+          root_node_location = parsed_doc.root_node_line_location
          
-          fn_line = root_link_location.start_line - 1
-          position = root_link_location.start_column
+          fn_line = root_node_location.start_line
+          position = root_node_location.end_column + 1
         else
           return nil
         end

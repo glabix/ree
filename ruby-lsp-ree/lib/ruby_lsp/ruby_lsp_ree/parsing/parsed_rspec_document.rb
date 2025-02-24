@@ -25,8 +25,11 @@ class RubyLsp::Ree::ParsedRspecDocument
     nil
   end
 
-  def root_link_location
-    @describe_node.location
+  def root_node_line_location
+    OpenStruct.new(
+      start_line: @describe_node.location.start_line,
+      end_column: @describe_node.block.opening_loc.end_column
+    )
   end
 
   def has_blank_links_container?
