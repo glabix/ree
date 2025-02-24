@@ -120,7 +120,7 @@ class RubyLsp::Ree::ParsedDocument
   def parse_links
     return unless class_node
 
-    nodes = if links_container_node && @links_container_block_node.body
+    nodes = if links_container_node && @links_container_block_node && @links_container_block_node.body
       @links_container_block_node.body.body.select{ |node| node.name == :link }
     elsif class_includes.any?{ _1.name == LINK_DSL_MODULE }
       class_node.body.body.select{ |node| node.name == :link }

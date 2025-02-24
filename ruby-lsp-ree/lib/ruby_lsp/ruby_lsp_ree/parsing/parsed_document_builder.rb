@@ -8,6 +8,7 @@ class RubyLsp::Ree::ParsedDocumentBuilder
   def self.build_from_uri(uri, type = nil)
     ast = Prism.parse_file(uri.path).value
     document = build_document(ast, type)
+    return unless document
 
     document.set_package_name(package_name_from_uri(uri))
 
@@ -16,6 +17,7 @@ class RubyLsp::Ree::ParsedDocumentBuilder
 
   def self.build_from_ast(ast, uri, type = nil)
     document = build_document(ast, type)
+    return unless document
 
     document.set_package_name(package_name_from_uri(uri))
 
