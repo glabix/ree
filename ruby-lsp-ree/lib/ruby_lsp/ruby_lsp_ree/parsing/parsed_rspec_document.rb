@@ -1,4 +1,5 @@
 require_relative 'parsed_link_node'
+require 'ostruct'
 
 class RubyLsp::Ree::ParsedRspecDocument
   include RubyLsp::Ree::ReeLspUtils
