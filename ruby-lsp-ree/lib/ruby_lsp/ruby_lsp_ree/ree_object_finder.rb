@@ -71,21 +71,10 @@ module RubyLsp
       end
 
       def object_type(ree_object)
-        # TODO rewrite to use string split
-        case ree_object.comments.lines[1]&.chomp
-        when DAO_TYPE_STRING
-          :dao
-        when BEAN_TYPE_STRING
-          :bean
-        when ENUM_TYPE_STRING
-          :enum
-        when MAPPER_TYPE_STRING
-          :mapper
-        when AGGREGATE_TYPE_STRING
-          :aggregate
-        else
-          nil
-        end
+        type_str = ree_object.comments.lines[1]&.chomp
+        return unless type_str
+          
+        type_str.split(' ').last[1..-1].to_sym
       end
     end
   end
