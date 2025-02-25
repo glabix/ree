@@ -1,3 +1,9 @@
+## [0.1.4] - 2025-02-25
+
+- autocompletion in spec files
+- Add Link in spec files
+- improved support of new files and unsaved documents
+
 ## [0.1.3] - 2025-02-21
 
 - improved Go To Definition for ree object methods and imported constants
