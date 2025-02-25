@@ -24,7 +24,7 @@ class RubyLsp::Ree::ParsedDocument
   end
 
   def includes_link_dsl?
-    @class_includes.any?{ _1.name == LINK_DSL_MODULE }
+    @class_includes.any?{ node_name(_1) == LINK_DSL_MODULE }
   end
 
   def includes_linked_constant?(const_name)
@@ -32,11 +32,11 @@ class RubyLsp::Ree::ParsedDocument
   end
 
   def includes_linked_object?(obj_name)
-    @link_nodes.map(&:name).include?(obj_name)
+    @link_nodes.map{ node_name(_1) }.include?(obj_name)
   end
 
   def find_link_node(name)
-    @link_nodes.detect{ _1.name == name }
+    @link_nodes.detect{ node_name(_1) == name }
   end
 
   def find_link_with_imported_object(name)
@@ -66,49 +66,49 @@ class RubyLsp::Ree::ParsedDocument
   def parse_fn_node
     return unless class_node
 
-    @fn_node ||= class_node.body.body.detect{ |node| node.name == :fn }
+    @fn_node ||= class_node.body.body.detect{ |node| node_name(node) == :fn }
     @links_container_block_node ||= @fn_node&.block
   end
 
   def parse_action_node
     return unless class_node
 
-    @action_node ||= class_node.body.body.detect{ |node| node.name == :action }
+    @action_node ||= class_node.body.body.detect{ |node| node_name(node) == :action }
     @links_container_block_node ||= @action_node&.block
   end
 
   def parse_dao_node
     return unless class_node
 
-    @dao_node ||= class_node.body.body.detect{ |node| node.name == :dao }
+    @dao_node ||= class_node.body.body.detect{ |node| node_name(node) == :dao }
     @links_container_block_node ||= @dao_node&.block
   end
 
   def parse_bean_node
     return unless class_node
 
-    @bean_node ||= class_node.body.body.detect{ |node| node.name == :bean }
+    @bean_node ||= class_node.body.body.detect{ |node| node_name(node) == :bean }
     @links_container_block_node ||= @bean_node&.block
   end
 
   def parse_mapper_node
     return unless class_node
 
-    @mapper_node ||= class_node.body.body.detect{ |node| node.name == :mapper }
+    @mapper_node ||= class_node.body.body.detect{ |node| node_name(node) == :mapper }
     @links_container_block_node ||= @mapper_node&.block
   end
 
   def parse_aggregate_node
     return unless class_node
 
-    @aggregate_node ||= class_node.body.body.detect{ |node| node.name == :aggregate }
+    @aggregate_node ||= class_node.body.body.detect{ |node| node_name(node) == :aggregate }
     @links_container_block_node ||= @aggregate_node&.block
   end
 
   def parse_class_includes
     return unless class_node
 
-    @class_includes ||= class_node.body.body.select{ _1.name == :include }.map do |class_include|
+    @class_includes ||= class_node.body.body.select{ node_name(_1) == :include }.map do |class_include|
       parent_name = class_include.arguments.arguments.first.parent.name.to_s
       module_name = class_include.arguments.arguments.first.name
     
@@ -122,9 +122,9 @@ class RubyLsp::Ree::ParsedDocument
     return unless class_node
 
     nodes = if links_container_node && @links_container_block_node && @links_container_block_node.body
-      @links_container_block_node.body.body.select{ |node| node.name == :link }
-    elsif class_includes.any?{ _1.name == LINK_DSL_MODULE }
-      class_node.body.body.select{ |node| node.name == :link }
+      @links_container_block_node.body.body.select{ |node| node_name(node) == :link }
+    elsif class_includes.any?{ node_name(_1) == LINK_DSL_MODULE }
+      class_node.body.body.select{ |node| node_name(node) == :link }
     else
       []
     end
@@ -140,7 +140,7 @@ class RubyLsp::Ree::ParsedDocument
     return unless class_node
     
     @values ||= class_node.body.body
-      .select{ _1.name == :val }
+      .select{ node_name(_1) == :val }
       .map{ OpenStruct.new(name: _1.arguments.arguments.first.unescaped) }
   end
 
@@ -148,7 +148,7 @@ class RubyLsp::Ree::ParsedDocument
     return unless class_node
     
     @filters ||= class_node.body.body
-      .select{ _1.name == :filter }
+      .select{ node_name(_1) == :filter }
       .map{ OpenStruct.new(name: _1.arguments.arguments.first.unescaped, signatures: parse_filter_signature(_1)) }
 
   end
@@ -158,7 +158,7 @@ class RubyLsp::Ree::ParsedDocument
     
     @bean_methods ||= class_node.body.body
       .select{ _1.is_a?(Prism::DefNode) }
-      .map{ OpenStruct.new(name: _1.name.to_s, signatures: parse_signatures_from_params(_1.parameters)) }
+      .map{ OpenStruct.new(name: node_name(_1).to_s, signatures: parse_signatures_from_params(_1.parameters)) }
   end
 
   def parse_filter_signature(filter_node)
@@ -178,5 +178,11 @@ class RubyLsp::Ree::ParsedDocument
   def get_class_name
     name_parts = [class_node.constant_path&.parent&.name, class_node.constant_path.name]
     name_parts.compact.map(&:to_s).join('::')
+  end
+
+  def node_name(node)
+    return nil unless node.respond_to?(:name)
+
+    node.name
   end
 end

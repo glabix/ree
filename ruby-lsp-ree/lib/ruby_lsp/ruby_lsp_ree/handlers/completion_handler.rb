@@ -307,6 +307,8 @@ module RubyLsp
       end
 
       def get_additional_text_edits_for_method(parsed_doc, fn_name, package_name)
+        return [] unless parsed_doc
+
         if parsed_doc.includes_linked_object?(fn_name)
           return []
         end
