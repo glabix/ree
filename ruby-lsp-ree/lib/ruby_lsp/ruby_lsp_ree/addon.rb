@@ -15,6 +15,7 @@ module RubyLsp
         @message_queue = message_queue
 
         global_state.register_formatter("ree_formatter", RubyLsp::Ree::ReeFormatter.new)
+        register_additional_file_watchers(global_state, message_queue)
       end
 
       def deactivate
@@ -37,6 +38,36 @@ module RubyLsp
       def create_hover_listener(response_builder, node_context, dispatcher)
         index = @global_state.index
         RubyLsp::Ree::HoverListener.new(response_builder, node_context, index, dispatcher)
+      end
+
+      def register_additional_file_watchers(global_state, message_queue)
+        # Clients are not required to implement this capability
+        return unless global_state.supports_watching_files
+
+        message_queue << Request.new(
+          id: "ruby-lsp-my-gem-file-watcher",
+          method: "client/registerCapability",
+          params: Interface::RegistrationParams.new(
+            registrations: [
+              Interface::Registration.new(
+                id: "workspace/didChangeWatchedFilesMyGem",
+                method: "workspace/didChangeWatchedFiles",
+                register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
+                  watchers: [
+                    Interface::FileSystemWatcher.new(
+                      glob_pattern: "**/*.rb",
+                      kind: Constant::WatchKind::CREATE,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+      end
+
+      def workspace_did_change_watched_files(changes)
+        $stderr.puts("workspace_did_change_watched_files #{changes.inspect}")
       end
     end
   end
