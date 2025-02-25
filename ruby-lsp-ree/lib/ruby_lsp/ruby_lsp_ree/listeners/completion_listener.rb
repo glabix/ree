@@ -21,6 +21,8 @@ module RubyLsp
 
         completion_items = @handler.get_class_name_completion_items(node)
         put_items_into_response(completion_items)
+      rescue => e
+        $stderr.puts("error in completion listener(on_constant_read_node_enter): #{e.message} : #{e.backtrace.first}")
       end
 
       def on_call_node_enter(node)
@@ -37,6 +39,8 @@ module RubyLsp
         end
         
         put_items_into_response(completion_items)
+      rescue => e
+        $stderr.puts("error in completion listener(on_call_node_enter): #{e.message} : #{e.backtrace.first}")
       end
 
       def put_items_into_response(items)

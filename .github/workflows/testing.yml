@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby: ['3.2', '3.3', '3.4']
-        gemfile_folders: ['ree', 'ree_lib', 'ree_spec']
+        gemfile_folders: ['ree', 'ree_lib', 'ree_spec', 'ruby-lsp-ree']
         include:
           - gemfile_folders: 'ree'
             rspec_cmd: 'cd ree && bundle exec rspec'
@@ -24,6 +24,8 @@ jobs:
             rspec_cmd: 'cd ree_lib/lib/ree_lib && bundle exec ree spec'
           - gemfile_folders: 'ree_spec'
             rspec_cmd: 'cd ree_spec/lib/ree_spec && bundle exec ree spec'
+          - gemfile_folders: 'ruby-lsp-ree'
+            rspec_cmd: 'cd ruby-lsp-ree && bundle exec rspec'
 
     services:
       postgres:

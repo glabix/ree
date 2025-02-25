@@ -33,8 +33,8 @@ module RubyLsp
       private
 
       def parse_signatures(fn_name)
-        uri = @listener.instance_variable_get(:@uri)
-        ast = Prism.parse_file(uri.path).value
+        source = @listener.instance_variable_get(:@source_lines).join
+        ast = Prism.parse(source).value
 
         class_node = ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
         return [] unless class_node

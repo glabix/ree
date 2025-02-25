@@ -1,5 +1,6 @@
 require 'prism'
 require_relative 'parsed_document'
+require_relative 'parsed_rspec_document'
 
 class RubyLsp::Ree::ParsedDocumentBuilder
   extend RubyLsp::Ree::ReeLspUtils
@@ -7,6 +8,7 @@ class RubyLsp::Ree::ParsedDocumentBuilder
   def self.build_from_uri(uri, type = nil)
     ast = Prism.parse_file(uri.path).value
     document = build_document(ast, type)
+    return unless document
 
     document.set_package_name(package_name_from_uri(uri))
 
@@ -15,6 +17,7 @@ class RubyLsp::Ree::ParsedDocumentBuilder
 
   def self.build_from_ast(ast, uri, type = nil)
     document = build_document(ast, type)
+    return unless document
 
     document.set_package_name(package_name_from_uri(uri))
 
@@ -35,8 +38,35 @@ class RubyLsp::Ree::ParsedDocumentBuilder
     when :bean
       build_bean_document(ast)
     else
-      build_regular_document(ast)
+      build_detected_doument_type(ast)
     end
+  end
+
+  def self.build_detected_doument_type(ast)
+    if has_root_class?(ast)
+      build_regular_document(ast)
+    elsif has_root_rspec_call?(ast)
+      build_rspec_document(ast)
+    else 
+      nil
+    end
+  end
+
+  def self.has_root_class?(ast)
+    ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
+  end
+
+  def self.has_root_rspec_call?(ast)
+    ast.statements.body.detect{ |node| node.is_a?(Prism::CallNode) && node.name == :describe }
+  end
+
+  def self.build_rspec_document(ast)
+    document = RubyLsp::Ree::ParsedRspecDocument.new(ast)
+
+    document.parse_describe_node    
+    document.parse_links
+    
+    document
   end
 
   def self.build_regular_document(ast)

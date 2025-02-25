@@ -10,6 +10,8 @@ module RubyLsp
       def run_formatting(uri, document)
         source = document.source
         sort_links(source)
+      rescue => e
+        $stderr.puts("error in ree_formatter: #{e.message} : #{e.backtrace.first}")
       end
 
       private
