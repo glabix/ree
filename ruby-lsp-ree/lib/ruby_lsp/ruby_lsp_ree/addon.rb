@@ -5,6 +5,7 @@ require_relative "listeners/hover_listener"
 require_relative "ree_indexing_enhancement"
 require_relative "utils/ree_lsp_utils"
 require_relative "ree_formatter"
+require_relative "ree_template_applicator"
 require_relative "parsing/parsed_document_builder"
 
 module RubyLsp
@@ -13,6 +14,7 @@ module RubyLsp
       def activate(global_state, message_queue)
         @global_state = global_state
         @message_queue = message_queue
+        @template_applicator = RubyLsp::Ree::ReeTemplateApplicator.new
 
         global_state.register_formatter("ree_formatter", RubyLsp::Ree::ReeFormatter.new)
         register_additional_file_watchers(global_state, message_queue)
@@ -68,6 +70,8 @@ module RubyLsp
 
       def workspace_did_change_watched_files(changes)
         $stderr.puts("workspace_did_change_watched_files #{changes.inspect}")
+
+        @template_applicator.apply(changes)
       end
     end
   end
