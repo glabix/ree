@@ -7,11 +7,17 @@ module RubyLsp
       DEFAULT_TEMPLATE_FILENAME = 'default.rb'
 
       def initialize
+        return unless template_dir_exists?
+
         @template_types = Dir
           .entries(TEMPLATES_FOLDER)
           .select{ |entry| 
             File.directory? File.join(TEMPLATES_FOLDER,entry) and !(entry =='.' || entry == '..')
           }
+      end
+
+      def template_dir_exists?
+        File.exist?(TEMPLATES_FOLDER)
       end
 
       def apply(change_item)

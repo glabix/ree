@@ -45,6 +45,8 @@ module RubyLsp
       def register_additional_file_watchers(global_state, message_queue)
         # Clients are not required to implement this capability
         return unless global_state.supports_watching_files
+        
+        return unless @template_applicator.template_dir_exists?
 
         message_queue << Request.new(
           id: "ruby-lsp-my-gem-file-watcher",
