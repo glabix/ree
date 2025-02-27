@@ -71,7 +71,9 @@ module RubyLsp
       def workspace_did_change_watched_files(changes)
         $stderr.puts("workspace_did_change_watched_files #{changes.inspect}")
 
-        @template_applicator.apply(changes)
+        changes.each do |change_item|
+          @template_applicator.apply(change_item)
+        end
       end
     end
   end
