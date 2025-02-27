@@ -10,6 +10,11 @@ module RubyLsp
 
       def apply(change_item)
         uri = change_item[:uri]
+        path = URI.parse(uri).path
+
+        file_content = File.read(path)
+        return if file_content.size > 0
+        
         template_type = get_template_type_from_uri(uri)
 
         $stderr.puts("template type #{template_type}")
@@ -20,7 +25,12 @@ module RubyLsp
 
         template_info = fetch_template_info(uri, template_type)
 
-        replace_placeholders(template_type, template_str, template_info)
+        template_content = replace_placeholders(template_type, template_str, template_info)
+
+        path = URI.parse(uri).path
+        $stderr.puts("template_url #{path}")
+
+        File.write(path, template_content)
       end
 
       def get_template_type_from_uri(uri)
