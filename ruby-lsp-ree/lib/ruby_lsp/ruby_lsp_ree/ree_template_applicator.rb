@@ -1,11 +1,17 @@
 module RubyLsp
   module Ree
     class ReeTemplateApplicator
+      include RubyLsp::Ree::ReeLspUtils
+
       TEMPLATES_FOLDER = '.vscode-ree/templates'
       DEFAULT_TEMPLATE_FILENAME = 'default.rb'
 
       def initialize
-        @template_types =  Dir.entries(TEMPLATES_FOLDER).select {|entry| File.directory? File.join(TEMPLATES_FOLDER,entry) and !(entry =='.' || entry == '..') }
+        @template_types = Dir
+          .entries(TEMPLATES_FOLDER)
+          .select{ |entry| 
+            File.directory? File.join(TEMPLATES_FOLDER,entry) and !(entry =='.' || entry == '..')
+          }
       end
 
       def apply(change_item)
@@ -18,20 +24,13 @@ module RubyLsp
         return if file_content.size > 0
 
         template_type = get_template_type_from_uri(uri)
-
-        $stderr.puts("template type #{template_type}")
         return unless template_type
 
         template_str = fetch_template(template_type)
-        $stderr.puts("template_str #{template_str}")
 
-        template_info = fetch_template_info(uri, template_type)
-        $stderr.puts("template_info #{template_info}")
+        template_info = fetch_template_info(uri)
 
-        template_content = replace_placeholders(template_type, template_str, template_info)
-
-        path = URI.parse(uri).path
-        $stderr.puts("template_url #{path}")
+        template_content = replace_placeholders(template_str, template_info)
 
         File.write(path, template_content)
       end
@@ -46,11 +45,25 @@ module RubyLsp
         File.read(File.join(TEMPLATES_FOLDER, template_type, DEFAULT_TEMPLATE_FILENAME))
       end
 
-      def fetch_template_info(uri, template_type)
-        {}
+      def fetch_template_info(uri)
+        object_name = File.basename(uri, '.rb')
+        object_class = object_name.split('_').collect(&:capitalize).join
+        package_name = package_name_from_uri(uri)
+        package_class = package_name.split('_').collect(&:capitalize).join
+        
+        {
+          'PACKAGE_MODULE' => package_class,
+          'PACKAGE_NAME' => package_name,
+          'OBJECT_CLASS' => object_class,
+          'OBJECT_NAME' => object_name,
+        }
       end
 
-      def replace_placeholders(template_type, template_str, template_info)
+      def replace_placeholders(template_str, template_info)
+        template_info.each do |k,v|
+          template_str.gsub!(k, v)
+        end
+
         template_str
       end
     end
