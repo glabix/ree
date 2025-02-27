@@ -12,9 +12,11 @@ module RubyLsp
         uri = change_item[:uri]
         path = URI.parse(uri).path
 
+        return if path.end_with?('_spec.rb') # skip spec templates for now
+
         file_content = File.read(path)
         return if file_content.size > 0
-        
+
         template_type = get_template_type_from_uri(uri)
 
         $stderr.puts("template type #{template_type}")
@@ -24,6 +26,7 @@ module RubyLsp
         $stderr.puts("template_str #{template_str}")
 
         template_info = fetch_template_info(uri, template_type)
+        $stderr.puts("template_info #{template_info}")
 
         template_content = replace_placeholders(template_type, template_str, template_info)
 
