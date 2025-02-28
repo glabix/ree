@@ -49,12 +49,12 @@ module RubyLsp
         return unless @template_applicator.template_dir_exists?
 
         message_queue << Request.new(
-          id: "ruby-lsp-my-gem-file-watcher",
+          id: "ruby-lsp-ree-file-create-watcher",
           method: "client/registerCapability",
           params: Interface::RegistrationParams.new(
             registrations: [
               Interface::Registration.new(
-                id: "workspace/didChangeWatchedFilesMyGem",
+                id: "workspace/didCreateWatchedFilesRee",
                 method: "workspace/didChangeWatchedFiles",
                 register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
                   watchers: [
