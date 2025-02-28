@@ -17,6 +17,7 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
       send_completion_request(server, uri, { line: 2, character: 5 })
       
       result = server.pop_response
+
       expect(result.response.size).to eq(1)
       expect(result.response.first.label).to eq('seconds_ago')
     end
