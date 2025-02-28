@@ -17,13 +17,30 @@ module RubyLsp
         uri_parts[package_folder_index + 1]
       end
 
+      def package_name_from_spec_uri(uri)
+        uri_parts = uri.to_s.split('/')
+        
+        spec_folder_index = uri_parts.find_index('spec')
+        return unless spec_folder_index
+
+        uri_parts[spec_folder_index + 1]
+      end
+
       def path_from_package_folder(uri)
-        uri_parts = uri.to_s.chomp(File.extname(uri)).split('/')
+        uri_parts = uri.to_s.chomp(File.extname(uri.to_s)).split('/')
 
         package_folder_index = uri_parts.index('package')
         return unless package_folder_index
 
         uri_parts.drop(package_folder_index+1).join('/')
+      end
+
+      def spec_relative_file_path_from_uri(uri)
+        uri_parts = uri.path.split('/')
+        spec_folder_index = uri_parts.index('spec')
+        return unless spec_folder_index
+
+        uri_parts[spec_folder_index+1..-1].join('/').chomp('.rb')
       end
 
       def get_ree_type(ree_object)
