@@ -1,3 +1,8 @@
+## [0.1.5] - 2025-02-28
+
+- improved hover format
+- basic support for ree templates
+
 ## [0.1.4] - 2025-02-25
 
 - autocompletion in spec files
