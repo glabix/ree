@@ -47,8 +47,6 @@ module RubyLsp
         # Clients are not required to implement this capability
         return unless global_state.supports_watching_files
         
-        return unless @template_applicator.template_dir_exists?
-
         message_queue << Request.new(
           id: "ruby-lsp-ree-file-create-watcher",
           method: "client/registerCapability",
@@ -72,10 +70,10 @@ module RubyLsp
       end
 
       def workspace_did_change_watched_files(changes)
-        $stderr.puts("workspace_did_change_watched_files #{changes.inspect}")
-
         if changes.size == 1 && changes[0][:type] == Constant::FileChangeType::CREATED
           $stderr.puts("file created #{changes[0][:uri]}")
+
+          return unless @template_applicator.template_dir_exists?
 
           @template_applicator.apply(changes[0])
         elsif changes.size == 2 && changes.any?{ _1[:type] == Constant::FileChangeType::CREATED } && changes.any?{ _1[:type] == Constant::FileChangeType::DELETED }

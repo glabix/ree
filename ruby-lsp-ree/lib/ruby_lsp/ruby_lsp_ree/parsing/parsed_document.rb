@@ -175,9 +175,17 @@ class RubyLsp::Ree::ParsedDocument
     [RubyIndexer::Entry::Signature.new(signature_params)]
   end
 
-  def get_class_name
+  def class_name
+    class_node.constant_path.name.to_s
+  end
+
+  def full_class_name
     name_parts = [class_node.constant_path&.parent&.name, class_node.constant_path.name]
     name_parts.compact.map(&:to_s).join('::')
+  end
+
+  def links_container_node_name
+    links_container_node.arguments.arguments.first.unescaped
   end
 
   def node_name(node)
