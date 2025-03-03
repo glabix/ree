@@ -1,6 +1,7 @@
 ## [0.1.6] - 2025-03-07
 
 - file rename triggers class name change
+- add documentation string to hover
 
 ## [0.1.5] - 2025-02-28
 
