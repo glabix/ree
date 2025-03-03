@@ -25,7 +25,7 @@ module RubyLsp
         #{node.name.to_s}#{get_detail_string(ree_object)}
         \`\`\`
         ---
-        ree type: :#{@finder.object_type(ree_object)} package: #{package_name_from_uri(ree_object.uri)}
+        #{@finder.object_documentation(ree_object)}
 
         [#{path_from_package_folder(ree_object.uri)}](#{ree_object.uri})
         DOC

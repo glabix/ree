@@ -67,7 +67,7 @@ module RubyLsp
           ''
         end
       rescue => e
-        $stderr.puts("error parsign documentation for #{fn_name}: #{e.message} : #{e.backtrace.first}")
+        $stderr.puts("error parsing documentation for #{fn_name}: #{e.message} : #{e.backtrace.first}")
         return ''
       end
 

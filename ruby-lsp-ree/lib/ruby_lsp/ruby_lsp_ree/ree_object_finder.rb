@@ -76,6 +76,10 @@ module RubyLsp
           
         type_str.split(' ').last[1..-1].to_sym
       end
+
+      def object_documentation(ree_object)
+        ree_object.comments.lines[2..-1].join("\n").chomp
+      end
     end
   end
 end
