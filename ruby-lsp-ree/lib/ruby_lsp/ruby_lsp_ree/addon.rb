@@ -6,6 +6,7 @@ require_relative "ree_indexing_enhancement"
 require_relative "utils/ree_lsp_utils"
 require_relative "ree_formatter"
 require_relative "ree_template_applicator"
+require_relative "ree_rename_handler"
 require_relative "parsing/parsed_document_builder"
 
 module RubyLsp
@@ -60,7 +61,7 @@ module RubyLsp
                   watchers: [
                     Interface::FileSystemWatcher.new(
                       glob_pattern: "**/*.rb",
-                      kind: Constant::WatchKind::CREATE,
+                      kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE,
                     ),
                   ],
                 ),
@@ -73,8 +74,14 @@ module RubyLsp
       def workspace_did_change_watched_files(changes)
         $stderr.puts("workspace_did_change_watched_files #{changes.inspect}")
 
-        changes.each do |change_item|
-          @template_applicator.apply(change_item)
+        if changes.size == 1 && changes[0][:type] == Constant::FileChangeType::CREATED
+          $stderr.puts("file created #{changes[0][:uri]}")
+
+          @template_applicator.apply(changes[0])
+        elsif changes.size == 2 && changes.any?{ _1[:type] == Constant::FileChangeType::CREATED } && changes.any?{ _1[:type] == Constant::FileChangeType::DELETED }
+          $stderr.puts("file renamed #{changes[0][:uri]} #{changes[1][:uri]}")
+  
+          RubyLsp::Ree::ReeRenameHandler.call(changes)
         end
       end
     end
