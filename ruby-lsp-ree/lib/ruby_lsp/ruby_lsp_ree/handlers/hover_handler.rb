@@ -20,15 +20,7 @@ module RubyLsp
 
         return [] unless ree_object
 
-        documentation =  <<~DOC
-        \`\`\`ruby
-        #{node.name.to_s}#{get_detail_string(ree_object)}
-        \`\`\`
-        ---
-        #{@finder.object_documentation(ree_object)}
-
-        [#{path_from_package_folder(ree_object.uri)}](#{ree_object.uri})
-        DOC
+        documentation = get_object_documentation(ree_object)
 
         [documentation]
       end
@@ -41,17 +33,21 @@ module RubyLsp
 
         return [] unless ree_object
 
-        documentation =  <<~DOC
+        documentation = get_object_documentation(ree_object)
+
+        [documentation]
+      end
+
+      def get_object_documentation(ree_object)
+        <<~DOC
         \`\`\`ruby
-        #{node.unescaped}#{get_detail_string(ree_object)}
+        #{ree_object.name}#{get_detail_string(ree_object)}
         \`\`\`
         ---
         #{@finder.object_documentation(ree_object)}
 
         [#{path_from_package_folder(ree_object.uri)}](#{ree_object.uri})
         DOC
-
-        [documentation]
       end
 
       def get_detail_string(ree_object)
