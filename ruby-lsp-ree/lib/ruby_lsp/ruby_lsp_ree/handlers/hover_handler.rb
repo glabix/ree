@@ -33,6 +33,27 @@ module RubyLsp
         [documentation]
       end
 
+      def get_linked_object_hover_items(node)
+        parent_node = @node_context.parent
+        return [] unless parent_node.name == :link
+
+        ree_object = @finder.find_object(node.unescaped)
+
+        return [] unless ree_object
+
+        documentation =  <<~DOC
+        \`\`\`ruby
+        #{node.unescaped}#{get_detail_string(ree_object)}
+        \`\`\`
+        ---
+        #{@finder.object_documentation(ree_object)}
+
+        [#{path_from_package_folder(ree_object.uri)}](#{ree_object.uri})
+        DOC
+
+        [documentation]
+      end
+
       def get_detail_string(ree_object)
         return '' if ree_object.signatures.size == 0
 
