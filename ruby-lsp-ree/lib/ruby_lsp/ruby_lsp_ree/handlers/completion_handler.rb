@@ -110,7 +110,7 @@ module RubyLsp
       def get_enum_values_completion_items(enum_obj, location)
         enum_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(enum_obj.uri, :enum)
 
-        class_name = enum_node.get_class_name
+        class_name = enum_node.full_class_name
 
         label_details = Interface::CompletionItemLabelDetails.new(
           description: "from: #{class_name}",

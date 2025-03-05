@@ -1,3 +1,9 @@
+## [0.1.6] - 2025-03-04
+
+- file rename triggers class name change
+- add documentation string to hover
+- add hover on link section beans
+
 ## [0.1.5] - 2025-02-28
 
 - improved hover format

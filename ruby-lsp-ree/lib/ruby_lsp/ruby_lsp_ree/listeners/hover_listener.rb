@@ -9,8 +9,12 @@ module RubyLsp
         @response_builder = response_builder
         @handler = RubyLsp::Ree::HoverHandler.new(index, node_context)
 
-        dispatcher.register(self, :on_call_node_enter)
-        dispatcher.register(self, :on_constant_read_node_enter)
+        dispatcher.register(
+          self, 
+          :on_call_node_enter,
+          :on_symbol_node_enter,
+          :on_constant_read_node_enter
+        )
       end
 
       def on_constant_read_node_enter(node)
@@ -30,6 +34,13 @@ module RubyLsp
         put_items_into_response(hover_items)
       rescue => e
         $stderr.puts("error in hover listener(on_call_node_enter): #{e.message} : #{e.backtrace.first}")
+      end
+
+      def on_symbol_node_enter(node)
+        hover_items = @handler.get_linked_object_hover_items(node)
+        put_items_into_response(hover_items)
+      rescue => e
+        $stderr.puts("error in hover listener(on_symbol_node_enter): #{e.message} : #{e.backtrace.first}")
       end
 
       def put_items_into_response(items)
