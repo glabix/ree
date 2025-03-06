@@ -10,6 +10,6 @@ class ReeErrors::InvalidParamError
 
   contract Symbol, Nilor[String], Kwargs[msg: Nilor[String]] => SubclassOf[Error]
   def call(code, locale = nil, msg: nil)
-    build_error(get_caller, :invalid_param, code,locale, msg)
+    build_error(get_caller, :invalid_param, code, locale, msg)
   end
 end
