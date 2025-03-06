@@ -45,6 +45,19 @@ module RubyLspReeHelper
     )
   end
 
+  def send_definition_request(server, uri, position)
+    server.process_message(
+      id: 1,
+      method: "textDocument/definition",
+      params: {
+        textDocument: {
+          uri: uri,
+        },
+        position: position
+      }
+    )
+  end
+
   def send_hover_request(server, uri, position)
     server.process_message(
       id: 1,
