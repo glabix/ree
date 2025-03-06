@@ -13,6 +13,7 @@ module RubyLsp
         @index = index
         @uri = uri
         @node_context = node_context
+        @root_node = @node_context.instance_variable_get(:@nesting_nodes).first
         @finder = ReeObjectFinder.new(@index)
       end
 
@@ -71,7 +72,15 @@ module RubyLsp
         message = node.message
         result = []
         
-        definition_item = ReeObjectFinder.new(@index).find_object(message)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
+        link_node = parsed_doc.find_link_node(message)
+
+        definition_item = if link_node
+          @finder.find_object_for_package(message, link_node.link_package_name)
+        else
+          @finder.find_object(message)
+        end
+
         return [] unless definition_item
 
         definition_uri = definition_item.uri.to_s

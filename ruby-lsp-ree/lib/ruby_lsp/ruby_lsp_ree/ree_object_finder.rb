@@ -1,6 +1,10 @@
+require_relative "utils/ree_lsp_utils"
+
 module RubyLsp
   module Ree
     class ReeObjectFinder
+      include RubyLsp::Ree::ReeLspUtils
+
       MAX_LIMIT = 1000
 
       REE_OBJECT_STRING = 'ree_object'
@@ -40,6 +44,13 @@ module RubyLsp
         return unless objects_by_name
 
         objects_by_name.detect{ _1.comments.to_s.lines.first&.chomp == REE_OBJECT_STRING }
+      end
+
+      def find_object_for_package(name, package_name)
+        objects_by_name = @index[name]
+        return unless objects_by_name
+
+        objects_by_name.detect{ _1.comments.to_s.lines.first&.chomp == REE_OBJECT_STRING && package_name_from_uri(_1.uri) == package_name }
       end
 
       def find_objects_by_types(name, types)
