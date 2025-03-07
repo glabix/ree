@@ -7,10 +7,6 @@ module ReeErrors
     link :underscore, from: :ree_string
 
     def initialize(msg = nil)
-      if !msg && !locale && !default_msg
-        raise ArgumentError, "message, locale or default message should be specified"
-      end
-
       message = if msg
         msg
       elsif default_msg
@@ -34,8 +30,10 @@ module ReeErrors
 
             if check_locale_exists(loc = "#{mod}.errors.#{klass}.#{path}")
               t(loc, default_by_locale: :en)
-            else check_locale_exists(loc = "#{mod}.errors.#{path}")
+            elsif check_locale_exists(loc = "#{mod}.errors.#{path}")
               t(loc, default_by_locale: :en)
+            else
+              raise ArgumentError.new("Translation missing for: #{klass}.#{path}")
             end
           else
           end

@@ -14,4 +14,16 @@ RSpec.describe ReeErrors::InvalidParamError do
     expect(error.type).to eq(:invalid_param)
     expect(error.locale).to eq(nil)
   }
+
+  it {
+    klass = invalid_param_error(:locale_error1)
+    error = klass.new
+
+    expect(klass).to be_a(Class)
+    expect(error).to be_a(ReeErrors::Error)
+    expect(error.message).to eq('locale error 1')
+    expect(error.code).to eq(:locale_error1)
+    expect(error.type).to eq(:invalid_param)
+    expect(error.locale).to eq(nil)
+  }
 end
