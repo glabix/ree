@@ -179,6 +179,10 @@ class RubyLsp::Ree::ParsedDocument
     class_node.constant_path.name.to_s
   end
 
+  def module_name
+    class_node.constant_path&.parent&.name.to_s
+  end
+
   def full_class_name
     name_parts = [class_node.constant_path&.parent&.name, class_node.constant_path.name]
     name_parts.compact.map(&:to_s).join('::')

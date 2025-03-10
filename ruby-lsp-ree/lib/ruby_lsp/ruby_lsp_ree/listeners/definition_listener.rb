@@ -42,7 +42,12 @@ module RubyLsp
       end
 
       def on_symbol_node_enter(node)
-        definition_items = @handler.get_linked_object_definition_items(node)
+        definition_items = if @ree_context.is_error_definition?
+          @handler.get_error_code_definition_items(node)
+        else
+          @handler.get_linked_object_definition_items(node)
+        end
+        
         put_items_into_response(definition_items)
       rescue => e
         $stderr.puts("error in definition listener(on_symbol_node_enter): #{e.message} : #{e.backtrace.first}")
