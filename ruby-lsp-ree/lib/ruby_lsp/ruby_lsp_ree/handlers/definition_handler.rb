@@ -138,8 +138,25 @@ module RubyLsp
       end
 
       def get_error_locales_definition_items(node)
-        $stderr.puts("get_error_locales_definition_items #{@node_context.parent.inspect}")
-        []
+        $stderr.puts("get_error_locales_definition_items")
+
+        locales_folder = package_locales_folder_path(@uri.path)
+        $stderr.puts("get_error_locales_definition_items1 #{locales_folder} #{File.directory?(locales_folder)}")
+
+        return [] unless File.directory?(locales_folder)
+
+        result = []
+        Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
+          result << Interface::Location.new(
+            uri: locale_file,
+            range: Interface::Range.new( # TODO get correct line
+              start: Interface::Position.new(line: 0, character: 0),
+              end: Interface::Position.new(line: 0, character: 0),
+            ),
+          )
+        end
+
+        result
       end
     end
   end

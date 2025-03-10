@@ -8,6 +8,16 @@ module RubyLsp
         Dir[File.join('**', file_name)].first
       end
 
+      def package_locales_folder_path(uri)
+        uri_parts = uri.to_s.chomp(File.extname(uri.to_s)).split('/')
+
+        package_folder_index = uri_parts.index('package')
+        return unless package_folder_index
+
+        path_parts = uri_parts.take(package_folder_index+2) + ['locales']
+        path_parts.join('/')
+      end
+      
       def package_name_from_uri(uri)
         uri_parts = uri.to_s.split('/')
         
