@@ -205,8 +205,6 @@ module RubyLsp
         regex = /^\s*#{Regexp.escape(current_key)}:/
 
         File.open(file_path, 'r:UTF-8').each_with_index do |line, line_index|
-          $stderr.puts(line)
-          $stderr.puts(line_index)
           if line.match?(regex)
             current_key_index += 1
             current_key = key_parts[current_key_index]
