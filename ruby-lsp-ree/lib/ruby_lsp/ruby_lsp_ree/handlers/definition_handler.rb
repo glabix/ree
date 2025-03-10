@@ -146,17 +146,46 @@ module RubyLsp
         return [] unless File.directory?(locales_folder)
 
         result = []
+        key_path = node.unescaped
+
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
+          line = find_locale_key_line(locale_file, key_path)
+
           result << Interface::Location.new(
             uri: locale_file,
-            range: Interface::Range.new( # TODO get correct line
-              start: Interface::Position.new(line: 0, character: 0),
-              end: Interface::Position.new(line: 0, character: 0),
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: line, character: 0),
+              end: Interface::Position.new(line: line, character: 0),
             ),
           )
         end
 
+
         result
+      end
+
+      def find_locale_key_line(file_path, key_path)
+        loc_key = File.basename(file_path, '.yml')
+
+        key_parts = [loc_key] + key_path.split('.')
+
+        current_key_index = 0
+        current_key = key_parts[current_key_index]
+        regex = /^\s*#{Regexp.escape(current_key)}:/
+
+        File.open(file_path, 'r:UTF-8').each_with_index do |line, line_index|
+          $stderr.puts(line)
+          $stderr.puts(line_index)
+          if line.match?(regex)
+            current_key_index += 1
+            current_key = key_parts[current_key_index]
+            return line_index unless current_key
+
+            regex = /^\s*#{Regexp.escape(current_key)}:/
+          end
+        end
+
+        0
       end
     end
   end
