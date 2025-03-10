@@ -1,4 +1,5 @@
 require_relative "../handlers/definition_handler"
+require_relative "../ree_context"
 
 module RubyLsp
   module Ree
@@ -8,6 +9,7 @@ module RubyLsp
       def initialize(response_builder, node_context, index, dispatcher, uri)
         @response_builder = response_builder
         @handler = RubyLsp::Ree::DefinitionHandler.new(index, uri, node_context)
+        @ree_context = RubyLsp::Ree::ReeContext.new(node_context)
 
         dispatcher.register(
           self, 
@@ -47,7 +49,12 @@ module RubyLsp
       end
 
       def on_string_node_enter(node)
-        definition_items = @handler.get_linked_filepath_definition_items(node)
+        definition_items = if @ree_context.is_error_definition?
+          @handler.get_error_locales_definition_items(node)
+        else
+          @handler.get_linked_filepath_definition_items(node)
+        end
+
         put_items_into_response(definition_items)
       rescue => e
         $stderr.puts("error in definition listener(on_string_node_enter): #{e.message} : #{e.backtrace.first}")

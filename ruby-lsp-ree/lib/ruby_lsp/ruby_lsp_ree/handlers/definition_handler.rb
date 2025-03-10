@@ -136,6 +136,11 @@ module RubyLsp
           ),
         )
       end
+
+      def get_error_locales_definition_items(node)
+        $stderr.puts("get_error_locales_definition_items #{@node_context.parent.inspect}")
+        []
+      end
     end
   end
 end
