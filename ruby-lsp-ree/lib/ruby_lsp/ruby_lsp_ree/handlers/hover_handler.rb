@@ -2,13 +2,14 @@ require_relative "../ree_object_finder"
 require_relative "../parsing/parsed_document_builder"
 require_relative "../parsing/parsed_link_node"
 require_relative "../utils/ree_lsp_utils"
-require 'yaml'
+require_relative "../utils/ree_locale_utils"
 
 module RubyLsp
   module Ree
     class HoverHandler
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
+      include RubyLsp::Ree::ReeLocaleUtils
 
       def initialize(index, node_context)
         @index = index
@@ -118,27 +119,11 @@ module RubyLsp
         [documentation]
       end
 
-      def find_locale_value(file_path, key_path)
-        loc_yaml = YAML.load_file(file_path)
-        loc_key = File.basename(file_path, '.yml')
-        key_parts = [loc_key] + key_path.split('.')
-
-        loc_yaml.dig(*key_parts)
-      end
-
       def get_uri_from_object(parsed_doc)
         obj = parsed_doc.links_container_node_name
 
         ree_obj = @finder.find_object(obj)
         ree_obj.uri
-      end
-
-      def underscore(str)
-        str.gsub(/::/, '/')
-           .gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
-           .gsub(/([a-z\d])([A-Z])/,'\1_\2')
-           .tr("-", "_")
-           .downcase
       end
     end
   end

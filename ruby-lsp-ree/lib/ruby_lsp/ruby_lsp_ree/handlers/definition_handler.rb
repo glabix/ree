@@ -2,12 +2,14 @@ require_relative "../utils/ree_lsp_utils"
 require_relative "../ree_object_finder"
 require_relative "../parsing/parsed_link_node"
 require_relative "../parsing/parsed_document_builder"
+require_relative "../utils/ree_locale_utils"
 
 module RubyLsp
   module Ree
     class DefinitionHandler
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
+      include RubyLsp::Ree::ReeLocaleUtils
 
       def initialize(index, uri, node_context)
         @index = index
@@ -157,7 +159,6 @@ module RubyLsp
           )
         end
 
-
         result
       end
 
@@ -189,38 +190,7 @@ module RubyLsp
           )
         end
 
-
         result
-      end
-
-      def find_locale_key_line(file_path, key_path)
-        loc_key = File.basename(file_path, '.yml')
-
-        key_parts = [loc_key] + key_path.split('.')
-
-        current_key_index = 0
-        current_key = key_parts[current_key_index]
-        regex = /^\s*#{Regexp.escape(current_key)}:/
-
-        File.open(file_path, 'r:UTF-8').each_with_index do |line, line_index|
-          if line.match?(regex)
-            current_key_index += 1
-            current_key = key_parts[current_key_index]
-            return line_index unless current_key
-
-            regex = /^\s*#{Regexp.escape(current_key)}:/
-          end
-        end
-
-        0
-      end
-
-      def underscore(str)
-        str.gsub(/::/, '/')
-           .gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2')
-           .gsub(/([a-z\d])([A-Z])/,'\1_\2')
-           .tr("-", "_")
-           .downcase
       end
     end
   end
