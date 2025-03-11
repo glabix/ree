@@ -14,6 +14,7 @@ module RubyLsp
           self, 
           :on_call_node_enter,
           :on_symbol_node_enter,
+          :on_string_node_enter, 
           :on_constant_read_node_enter
         )
       end
@@ -35,6 +36,16 @@ module RubyLsp
         put_items_into_response(hover_items)
       rescue => e
         $stderr.puts("error in hover listener(on_call_node_enter): #{e.message} : #{e.backtrace.first}")
+      end
+
+      def on_string_node_enter(node)
+        return unless @ree_context.is_error_definition?
+        
+        hover_items = @handler.get_error_locales_hover_items(node)
+        
+        put_items_into_response(hover_items)
+      rescue => e
+        $stderr.puts("error in hover listener(on_string_node_enter): #{e.message} : #{e.backtrace.first}")
       end
 
       def on_symbol_node_enter(node)

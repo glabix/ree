@@ -64,12 +64,35 @@ module RubyLsp
         signature.parameters.map(&:decorated_name).join(', ')
       end
 
-      def get_error_code_hover_items(node)
-        uri = get_uri_from_object()
+      def get_error_locales_hover_items(node)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, nil)
+        uri = get_uri_from_object(parsed_doc)
 
         locales_folder = package_locales_folder_path(uri.path)
+        return [] unless File.directory?(locales_folder)
 
-        $stderr.puts(locales_folder)
+        result = []
+        key_path = node.unescaped
+
+        documentation = ''
+
+        Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
+          value = find_locale_value(locale_file, key_path)
+
+          if value
+            loc_key = File.basename(locale_file, '.yml')
+            documentation += "#{loc_key}: #{value}\n\n"
+          end
+        end
+
+        [documentation]
+      end
+
+      def get_error_code_hover_items(node)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, nil)
+        uri = get_uri_from_object(parsed_doc)
+
+        locales_folder = package_locales_folder_path(uri.path)
         return [] unless File.directory?(locales_folder)
 
         result = []
@@ -77,20 +100,14 @@ module RubyLsp
         key_path = if @node_context.parent.arguments.arguments.size > 1
           @node_context.parent.arguments.arguments[1].unescaped
         else
-          parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, uri)
-
           mod = underscore(parsed_doc.module_name)
           "#{mod}.errors.#{node.unescaped}"
         end
-
-        $stderr.puts(key_path)
-
 
         documentation = ''
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
           value = find_locale_value(locale_file, key_path)
-          $stderr.puts(value)
 
           if value
             loc_key = File.basename(locale_file, '.yml')
@@ -109,14 +126,10 @@ module RubyLsp
         loc_yaml.dig(*key_parts)
       end
 
-      def get_uri_from_object()
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, nil)
+      def get_uri_from_object(parsed_doc)
         obj = parsed_doc.links_container_node_name
 
-        $stderr.puts(obj.inspect)
         ree_obj = @finder.find_object(obj)
-        $stderr.puts(ree_obj.uri.inspect)
-
         ree_obj.uri
       end
 
