@@ -168,16 +168,14 @@ module RubyLsp
 
         result = []
 
-        key_paths = if @node_context.parent.arguments.arguments.size > 1
-          [@node_context.parent.arguments.arguments[1].unescaped]
+        key_path = if @node_context.parent.arguments.arguments.size > 1
+          @node_context.parent.arguments.arguments[1].unescaped
         else
           parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
 
           mod = underscore(parsed_doc.module_name)
           "#{mod}.errors.#{node.unescaped}"
         end
-
-        key_path = node.unescaped
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
           line = find_locale_key_line(locale_file, key_path)

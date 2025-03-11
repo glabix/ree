@@ -8,6 +8,7 @@ module RubyLsp
       def initialize(response_builder, node_context, index, dispatcher)
         @response_builder = response_builder
         @handler = RubyLsp::Ree::HoverHandler.new(index, node_context)
+        @ree_context = RubyLsp::Ree::ReeContext.new(node_context)
 
         dispatcher.register(
           self, 
@@ -37,7 +38,12 @@ module RubyLsp
       end
 
       def on_symbol_node_enter(node)
-        hover_items = @handler.get_linked_object_hover_items(node)
+        hover_items = if @ree_context.is_error_definition?
+          @handler.get_error_code_hover_items(node)
+        else
+          @handler.get_linked_object_hover_items(node)
+        end
+
         put_items_into_response(hover_items)
       rescue => e
         $stderr.puts("error in hover listener(on_symbol_node_enter): #{e.message} : #{e.backtrace.first}")
