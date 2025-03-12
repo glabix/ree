@@ -76,13 +76,30 @@ module RubyLsp
         # pp parsed_doc.doc_instance_methods
 
         parsed_doc.doc_instance_methods.select(&:has_contract?).each do |doc_instance_method|
-          pp raised_errors = doc_instance_method.raised_errors(source, parsed_doc.error_definitions)
+          raised_errors = doc_instance_method.raised_errors(source, parsed_doc.error_definitions)
           throws_errors = doc_instance_method.throws_errors
 
           missed_errors = raised_errors - throws_errors
 
-          add_missed_errors(doc_instance_method, missed_errors)
+          source = add_missed_errors(source, doc_instance_method, missed_errors)
         end
+
+        source
+      end
+
+      def add_missed_errors(source, doc_instance_method, missed_errors)
+        source_lines = source.lines
+
+        if doc_instance_method.has_throw_section?
+          position = doc_instance_method.throw_arguments_end_position
+          line = doc_instance_method.throw_arguments_end_line
+
+          source_lines[line] = source_lines[line][0..position] + ", #{missed_errors.join(', ')})\n"
+        else
+
+        end
+
+        source_lines.join()
       end
     end
   end

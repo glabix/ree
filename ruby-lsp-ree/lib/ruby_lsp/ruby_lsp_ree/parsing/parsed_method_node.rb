@@ -39,8 +39,20 @@ class RubyLsp::Ree::ParsedMethodNode
 
   def throws_errors
     return [] unless has_contract?
-    return [] if @contract_node.name != :throws
+    return [] unless has_throw_section?
 
     @contract_node.arguments.arguments.map{ _1.name.to_s }
+  end
+
+  def has_throw_section?
+    @contract_node && @contract_node.name == :throws
+  end
+
+  def throw_arguments_end_position
+    @contract_node.arguments.arguments.last.location.end_column - 1
+  end
+
+  def throw_arguments_end_line
+    @contract_node.arguments.arguments.last.location.end_line - 1
   end
 end

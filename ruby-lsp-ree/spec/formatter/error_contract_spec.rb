@@ -22,7 +22,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
     result = subject.run_formatting('', document)
     
-    expect(result.lines[5].strip).to eq('contract(Integer => nil).throws(InvalidArg2Error, InvalidArg1Error)')
+    expect(result.lines[6].strip).to eq('contract(Integer => nil).throws(InvalidArg2Error, InvalidArg1Error)')
   end
 
   xit "adds throw section if needed" do
