@@ -18,6 +18,11 @@ class RubyLsp::Ree::ParsedDocument
     :validation_error
   ]
 
+  CONTRACT_CALL_NODE_NAMES = [
+    :contract,
+    :throws
+  ]
+
   attr_reader :ast, :package_name, :class_node, :fn_node, :class_includes,
     :link_nodes, :values, :action_node, :dao_node, :filters,
     :bean_node, :bean_methods, :mapper_node, :links_container_block_node, :aggregate_node,
@@ -179,7 +184,7 @@ class RubyLsp::Ree::ParsedDocument
 
     current_contract_node = nil
     class_node.body.body.each do |node|
-      if node.is_a?(Prism::CallNode) && node_name(node) == :contract
+      if node.is_a?(Prism::CallNode) && CONTRACT_CALL_NODE_NAMES.include?(node_name(node))
         current_contract_node = node
       else
         if node.is_a?(Prism::DefNode)
