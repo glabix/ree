@@ -7,12 +7,13 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   it "sorts links inside fn" do
     source =  <<~RUBY
       class SomeClass
-        fn :some_class do
-          link :linked_service_2
-          link :linked_service_1
-        end
+        fn :some_class
 
-        def call
+        InvalidArg1Error = invalid_param_error(:invalid_arg1_error)
+
+        contract(Integer => nil)
+        def call(arg1)
+          raise InvalidArg1Error.new
         end
       end
     RUBY
@@ -20,7 +21,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
     result = subject.run_formatting('', document)
     
-    expect(result.lines[2]).to match('linked_service_1')
-    expect(result.lines[3]).to match('linked_service_2')
+    expect(result.lines[5].strip).to eq('contract(Integer => nil).throws(InvalidArg1Error)')
   end
 end

@@ -9,7 +9,9 @@ module RubyLsp
 
       def run_formatting(uri, document)
         source = document.source
-        sort_links(source)
+        
+        sorted_source = sort_links(source)
+        add_missing_error_contracts(source)
       rescue => e
         $stderr.puts("error in ree_formatter: #{e.message} : #{e.backtrace.first}")
       end
@@ -58,6 +60,26 @@ module RubyLsp
         end
 
         source_lines.join()
+      end
+
+      def add_missing_error_contracts(source)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
+        return source if !parsed_doc || !parsed_doc.class_node
+
+        parsed_doc.parse_error_definitions
+        parsed_doc.parse_instance_methods
+
+        # pp parsed_doc.error_definitions
+        # pp parsed_doc.doc_instance_methods
+
+        parsed_doc.doc_instance_methods.select(&:has_contract?).each do |doc_instance_method|
+          raised_errors = doc_instance_method.raised_errors(source, parsed_doc.error_definitions)
+          throws_errors = doc_instance_method.throws_errors
+
+          missed_errors = raised_errors - throws_errors
+
+          add_missed_errors(doc_instance_method, missed_errors)
+        end
       end
     end
   end
