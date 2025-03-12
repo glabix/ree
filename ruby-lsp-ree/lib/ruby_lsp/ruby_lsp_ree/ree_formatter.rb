@@ -66,15 +66,13 @@ module RubyLsp
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
         return source if !parsed_doc || !parsed_doc.class_node
 
-
         parsed_doc.parse_error_definitions
         parsed_doc.parse_instance_methods
 
-        # pp parsed_doc.doc_instance_methods
-
-        # pp parsed_doc.error_definitions
-        # pp parsed_doc.doc_instance_methods
-
+        # TODO
+        # - add if no throw section
+        # - add specs with different throw section formatting
+        # - check if nested methods raise error
         parsed_doc.doc_instance_methods.select(&:has_contract?).each do |doc_instance_method|
           raised_errors = doc_instance_method.raised_errors(source, parsed_doc.error_definitions)
           throws_errors = doc_instance_method.throws_errors
