@@ -66,17 +66,13 @@ module RubyLsp
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
         return source if !parsed_doc || !parsed_doc.class_node
 
-
         parsed_doc.parse_error_definitions
         parsed_doc.parse_instance_methods
 
-        # pp parsed_doc.doc_instance_methods
-
-        # pp parsed_doc.error_definitions
-        # pp parsed_doc.doc_instance_methods
-
         parsed_doc.doc_instance_methods.select(&:has_contract?).each do |doc_instance_method|
-          pp raised_errors = doc_instance_method.raised_errors(source, parsed_doc.error_definitions)
+          doc_instance_method.parse_nested_local_methods
+          
+          raised_errors = doc_instance_method.raised_errors_nested(source, parsed_doc.error_definitions)
           throws_errors = doc_instance_method.throws_errors
 
           missed_errors = raised_errors - throws_errors

@@ -20,6 +20,20 @@ class RubyLsp::Ree::ParsedMethodNode
     @method_node.location.end_line - 1
   end
 
+  def raised_errors_nested(source, error_definitions)
+    return [] if error_definitions.size == 0
+    
+    raised = raised_errors(source, error_definitions)
+    
+    not_detected_errors = error_definitions.select{ !raised.include?(_1.name.to_s) }
+    @nested_local_methods.each do |nested_method|
+      raised += nested_method.raised_errors(source, not_detected_errors)
+      not_detected_errors = error_definitions.select{ !raised.include?(_1.name.to_s) }
+    end
+
+    raised
+  end
+
   def raised_errors(source, error_definitions)
     raised = []
     error_names = error_definitions.map(&:name).map(&:to_s)
