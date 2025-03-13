@@ -70,13 +70,14 @@ module RubyLsp
         parsed_doc.parse_instance_methods
 
         parsed_doc.doc_instance_methods.select(&:has_contract?).each do |doc_instance_method|
-          doc_instance_method.parse_nested_local_methods
-          
+          doc_instance_method.parse_nested_local_methods(parsed_doc.doc_instance_methods)
+
           raised_errors = doc_instance_method.raised_errors_nested(source, parsed_doc.error_definitions)
           throws_errors = doc_instance_method.throws_errors
 
           missed_errors = raised_errors - throws_errors
 
+          pp missed_errors
           add_missed_errors(doc_instance_method, missed_errors)
         end
       end
