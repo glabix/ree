@@ -69,10 +69,6 @@ module RubyLsp
         parsed_doc.parse_error_definitions
         parsed_doc.parse_instance_methods
 
-        # TODO
-        # - add if no throw section
-        # - add specs with different throw section formatting
-        # - check if nested methods raise error
         parsed_doc.doc_instance_methods.select(&:has_contract?).each do |doc_instance_method|
           doc_instance_method.parse_nested_local_methods(parsed_doc.doc_instance_methods)
 
