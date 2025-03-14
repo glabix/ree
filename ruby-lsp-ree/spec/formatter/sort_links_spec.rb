@@ -10,6 +10,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         fn :some_class do
           link :linked_service_2
           link :linked_service_1
+        end
 
         def call
         end
