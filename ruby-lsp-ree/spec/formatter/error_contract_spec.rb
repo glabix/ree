@@ -4,7 +4,7 @@ require 'spec_helper'
 RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   subject{ RubyLsp::Ree::ReeFormatter.new }
 
-  xit "adds error to contract throw section" do
+  it "adds error to contract throw section" do
     source =  <<~RUBY
       class SomeClass
         fn :some_class
@@ -25,7 +25,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[6].strip).to eq('contract(Integer => nil).throws(InvalidArg2Error, InvalidArg1Error)')
   end
 
-  xit "adds throw section if needed" do
+  it "adds throw section if needed" do
     source =  <<~RUBY
       class SomeClass
         fn :some_class

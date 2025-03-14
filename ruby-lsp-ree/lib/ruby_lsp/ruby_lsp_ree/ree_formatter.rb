@@ -11,7 +11,7 @@ module RubyLsp
         source = document.source
         
         sorted_source = sort_links(source)
-        add_missing_error_contracts(source)
+        add_missing_error_contracts(sorted_source)
       rescue => e
         $stderr.puts("error in ree_formatter: #{e.message} : #{e.backtrace.first}")
       end
