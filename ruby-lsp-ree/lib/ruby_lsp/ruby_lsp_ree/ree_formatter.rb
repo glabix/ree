@@ -74,11 +74,12 @@ module RubyLsp
         # - add specs with different throw section formatting
         # - check if nested methods raise error
         parsed_doc.doc_instance_methods.select(&:has_contract?).each do |doc_instance_method|
+          doc_instance_method.parse_nested_local_methods(parsed_doc.doc_instance_methods)
+
           raised_errors = doc_instance_method.raised_errors(source, parsed_doc.error_definitions)
           throws_errors = doc_instance_method.throws_errors
 
           missed_errors = raised_errors - throws_errors
-
           source = add_missed_errors(source, doc_instance_method, missed_errors)
         end
 
