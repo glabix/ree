@@ -73,6 +73,14 @@ class RubyLsp::Ree::ParsedMethodNode
   def throw_arguments_end_line
     @contract_node.arguments.arguments.last.location.end_line - 1
   end
+
+  def contract_node_end_position
+    @contract_node.location.end_column - 1
+  end
+
+  def contract_node_end_line
+    @contract_node.location.end_line - 1
+  end
   
   def parse_nested_local_methods(local_methods)
     local_method_names = local_methods.map(&:name)
