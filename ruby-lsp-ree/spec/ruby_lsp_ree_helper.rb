@@ -76,4 +76,10 @@ module RubyLspReeHelper
       File.join(__dir__, 'sample_package')
     )
   end
+
+  def sample_file_uri
+    file_name = 'my_file'
+    package_name = 'sample_package'
+    URI("file://#{sample_package_dir}/package/#{package_name}/#{file_name}.rb")
+  end
 end

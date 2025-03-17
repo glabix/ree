@@ -13,11 +13,7 @@ RSpec.describe "RubyLsp::Ree::DefinitionListener" do
       end
     RUBY
 
-    file_name = 'my_file'
-    package_name = 'sample_package'
-    file_uri = URI("file://#{sample_package_dir}/package/#{package_name}/#{file_name}.rb")
-    
-    with_server(source, file_uri) do |server, uri|
+    with_server(source, sample_file_uri) do |server, uri|
       send_definition_request(server, uri, { line: 1, character: 47 })
       
       result = server.pop_response
@@ -37,11 +33,7 @@ RSpec.describe "RubyLsp::Ree::DefinitionListener" do
       end
     RUBY
 
-    file_name = 'my_file'
-    package_name = 'sample_package'
-    file_uri = URI("file://#{sample_package_dir}/package/#{package_name}/#{file_name}.rb")
-    
-    with_server(source, file_uri) do |server, uri|
+    with_server(source, sample_file_uri) do |server, uri|
       send_definition_request(server, uri, { line: 1, character: 47 })
       
       result = server.pop_response
@@ -61,11 +53,7 @@ RSpec.describe "RubyLsp::Ree::DefinitionListener" do
       end
     RUBY
 
-    file_name = 'my_file'
-    package_name = 'sample_package'
-    file_uri = URI("file://#{sample_package_dir}/package/#{package_name}/#{file_name}.rb")
-    
-    with_server(source, file_uri) do |server, uri|
+    with_server(source, sample_file_uri) do |server, uri|
       send_definition_request(server, uri, { line: 1, character: 47 })
       
       result = server.pop_response
