@@ -22,29 +22,18 @@ module RubyLsp
         loc_yaml.dig(*key_parts)
       end
 
-      def find_locale_key_line(file_path, key_path)
-        puts "=========================1"
-
+      def find_locale_key_location(file_path, key_path)
         loc_key = File.basename(file_path, '.yml')
 
-        pp key_parts = [loc_key] + key_path.split('.')
+        key_parts = [loc_key] + key_path.split('.')
         parsed_yaml = RubyLsp::Ree::YamlFileParser.parse(file_path)
-        puts "=========================!"
-        current_key_index = 0
-        current_key = key_parts[current_key_index]
-        regex = /^\s*#{Regexp.escape(current_key)}:/
+        key_location = parsed_yaml.dig(*key_parts)
 
-        File.open(file_path, 'r:UTF-8').each_with_index do |line, line_index|
-          if line.match?(regex)
-            current_key_index += 1
-            current_key = key_parts[current_key_index]
-            return line_index unless current_key
-
-            regex = /^\s*#{Regexp.escape(current_key)}:/
-          end
+        if key_location
+          OpenStruct.new(line: key_location.line, column: key_location.column)
+        else
+          OpenStruct.new(line: 0, column: 0)
         end
-
-        0
       end
     end
   end

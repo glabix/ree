@@ -148,13 +148,13 @@ module RubyLsp
         key_path = node.unescaped
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
-          line = find_locale_key_line(locale_file, key_path)
+          location = find_locale_key_location(locale_file, key_path)
 
           result << Interface::Location.new(
             uri: locale_file,
             range: Interface::Range.new(
-              start: Interface::Position.new(line: line, character: 0),
-              end: Interface::Position.new(line: line, character: 0),
+              start: Interface::Position.new(line: location.line, character: location.column),
+              end: Interface::Position.new(line: location.line, character: location.column),
             ),
           )
         end
@@ -178,13 +178,13 @@ module RubyLsp
         end
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
-          line = find_locale_key_line(locale_file, key_path)
+          location = find_locale_key_location(locale_file, key_path)
 
           result << Interface::Location.new(
             uri: locale_file,
             range: Interface::Range.new(
-              start: Interface::Position.new(line: line, character: 0),
-              end: Interface::Position.new(line: line, character: 0),
+              start: Interface::Position.new(line: location.line, character: location.column),
+              end: Interface::Position.new(line: location.line, character: location.column),
             ),
           )
         end
