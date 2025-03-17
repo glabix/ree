@@ -1,4 +1,5 @@
 require 'yaml'
+require_relative 'yaml_file_parser'
 
 module RubyLsp
   module Ree
@@ -22,10 +23,13 @@ module RubyLsp
       end
 
       def find_locale_key_line(file_path, key_path)
+        puts "=========================1"
+
         loc_key = File.basename(file_path, '.yml')
 
-        key_parts = [loc_key] + key_path.split('.')
-
+        pp key_parts = [loc_key] + key_path.split('.')
+        parsed_yaml = RubyLsp::Ree::YamlFileParser.parse(file_path)
+        puts "=========================!"
         current_key_index = 0
         current_key = key_parts[current_key_index]
         regex = /^\s*#{Regexp.escape(current_key)}:/

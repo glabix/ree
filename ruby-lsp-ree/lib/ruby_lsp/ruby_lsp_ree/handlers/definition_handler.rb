@@ -164,7 +164,6 @@ module RubyLsp
 
       def get_error_code_definition_items(node)
         locales_folder = package_locales_folder_path(@uri.path)
-
         return [] unless File.directory?(locales_folder)
 
         result = []
