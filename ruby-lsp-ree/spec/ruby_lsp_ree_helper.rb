@@ -70,4 +70,10 @@ module RubyLspReeHelper
       }
     )
   end
+
+  def sample_package_dir
+    @sample_package_dir ||= File.expand_path(
+      File.join(__dir__, 'sample_package')
+    )
+  end
 end
