@@ -3,6 +3,7 @@ module RubyLsp
     class ReeFormatter
       include RubyLsp::Requests::Support::Formatter
       include RubyLsp::Ree::ReeLspUtils
+      include RubyLsp::Ree::ReeLocaleUtils
 
       def initialize
       end
@@ -14,6 +15,23 @@ module RubyLsp
         add_missing_error_contracts(sorted_source)
       rescue => e
         $stderr.puts("error in ree_formatter: #{e.message} : #{e.backtrace.first}")
+      end
+
+      def run_diagnostic(uri, document)
+        detect_missing_error_locales(uri, document)
+        # [
+        #   RubyLsp::Interface::Diagnostic.new(
+        #     message: "Hello from custom formatter",
+        #     source: "Custom formatter",
+        #     severity: RubyLsp::Constant::DiagnosticSeverity::ERROR,
+        #     range: RubyLsp::Interface::Range.new(
+        #       start: RubyLsp::Interface::Position.new(line: 0, character: 0),
+        #       end: RubyLsp::Interface::Position.new(line: 2, character: 3),
+        #     ),
+        #   ),
+        # ]
+      rescue => e
+        $stderr.puts("error in ree_formatter_diagnostic: #{e.message} : #{e.backtrace.first}")
       end
 
       private
@@ -101,6 +119,51 @@ module RubyLsp
 
 
         source_lines.join()
+      end
+
+      def detect_missing_error_locales(uri, document)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(document.source)
+
+        locales_folder = package_locales_folder_path(uri.path)
+        return [] unless File.directory?(locales_folder)
+
+        result = []
+        key_paths = []
+        parsed_doc.parse_error_definitions
+        parsed_doc.error_definitions.each do |error_definition|
+          key_path = if error_definition.value.arguments.arguments.size > 1
+            error_definition.value.arguments.arguments[1].unescaped
+          else
+            mod = underscore(parsed_doc.module_name)
+            "#{mod}.errors.#{error_definition.value.arguments.arguments[0].unescaped}"
+          end
+
+          key_paths << key_path
+        end
+
+        # key_path = if @node_context.parent.arguments.arguments.size > 1
+        #   @node_context.parent.arguments.arguments[1].unescaped
+        # else
+        #   mod = underscore(parsed_doc.module_name)
+        #   "#{mod}.errors.#{node.unescaped}"
+        # end
+
+        # documentation = ''
+
+        # Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
+        #   value = find_locale_value(locale_file, key_path)
+
+        #   loc_key = File.basename(locale_file, '.yml')
+
+        #   if value
+        #     documentation += "#{loc_key}: #{value}\n\n"
+        #   else
+        #     documentation += "#{loc_key}: MISSING TRANSLATION\n\n"
+        #     documentation += "go to locale file: [#{loc_key}.yml](#{locale_file})\n\n"
+        #   end
+        # end
+
+        # [documentation]
       end
     end
   end

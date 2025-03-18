@@ -110,9 +110,13 @@ module RubyLsp
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
           value = find_locale_value(locale_file, key_path)
 
+          loc_key = File.basename(locale_file, '.yml')
+
           if value
-            loc_key = File.basename(locale_file, '.yml')
             documentation += "#{loc_key}: #{value}\n\n"
+          else
+            documentation += "#{loc_key}: MISSING TRANSLATION\n\n"
+            documentation += "go to locale file: [#{loc_key}.yml](#{locale_file})\n\n"
           end
         end
 
