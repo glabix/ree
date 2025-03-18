@@ -141,29 +141,27 @@ module RubyLsp
           key_paths << key_path
         end
 
-        # key_path = if @node_context.parent.arguments.arguments.size > 1
-        #   @node_context.parent.arguments.arguments[1].unescaped
-        # else
-        #   mod = underscore(parsed_doc.module_name)
-        #   "#{mod}.errors.#{node.unescaped}"
-        # end
+        Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
+          key_paths.each do |key_path|
+            value = find_locale_value(locale_file, key_path)
+            unless value
+              loc_key = File.basename(locale_file, '.yml')
 
-        # documentation = ''
+              # TODO correct error range
+              result <<RubyLsp::Interface::Diagnostic.new(
+                message: "Missing locale #{loc_key}: #{key_path}",
+                source: "Ree formatter",
+                severity: RubyLsp::Constant::DiagnosticSeverity::ERROR,
+                range: RubyLsp::Interface::Range.new( 
+                  start: RubyLsp::Interface::Position.new(line: 0, character: 0),
+                  end: RubyLsp::Interface::Position.new(line: 0, character: 0),
+                ),
+              )
+            end
+          end
+        end
 
-        # Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
-        #   value = find_locale_value(locale_file, key_path)
-
-        #   loc_key = File.basename(locale_file, '.yml')
-
-        #   if value
-        #     documentation += "#{loc_key}: #{value}\n\n"
-        #   else
-        #     documentation += "#{loc_key}: MISSING TRANSLATION\n\n"
-        #     documentation += "go to locale file: [#{loc_key}.yml](#{locale_file})\n\n"
-        #   end
-        # end
-
-        # [documentation]
+        result
       end
     end
   end

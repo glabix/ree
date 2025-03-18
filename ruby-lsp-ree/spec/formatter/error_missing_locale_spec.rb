@@ -22,7 +22,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
     result = subject.run_diagnostic(sample_file_uri, document)
 
-    expect(result.size).to eq(2)
+    expect(result.size).to eq(4)
     expect(result.first.message).to match('Missing locale')
   end
 end
