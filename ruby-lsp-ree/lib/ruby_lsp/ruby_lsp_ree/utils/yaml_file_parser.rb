@@ -1,20 +1,19 @@
 require 'psych'
 
-# TODO try to use refinement
-class Psych::Visitors::ToRuby
-  def visit_Psych_Nodes_Scalar(o)
-    register(o, OpenStruct.new(value: deserialize(o), line: o.start_line, column: o.start_column))
-  end
-end
-
 module RubyLsp
   module Ree
+    class NodeVisitor < Psych::Visitors::ToRuby
+      def visit_Psych_Nodes_Scalar(o)
+        register(o, OpenStruct.new(value: deserialize(o), line: o.start_line, column: o.start_column))
+      end
+    end
+    
     class YamlFileParser
       def self.parse(file_path)
         parser = Psych::Parser.new(Psych::TreeBuilder.new)
         parser.parse(File.read(file_path))
 
-        parse_result = Psych::Visitors::ToRuby.create.accept(parser.handler.root)
+        parse_result = NodeVisitor.create.accept(parser.handler.root)
         normalize_hash_keys(parse_result.first)
       end
 
