@@ -1,7 +1,9 @@
 module RubyLspReeHelper
-  def index_fn(server, name, package = nil)
+  def index_fn(server, name, package = nil, uri = nil)
     location = RubyIndexer::Location.new(0, 0, 0, 0)
-    file_uri = if package
+    file_uri = if uri
+      uri
+    elsif package
       URI("file:///#{package}/package/#{package}/#{name}.rb")
     else
       URI("file:///#{name}.rb")
