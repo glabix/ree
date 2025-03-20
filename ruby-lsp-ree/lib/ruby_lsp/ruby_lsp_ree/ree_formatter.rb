@@ -1,3 +1,7 @@
+require_relative 'formatters/sort_links_formatter'
+require_relative 'formatters/missing_error_definitions_formatter'
+require_relative 'formatters/missing_error_contracts_formatter'
+
 module RubyLsp
   module Ree
     class ReeFormatter
@@ -5,15 +9,16 @@ module RubyLsp
       include RubyLsp::Ree::ReeLspUtils
       include RubyLsp::Ree::ReeLocaleUtils
 
-      def initialize
-      end
-
       def run_formatting(uri, document)
         source = document.source
-        
-        updated_source = sort_links(source)
-        updated_source = add_missing_error_definitions(updated_source)
-        add_missing_error_contracts(updated_source)
+
+        formatters = [
+          RubyLsp::Ree::SortLinksFormatter,
+          RubyLsp::Ree::MissingErrorDefinitionsFormatter,
+          RubyLsp::Ree::MissingErrorContractsFormatter
+        ]
+
+        formatters.reduce(source){ |s, formatter| formatter.call(s) }
       rescue => e
         $stderr.puts("error in ree_formatter: #{e.message} : #{e.backtrace.first}")
       end
@@ -25,131 +30,6 @@ module RubyLsp
       end
 
       private
-
-      def sort_links(source)
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
-        return source if !parsed_doc.link_nodes&.any?
-
-        if parsed_doc.link_nodes.any?{ _1.location.start_line != _1.location.end_line }
-          $stderr.puts("multiline link definitions, don't sort")
-          return source
-        end
-
-        # sort link nodes
-        sorted_link_nodes = parsed_doc.link_nodes.sort{ |a, b|
-          a_name = a.node.arguments.arguments.first
-          b_name = b.node.arguments.arguments.first
-
-          if a_name.is_a?(Prism::SymbolNode) && !b_name.is_a?(Prism::SymbolNode)
-            -1
-          elsif b_name.is_a?(Prism::SymbolNode) && !a_name.is_a?(Prism::SymbolNode)
-            1
-          else
-            a_name.unescaped <=> b_name.unescaped
-          end
-        }
-
-        # check if no re-order
-        if parsed_doc.link_nodes.map{ _1.node.arguments.arguments.first.unescaped } == sorted_link_nodes.map{ _1.node.arguments.arguments.first.unescaped }
-          return source
-        end
-
-        # insert nodes to source
-        link_lines = parsed_doc.link_nodes.map{ _1.location.start_line }
-
-        source_lines = source.lines
-
-        sorted_lines = sorted_link_nodes.map do |sorted_link|
-          source_lines[sorted_link.location.start_line - 1]
-        end
-
-        link_lines.each_with_index do |link_line, index|
-          source_lines[link_line - 1] = sorted_lines[index]
-        end
-
-        source_lines.join()
-      end
-
-      def add_missing_error_definitions(source)
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
-        return source if !parsed_doc || !parsed_doc.class_node
-
-        parsed_doc.parse_error_definitions
-        parsed_doc.parse_instance_methods
-        parsed_doc.parse_links
-
-        existing_errors = parsed_doc.error_definition_names + parsed_doc.imported_constants
-
-        missed_errors = []
-        parsed_doc.doc_instance_methods.each do |doc_instance_method|
-          doc_instance_method.parse_nested_local_methods(parsed_doc.doc_instance_methods)
-
-          raised_errors = doc_instance_method.raised_errors_nested
-
-          missed_errors += raised_errors - existing_errors
-        end
-
-        add_missed_error_definitions(source, parsed_doc, missed_errors.uniq)
-      end
-
-      def add_missing_error_contracts(source)
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
-        return source if !parsed_doc || !parsed_doc.class_node
-
-        parsed_doc.parse_error_definitions
-        parsed_doc.parse_instance_methods
-
-        parsed_doc.doc_instance_methods.select(&:has_contract?).each do |doc_instance_method|
-          doc_instance_method.parse_nested_local_methods(parsed_doc.doc_instance_methods)
-
-          raised_errors = doc_instance_method.raised_errors_nested
-          throws_errors = doc_instance_method.throws_errors
-
-          missed_errors = raised_errors - throws_errors
-          source = add_missed_errors(source, doc_instance_method, missed_errors)
-        end
-
-        source
-      end
-
-      def add_missed_errors(source, doc_instance_method, missed_errors)
-        return source if missed_errors.size == 0
-
-        source_lines = source.lines
-
-        if doc_instance_method.has_throw_section?
-          position = doc_instance_method.throw_arguments_end_position
-          line = doc_instance_method.throw_arguments_end_line
-
-          source_lines[line] = source_lines[line][0..position] + ", #{missed_errors.join(', ')})\n"
-        else
-          position = doc_instance_method.contract_node_end_position
-          line = doc_instance_method.contract_node_end_line
-
-          source_lines[line] = source_lines[line][0..position] + ".throws(#{missed_errors.join(', ')})\n"
-        end
-
-        source_lines.join
-      end
-
-      def add_missed_error_definitions(source, parsed_doc, missed_errors)
-        return source if missed_errors.size == 0
-
-        source_lines = source.lines
-
-        if parsed_doc.error_definitions.size > 0
-          change_line = parsed_doc.error_definitions.map{ _1.location.start_line }.max - 1
-        else
-          change_line = parsed_doc.links_container_node.location.end_line - 1 
-          source_lines[change_line] += "\n"
-        end
-
-        missed_errors.each do |err|
-          source_lines[change_line] += "\s\s#{err} = invalid_param_error(:#{underscore(err)})\n"
-        end
-
-        source_lines.join
-      end 
 
       def detect_missing_error_locales(uri, document)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(document.source)
