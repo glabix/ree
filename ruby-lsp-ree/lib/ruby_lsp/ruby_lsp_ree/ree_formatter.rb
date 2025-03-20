@@ -76,6 +76,9 @@ module RubyLsp
 
         parsed_doc.parse_error_definitions
         parsed_doc.parse_instance_methods
+        parsed_doc.parse_links
+
+        existing_errors = parsed_doc.error_definition_names + parsed_doc.imported_constants
 
         missed_errors = []
         parsed_doc.doc_instance_methods.each do |doc_instance_method|
@@ -83,7 +86,7 @@ module RubyLsp
 
           raised_errors = doc_instance_method.raised_errors_nested
 
-          missed_errors += raised_errors - parsed_doc.error_definition_names
+          missed_errors += raised_errors - existing_errors
         end
 
         add_missed_error_definitions(source, parsed_doc, missed_errors.uniq)

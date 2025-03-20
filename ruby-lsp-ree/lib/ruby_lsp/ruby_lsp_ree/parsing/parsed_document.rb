@@ -244,4 +244,8 @@ class RubyLsp::Ree::ParsedDocument
 
     node.name
   end
+
+  def imported_constants
+    @link_nodes.map(&:imports).flatten.map(&:to_sym)
+  end
 end

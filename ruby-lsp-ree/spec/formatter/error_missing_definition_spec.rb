@@ -124,5 +124,20 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[5].strip).to eq('contract(Integer => nil).throws(InvalidArg1Error)')
   end
 
-  # TODO it "doesn't add definition for imported error" do
+  it "doesn't add definition for imported error" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :some_fn, import: -> { InvalidArg1Error }
+        end
+
+        def call(arg1)
+          raise InvalidArg1Error.new
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result).to eq(source)
+  end
 end
