@@ -26,7 +26,7 @@ class RubyLsp::Ree::ParsedDocument
   attr_reader :ast, :package_name, :class_node, :fn_node, :class_includes,
     :link_nodes, :values, :action_node, :dao_node, :filters,
     :bean_node, :bean_methods, :mapper_node, :links_container_block_node, :aggregate_node,
-    :error_definitions, :doc_instance_methods
+    :error_definitions, :error_definition_names, :doc_instance_methods
 
   def initialize(ast)
     @ast = ast
@@ -218,6 +218,8 @@ class RubyLsp::Ree::ParsedDocument
     @error_definitions = class_node.body.body
       .select{ _1.is_a?(Prism::ConstantWriteNode) }
       .select{ ERROR_DEFINITION_NAMES.include?(node_name(_1.value)) }
+
+    @error_definition_names = @error_definitions.map(&:name)
   end
 
   def class_name

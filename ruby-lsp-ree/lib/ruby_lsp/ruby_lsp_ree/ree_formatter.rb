@@ -11,25 +11,15 @@ module RubyLsp
       def run_formatting(uri, document)
         source = document.source
         
-        sorted_source = sort_links(source)
-        add_missing_error_contracts(sorted_source)
+        updated_source = sort_links(source)
+        updated_source = add_missing_error_definitions(updated_source)
+        add_missing_error_contracts(updated_source)
       rescue => e
         $stderr.puts("error in ree_formatter: #{e.message} : #{e.backtrace.first}")
       end
 
       def run_diagnostic(uri, document)
         detect_missing_error_locales(uri, document)
-        # [
-        #   RubyLsp::Interface::Diagnostic.new(
-        #     message: "Hello from custom formatter",
-        #     source: "Custom formatter",
-        #     severity: RubyLsp::Constant::DiagnosticSeverity::ERROR,
-        #     range: RubyLsp::Interface::Range.new(
-        #       start: RubyLsp::Interface::Position.new(line: 0, character: 0),
-        #       end: RubyLsp::Interface::Position.new(line: 2, character: 3),
-        #     ),
-        #   ),
-        # ]
       rescue => e
         $stderr.puts("error in ree_formatter_diagnostic: #{e.message} : #{e.backtrace.first}")
       end
@@ -80,6 +70,25 @@ module RubyLsp
         source_lines.join()
       end
 
+      def add_missing_error_definitions(source)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
+        return source if !parsed_doc || !parsed_doc.class_node
+
+        parsed_doc.parse_error_definitions
+        parsed_doc.parse_instance_methods
+
+        missed_errors = []
+        parsed_doc.doc_instance_methods.each do |doc_instance_method|
+          doc_instance_method.parse_nested_local_methods(parsed_doc.doc_instance_methods)
+
+          raised_errors = doc_instance_method.raised_errors_nested
+
+          missed_errors += raised_errors - parsed_doc.error_definition_names
+        end
+
+        add_missed_error_definitions(source, parsed_doc, missed_errors.uniq)
+      end
+
       def add_missing_error_contracts(source)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
         return source if !parsed_doc || !parsed_doc.class_node
@@ -90,7 +99,7 @@ module RubyLsp
         parsed_doc.doc_instance_methods.select(&:has_contract?).each do |doc_instance_method|
           doc_instance_method.parse_nested_local_methods(parsed_doc.doc_instance_methods)
 
-          raised_errors = doc_instance_method.raised_errors_nested(source, parsed_doc.error_definitions)
+          raised_errors = doc_instance_method.raised_errors_nested
           throws_errors = doc_instance_method.throws_errors
 
           missed_errors = raised_errors - throws_errors
@@ -117,9 +126,27 @@ module RubyLsp
           source_lines[line] = source_lines[line][0..position] + ".throws(#{missed_errors.join(', ')})\n"
         end
 
-
-        source_lines.join()
+        source_lines.join
       end
+
+      def add_missed_error_definitions(source, parsed_doc, missed_errors)
+        return source if missed_errors.size == 0
+
+        source_lines = source.lines
+
+        start_line = if parsed_doc.error_definitions.size > 0
+          parsed_doc.error_definitions.map{ _1.location.start_line }
+        else
+          parsed_doc.links_container_node.location.end_line
+        end
+
+        source_lines[start_line - 1] += "\n"
+        missed_errors.each do |err|
+          source_lines[start_line - 1] += "\s\s#{err} = invalid_param_error(:#{underscore(err)})\n"
+        end
+
+        source_lines.join
+      end 
 
       def detect_missing_error_locales(uri, document)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(document.source)
