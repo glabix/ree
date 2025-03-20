@@ -134,15 +134,15 @@ module RubyLsp
 
         source_lines = source.lines
 
-        start_line = if parsed_doc.error_definitions.size > 0
-          parsed_doc.error_definitions.map{ _1.location.start_line }
+        if parsed_doc.error_definitions.size > 0
+          change_line = parsed_doc.error_definitions.map{ _1.location.start_line }.max - 1
         else
-          parsed_doc.links_container_node.location.end_line
+          change_line = parsed_doc.links_container_node.location.end_line - 1 
+          source_lines[change_line] += "\n"
         end
 
-        source_lines[start_line - 1] += "\n"
         missed_errors.each do |err|
-          source_lines[start_line - 1] += "\s\s#{err} = invalid_param_error(:#{underscore(err)})\n"
+          source_lines[change_line] += "\s\s#{err} = invalid_param_error(:#{underscore(err)})\n"
         end
 
         source_lines.join

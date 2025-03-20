@@ -21,10 +21,97 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[3].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
   end
 
-  # TODO it "adds error definition after last esisting definition" do
-  # TODO it "adds error definition after fn block" do
-  # TODO it "adds error on 'raise ErrorClass'" do
-  # TODO it "correctly adds multiple error definitions" do
-  # TODO it "doesn't add definition on 'raise string'" do
+  it "adds error definition after last existing definition" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        InvalidArg2Error = invalid_param_error(:invalid_arg2_error)
+
+        def call(arg1)
+          raise InvalidArg1Error.new
+        end
+      end
+    RUBY
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
+    result = subject.run_formatting(sample_file_uri, document)
+
+    expect(result.lines[4].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
+  end
+
+  it "adds error definition after fn block" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :somthing
+        end
+
+        def call(arg1)
+          raise InvalidArg1Error.new
+        end
+      end
+    RUBY
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
+    result = subject.run_formatting(sample_file_uri, document)
+
+    expect(result.lines[5].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
+  end
+
+  it "adds error on 'raise ErrorClass'" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        def call(arg1)
+          raise InvalidArg1Error
+        end
+      end
+    RUBY
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
+    result = subject.run_formatting(sample_file_uri, document)
+
+    expect(result.lines[3].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
+  end
+
+  it "correctly adds multiple error definitions" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        def call(arg1)
+          raise InvalidArg1Error.new
+          raise InvalidArg2Error
+        end
+      end
+    RUBY
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
+    result = subject.run_formatting(sample_file_uri, document)
+
+    expect(result.lines[3].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
+    expect(result.lines[4].strip).to eq('InvalidArg2Error = invalid_param_error(:invalid_arg2_error)')
+  end
+
+  it "doesn't add definition on 'raise string'" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        def call(arg1)
+          raise 'some string'
+        end
+      end
+    RUBY
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
+    result = subject.run_formatting(sample_file_uri, document)
+
+    expect(result).to eq(source)
+  end
+  
   # TODO it "doesn't add definition for imported error" do
+  # TODO it "adds both missing definition and contract throws" do
 end
