@@ -97,4 +97,16 @@ module RubyLspReeHelper
       global_state: RubyLsp::GlobalState.new
     )
   end
+
+  def store_locales_cache
+    {
+      en: File.read(sample_package_locales_dir + '/en.yml'),
+      ru: File.read(sample_package_locales_dir + '/ru.yml')
+    }
+  end
+
+  def restore_locales_cache(cache)
+    File.write(sample_package_locales_dir + '/en.yml', cache[:en])
+    File.write(sample_package_locales_dir + '/ru.yml', cache[:ru])
+  end
 end

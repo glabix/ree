@@ -4,6 +4,14 @@ require 'spec_helper'
 RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   subject{ RubyLsp::Ree::ReeFormatter.new }
 
+  before :each do
+    @locales_cache = store_locales_cache
+  end
+
+  after :each do
+    restore_locales_cache(@locales_cache)
+  end
+
   it "adds error definition raised error" do
     source =  <<~RUBY
       class SamplePackage::SomeClass

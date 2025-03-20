@@ -5,8 +5,11 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   subject{ RubyLsp::Ree::ReeFormatter.new }
 
   before :each do
-    @cached_en_locale = File.read(sample_package_locales_dir + '/en.yml')
-    @cached_ru_locale = File.read(sample_package_locales_dir + '/ru.yml')
+    @locales_cache = store_locales_cache
+  end
+
+  after :each do
+    restore_locales_cache(@locales_cache)
   end
 
   it "adds error placeholders to locale files" do
@@ -49,10 +52,5 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     en_locale_content = File.read(sample_package_locales_dir + '/en.yml')
     expect(en_locale_content.lines[1].strip).to eq('new_error_code:')
     expect(en_locale_content.lines[2].strip).to eq('my_new_code: _MISSING_LOCALE_')
-  end
-  
-  after :each do
-    File.write(sample_package_locales_dir + '/en.yml', @cached_en_locale)
-    File.write(sample_package_locales_dir + '/ru.yml', @cached_ru_locale)
   end
 end
