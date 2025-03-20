@@ -27,11 +27,11 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
 
     subject.run_formatting(sample_file_uri, ruby_document(source))
 
-
     en_locale_content = File.read(sample_package_locales_dir + '/en.yml')
     ru_locale_content = File.read(sample_package_locales_dir + '/ru.yml')
-    expect(en_locale_content.lines[11]).to match(/_MISSING_LOCALE_/)
-    expect(ru_locale_content.lines[11]).to match(/_MISSING_LOCALE_/)
+
+    expect(en_locale_content.lines[10]).to match(/_MISSING_LOCALE_/)
+    expect(ru_locale_content.lines[10]).to match(/_MISSING_LOCALE_/)
   end
 
   it "adds several levels of keys for error placeholders" do
