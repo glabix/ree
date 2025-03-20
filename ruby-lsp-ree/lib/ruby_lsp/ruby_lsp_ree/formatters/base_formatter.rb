@@ -1,11 +1,11 @@
 module RubyLsp
   module Ree
     class BaseFormatter
-      def self.call(source)
-        new.call(source)
+      def self.call(source, uri)
+        new.call(source, uri)
       end
 
-      def call(source)
+      def call(source, uri)
         raise 'abstrtact method'
       end
     end

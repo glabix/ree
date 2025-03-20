@@ -3,7 +3,7 @@ require_relative 'base_formatter'
 module RubyLsp
   module Ree
     class SortLinksFormatter < BaseFormatter
-      def call(source)
+      def call(source, _uri)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
         return source if !parsed_doc.link_nodes&.any?
 

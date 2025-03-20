@@ -1,6 +1,7 @@
 require_relative 'formatters/sort_links_formatter'
 require_relative 'formatters/missing_error_definitions_formatter'
 require_relative 'formatters/missing_error_contracts_formatter'
+require_relative 'formatters/missing_error_locales_formatter'
 
 module RubyLsp
   module Ree
@@ -15,10 +16,11 @@ module RubyLsp
         formatters = [
           RubyLsp::Ree::SortLinksFormatter,
           RubyLsp::Ree::MissingErrorDefinitionsFormatter,
-          RubyLsp::Ree::MissingErrorContractsFormatter
+          RubyLsp::Ree::MissingErrorContractsFormatter,
+          RubyLsp::Ree::MissingErrorLocalesFormatter
         ]
 
-        formatters.reduce(source){ |s, formatter| formatter.call(s) }
+        formatters.reduce(source){ |s, formatter| formatter.call(s, uri) }
       rescue => e
         $stderr.puts("error in ree_formatter: #{e.message} : #{e.backtrace.first}")
       end

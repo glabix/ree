@@ -79,6 +79,10 @@ module RubyLspReeHelper
     )
   end
 
+  def sample_package_locales_dir
+    File.join(sample_package_dir, 'package', 'sample_package', 'locales')
+  end
+
   def sample_file_uri
     file_name = 'my_file'
     package_name = 'sample_package'

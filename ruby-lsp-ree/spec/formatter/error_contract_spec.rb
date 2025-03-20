@@ -119,4 +119,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     
     expect(result.lines[7].strip).to eq('contract(Integer => nil).throws(InvalidArg2Error, InvalidArg1Error)')
   end
+
+  # TODO it correctly adds error to multiline throw section
 end
