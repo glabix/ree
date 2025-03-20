@@ -4,6 +4,7 @@ require 'spec_helper'
 RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   subject{ RubyLsp::Ree::ReeFormatter.new }
 
+  # TODO change diagnostic for _MISSING_LOCALE_ placeholder
   it "adds diagnostics if error locale is missing" do
     source =  <<~RUBY
       class SamplePackage::SomeClass

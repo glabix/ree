@@ -8,8 +8,6 @@ ru:
     duplicated_key2: duplicated_value
   sample_package:
     errors:
-
       invalid_arg2_error: _MISSING_LOCALE_
-
       invalid_arg1_error: _MISSING_LOCALE_
       some_error_code: error_code_value

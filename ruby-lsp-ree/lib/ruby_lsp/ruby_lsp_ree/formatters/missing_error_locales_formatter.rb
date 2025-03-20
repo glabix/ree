@@ -65,10 +65,14 @@ module RubyLsp
         missed_key_parts = key_parts[last_found_index+1..-1]
 
         identation = last_found_key.column
-        adding_string = "\n"
-        missed_key_parts.each do |key_part|
+        adding_string = ''
+        missed_key_parts.each_with_index do |key_part, index|
           identation += 2
-          adding_string += "\s" * identation + "#{key_part}: #{MISSING_LOCALE_PLACEHOLDER}\n"
+          if index == missed_key_parts.size - 1
+            adding_string += "\s" * identation + "#{key_part}: #{MISSING_LOCALE_PLACEHOLDER}\n"
+          else
+            adding_string += "\s" * identation + "#{key_part}:\n"
+          end
         end
 
         lines = File.read(file_path).lines
