@@ -15,8 +15,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting(sample_file_uri, document)
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
 
     expect(result.lines[3].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
   end
@@ -34,8 +33,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting(sample_file_uri, document)
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
 
     expect(result.lines[4].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
   end
@@ -53,8 +51,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting(sample_file_uri, document)
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
 
     expect(result.lines[5].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
   end
@@ -70,8 +67,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting(sample_file_uri, document)
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
 
     expect(result.lines[3].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
   end
@@ -88,8 +84,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting(sample_file_uri, document)
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
 
     expect(result.lines[3].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
     expect(result.lines[4].strip).to eq('InvalidArg2Error = invalid_param_error(:invalid_arg2_error)')
@@ -106,12 +101,28 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting(sample_file_uri, document)
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
 
     expect(result).to eq(source)
   end
-  
+
+  it "adds both missing definition and contract throws" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        contract(Integer => nil)
+        def call(arg1)
+          raise InvalidArg1Error.new
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+    expect(result.lines[3].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
+    expect(result.lines[5].strip).to eq('contract(Integer => nil).throws(InvalidArg1Error)')
+  end
+
   # TODO it "doesn't add definition for imported error" do
-  # TODO it "adds both missing definition and contract throws" do
 end

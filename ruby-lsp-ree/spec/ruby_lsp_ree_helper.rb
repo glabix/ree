@@ -84,4 +84,13 @@ module RubyLspReeHelper
     package_name = 'sample_package'
     URI("file://#{sample_package_dir}/package/#{package_name}/#{file_name}.rb")
   end
+
+  def ruby_document(source)
+    RubyLsp::RubyDocument.new(
+      source: source, 
+      version: 1, 
+      uri: URI.parse(''), 
+      global_state: RubyLsp::GlobalState.new
+    )
+  end
 end

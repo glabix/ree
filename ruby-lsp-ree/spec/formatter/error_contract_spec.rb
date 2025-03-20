@@ -19,8 +19,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting('', document)
+    result = subject.run_formatting('', ruby_document(source))
     
     expect(result.lines[6].strip).to eq('contract(Integer => nil).throws(InvalidArg2Error, InvalidArg1Error)')
   end
@@ -40,8 +39,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting('', document)
+    result = subject.run_formatting('', ruby_document(source))
     
     expect(result.lines[6].strip).to eq('contract(Integer => nil).throws(InvalidArg2Error, InvalidArg1Error)')
   end
@@ -60,8 +58,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting('', document)
+    result = subject.run_formatting('', ruby_document(source))
     
     expect(result.lines[5].strip).to eq('contract(Integer => nil).throws(InvalidArg1Error)')
   end
@@ -97,8 +94,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting('', document)
+    result = subject.run_formatting('', ruby_document(source))
     
     expect(result.lines[5].strip).to eq('contract(Integer => nil).throws(InvalidArg1Error)')
   end
