@@ -14,10 +14,8 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       class SamplePackage::SomeClass
         fn :some_class
 
-        InvalidArg1Error = invalid_param_error(:invalid_arg1_error)
-        InvalidArg2Error = invalid_param_error(:invalid_arg2_error, "some_unexisting_locale_path.some_unexsting_locale_path")
+        InvalidArg1Error = invalid_param_error(:some_error_code1)
 
-        contract(Integer => nil).throws(InvalidArg2Error)
         def call(arg1)
           raise InvalidArg1Error.new
         end
@@ -29,8 +27,8 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
 
     en_locale_content = File.read(sample_package_locales_dir + '/en.yml')
     ru_locale_content = File.read(sample_package_locales_dir + '/ru.yml')
-    expect(en_locale_content.lines[7]).to match(/MISSING_LOCALE/)
-    expect(ru_locale_content.lines[7]).to match(/MISSING_LOCALE/)
+    expect(en_locale_content.lines[11]).to match(/_MISSING_LOCALE_/)
+    expect(ru_locale_content.lines[11]).to match(/_MISSING_LOCALE_/)
   end
 
   # TODO it "adds several levels of keys for error placeholders" do

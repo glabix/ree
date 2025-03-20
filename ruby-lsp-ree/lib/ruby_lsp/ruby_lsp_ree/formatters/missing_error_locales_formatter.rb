@@ -6,6 +6,8 @@ module RubyLsp
       include RubyLsp::Ree::ReeLspUtils
       include RubyLsp::Ree::ReeLocaleUtils
 
+      MISSING_LOCALE_PLACEHOLDER = '_MISSING_LOCALE_'
+
       def call(source, uri)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
 
@@ -47,19 +49,31 @@ module RubyLsp
         key_parts = [loc_key] + key_path.split('.')
 
         last_found_index = 0
-        current_node = yaml_with_line_numbers
-        key_parts.each_with_index do |key_part, index|
-          next_node = find_key_in_node(current_node)
+        last_found_key = nil
+        current_node = YamlFileParser.parse_with_key_coordinates(file_path)
 
-          break unless next_node
+        key_parts.each_with_index do |key_part, index|
+          found_key, next_node = YamlFileParser.find_key_in_node(current_node, key_part)
+
+          break unless found_key
 
           current_node = next_node
           last_found_index = index
+          last_found_key = found_key
         end
 
-        pp key_parts
-        pp last_found_index
-        pp current_node
+        missed_key_parts = key_parts[last_found_index+1..-1]
+
+        identation = last_found_key.column
+        adding_string = "\n"
+        missed_key_parts.each do |key_part|
+          identation += 2
+          adding_string += "\s" * identation + "#{key_part}: #{MISSING_LOCALE_PLACEHOLDER}\n"
+        end
+
+        lines = File.read(file_path).lines
+        lines[last_found_key.line] += adding_string
+        File.write(file_path, lines.join)
       end
     end
   end

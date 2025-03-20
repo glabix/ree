@@ -17,6 +17,19 @@ module RubyLsp
         normalize_hash_keys(parse_result.first)
       end
 
+      def self.parse_with_key_coordinates(file_path)
+        parser = Psych::Parser.new(Psych::TreeBuilder.new)
+        parser.parse(File.read(file_path))
+
+        NodeVisitor.create.accept(parser.handler.root).first
+      end
+
+      def self.find_key_in_node(current_node, key)
+        matched_key_el = current_node.detect{ _1[0].value == key }
+        return [nil, nil] unless matched_key_el
+        matched_key_el
+      end
+
       def self.normalize_hash_keys(res)
         deep_transform_keys_in_object!(res){ |k| k.value }
       end
