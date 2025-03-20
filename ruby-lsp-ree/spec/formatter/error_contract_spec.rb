@@ -98,4 +98,25 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     
     expect(result.lines[5].strip).to eq('contract(Integer => nil).throws(InvalidArg1Error)')
   end
+
+  it "adds imported error to contract throw section" do
+    source =  <<~RUBY
+      class SomeClass
+        fn :some_class do
+          link :some_fn, import: -> { InvalidArg1Error }
+        end
+
+        InvalidArg2Error = invalid_param_error(:invalid_arg2_error)
+
+        contract(Integer => nil).throws(InvalidArg2Error)
+        def call(arg1)
+          raise InvalidArg1Error.new
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting('', ruby_document(source))
+    
+    expect(result.lines[7].strip).to eq('contract(Integer => nil).throws(InvalidArg2Error, InvalidArg1Error)')
+  end
 end
