@@ -2,17 +2,20 @@ require_relative "../utils/ree_lsp_utils"
 require_relative "../ree_object_finder"
 require_relative "../parsing/parsed_link_node"
 require_relative "../parsing/parsed_document_builder"
+require_relative "../utils/ree_locale_utils"
 
 module RubyLsp
   module Ree
     class DefinitionHandler
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
+      include RubyLsp::Ree::ReeLocaleUtils
 
       def initialize(index, uri, node_context)
         @index = index
         @uri = uri
         @node_context = node_context
+        @root_node = @node_context.instance_variable_get(:@nesting_nodes).first
         @finder = ReeObjectFinder.new(@index)
       end
 
@@ -71,7 +74,15 @@ module RubyLsp
         message = node.message
         result = []
         
-        definition_item = ReeObjectFinder.new(@index).find_object(message)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
+        link_node = parsed_doc.find_link_node(message)
+
+        definition_item = if link_node
+          @finder.find_object_for_package(message, link_node.link_package_name)
+        else
+          @finder.find_object(message)
+        end
+
         return [] unless definition_item
 
         definition_uri = definition_item.uri.to_s
@@ -126,6 +137,60 @@ module RubyLsp
             end: Interface::Position.new(line: 0, character: 0),
           ),
         )
+      end
+
+      def get_error_locales_definition_items(node)
+        locales_folder = package_locales_folder_path(@uri.path)
+
+        return [] unless File.directory?(locales_folder)
+
+        result = []
+        key_path = node.unescaped
+
+        Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
+          line = find_locale_key_line(locale_file, key_path)
+
+          result << Interface::Location.new(
+            uri: locale_file,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: line, character: 0),
+              end: Interface::Position.new(line: line, character: 0),
+            ),
+          )
+        end
+
+        result
+      end
+
+      def get_error_code_definition_items(node)
+        locales_folder = package_locales_folder_path(@uri.path)
+
+        return [] unless File.directory?(locales_folder)
+
+        result = []
+
+        key_path = if @node_context.parent.arguments.arguments.size > 1
+          @node_context.parent.arguments.arguments[1].unescaped
+        else
+          parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
+
+          mod = underscore(parsed_doc.module_name)
+          "#{mod}.errors.#{node.unescaped}"
+        end
+
+        Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
+          line = find_locale_key_line(locale_file, key_path)
+
+          result << Interface::Location.new(
+            uri: locale_file,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: line, character: 0),
+              end: Interface::Position.new(line: line, character: 0),
+            ),
+          )
+        end
+
+        result
       end
     end
   end

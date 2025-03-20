@@ -2,17 +2,20 @@ require_relative "../ree_object_finder"
 require_relative "../parsing/parsed_document_builder"
 require_relative "../parsing/parsed_link_node"
 require_relative "../utils/ree_lsp_utils"
+require_relative "../utils/ree_locale_utils"
 
 module RubyLsp
   module Ree
     class HoverHandler
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
+      include RubyLsp::Ree::ReeLocaleUtils
 
       def initialize(index, node_context)
         @index = index
         @node_context = node_context
         @finder = ReeObjectFinder.new(@index)
+        @root_node = @node_context.instance_variable_get(:@nesting_nodes).first
       end
 
       def get_ree_object_hover_items(node)
@@ -60,6 +63,67 @@ module RubyLsp
         return '' unless signature
 
         signature.parameters.map(&:decorated_name).join(', ')
+      end
+
+      def get_error_locales_hover_items(node)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, nil)
+        uri = get_uri_from_object(parsed_doc)
+
+        locales_folder = package_locales_folder_path(uri.path)
+        return [] unless File.directory?(locales_folder)
+
+        result = []
+        key_path = node.unescaped
+
+        documentation = ''
+
+        Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
+          value = find_locale_value(locale_file, key_path)
+
+          if value
+            loc_key = File.basename(locale_file, '.yml')
+            documentation += "#{loc_key}: #{value}\n\n"
+          end
+        end
+
+        [documentation]
+      end
+
+      def get_error_code_hover_items(node)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, nil)
+        uri = get_uri_from_object(parsed_doc)
+
+        locales_folder = package_locales_folder_path(uri.path)
+        return [] unless File.directory?(locales_folder)
+
+        result = []
+
+        key_path = if @node_context.parent.arguments.arguments.size > 1
+          @node_context.parent.arguments.arguments[1].unescaped
+        else
+          mod = underscore(parsed_doc.module_name)
+          "#{mod}.errors.#{node.unescaped}"
+        end
+
+        documentation = ''
+
+        Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
+          value = find_locale_value(locale_file, key_path)
+
+          if value
+            loc_key = File.basename(locale_file, '.yml')
+            documentation += "#{loc_key}: #{value}\n\n"
+          end
+        end
+
+        [documentation]
+      end
+
+      def get_uri_from_object(parsed_doc)
+        obj = parsed_doc.links_container_node_name
+
+        ree_obj = @finder.find_object(obj)
+        ree_obj.uri
       end
     end
   end

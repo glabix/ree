@@ -38,11 +38,11 @@ class RubyLsp::Ree::ParsedDocumentBuilder
     when :bean
       build_bean_document(ast)
     else
-      build_detected_doument_type(ast)
+      build_detected_document_type(ast)
     end
   end
 
-  def self.build_detected_doument_type(ast)
+  def self.build_detected_document_type(ast)
     if has_root_class?(ast)
       build_regular_document(ast)
     elsif has_root_rspec_call?(ast)
@@ -53,7 +53,7 @@ class RubyLsp::Ree::ParsedDocumentBuilder
   end
 
   def self.has_root_class?(ast)
-    ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
+    !!ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
   end
 
   def self.has_root_rspec_call?(ast)

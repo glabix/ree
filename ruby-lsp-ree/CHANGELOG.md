@@ -1,3 +1,9 @@
+## [0.1.7] - 2025-03-14
+
+- Go To Definition for ree errors into locales
+- hover for ree error locales
+- formatter: add raised ree errors to `throws` section
+
 ## [0.1.6] - 2025-03-04
 
 - file rename triggers class name change

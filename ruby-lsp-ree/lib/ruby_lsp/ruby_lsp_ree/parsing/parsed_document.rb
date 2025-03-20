@@ -1,4 +1,5 @@
 require_relative 'parsed_link_node'
+require_relative 'parsed_method_node'
 require 'ostruct'
 
 class RubyLsp::Ree::ParsedDocument
@@ -6,9 +7,26 @@ class RubyLsp::Ree::ParsedDocument
 
   LINK_DSL_MODULE = 'Ree::LinkDSL'
 
+  ERROR_DEFINITION_NAMES = [
+    :auth_error,
+    :build_error,
+    :conflict_error,
+    :invalid_param_error,
+    :not_found_error,
+    :payment_required_error,
+    :permission_error,
+    :validation_error
+  ]
+
+  CONTRACT_CALL_NODE_NAMES = [
+    :contract,
+    :throws
+  ]
+
   attr_reader :ast, :package_name, :class_node, :fn_node, :class_includes,
     :link_nodes, :values, :action_node, :dao_node, :filters,
-    :bean_node, :bean_methods, :mapper_node, :links_container_block_node, :aggregate_node
+    :bean_node, :bean_methods, :mapper_node, :links_container_block_node, :aggregate_node,
+    :error_definitions, :doc_instance_methods
 
   def initialize(ast)
     @ast = ast
@@ -161,6 +179,25 @@ class RubyLsp::Ree::ParsedDocument
       .map{ OpenStruct.new(name: node_name(_1).to_s, signatures: parse_signatures_from_params(_1.parameters)) }
   end
 
+  def parse_instance_methods
+    @doc_instance_methods = []
+
+    current_contract_node = nil
+    class_node.body.body.each do |node|
+      if node.is_a?(Prism::CallNode) && CONTRACT_CALL_NODE_NAMES.include?(node_name(node))
+        current_contract_node = node
+      else
+        if node.is_a?(Prism::DefNode)
+          @doc_instance_methods << RubyLsp::Ree::ParsedMethodNode.new(node, current_contract_node)
+        end
+
+        current_contract_node = nil
+      end
+    end
+
+    @doc_instance_methods
+  end
+
   def parse_filter_signature(filter_node)
     return [] unless filter_node
 
@@ -175,8 +212,20 @@ class RubyLsp::Ree::ParsedDocument
     [RubyIndexer::Entry::Signature.new(signature_params)]
   end
 
+  def parse_error_definitions
+    return unless class_node
+
+    @error_definitions = class_node.body.body
+      .select{ _1.is_a?(Prism::ConstantWriteNode) }
+      .select{ ERROR_DEFINITION_NAMES.include?(node_name(_1.value)) }
+  end
+
   def class_name
     class_node.constant_path.name.to_s
+  end
+
+  def module_name
+    class_node.constant_path&.parent&.name.to_s
   end
 
   def full_class_name
