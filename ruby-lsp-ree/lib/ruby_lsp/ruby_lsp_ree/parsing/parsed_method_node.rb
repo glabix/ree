@@ -60,7 +60,7 @@ class RubyLsp::Ree::ParsedMethodNode
     return [] unless has_contract?
     return [] unless has_throw_section?
 
-    @contract_node.arguments.arguments.map{ _1.name.to_s }
+    @contract_node.arguments.arguments.map{ _1.name }
   end
 
   def has_throw_section?
