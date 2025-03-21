@@ -7,19 +7,15 @@ class RubyLsp::Ree::ParsedDocumentBuilder
 
   def self.build_from_uri(uri, type = nil)
     ast = Prism.parse_file(uri.path).value
-    document = build_document(ast, type)
+    document = build_document(ast, type, package_name_from_uri(uri))
     return unless document
-
-    document.set_package_name(package_name_from_uri(uri))
 
     document
   end
 
   def self.build_from_ast(ast, uri, type = nil)
-    document = build_document(ast, type)
+    document = build_document(ast, type, package_name_from_uri(uri))
     return unless document
-
-    document.set_package_name(package_name_from_uri(uri))
 
     document
   end
@@ -29,7 +25,7 @@ class RubyLsp::Ree::ParsedDocumentBuilder
     build_document(ast, type)
   end
 
-  def self.build_document(ast, type)
+  def self.build_document(ast, type, package_name = nil)
     case type
     when :enum
       build_enum_document(ast)
@@ -38,13 +34,13 @@ class RubyLsp::Ree::ParsedDocumentBuilder
     when :bean
       build_bean_document(ast)
     else
-      build_detected_document_type(ast)
+      build_detected_document_type(ast, package_name)
     end
   end
 
-  def self.build_detected_document_type(ast)
+  def self.build_detected_document_type(ast, package_name = nil)
     if has_root_class?(ast)
-      build_regular_document(ast)
+      build_regular_document(ast, package_name)
     elsif has_root_rspec_call?(ast)
       build_rspec_document(ast)
     else 
@@ -69,8 +65,8 @@ class RubyLsp::Ree::ParsedDocumentBuilder
     document
   end
 
-  def self.build_regular_document(ast)
-    document = RubyLsp::Ree::ParsedDocument.new(ast)
+  def self.build_regular_document(ast, package_name)
+    document = RubyLsp::Ree::ParsedDocument.new(ast, package_name)
     
     document.parse_class_node
     document.parse_fn_node

@@ -28,8 +28,9 @@ class RubyLsp::Ree::ParsedDocument
     :bean_node, :bean_methods, :mapper_node, :links_container_block_node, :aggregate_node,
     :error_definitions, :error_definition_names, :doc_instance_methods
 
-  def initialize(ast)
+  def initialize(ast, package_name = nil)
     @ast = ast
+    set_package_name(package_name) if package_name
   end
 
   def links_container_node
