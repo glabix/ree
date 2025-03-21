@@ -11,6 +11,8 @@ module RubyLsp
       include RubyLsp::Ree::ReeLspUtils
       include RubyLsp::Ree::ReeLocaleUtils
 
+      MISSING_LOCALE_PLACEHOLDER = '_MISSING_LOCALE_'
+
       def initialize(index, node_context)
         @index = index
         @node_context = node_context
@@ -114,6 +116,10 @@ module RubyLsp
 
           if value
             documentation += "#{loc_key}: #{value}\n\n"
+
+            if value == MISSING_LOCALE_PLACEHOLDER
+              documentation += "go to locale file: [#{loc_key}.yml](#{locale_file})\n\n"
+            end
           else
             documentation += "#{loc_key}: MISSING TRANSLATION\n\n"
             documentation += "go to locale file: [#{loc_key}.yml](#{locale_file})\n\n"

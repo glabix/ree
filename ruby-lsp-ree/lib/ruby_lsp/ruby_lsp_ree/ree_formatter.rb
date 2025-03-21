@@ -26,6 +26,7 @@ module RubyLsp
       end
 
       def run_diagnostic(uri, document)
+        $stderr.puts("ree_formatter_diagnostic")
         detect_missing_error_locales(uri, document)
       rescue => e
         $stderr.puts("error in ree_formatter_diagnostic: #{e.message} : #{e.backtrace.first}")
@@ -53,14 +54,18 @@ module RubyLsp
           key_paths << key_path
         end
 
+        $stderr.puts("ree_formatter_diagnostic #{key_paths}")
+
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
           key_paths.each do |key_path|
             value = find_locale_value(locale_file, key_path)
             unless value
               loc_key = File.basename(locale_file, '.yml')
 
+              $stderr.puts("ree_formatter_diagnostic add diagnostic")
+
               # TODO correct error range
-              result <<RubyLsp::Interface::Diagnostic.new(
+              result << RubyLsp::Interface::Diagnostic.new(
                 message: "Missing locale #{loc_key}: #{key_path}",
                 source: "Ree formatter",
                 severity: RubyLsp::Constant::DiagnosticSeverity::ERROR,
