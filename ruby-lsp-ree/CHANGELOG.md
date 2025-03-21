@@ -1,3 +1,12 @@
+## [0.1.8] - 2025-03-21
+
+- hover: show missing locales
+- formatter: add raised error definition if missing
+- formatter: add placeholder for missing locale
+- formatter: improved adding raised errors into contract throw section
+- Go To Definition: improved location for error locales
+- Go To Definition: got to missing locale placeholder
+
 ## [0.1.7] - 2025-03-14
 
 - Go To Definition for ree errors into locales

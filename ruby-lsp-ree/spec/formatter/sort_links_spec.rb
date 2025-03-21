@@ -17,8 +17,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI.parse(''), global_state: RubyLsp::GlobalState.new)
-    result = subject.run_formatting('', document)
+    result = subject.run_formatting('', ruby_document(source))
     
     expect(result.lines[2]).to match('linked_service_1')
     expect(result.lines[3]).to match('linked_service_2')

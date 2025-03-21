@@ -24,42 +24,43 @@ class RubyLsp::Ree::ParsedMethodNode
     @method_node.location.end_line - 1
   end
 
-  def raised_errors_nested(source, error_definitions)
-    return [] if error_definitions.size == 0
+  def raised_errors_nested
+    return @raised_errors_nested if @raised_errors_nested
+    raised = raised_errors
     
-    raised = raised_errors(source, error_definitions)
-    
-    not_detected_errors = error_definitions.select{ !raised.include?(_1.name.to_s) }
     @nested_local_methods.each do |nested_method|
-      raised += nested_method.raised_errors_nested(source, not_detected_errors)
-      not_detected_errors = error_definitions.select{ !raised.include?(_1.name.to_s) }
+      raised += nested_method.raised_errors_nested
     end
 
-    raised
+    @raised_errors_nested = raised
   end
 
-  def raised_errors(source, error_definitions)
-    raised = []
-    error_names = error_definitions.map(&:name).map(&:to_s)
+  def raised_errors
+    return @raised_errors if @raised_errors
+    return [] unless @method_node.body
 
-    source.lines[start_line+1 .. end_line-1].each do |line|
-      error_names.each do |error_name|
-        regex = /\braise #{Regexp.escape(error_name)}\b/
+    call_objects = parse_body_call_objects(@method_node.body.body)
+    raise_objects = call_objects.select{ _1.name == :raise }
+    @raised_errors = raise_objects.map{ parse_raised_class_name(_1) }.compact
+  end
 
-        if line.match?(regex)
-          raised << error_name
-        end
-      end
+  def parse_raised_class_name(raise_node)
+    return unless raise_node.arguments
+
+    if raise_node.arguments.arguments.first.is_a?(Prism::ConstantReadNode)
+      raise_node.arguments.arguments.first.name
+    elsif raise_node.arguments.arguments.first.is_a?(Prism::CallNode)
+      raise_node.arguments.arguments.first.receiver.name
+    else
+      nil
     end
-
-    raised.uniq
   end
 
   def throws_errors
     return [] unless has_contract?
     return [] unless has_throw_section?
 
-    @contract_node.arguments.arguments.map{ _1.name.to_s }
+    @contract_node.arguments.arguments.map{ _1.name }
   end
 
   def has_throw_section?
@@ -83,6 +84,11 @@ class RubyLsp::Ree::ParsedMethodNode
   end
   
   def parse_nested_local_methods(local_methods)
+    unless @method_node.body
+      @nested_local_methods = []
+      return
+    end
+
     local_method_names = local_methods.map(&:name)
     call_nodes = parse_body_call_objects(@method_node.body.body)
     call_node_names = call_nodes.map(&:name)

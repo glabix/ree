@@ -1,0 +1,11 @@
+ru:
+  some_key:
+    some_key1: some_value
+  duplicated_key0:
+    duplicated_key1:
+      duplicated_key2: duplicated_value0
+  duplicated_key1:
+    duplicated_key2: duplicated_value
+  sample_package:
+    errors:
+      some_error_code: error_code_value
