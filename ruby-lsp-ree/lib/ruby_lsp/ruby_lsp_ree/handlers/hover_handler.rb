@@ -81,10 +81,18 @@ module RubyLsp
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
           value = find_locale_value(locale_file, key_path)
+          loc_key = File.basename(locale_file, '.yml')
 
           if value
-            loc_key = File.basename(locale_file, '.yml')
-            documentation += "#{loc_key}: #{value}\n\n"
+            if value == MISSING_LOCALE_PLACEHOLDER
+              value_location = find_locale_key_location(locale_file, key_path)
+              file_uri = "#{locale_file}" # TODO add line to uri :#{value_location.line+1}:#{value_location.column}"
+              documentation += "#{loc_key}: [#{value}](#{file_uri})\n\n"
+            else
+              documentation += "#{loc_key}: #{value}\n\n"
+            end
+          else
+            documentation += "#{loc_key}: [MISSING TRANSLATION](#{locale_file})\n\n"
           end
         end
 
@@ -115,14 +123,15 @@ module RubyLsp
           loc_key = File.basename(locale_file, '.yml')
 
           if value
-            documentation += "#{loc_key}: #{value}\n\n"
-
             if value == MISSING_LOCALE_PLACEHOLDER
-              documentation += "go to locale file: [#{loc_key}.yml](#{locale_file})\n\n"
+              value_location = find_locale_key_location(locale_file, key_path)
+              file_uri = "#{locale_file}" # TODO add line to uri :#{value_location.line+1}:#{value_location.column}"
+              documentation += "#{loc_key}: [#{value}](#{file_uri})\n\n"
+            else
+              documentation += "#{loc_key}: #{value}\n\n"
             end
           else
-            documentation += "#{loc_key}: MISSING TRANSLATION\n\n"
-            documentation += "go to locale file: [#{loc_key}.yml](#{locale_file})\n\n"
+            documentation += "#{loc_key}: [MISSING TRANSLATION](#{locale_file})\n\n"
           end
         end
 
