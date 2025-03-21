@@ -34,7 +34,11 @@ module RubyLsp
           position = doc_instance_method.throw_arguments_end_position
           line = doc_instance_method.throw_arguments_end_line
 
-          source_lines[line] = source_lines[line][0..position] + ", #{missed_errors.join(', ')})\n"
+          if source_lines[line].strip.end_with?(")")
+            source_lines[line] = source_lines[line][0..position] + ", #{missed_errors.join(', ')})\n"
+          else
+            source_lines[line] = source_lines[line][0..position] + ", #{missed_errors.join(', ')}\n"
+          end
         else
           position = doc_instance_method.contract_node_end_position
           line = doc_instance_method.contract_node_end_line

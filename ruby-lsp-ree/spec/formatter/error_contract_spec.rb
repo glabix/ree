@@ -128,7 +128,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[7].strip).to eq('contract(Integer => nil).throws(InvalidArg2Error, InvalidArg1Error)')
   end
 
-  it "deosn't add error to contract second time" do
+  it "doesn't add error to contract second time" do
     source =  <<~RUBY
       class SomeClass
         fn :some_class
@@ -149,5 +149,27 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[6].strip).to eq('contract(Integer => nil).throws(InvalidArg2Error, InvalidArg1Error)')
   end
 
-  # TODO it correctly adds error to multiline throw section
+  it "correctly adds error to multiline throw section" do
+    source =  <<~RUBY
+      class SomeClass
+        fn :some_class
+
+        InvalidArg1Error = invalid_param_error(:invalid_arg1_error)
+        InvalidArg2Error = invalid_param_error(:invalid_arg2_error)
+
+        contract(
+          Integer => nil
+        ).throws(
+          InvalidArg2Error
+        )
+        def call(arg1)
+          raise InvalidArg1Error.new
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting('', ruby_document(source))
+    expect(result.lines[9].strip).to eq('InvalidArg2Error, InvalidArg1Error')
+    expect(result.lines[10].strip).to eq(')')
+  end
 end
