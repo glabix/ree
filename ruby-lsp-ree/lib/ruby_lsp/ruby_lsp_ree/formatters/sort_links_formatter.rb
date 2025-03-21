@@ -5,7 +5,7 @@ module RubyLsp
     class SortLinksFormatter < BaseFormatter
       def call(source, _uri)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
-        return source if !parsed_doc.link_nodes&.any?
+        return source if !parsed_doc || !parsed_doc.link_nodes&.any?
 
         if parsed_doc.link_nodes.any?{ _1.location.start_line != _1.location.end_line }
           $stderr.puts("multiline link definitions, don't sort")
