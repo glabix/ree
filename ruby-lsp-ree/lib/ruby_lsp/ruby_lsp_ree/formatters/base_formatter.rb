@@ -6,7 +6,7 @@ module RubyLsp
       end
 
       def call(source, uri)
-        raise 'abstrtact method'
+        raise 'abstract method'
       end
     end
   end

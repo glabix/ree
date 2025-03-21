@@ -24,6 +24,8 @@ module RubyLsp
           missed_errors += raised_errors - existing_errors
         end
 
+        missed_errors = missed_errors.uniq.reject{ Object.const_defined?(_1) }
+
         add_missed_error_definitions(source, parsed_doc, missed_errors.uniq)
       end
 

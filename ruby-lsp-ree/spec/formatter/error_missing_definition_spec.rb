@@ -148,4 +148,19 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     result = subject.run_formatting(sample_file_uri, ruby_document(source))
     expect(result).to eq(source)
   end
+
+  it "doesn't add definition for ruby standard error" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        def call(arg1)
+          raise ArgumentError.new
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result).to eq(source)
+  end
 end
