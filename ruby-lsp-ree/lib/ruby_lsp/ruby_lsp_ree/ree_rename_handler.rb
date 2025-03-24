@@ -8,8 +8,8 @@ module RubyLsp
       end
 
       def call(changes)
-        old_uri = changes.detect{ _1[:type] == Constant::FileChangeType::DELETED }[:uri]
-        new_uri = changes.detect{ _1[:type] == Constant::FileChangeType::CREATED }[:uri]
+        old_uri = URI.parse(changes.detect{ _1[:type] == Constant::FileChangeType::DELETED }[:uri])
+        new_uri = URI.parse(changes.detect{ _1[:type] == Constant::FileChangeType::CREATED }[:uri])
       
         old_path = get_uri_path(old_uri)
         new_path = get_uri_path(new_uri)
