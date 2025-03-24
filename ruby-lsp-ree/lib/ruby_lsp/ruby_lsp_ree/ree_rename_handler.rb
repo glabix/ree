@@ -14,7 +14,7 @@ module RubyLsp
         old_path = get_uri_path(old_uri)
         new_path = get_uri_path(new_uri)
 
-        old_file_name = File.basename(old_path, '.rb').gsub(" copy.rb", ".rb")
+        old_file_name = File.basename(old_path, '.rb').chomp(" copy")
         new_file_name = File.basename(new_path, '.rb')
 
         return if old_file_name == new_file_name
