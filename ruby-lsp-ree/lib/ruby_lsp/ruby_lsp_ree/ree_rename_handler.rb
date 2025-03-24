@@ -4,6 +4,10 @@ module RubyLsp
       include RubyLsp::Ree::ReeLspUtils
 
       def self.call(changes)
+        new.call(changes)
+      end
+
+      def call(changes)
         old_path = get_uri_path(changes.detect{ _1[:type] == Constant::FileChangeType::DELETED }[:uri])
         new_path = get_uri_path(changes.detect{ _1[:type] == Constant::FileChangeType::CREATED }[:uri])
 
