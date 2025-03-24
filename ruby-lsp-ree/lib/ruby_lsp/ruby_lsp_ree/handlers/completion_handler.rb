@@ -21,7 +21,7 @@ module RubyLsp
       def get_ree_receiver(receiver_node)
         return if !receiver_node || !receiver_node.is_a?(Prism::CallNode)
       
-        pp @finder.find_objects_by_types(receiver_node.name.to_s, RECEIVER_OBJECT_TYPES).first
+        @finder.find_objects_by_types(receiver_node.name.to_s, RECEIVER_OBJECT_TYPES).first
       end
 
       def get_ree_object_methods_completions_items(ree_receiver, receiver_node, node)

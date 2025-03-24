@@ -6,7 +6,6 @@ class RubyLsp::Ree::ParsedDocumentBuilder
   extend RubyLsp::Ree::ReeLspUtils
 
   def self.build_from_uri(uri, type = nil)
-    pp uri
     ast = Prism.parse_file(uri.path).value
     document = build_document(ast, type, package_name_from_uri(uri))
     return unless document
