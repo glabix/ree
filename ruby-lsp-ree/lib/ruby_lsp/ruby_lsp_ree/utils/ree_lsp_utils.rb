@@ -4,7 +4,7 @@ module RubyLsp
       Entry = RubyIndexer::Entry
 
       def get_uri_path(uri)
-        URI.decode_www_form_component(URI.parse(uri).path)
+        URI.decode_www_form_component(URI.parse(uri.to_s).path)
       end
 
       def find_local_file_path(file_path)
