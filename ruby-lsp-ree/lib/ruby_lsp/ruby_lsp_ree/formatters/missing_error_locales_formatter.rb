@@ -77,7 +77,13 @@ module RubyLsp
 
         lines = File.read(file_path).lines
         lines[last_found_key.line] += adding_string
-        File.write(file_path, lines.join)
+        
+        new_source = lines.join
+        File.open(file_path, 'wb:UTF-8'){|f|
+          f.write(new_source)
+        }
+        
+        new_source
       end
     end
   end
