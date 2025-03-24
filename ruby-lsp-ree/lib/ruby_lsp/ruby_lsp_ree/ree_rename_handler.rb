@@ -7,7 +7,7 @@ module RubyLsp
         old_uri = URI.parse(changes.detect{ _1[:type] == Constant::FileChangeType::DELETED }[:uri])
         new_uri = URI.parse(changes.detect{ _1[:type] == Constant::FileChangeType::CREATED }[:uri])
 
-        old_file_name = File.basename(old_uri, '.rb')
+        old_file_name = File.basename(old_uri, '.rb').gsub(" copy.rb", ".rb")
         new_file_name = File.basename(new_uri, '.rb')
 
         return if old_file_name == new_file_name
