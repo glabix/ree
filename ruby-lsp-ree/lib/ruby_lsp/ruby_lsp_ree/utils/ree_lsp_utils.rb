@@ -3,6 +3,10 @@ module RubyLsp
     module ReeLspUtils
       Entry = RubyIndexer::Entry
 
+      def get_uri_path(uri)
+        URI.decode_www_form_component(URI.parse(uri).path)
+      end
+
       def find_local_file_path(file_path)
         file_name = file_path + ".rb"
         Dir[File.join('**', file_name)].first
