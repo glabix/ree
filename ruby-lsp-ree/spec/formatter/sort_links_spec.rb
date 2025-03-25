@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 RSpec.describe "RubyLsp::Ree::ReeFormatter" do
-  subject{ RubyLsp::Ree::ReeFormatter.new }
+  subject{ RubyLsp::Ree::ReeFormatter.new([]) }
 
   it "sorts links inside fn" do
     source =  <<~RUBY
