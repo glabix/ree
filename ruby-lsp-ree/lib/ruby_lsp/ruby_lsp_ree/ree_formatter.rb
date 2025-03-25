@@ -12,6 +12,10 @@ module RubyLsp
 
       MISSING_LOCALE_PLACEHOLDER = '_MISSING_LOCALE_'
 
+      def initialize(message_queue)
+        @message_queue = message_queue
+      end
+
       def run_formatting(uri, document)
         source = document.source
 
@@ -22,7 +26,7 @@ module RubyLsp
           RubyLsp::Ree::MissingErrorLocalesFormatter
         ]
 
-        formatters.reduce(source){ |s, formatter| formatter.call(s, uri) }
+        formatters.reduce(source){ |s, formatter| formatter.call(s, uri, @message_queue) }
       rescue => e
         $stderr.puts("error in ree_formatter: #{e.message} : #{e.backtrace.first}")
       end

@@ -34,7 +34,8 @@ module RubyLsp
             unless value
               loc_key = File.basename(locale_file, '.yml')
 
-              add_locale_placeholder(locale_file, key_path)          
+              add_locale_placeholder(locale_file, key_path)    
+              send_message(locale_file, key_path)      
             end
           end
         end
@@ -78,12 +79,19 @@ module RubyLsp
         lines = File.read(file_path).lines
         lines[last_found_key.line] += adding_string
         
-        new_source = lines.join
+        new_source = lines.join.force_encoding("utf-8")
         File.open(file_path, 'wb:UTF-8'){|f|
           f.write(new_source)
         }
         
         new_source
+      end
+
+      def send_message(locale_file, key_path)   
+        loc_key = File.basename(locale_file, '.yml')
+
+        message = "Missing locale #{loc_key}: #{key_path}"
+        @message_queue << RubyLsp::Notification.window_show_message(message, type: Constant::MessageType::ERROR)
       end
     end
   end
