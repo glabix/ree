@@ -10,6 +10,8 @@ module RubyLsp
       include RubyLsp::Ree::ReeLspUtils
       include RubyLsp::Ree::ReeLocaleUtils
 
+      MISSING_LOCALE_PLACEHOLDER = '_MISSING_LOCALE_'
+
       def run_formatting(uri, document)
         source = document.source
 
@@ -58,7 +60,7 @@ module RubyLsp
           error_keys.each do |error_key|
             key_path = error_key[0]
             value = find_locale_value(locale_file, key_path)
-            unless value
+            if !value || value == MISSING_LOCALE_PLACEHOLDER
               loc_key = File.basename(locale_file, '.yml')
               error_definition = error_key[1]
 
