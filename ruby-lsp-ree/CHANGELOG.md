@@ -1,3 +1,11 @@
+## [0.1.10] - 2025-03-26
+
+- async_bean support
+- rename for 'copy' files
+- add diagnostics for missing locale
+- link in error locale hover leads to the correct line
+- missing locale notification
+
 ## [0.1.8] - 2025-03-21
 
 - hover: show missing locales
