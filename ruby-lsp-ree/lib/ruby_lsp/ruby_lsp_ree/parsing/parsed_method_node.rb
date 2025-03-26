@@ -1,7 +1,7 @@
 require 'prism'
 
 class RubyLsp::Ree::ParsedMethodNode
-  attr_reader :method_node, :contract_node
+  attr_reader :method_node, :contract_node, :nested_local_methods
 
   def initialize(method_node, contract_node)
     @method_node = method_node

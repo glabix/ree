@@ -55,5 +55,67 @@ RSpec.describe "RubyLsp::Ree::ParsedMethodNode" do
         doc_instance_methods[0].parse_nested_local_methods(doc_instance_methods).map(&:name)
       ).to eq([:call_nested_method])
     end
+
+    it "returns correct result for nested methods with rescue" do
+      source =  <<~RUBY
+        class SomPackage::SomeClass
+          def call(attrs)
+            call_nested_method
+          rescue AnyError
+            return true
+          end
+
+          def call_nested_method
+            call_second_nested_method
+          rescue AnyError
+            return true            
+          end
+
+          def call_second_nested_method
+            puts "second nested method"
+          end
+        end
+      RUBY
+
+      doc_instance_methods = parse_instance_methods(source)
+      doc_instance_methods[0].parse_nested_local_methods(doc_instance_methods)
+
+      expect(
+        doc_instance_methods[0].nested_local_methods.map(&:name)
+      ).to eq([:call_nested_method])
+
+      expect(
+        doc_instance_methods[1].nested_local_methods.map(&:name)
+      ).to eq([:call_second_nested_method])
+    end
+
+    it "returns correct result for method with rescue" do
+      source =  <<~RUBY
+        class SomPackage::SomeClass
+          def call(attrs)
+            call_nested_method
+
+            begin
+              call_second_nested_method
+            rescue AnyError
+              return true
+            end
+          end
+
+          def call_nested_method
+            puts "nested method"
+          end
+
+          def call_second_nested_method
+            puts "second nested method"
+          end
+        end
+      RUBY
+
+      doc_instance_methods = parse_instance_methods(source)
+      expect(
+        doc_instance_methods[0].parse_nested_local_methods(doc_instance_methods).map(&:name)
+      ).to eq([:call_nested_method, :call_second_nested_method])
+    end
   end
 end
