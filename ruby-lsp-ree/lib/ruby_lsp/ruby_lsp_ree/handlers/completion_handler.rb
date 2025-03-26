@@ -7,7 +7,7 @@ module RubyLsp
       include Requests::Support::Common
       include RubyLsp::Ree::ReeLspUtils
 
-      RECEIVER_OBJECT_TYPES = [:enum, :dao, :bean]
+      RECEIVER_OBJECT_TYPES = [:enum, :dao, :bean, :async_bean]
       CANDIDATES_LIMIT = 100
 
       def initialize(index, uri, node_context)
@@ -30,7 +30,7 @@ module RubyLsp
         case @finder.object_type(ree_receiver)
         when :enum
           get_enum_values_completion_items(ree_receiver, location)
-        when :bean
+        when :bean, :async_bean
           get_bean_methods_completion_items(ree_receiver, location)
         when :dao
           get_dao_filters_completion_items(ree_receiver, location)

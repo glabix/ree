@@ -11,7 +11,7 @@ module RubyLsp
     class YamlFileParser
       def self.parse(file_path)
         parser = Psych::Parser.new(Psych::TreeBuilder.new)
-        parser.parse(File.read(file_path))
+        parser.parse(File.read(file_path, encoding: 'utf-8'))
 
         parse_result = NodeVisitor.create.accept(parser.handler.root)
         normalize_hash_keys(parse_result.first)
@@ -19,7 +19,7 @@ module RubyLsp
 
       def self.parse_with_key_coordinates(file_path)
         parser = Psych::Parser.new(Psych::TreeBuilder.new)
-        parser.parse(File.read(file_path))
+        parser.parse(File.read(file_path, encoding: 'utf-8'))
 
         NodeVisitor.create.accept(parser.handler.root).first
       end

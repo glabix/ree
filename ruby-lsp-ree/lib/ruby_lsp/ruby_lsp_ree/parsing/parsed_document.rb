@@ -106,7 +106,7 @@ class RubyLsp::Ree::ParsedDocument
   def parse_bean_node
     return unless class_node
 
-    @bean_node ||= class_node.body.body.detect{ |node| node_name(node) == :bean }
+    @bean_node ||= class_node.body.body.detect{ |node| node_name(node) == :bean || node_name(node) == :async_bean}
     @links_container_block_node ||= @bean_node&.block
   end
 

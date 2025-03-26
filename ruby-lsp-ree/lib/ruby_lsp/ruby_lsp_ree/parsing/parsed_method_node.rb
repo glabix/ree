@@ -1,7 +1,7 @@
 require 'prism'
 
 class RubyLsp::Ree::ParsedMethodNode
-  attr_reader :method_node, :contract_node
+  attr_reader :method_node, :contract_node, :nested_local_methods
 
   def initialize(method_node, contract_node)
     @method_node = method_node
@@ -89,8 +89,10 @@ class RubyLsp::Ree::ParsedMethodNode
       return
     end
 
+    method_body = get_method_body(@method_node)
+
     local_method_names = local_methods.map(&:name)
-    call_nodes = parse_body_call_objects(@method_node.body.body)
+    call_nodes = parse_body_call_objects(method_body)
     call_node_names = call_nodes.map(&:name)
    
     @nested_local_methods = local_methods.select{ call_node_names.include?(_1.name) }
@@ -111,5 +113,13 @@ class RubyLsp::Ree::ParsedMethodNode
     end
 
     call_nodes
+  end
+
+  def get_method_body(node)
+    if node.body.is_a?(Prism::BeginNode)
+      node.body.statements.body
+    else
+      node.body.body
+    end
   end
 end

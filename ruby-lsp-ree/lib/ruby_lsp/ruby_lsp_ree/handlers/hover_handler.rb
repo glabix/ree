@@ -86,7 +86,7 @@ module RubyLsp
           if value
             if value == MISSING_LOCALE_PLACEHOLDER
               value_location = find_locale_key_location(locale_file, key_path)
-              file_uri = "#{locale_file}" # TODO add line to uri :#{value_location.line+1}:#{value_location.column}"
+              file_uri = "file://#{locale_file}##{value_location.line+1}"
               documentation += "#{loc_key}: [#{value}](#{file_uri})\n\n"
             else
               documentation += "#{loc_key}: #{value}\n\n"

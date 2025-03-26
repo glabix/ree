@@ -9,3 +9,5 @@ en:
   sample_package:
     errors:
       some_error_code: error_code_value
+  local_placeholder_key: _MISSING_LOCALE_
+  

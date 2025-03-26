@@ -23,7 +23,9 @@ module RubyLsp
 
       def apply(change_item)
         uri = change_item[:uri]
-        path = URI.parse(uri).path
+        path = get_uri_path(uri)
+
+        return unless File.exist?(path)
 
         file_content = File.read(path)
         return if file_content.size > 0

@@ -1,5 +1,9 @@
 module RubyLspReeHelper
   def index_fn(server, name, package = nil, uri = nil)
+    index_ree_object(server, name, :fn, package, uri)
+  end
+
+  def index_ree_object(server, name, type, package = nil, uri = nil)
     location = RubyIndexer::Location.new(0, 0, 0, 0)
     file_uri = if uri
       uri
@@ -14,7 +18,7 @@ module RubyLspReeHelper
       file_uri,
       location,
       location,
-      "ree_object\ntype: :fn",
+      "ree_object\ntype: :#{type.to_s}",
       [],
       RubyIndexer::Entry::Visibility::PUBLIC,
       nil,
@@ -83,10 +87,13 @@ module RubyLspReeHelper
     File.join(sample_package_dir, 'package', 'sample_package', 'locales')
   end
 
-  def sample_file_uri
-    file_name = 'my_file'
+  def sample_package_file_uri(file_name)
     package_name = 'sample_package'
     URI("file://#{sample_package_dir}/package/#{package_name}/#{file_name}.rb")
+  end
+
+  def sample_file_uri
+    sample_package_file_uri('my_file')
   end
 
   def ruby_document(source)
