@@ -117,5 +117,31 @@ RSpec.describe "RubyLsp::Ree::ParsedMethodNode" do
         doc_instance_methods[0].parse_nested_local_methods(doc_instance_methods).map(&:name)
       ).to eq([:call_nested_method, :call_second_nested_method])
     end
+
+    describe '#raised_errors_nested' do
+      it "returns correct result for method with rescue" do
+        source =  <<~RUBY
+          class SomPackage::SomeClass
+            def call(attrs)
+              call_nested_method
+            rescue AnyError
+              return true
+            end
+
+            def call_nested_method
+              raise SomeError
+            end
+          end
+        RUBY
+
+        doc_instance_methods = parse_instance_methods(source)
+        doc_instance_methods[0].parse_nested_local_methods(doc_instance_methods)
+
+        expect(
+          doc_instance_methods[0].raised_errors_nested
+        ).to eq([:SomeError])
+      end
+    end
+
   end
 end
