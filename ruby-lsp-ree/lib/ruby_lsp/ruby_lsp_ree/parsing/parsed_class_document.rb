@@ -3,7 +3,7 @@ require_relative 'parsed_link_node'
 require_relative 'parsed_method_node'
 require 'ostruct'
 
-class RubyLsp::Ree::ParsedDocument < RubyLsp::Ree::ParsedBaseDocument
+class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   include RubyLsp::Ree::ReeLspUtils
 
   LINK_DSL_MODULE = 'Ree::LinkDSL'
@@ -36,6 +36,11 @@ class RubyLsp::Ree::ParsedDocument < RubyLsp::Ree::ParsedBaseDocument
   attr_reader :class_node, :class_includes, 
     :values, :filters, :bean_methods, :links_container_block_node, :error_definitions, 
     :error_definition_names, :doc_instance_methods, :links_container_node
+
+  def initialize(ast, package_name = nil)
+    super
+    parse_class_node    
+  end
 
   def allows_root_links?
     false

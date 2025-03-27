@@ -7,6 +7,11 @@ class RubyLsp::Ree::ParsedRspecDocument < RubyLsp::Ree::ParsedBaseDocument
 
   attr_reader :describe_node
 
+  def initialize(ast, package_name = nil)
+    super
+    parse_describe_node    
+  end
+
   def allows_root_links?
     true
   end
