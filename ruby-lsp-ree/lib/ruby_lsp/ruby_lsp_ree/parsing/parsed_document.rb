@@ -6,6 +6,15 @@ class RubyLsp::Ree::ParsedDocument
   include RubyLsp::Ree::ReeLspUtils
 
   LINK_DSL_MODULE = 'Ree::LinkDSL'
+  LINKS_CONTAINER_TYPES = [
+    :fn,
+    :action,
+    :dao,
+    :bean,
+    :async_bean,
+    :mapper,
+    :aggregate
+  ]
 
   ERROR_DEFINITION_NAMES = [
     :auth_error,
@@ -23,19 +32,13 @@ class RubyLsp::Ree::ParsedDocument
     :throws
   ]
 
-  attr_reader :ast, :package_name, :class_node, :fn_node, :class_includes,
-    :link_nodes, :values, :action_node, :dao_node, :filters,
-    :bean_node, :bean_methods, :mapper_node, :links_container_block_node, :aggregate_node,
-    :error_definitions, :error_definition_names, :doc_instance_methods
+  attr_reader :ast, :package_name, :class_node, :class_includes, :link_nodes, 
+    :values, :filters, :bean_methods, :links_container_block_node, :error_definitions, 
+    :error_definition_names, :doc_instance_methods, :links_container_node
 
   def initialize(ast, package_name = nil)
     @ast = ast
     set_package_name(package_name) if package_name
-  end
-
-  def links_container_node
-    # TODO don't use separate node, use one field for all and additional type field: links_container_node_type
-    @fn_node || @action_node || @dao_node || @bean_node || @mapper_node || @aggregate_node
   end
 
   def allows_root_links?
@@ -82,46 +85,12 @@ class RubyLsp::Ree::ParsedDocument
     @class_node ||= ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
   end
 
-  def parse_fn_node
+  def parse_links_container_node
     return unless class_node
 
-    @fn_node ||= class_node.body.body.detect{ |node| node_name(node) == :fn }
-    @links_container_block_node ||= @fn_node&.block
-  end
-
-  def parse_action_node
-    return unless class_node
-
-    @action_node ||= class_node.body.body.detect{ |node| node_name(node) == :action }
-    @links_container_block_node ||= @action_node&.block
-  end
-
-  def parse_dao_node
-    return unless class_node
-
-    @dao_node ||= class_node.body.body.detect{ |node| node_name(node) == :dao }
-    @links_container_block_node ||= @dao_node&.block
-  end
-
-  def parse_bean_node
-    return unless class_node
-
-    @bean_node ||= class_node.body.body.detect{ |node| node_name(node) == :bean || node_name(node) == :async_bean}
-    @links_container_block_node ||= @bean_node&.block
-  end
-
-  def parse_mapper_node
-    return unless class_node
-
-    @mapper_node ||= class_node.body.body.detect{ |node| node_name(node) == :mapper }
-    @links_container_block_node ||= @mapper_node&.block
-  end
-
-  def parse_aggregate_node
-    return unless class_node
-
-    @aggregate_node ||= class_node.body.body.detect{ |node| node_name(node) == :aggregate }
-    @links_container_block_node ||= @aggregate_node&.block
+    @links_container_node ||= class_node.body.body.detect{ |node| LINKS_CONTAINER_TYPES.include?(node_name(node)) }
+    @links_container_node_type = node_name(@links_container_node)
+    @links_container_block_node ||= @links_container_node&.block
   end
 
   def parse_class_includes
