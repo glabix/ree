@@ -1,37 +1,12 @@
 require_relative 'parsed_base_document'
 require_relative 'parsed_link_node'
 require_relative 'parsed_method_node'
+require_relative "../ree_constants"
 require 'ostruct'
 
 class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   include RubyLsp::Ree::ReeLspUtils
-
-  LINK_DSL_MODULE = 'Ree::LinkDSL'
-  LINKS_CONTAINER_TYPES = [
-    :fn,
-    :action,
-    :dao,
-    :bean,
-    :async_bean,
-    :mapper,
-    :aggregate
-  ]
-
-  ERROR_DEFINITION_NAMES = [
-    :auth_error,
-    :build_error,
-    :conflict_error,
-    :invalid_param_error,
-    :not_found_error,
-    :payment_required_error,
-    :permission_error,
-    :validation_error
-  ]
-
-  CONTRACT_CALL_NODE_NAMES = [
-    :contract,
-    :throws
-  ]
+  include RubyLsp::Ree::ReeConstants
 
   attr_reader :class_node, :class_includes, 
     :values, :filters, :bean_methods, :links_container_block_node, :error_definitions, 
