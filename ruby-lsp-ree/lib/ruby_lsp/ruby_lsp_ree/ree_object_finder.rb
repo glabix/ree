@@ -8,11 +8,6 @@ module RubyLsp
       MAX_LIMIT = 1000
 
       REE_OBJECT_STRING = 'ree_object'
-      ENUM_TYPE_STRING = 'type: :enum'
-      DAO_TYPE_STRING = 'type: :dao'
-      BEAN_TYPE_STRING = 'type: :bean'
-      MAPPER_TYPE_STRING = 'type: :mapper'
-      AGGREGATE_TYPE_STRING = 'type: :aggregate'
 
       def initialize(index)
         @index = index
@@ -58,27 +53,6 @@ module RubyLsp
         return [] unless objects_by_name
 
         objects_by_name.select{ types.include?(object_type(_1)) }
-      end
-
-      def find_enum(name)
-        objects_by_name = @index[name]
-        return unless objects_by_name
-
-        objects_by_name.detect{ _1.comments.lines[1]&.chomp == ENUM_TYPE_STRING }
-      end
-
-      def find_dao(name)
-        objects_by_name = @index[name]
-        return unless objects_by_name
-
-        objects_by_name.detect{ _1.comments.lines[1]&.chomp == DAO_TYPE_STRING }
-      end
-
-      def find_bean(index, name)
-        objects_by_name = @index[name]
-        return unless objects_by_name
-
-        objects_by_name.detect{ _1.comments.lines[1]&.chomp == BEAN_TYPE_STRING }
       end
 
       def object_type(ree_object)
