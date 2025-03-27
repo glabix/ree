@@ -1,8 +1,9 @@
+require_relative 'parsed_base_document'
 require_relative 'parsed_link_node'
 require_relative 'parsed_method_node'
 require 'ostruct'
 
-class RubyLsp::Ree::ParsedDocument
+class RubyLsp::Ree::ParsedDocument < RubyLsp::Ree::ParsedBaseDocument
   include RubyLsp::Ree::ReeLspUtils
 
   LINK_DSL_MODULE = 'Ree::LinkDSL'
@@ -32,14 +33,9 @@ class RubyLsp::Ree::ParsedDocument
     :throws
   ]
 
-  attr_reader :ast, :package_name, :class_node, :class_includes, :link_nodes, 
+  attr_reader :class_node, :class_includes, 
     :values, :filters, :bean_methods, :links_container_block_node, :error_definitions, 
     :error_definition_names, :doc_instance_methods, :links_container_node
-
-  def initialize(ast, package_name = nil)
-    @ast = ast
-    set_package_name(package_name) if package_name
-  end
 
   def allows_root_links?
     false
@@ -51,10 +47,6 @@ class RubyLsp::Ree::ParsedDocument
 
   def includes_linked_constant?(const_name)
     @link_nodes.map(&:imports).flatten.include?(const_name)
-  end
-
-  def includes_linked_object?(obj_name)
-    @link_nodes.map{ node_name(_1) }.include?(obj_name)
   end
 
   def find_link_node(name)
@@ -75,10 +67,6 @@ class RubyLsp::Ree::ParsedDocument
 
   def has_blank_links_container?
     links_container_node && !@links_container_block_node
-  end
-
-  def set_package_name(package_name)
-    @package_name = package_name
   end
 
   def parse_class_node
