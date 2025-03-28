@@ -1,6 +1,7 @@
 require_relative "../utils/ree_lsp_utils"
 require_relative "../ree_object_finder"
 require_relative 'const_additional_text_edits_creator'
+require_relative 'method_additional_text_edits_creator'
 
 module RubyLsp
   module Ree
@@ -235,7 +236,7 @@ module RubyLsp
               owner_name: "Object",
               guessed_type: false,
             },
-            additional_text_edits: get_additional_text_edits_for_method(parsed_doc, ree_object_name, package_name)
+            additional_text_edits: MethodAdditionalTextEditsCreator.call(parsed_doc, ree_object_name, package_name)
           )
         end
       end
@@ -269,40 +270,6 @@ module RubyLsp
             "${#{index+1}:#{signature_param.name}}"
           end
         end.join(', ')
-      end
-
-      def get_additional_text_edits_for_method(parsed_doc, fn_name, package_name)
-        return [] unless parsed_doc
-
-        if parsed_doc.includes_linked_object?(fn_name)
-          return []
-        end
-
-        link_text = if parsed_doc.package_name == package_name
-          "\s\slink :#{fn_name}"
-        else
-          "\s\slink :#{fn_name}, from: :#{package_name}"
-        end
-
-        if parsed_doc.links_container_node
-          link_text = "\s\s" + link_text
-        end
-        
-        new_text = "\n" + link_text
-
-        if parsed_doc.has_blank_links_container?
-          new_text = "\sdo#{link_text}\n\s\send\n"
-        end
-
-        range = get_range_for_fn_insert(parsed_doc, link_text)
-        return unless range
-
-        [
-          Interface::TextEdit.new(
-            range:    range,
-            new_text: new_text,
-          )
-        ]
       end
     end
   end
