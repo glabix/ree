@@ -281,7 +281,9 @@ module RubyLsp
           ree_obj_name = File.basename(entry_uri, ".*")
           link_name = ":#{ree_obj_name}"
 
-          # TODO add from
+          if package_name != parsed_doc.package_name
+            link_name += ", from: :#{package_name}"
+          end
         else
           path = path_from_package_folder(entry_uri)
           link_name = "\"#{path}\""

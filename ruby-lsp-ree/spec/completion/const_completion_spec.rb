@@ -104,4 +104,39 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
       expect(result.response[0].additional_text_edits.first.new_text).to match('link :some_package_fn, import: -> { User }')
     end
   end
+
+  it "adds link to ree object with from section" do
+    source = <<~RUBY
+      class SomeFn
+        fn :some_fn
+
+        def something
+          Use
+        end
+      end
+    RUBY
+
+    some_package_fn_source = <<~RUBY
+      class SomeOtherPackage::SomePackageFn
+        bean :some_package_fn
+
+        class User; end
+      end
+    RUBY
+
+    current_uri = URI("file:///some_package/package/some_package/some_fn.rb")
+    file_uri1 = URI("file:///some_other_package/package/some_other_package/some_package_fn.rb")
+    stub_parse_document(file_uri1, some_package_fn_source)
+
+    with_server(source, current_uri) do |server, uri|
+      index_class(server, 'User', file_uri1)
+      index_fn(server, 'some_package_fn', 'some_package', file_uri1)
+
+      send_completion_request(server, uri, { line: 4, character: 7 })
+
+      result = server.pop_response
+      expect(result.response.size).to eq(1)
+      expect(result.response[0].additional_text_edits.first.new_text).to match('link :some_package_fn, from: :some_other_package, import: -> { User }')
+    end
+  end
 end
