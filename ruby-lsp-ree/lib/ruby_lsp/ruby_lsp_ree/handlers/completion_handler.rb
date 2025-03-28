@@ -1,5 +1,6 @@
 require_relative "../utils/ree_lsp_utils"
 require_relative "../ree_object_finder"
+require_relative 'const_additional_text_edits_creator'
 
 module RubyLsp
   module Ree
@@ -193,7 +194,7 @@ module RubyLsp
                   new_text: class_name,
                 ),
                 kind: Constant::CompletionItemKind::CLASS,
-                additional_text_edits: get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
+                additional_text_edits: ConstAdditionalTextEditsCreator.call(parsed_doc, class_name, package_name, entry)
               )
             end
           end
@@ -270,61 +271,6 @@ module RubyLsp
         end.join(', ')
       end
 
-      def get_additional_text_edits_for_constant(parsed_doc, class_name, package_name, entry)
-        if parsed_doc.includes_linked_constant?(class_name)
-          return []
-        end
-
-        const_link = get_constant_link(entry, package_name, parsed_doc)
-
-        if existing_link = parsed_doc.find_link_node(const_link[:object_name])
-          # attach to existing link
-          if existing_link.has_import_section?
-            new_text = "& #{class_name} }"
-            position = existing_link.location.end_column
-            range = Interface::Range.new(
-              start: Interface::Position.new(line: existing_link.location.start_line, character: position),
-              end: Interface::Position.new(line: existing_link.location.start_line, character: position + new_text.size),
-            )
-          else
-            if existing_link.object_name_type?
-              new_text = ", import: -> { #{class_name} }"
-            else
-              new_text = ", -> { #{class_name} }"
-            end
-            
-            position = existing_link.location.end_column + 1
-            range = Interface::Range.new(
-              start: Interface::Position.new(line: existing_link.location.start_line, character: position),
-              end: Interface::Position.new(line: existing_link.location.start_line, character: position + new_text.size),
-            )
-          end          
-        else
-          # add new link
-
-          link_text = "\s\slink #{const_link[:link_name]}, import: -> { #{class_name} }"
-
-          if parsed_doc.links_container_node
-            link_text = "\s\s" + link_text
-          end
-
-          new_text = "\n" + link_text
-
-          if parsed_doc.has_blank_links_container?
-            new_text = "\sdo#{link_text}\n\s\send\n"
-          end
-
-          range = get_range_for_fn_insert(parsed_doc, link_text)
-        end
-
-        [
-          Interface::TextEdit.new(
-            range:    range,
-            new_text: new_text,
-          )
-        ]
-      end
-
       def get_additional_text_edits_for_method(parsed_doc, fn_name, package_name)
         return [] unless parsed_doc
 
@@ -357,37 +303,6 @@ module RubyLsp
             new_text: new_text,
           )
         ]
-      end
-
-      private
-
-      def is_ree_object?(uri)
-        doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(uri)
-        return false unless doc.has_root_class?
-        
-        doc.parse_links_container_node
-        return !!doc.links_container_node
-      end
-
-      def get_constant_link(entry, package_name, parsed_doc)
-        entry_uri = entry.uri.to_s
-        
-        ree_obj_name = nil
-        link_name = nil
-
-        if is_ree_object?(entry.uri)
-          ree_obj_name = File.basename(entry_uri, ".*")
-          link_name = ":#{ree_obj_name}"
-
-          if package_name != parsed_doc.package_name
-            link_name += ", from: :#{package_name}"
-          end
-        else
-          ree_obj_name = path_from_package_folder(entry_uri)
-          link_name = "\"#{ree_obj_name}\""
-        end
-
-        return { link_name: link_name, object_name: ree_obj_name }
       end
     end
   end
