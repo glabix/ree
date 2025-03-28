@@ -68,8 +68,8 @@ module RubyLsp
             links_container_node.arguments.location.end_column + 1
           end
         elsif parsed_doc.includes_link_dsl?
-          fn_line = parsed_doc.link_nodes.first.location.start_line - 1
-          position = parsed_doc.link_nodes.first.location.start_column
+          fn_line = parsed_doc.link_nodes.last.location.start_line
+          position = parsed_doc.link_nodes.last.location.end_column + 1
         elsif parsed_doc.allows_root_links?
           root_node_location = parsed_doc.root_node_line_location
          
