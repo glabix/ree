@@ -73,7 +73,7 @@ module RubyLsp
 
       def is_ree_object?(uri)
         doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(uri)
-        return false unless doc.has_root_class?
+        return false if !doc || !doc.has_root_class?
         
         doc.parse_links_container_node
         return !!doc.links_container_node
