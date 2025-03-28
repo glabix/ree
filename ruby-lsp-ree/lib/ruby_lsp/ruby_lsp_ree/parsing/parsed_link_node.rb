@@ -75,15 +75,26 @@ class RubyLsp::Ree::ParsedLinkNode
     @imports ||= get_imports
   end
 
+  def has_import_section?
+    return false if @node.arguments.arguments.size == 1
+
+    !!import_arg
+  end
+
   private
+
+  def last_arg
+    @node.arguments.arguments.last
+  end
+
+  def import_arg
+    last_arg.elements.detect{ _1.key.unescaped == IMPORT_ARG_KEY }
+  end
 
   def get_imports
     return [] if @node.arguments.arguments.size == 1
     
-    last_arg = @node.arguments.arguments.last
-
     if last_arg.is_a?(Prism::KeywordHashNode)
-      import_arg = last_arg.elements.detect{ _1.key.unescaped == IMPORT_ARG_KEY }
       return [] unless import_arg
 
       [import_arg.value.body.body.first.name.to_s]

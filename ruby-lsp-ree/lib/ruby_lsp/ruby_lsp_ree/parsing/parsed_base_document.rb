@@ -20,6 +20,16 @@ class RubyLsp::Ree::ParsedBaseDocument
     @link_nodes.map(&:name).include?(obj_name)
   end
 
+  def find_link_node(name)
+    @link_nodes.detect{ node_name(_1) == name }
+  end
+
+  def node_name(node)
+    return nil unless node.respond_to?(:name)
+
+    node.name
+  end
+
   def allows_root_links?
     raise "abstract method"
   end

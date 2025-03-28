@@ -275,34 +275,42 @@ module RubyLsp
           return []
         end
 
-        entry_uri = entry.uri.to_s
+        const_link = get_constant_link(entry, package_name, parsed_doc)
 
-        if is_ree_object?(entry.uri)
-          ree_obj_name = File.basename(entry_uri, ".*")
-          link_name = ":#{ree_obj_name}"
-
-          if package_name != parsed_doc.package_name
-            link_name += ", from: :#{package_name}"
-          end
+        if existing_link = parsed_doc.find_link_node(const_link[:object_name])
+          # attach to existing link
+          if existing_link.has_import_section?
+            new_text = ""
+            position = 0
+            range = Interface::Range.new(
+              start: Interface::Position.new(line: 0, character: position),
+              end: Interface::Position.new(line: 0, character: position + new_text.size),
+            )
+          else
+            new_text = ", import: -> { #{class_name} }"
+            position = existing_link.location.end_column + 1
+            range = Interface::Range.new(
+              start: Interface::Position.new(line: existing_link.location.start_line, character: position),
+              end: Interface::Position.new(line: existing_link.location.start_line, character: position + new_text.size),
+            )
+          end          
         else
-          path = path_from_package_folder(entry_uri)
-          link_name = "\"#{path}\""
+          # add new link
+
+          link_text = "\s\slink #{link_name}, import: -> { #{class_name} }"
+
+          if parsed_doc.links_container_node
+            link_text = "\s\s" + link_text
+          end
+
+          new_text = "\n" + link_text
+
+          if parsed_doc.has_blank_links_container?
+            new_text = "\sdo#{link_text}\n\s\send\n"
+          end
+
+          range = get_range_for_fn_insert(parsed_doc, link_text)
         end
-
-        link_text = "\s\slink #{link_name}, import: -> { #{class_name} }"
-
-        if parsed_doc.links_container_node
-          link_text = "\s\s" + link_text
-        end
-        
-        new_text = "\n" + link_text
-
-
-        if parsed_doc.has_blank_links_container?
-          new_text = "\sdo#{link_text}\n\s\send\n"
-        end
-
-        range = get_range_for_fn_insert(parsed_doc, link_text)
 
         [
           Interface::TextEdit.new(
@@ -354,6 +362,27 @@ module RubyLsp
         
         doc.parse_links_container_node
         return !!doc.links_container_node
+      end
+
+      def get_constant_link(entry, package_name, parsed_doc)
+        entry_uri = entry.uri.to_s
+        
+        ree_obj_name = nil
+        link_name = nil
+
+        if is_ree_object?(entry.uri)
+          ree_obj_name = File.basename(entry_uri, ".*")
+          link_name = ":#{ree_obj_name}"
+
+          if package_name != parsed_doc.package_name
+            link_name += ", from: :#{package_name}"
+          end
+        else
+          ree_obj_name = path_from_package_folder(entry_uri)
+          link_name = "\"#{ree_obj_name}\""
+        end
+
+        return { link_name: link_name, object_name: ree_obj_name }
       end
     end
   end

@@ -33,10 +33,6 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     @link_nodes.map(&:imports).flatten.include?(const_name)
   end
 
-  def find_link_node(name)
-    @link_nodes.detect{ node_name(_1) == name }
-  end
-
   def find_link_with_imported_object(name)
     @link_nodes.detect do |link_node|
       link_node.imports.include?(name)
@@ -179,12 +175,6 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
   def links_container_node_name
     links_container_node.arguments.arguments.first.unescaped
-  end
-
-  def node_name(node)
-    return nil unless node.respond_to?(:name)
-
-    node.name
   end
 
   def imported_constants
