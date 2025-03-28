@@ -25,6 +25,10 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     false
   end
 
+  def has_body?
+    class_node && class_node.body && class_node.body.body
+  end
+
   def includes_link_dsl?
     @class_includes.any?{ node_name(_1) == LINK_DSL_MODULE }
   end
@@ -54,7 +58,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_links_container_node
-    return unless class_node
+    return unless has_body?
 
     @links_container_node ||= class_node.body.body.detect{ |node| LINKS_CONTAINER_TYPES.include?(node_name(node)) }
     @links_container_node_type = node_name(@links_container_node)
@@ -62,7 +66,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_class_includes
-    return unless class_node
+    return unless has_body?
 
     @class_includes ||= class_node.body.body.select{ node_name(_1) == :include }.map do |class_include|
       parent_name = class_include.arguments.arguments.first.parent.name.to_s
@@ -75,7 +79,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_links
-    return unless class_node
+    return unless has_body?
 
     nodes = if links_container_node && @links_container_block_node && @links_container_block_node.body
       @links_container_block_node.body.body.select{ |node| node_name(node) == :link }
@@ -93,7 +97,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_values
-    return unless class_node
+    return unless has_body?
     
     @values ||= class_node.body.body
       .select{ node_name(_1) == :val }
@@ -110,8 +114,8 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_bean_methods
-    return unless class_node
-    
+    return unless has_body?
+
     @bean_methods ||= class_node.body.body
       .select{ _1.is_a?(Prism::DefNode) }
       .map{ OpenStruct.new(name: node_name(_1).to_s, signatures: parse_signatures_from_params(_1.parameters)) }
@@ -151,7 +155,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_error_definitions
-    return unless class_node
+    return unless has_body?
 
     @error_definitions = class_node.body.body
       .select{ _1.is_a?(Prism::ConstantWriteNode) }
