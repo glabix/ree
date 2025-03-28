@@ -177,9 +177,6 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
     end
   end
 
-  # TODO it "adds import section to already linked file path" do
-  # TODO it "adds const to existing import section for file path" do
-
   it "adds const to existing import section for ree object" do
     source = <<~RUBY
       class SomeFn
@@ -210,6 +207,73 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
       index_class(server, 'User', file_uri1)
       index_fn(server, 'some_package_fn', 'some_other_package', file_uri1)
 
+      send_completion_request(server, uri, { line: 6, character: 7 })
+
+      result = server.pop_response
+      expect(result.response.size).to eq(1)
+      expect(result.response[0].additional_text_edits.first.new_text).to eq('& User }')
+    end
+  end
+  
+  it "adds import section to already linked file path" do
+    source = <<~RUBY
+      class SomeFn
+        fn :some_fn do
+          link "some_other_package/some_package_fn"
+        end
+
+        def something
+          Use
+        end
+      end
+    RUBY
+
+    some_package_fn_source = <<~RUBY
+      class SomeOtherPackage::SomePackageFn
+        class User; end
+      end
+    RUBY
+
+    current_uri = URI("file:///some_package/package/some_package/some_fn.rb")
+    file_uri1 = URI("file:///some_other_package/package/some_other_package/some_package_fn.rb")
+    stub_parse_document(file_uri1, some_package_fn_source)
+
+    with_server(source, current_uri) do |server, uri|
+      index_class(server, 'User', file_uri1)
+      send_completion_request(server, uri, { line: 6, character: 7 })
+
+      result = server.pop_response
+      expect(result.response.size).to eq(1)
+      expect(result.response[0].additional_text_edits.first.new_text).to eq(', import: -> { User }')
+    end
+  end
+
+  it "adds const to existing import section for file path" do
+    source = <<~RUBY
+      class SomeFn
+        fn :some_fn do
+          link "some_other_package/some_package_fn", import: -> { User1 }
+        end
+
+        def something
+          Use
+        end
+      end
+    RUBY
+
+    some_package_fn_source = <<~RUBY
+      class SomeOtherPackage::SomePackageFn
+        class User; end
+        class User1; end
+      end
+    RUBY
+
+    current_uri = URI("file:///some_package/package/some_package/some_fn.rb")
+    file_uri1 = URI("file:///some_other_package/package/some_other_package/some_package_fn.rb")
+    stub_parse_document(file_uri1, some_package_fn_source)
+
+    with_server(source, current_uri) do |server, uri|
+      index_class(server, 'User', file_uri1)
       send_completion_request(server, uri, { line: 6, character: 7 })
 
       result = server.pop_response
