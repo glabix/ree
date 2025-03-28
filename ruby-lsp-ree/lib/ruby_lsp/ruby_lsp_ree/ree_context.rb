@@ -1,18 +1,10 @@
 require 'prism'
+require_relative "ree_constants"
 
 module RubyLsp
   module Ree
     class ReeContext
-      ERROR_DEFINITION_NAMES = [
-        :auth_error,
-        :build_error,
-        :conflict_error,
-        :invalid_param_error,
-        :not_found_error,
-        :payment_required_error,
-        :permission_error,
-        :validation_error
-      ]
+      include RubyLsp::Ree::ReeConstants
 
       def initialize(node_context)
         @node_context = node_context

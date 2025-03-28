@@ -7,6 +7,7 @@ require_relative "utils/ree_lsp_utils"
 require_relative "ree_formatter"
 require_relative "ree_template_applicator"
 require_relative "ree_rename_handler"
+require_relative "ree_constants"
 require_relative "parsing/parsed_document_builder"
 
 module RubyLsp

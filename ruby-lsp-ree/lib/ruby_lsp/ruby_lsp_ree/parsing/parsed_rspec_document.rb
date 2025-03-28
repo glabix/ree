@@ -1,25 +1,19 @@
+require_relative 'parsed_base_document'
 require_relative 'parsed_link_node'
 require 'ostruct'
 
-class RubyLsp::Ree::ParsedRspecDocument
+class RubyLsp::Ree::ParsedRspecDocument < RubyLsp::Ree::ParsedBaseDocument
   include RubyLsp::Ree::ReeLspUtils
 
-  attr_reader :ast, :package_name, :describe_node
+  attr_reader :describe_node
 
-  def initialize(ast)
-    @ast = ast
-  end
-
-  def set_package_name(package_name)
-    @package_name = package_name
+  def initialize(ast, package_name = nil)
+    super
+    parse_describe_node    
   end
 
   def allows_root_links?
     true
-  end
-
-  def includes_linked_object?(obj_name)
-    @link_nodes.map(&:name).include?(obj_name)
   end
 
   def links_container_node

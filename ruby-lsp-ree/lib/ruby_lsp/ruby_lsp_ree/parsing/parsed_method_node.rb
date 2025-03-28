@@ -39,7 +39,7 @@ class RubyLsp::Ree::ParsedMethodNode
     return @raised_errors if @raised_errors
     return [] unless @method_node.body
 
-    call_objects = parse_body_call_objects(@method_node.body.body)
+    call_objects = parse_body_call_objects(get_method_body(@method_node))
     raise_objects = call_objects.select{ _1.name == :raise }
     @raised_errors = raise_objects.map{ parse_raised_class_name(_1) }.compact
   end
