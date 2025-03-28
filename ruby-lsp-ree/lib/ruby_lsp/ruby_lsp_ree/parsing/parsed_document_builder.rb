@@ -69,8 +69,6 @@ class RubyLsp::Ree::ParsedDocumentBuilder
 
   def self.build_class_document(ast, package_name)
     document = RubyLsp::Ree::ParsedClassDocument.new(ast, package_name)
-    $stderr.puts("build_class_document #{package_name.inspect}")
-    
     
     document.parse_links_container_node
     document.parse_class_includes
