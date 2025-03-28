@@ -1,6 +1,7 @@
 ## [0.1.11] - 2025-03-28
 
 - fixed formatting errors for methods with `rescue`
+- fixed imports from enums
 - improved Add Link for constants
 
 ## [0.1.10] - 2025-03-26
