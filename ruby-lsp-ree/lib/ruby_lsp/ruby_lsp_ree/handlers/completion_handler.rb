@@ -277,13 +277,17 @@ module RubyLsp
 
         entry_uri = entry.uri.to_s
 
-        link_text = if parsed_doc.package_name == package_name
-          fn_name = File.basename(entry_uri, ".*")
-          "\s\slink :#{fn_name}, import: -> { #{class_name} }"
+        if is_ree_object?(entry.uri)
+          ree_obj_name = File.basename(entry_uri, ".*")
+          link_name = ":#{ree_obj_name}"
+
+          # TODO add from
         else
           path = path_from_package_folder(entry_uri)
-          "\s\slink \"#{path}\", import: -> { #{class_name} }"
+          link_name = "\"#{path}\""
         end
+
+        link_text = "\s\slink #{link_name}, import: -> { #{class_name} }"
 
         if parsed_doc.links_container_node
           link_text = "\s\s" + link_text
@@ -338,6 +342,16 @@ module RubyLsp
             new_text: new_text,
           )
         ]
+      end
+
+      private
+
+      def is_ree_object?(uri)
+        doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(uri)
+        return false unless doc.has_root_class?
+        
+        doc.parse_links_container_node
+        return !!doc.links_container_node
       end
     end
   end

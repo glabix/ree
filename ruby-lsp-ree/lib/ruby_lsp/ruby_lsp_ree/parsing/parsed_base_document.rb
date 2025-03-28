@@ -12,6 +12,10 @@ class RubyLsp::Ree::ParsedBaseDocument
     @package_name = package_name
   end
 
+  def has_root_class?
+    false
+  end
+
   def includes_linked_object?(obj_name)
     @link_nodes.map(&:name).include?(obj_name)
   end

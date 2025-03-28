@@ -17,6 +17,10 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     parse_class_node    
   end
 
+  def has_root_class?
+    true
+  end
+
   def allows_root_links?
     false
   end
