@@ -27,8 +27,8 @@ module RubyLsp
             new_text = "& #{@const_name} }"
             position = existing_link.location.end_column
             range = Interface::Range.new(
-              start: Interface::Position.new(line: existing_link.location.start_line, character: position),
-              end: Interface::Position.new(line: existing_link.location.start_line, character: position + new_text.size),
+              start: Interface::Position.new(line: existing_link.location.start_line-1, character: position),
+              end: Interface::Position.new(line: existing_link.location.start_line-1, character: position + new_text.size),
             )
           else
             if existing_link.object_name_type?
@@ -39,8 +39,8 @@ module RubyLsp
 
             position = existing_link.location.end_column + 1
             range = Interface::Range.new(
-              start: Interface::Position.new(line: existing_link.location.start_line, character: position),
-              end: Interface::Position.new(line: existing_link.location.start_line, character: position + new_text.size),
+              start: Interface::Position.new(line: existing_link.location.start_line-1, character: position),
+              end: Interface::Position.new(line: existing_link.location.start_line-1, character: position + new_text.size),
             )
           end          
         else
