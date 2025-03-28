@@ -25,7 +25,7 @@ module RubyLsp
           # attach to existing link
           if existing_link.has_import_section?
             new_text = "& #{@const_name} }"
-            position = existing_link.location.end_column
+            position = existing_link.location.end_column - 1
             range = Interface::Range.new(
               start: Interface::Position.new(line: existing_link.location.start_line-1, character: position),
               end: Interface::Position.new(line: existing_link.location.start_line-1, character: position + new_text.size),
