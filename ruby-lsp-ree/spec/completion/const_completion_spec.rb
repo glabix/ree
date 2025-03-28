@@ -244,7 +244,7 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
 
       result = server.pop_response
       expect(result.response.size).to eq(1)
-      expect(result.response[0].additional_text_edits.first.new_text).to eq(', import: -> { User }')
+      expect(result.response[0].additional_text_edits.first.new_text).to eq(', -> { User }')
     end
   end
 
@@ -252,7 +252,7 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
     source = <<~RUBY
       class SomeFn
         fn :some_fn do
-          link "some_other_package/some_package_fn", import: -> { User1 }
+          link "some_other_package/some_package_fn", -> { User1 }
         end
 
         def something

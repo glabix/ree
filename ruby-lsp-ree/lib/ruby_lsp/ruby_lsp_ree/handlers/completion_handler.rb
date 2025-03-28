@@ -287,7 +287,12 @@ module RubyLsp
               end: Interface::Position.new(line: existing_link.location.start_line, character: position + new_text.size),
             )
           else
-            new_text = ", import: -> { #{class_name} }"
+            if existing_link.object_name_type?
+              new_text = ", import: -> { #{class_name} }"
+            else
+              new_text = ", -> { #{class_name} }"
+            end
+            
             position = existing_link.location.end_column + 1
             range = Interface::Range.new(
               start: Interface::Position.new(line: existing_link.location.start_line, character: position),

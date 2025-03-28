@@ -88,15 +88,18 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   def import_arg
-    last_arg.elements.detect{ _1.key.unescaped == IMPORT_ARG_KEY }
+    if object_name_type?
+      last_arg.elements.detect{ _1.key.unescaped == IMPORT_ARG_KEY }
+    else
+      last_arg
+    end
   end
 
   def get_imports
     return [] if @node.arguments.arguments.size == 1
     
-    if last_arg.is_a?(Prism::KeywordHashNode)
+    if object_name_type?
       return [] unless import_arg
-
       [import_arg.value.body.body.first.name.to_s]
     elsif last_arg.is_a?(Prism::LambdaNode)
       [last_arg.body.body.first.name.to_s]
