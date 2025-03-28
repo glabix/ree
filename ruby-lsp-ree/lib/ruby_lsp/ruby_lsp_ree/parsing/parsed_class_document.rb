@@ -69,11 +69,22 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     return unless has_body?
 
     @class_includes ||= class_node.body.body.select{ node_name(_1) == :include }.map do |class_include|
-      parent_name = class_include.arguments.arguments.first.parent.name.to_s
-      module_name = class_include.arguments.arguments.first.name
+      first_arg = class_include.arguments.arguments.first
+
+      include_name = case first_arg
+      when Prism::ConstantPathNode
+        parent_name = class_include.arguments.arguments.first.parent.name.to_s
+        module_name = class_include.arguments.arguments.first.name
+
+        [parent_name, module_name].compact.join('::')
+      when Prism::ConstantReadNode
+        first_arg.name.to_s
+      else
+        ''
+      end
     
       OpenStruct.new(
-        name: [parent_name, module_name].compact.join('::')
+        name: include_name, location: class_include.location
       )          
     end
   end
