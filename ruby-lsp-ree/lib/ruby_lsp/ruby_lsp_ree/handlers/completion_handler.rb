@@ -280,11 +280,11 @@ module RubyLsp
         if existing_link = parsed_doc.find_link_node(const_link[:object_name])
           # attach to existing link
           if existing_link.has_import_section?
-            new_text = ""
-            position = 0
+            new_text = "& #{class_name} }"
+            position = existing_link.location.end_column
             range = Interface::Range.new(
-              start: Interface::Position.new(line: 0, character: position),
-              end: Interface::Position.new(line: 0, character: position + new_text.size),
+              start: Interface::Position.new(line: existing_link.location.start_line, character: position),
+              end: Interface::Position.new(line: existing_link.location.start_line, character: position + new_text.size),
             )
           else
             new_text = ", import: -> { #{class_name} }"
@@ -297,7 +297,7 @@ module RubyLsp
         else
           # add new link
 
-          link_text = "\s\slink #{link_name}, import: -> { #{class_name} }"
+          link_text = "\s\slink #{const_link[:link_name]}, import: -> { #{class_name} }"
 
           if parsed_doc.links_container_node
             link_text = "\s\s" + link_text
