@@ -10,7 +10,8 @@ module RubyLsp
         :bean,
         :async_bean,
         :mapper,
-        :aggregate
+        :aggregate,
+        :enum
       ]
 
       ERROR_DEFINITION_NAMES = [
