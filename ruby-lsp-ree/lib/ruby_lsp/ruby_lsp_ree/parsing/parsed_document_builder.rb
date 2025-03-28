@@ -6,6 +6,8 @@ class RubyLsp::Ree::ParsedDocumentBuilder
   extend RubyLsp::Ree::ReeLspUtils
 
   def self.build_from_uri(uri, type = nil)
+    return unless is_ruby_file?(uri)
+    
     ast = Prism.parse_file(uri.path).value
     document = build_document(ast, type, package_name_from_uri(uri))
     return unless document
@@ -14,6 +16,8 @@ class RubyLsp::Ree::ParsedDocumentBuilder
   end
 
   def self.build_from_ast(ast, uri, type = nil)
+    return if uri && !is_ruby_file?(uri)
+
     document = build_document(ast, type, package_name_from_uri(uri))
     return unless document
 
@@ -65,6 +69,8 @@ class RubyLsp::Ree::ParsedDocumentBuilder
 
   def self.build_class_document(ast, package_name)
     document = RubyLsp::Ree::ParsedClassDocument.new(ast, package_name)
+    $stderr.puts("build_class_document #{package_name.inspect}")
+    
     
     document.parse_links_container_node
     document.parse_class_includes
@@ -99,4 +105,8 @@ class RubyLsp::Ree::ParsedDocumentBuilder
 
     document
   end  
+
+  def self.is_ruby_file?(uri)
+    File.extname(uri.to_s) == '.rb'
+  end
 end
