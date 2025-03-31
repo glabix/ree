@@ -31,10 +31,6 @@ class RubyLsp::Ree::ParsedRspecDocument < RubyLsp::Ree::ParsedBaseDocument
     false
   end
 
-  def includes_link_dsl?
-    false
-  end
-
   def parse_describe_node
     @describe_node ||= @ast.statements.body.detect{ |node| node.is_a?(Prism::CallNode) && node.name == :describe }
   end

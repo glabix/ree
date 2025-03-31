@@ -102,7 +102,6 @@ module RubyLsp
       def get_linked_object_definition_items(node)
         result = []
         parent_node = @node_context.parent
-        return [] unless parent_node.name == :link
 
         link_node = RubyLsp::Ree::ParsedLinkNode.new(parent_node, package_name_from_uri(@uri))
         package_name = link_node.link_package_name
@@ -122,6 +121,16 @@ module RubyLsp
         )
 
         result
+      end
+
+      def get_routes_definition_items(node)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
+
+        return [] unless parsed_doc.has_routes_dsl?
+
+        $stderr.puts("has_routes dsl")
+
+        []
       end
 
       def get_linked_filepath_definition_items(node)

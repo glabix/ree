@@ -15,6 +15,12 @@ module RubyLsp
         
         ERROR_DEFINITION_NAMES.include?(@node_context.parent.name)
       end
+
+      def is_link_object?
+        return false if !@node_context || !@node_context.parent || !@node_context.parent.is_a?(Prism::CallNode)
+
+        @node_context.parent.name == :link
+      end
     end
   end
 end

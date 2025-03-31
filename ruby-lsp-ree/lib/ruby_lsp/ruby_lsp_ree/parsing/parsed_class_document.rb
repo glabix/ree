@@ -33,6 +33,10 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     @class_includes.any?{ node_name(_1) == LINK_DSL_MODULE }
   end
 
+  def includes_routes_dsl?
+    @class_includes.any?{ node_name(_1) == ROUTES_DSL_MODULE }
+  end
+
   def includes_linked_constant?(const_name)
     @link_nodes.map(&:imports).flatten.include?(const_name)
   end

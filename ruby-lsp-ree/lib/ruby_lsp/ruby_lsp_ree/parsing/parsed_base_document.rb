@@ -16,6 +16,14 @@ class RubyLsp::Ree::ParsedBaseDocument
     false
   end
 
+  def includes_link_dsl?
+    false
+  end
+
+  def includes_routes_dsl?
+    false
+  end
+
   def includes_linked_object?(obj_name)
     @link_nodes.map(&:name).include?(obj_name)
   end
@@ -39,10 +47,6 @@ class RubyLsp::Ree::ParsedBaseDocument
   end
 
   def links_container_node
-    raise "abstract method"
-  end
-
-  def includes_link_dsl?
     raise "abstract method"
   end
 
