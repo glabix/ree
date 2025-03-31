@@ -124,13 +124,30 @@ module RubyLsp
       end
 
       def get_routes_definition_items(node)
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri, :route)
 
-        return [] unless parsed_doc.has_routes_dsl?
+        return [] unless parsed_doc.includes_routes_dsl?
 
-        $stderr.puts("has_routes dsl")
+        parent_node = @node_context.parent
 
-        []
+        package_name = if parsed_doc.has_route_option?(:from)
+          parsed_doc.route_option_value(:from)
+        else
+          package_name_from_uri(@uri)
+        end 
+
+        ree_object = @finder.find_object_for_package(node.unescaped, package_name)
+        return [] unless ree_object
+
+        [
+          Interface::Location.new(
+            uri: ree_object.uri.to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: 0, character: 0),
+              end: Interface::Position.new(line: 0, character: 0),
+            ),
+          )
+        ]
       end
 
       def get_linked_filepath_definition_items(node)
