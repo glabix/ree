@@ -7,9 +7,14 @@ module RubyLsp
       include RubyLsp::Ree::ReeLspUtils
 
       REE_INDEXED_OBJECTS = [:fn, :enum, :action, :dao, :bean, :mapper, :aggregate, :async_bean]
+      SCHEMA_NODE_NAME = :schema
 
       def on_call_node_enter(node)
         return unless @listener.current_owner
+      
+        if node.name == SCHEMA_NODE_NAME
+          return index_ree_schema(node)
+        end
 
         return unless REE_INDEXED_OBJECTS.include?(node.name)
         return unless node.arguments
@@ -36,6 +41,19 @@ module RubyLsp
       end
 
       private
+
+      def index_ree_schema(node)
+        return if node.receiver
+        return if !node.arguments || !node.block
+
+        @listener.add_class(
+          node.arguments.arguments.first.name.to_s, 
+          node.location, 
+          node.location, 
+          parent_class_name: nil, 
+          comments: "ree_schema"
+        )
+      end
 
       def parse_signatures(fn_name, ast)
         class_node = ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
