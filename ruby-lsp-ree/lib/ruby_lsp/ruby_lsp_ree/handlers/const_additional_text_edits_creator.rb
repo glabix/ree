@@ -46,7 +46,11 @@ module RubyLsp
         else
           # add new link
 
-          link_text = "\s\slink #{const_link[:link_name]}, import: -> { #{@const_name} }"
+          link_text = if const_link[:link_type] == :file_path
+            "\s\slink #{const_link[:link_name]}, -> { #{@const_name} }"
+          else
+            "\s\slink #{const_link[:link_name]}, import: -> { #{@const_name} }"
+          end
 
           if @parsed_doc.links_container_node
             link_text = "\s\s" + link_text
@@ -84,10 +88,12 @@ module RubyLsp
         
         ree_obj_name = nil
         link_name = nil
+        link_type = nil
 
         if is_ree_object?(@entry.uri)
           ree_obj_name = File.basename(entry_uri, ".*")
           link_name = ":#{ree_obj_name}"
+          link_type = :ree_object
 
           if @package_name != @parsed_doc.package_name
             link_name += ", from: :#{@package_name}"
@@ -95,9 +101,10 @@ module RubyLsp
         else
           ree_obj_name = path_from_package_folder(entry_uri)
           link_name = "\"#{ree_obj_name}\""
+          link_type = :file_path
         end
 
-        return { link_name: link_name, object_name: ree_obj_name }
+        return { link_name: link_name, object_name: ree_obj_name, link_type: link_type }
       end
     end
   end

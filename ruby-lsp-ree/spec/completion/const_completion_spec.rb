@@ -66,7 +66,7 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
 
       result = server.pop_response
       expect(result.response.size).to eq(1)
-      expect(result.response[0].additional_text_edits.first.new_text).to match('link "some_package/some_package_fn", import: -> { User }')
+      expect(result.response[0].additional_text_edits.first.new_text).to match('link "some_package/some_package_fn", -> { User }')
     end
   end
 
