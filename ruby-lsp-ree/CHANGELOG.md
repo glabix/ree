@@ -2,6 +2,7 @@
 
 - Go To Definition for action and serializers in routes
 - support for `schema` objects
+- better support for both ree locale conventions
 
 ## [0.1.11] - 2025-03-28
 
