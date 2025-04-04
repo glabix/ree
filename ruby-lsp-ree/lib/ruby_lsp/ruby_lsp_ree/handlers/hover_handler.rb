@@ -114,6 +114,8 @@ module RubyLsp
         else
           mod = underscore(parsed_doc.module_name)
           "#{mod}.errors.#{node.unescaped}"
+            # TODO add second convention
+
         end
 
         documentation = ''

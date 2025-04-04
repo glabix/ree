@@ -55,6 +55,7 @@ module RubyLsp
           else
             mod = underscore(parsed_doc.module_name)
             "#{mod}.errors.#{error_definition.value.arguments.arguments[0].unescaped}"
+            # TODO add second convention
           end
 
           error_keys << [key_path, error_definition]

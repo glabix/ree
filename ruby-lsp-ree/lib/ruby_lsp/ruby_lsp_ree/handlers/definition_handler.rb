@@ -201,6 +201,8 @@ module RubyLsp
 
           mod = underscore(parsed_doc.module_name)
           "#{mod}.errors.#{node.unescaped}"
+            # TODO add second convention
+
         end
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
