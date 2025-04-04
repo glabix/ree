@@ -14,24 +14,30 @@ module RubyLsp
         locales_folder = package_locales_folder_path(get_uri_path(uri))
         return source if !locales_folder || !File.directory?(locales_folder)
 
+        file_name = File.basename(uri.to_s, '.rb')
+
         result = []
         key_paths = []
         parsed_doc.parse_error_definitions
         parsed_doc.error_definitions.each do |error_definition|
-          key_path = if error_definition.value.arguments.arguments.size > 1
-            error_definition.value.arguments.arguments[1].unescaped
+          key_path_entries = if error_definition.value.arguments.arguments.size > 1
+            [error_definition.value.arguments.arguments[1].unescaped]
           else
             mod = underscore(parsed_doc.module_name)
-            "#{mod}.errors.#{error_definition.value.arguments.arguments[0].unescaped}"
+            [
+              "#{mod}.errors.#{error_definition.value.arguments.arguments[0].unescaped}",
+              "#{mod}.errors.#{file_name}.#{error_definition.value.arguments.arguments[0].unescaped}"
+            ]
           end
 
-          key_paths << key_path
+          key_paths << key_path_entries
         end
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
-          key_paths.each do |key_path|
-            value = find_locale_value(locale_file, key_path)
+          key_paths.each do |key_path_entries|
+            value = key_path_entries.map{ find_locale_value(locale_file, _1) }.compact.first
             unless value
+              key_path = key_path_entries.last
               loc_key = File.basename(locale_file, '.yml')
 
               add_locale_placeholder(locale_file, key_path)    

@@ -44,8 +44,10 @@ module RubyLsp
       def on_symbol_node_enter(node)
         definition_items = if @ree_context.is_error_definition?
           @handler.get_error_code_definition_items(node)
-        else
+        elsif @ree_context.is_link_object?
           @handler.get_linked_object_definition_items(node)
+        else
+          @handler.get_routes_definition_items(node)
         end
         
         put_items_into_response(definition_items)

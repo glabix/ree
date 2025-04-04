@@ -102,7 +102,6 @@ module RubyLsp
       def get_linked_object_definition_items(node)
         result = []
         parent_node = @node_context.parent
-        return [] unless parent_node.name == :link
 
         link_node = RubyLsp::Ree::ParsedLinkNode.new(parent_node, package_name_from_uri(@uri))
         package_name = link_node.link_package_name
@@ -122,6 +121,33 @@ module RubyLsp
         )
 
         result
+      end
+
+      def get_routes_definition_items(node)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri, :route)
+
+        return [] unless parsed_doc.includes_routes_dsl?
+
+        parent_node = @node_context.parent
+
+        package_name = if parsed_doc.has_route_option?(:from)
+          parsed_doc.route_option_value(:from)
+        else
+          package_name_from_uri(@uri)
+        end 
+
+        ree_object = @finder.find_object_for_package(node.unescaped, package_name)
+        return [] unless ree_object
+
+        [
+          Interface::Location.new(
+            uri: ree_object.uri.to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: 0, character: 0),
+              end: Interface::Position.new(line: 0, character: 0),
+            ),
+          )
+        ]
       end
 
       def get_linked_filepath_definition_items(node)
@@ -168,17 +194,25 @@ module RubyLsp
 
         result = []
 
-        key_path = if @node_context.parent.arguments.arguments.size > 1
-          @node_context.parent.arguments.arguments[1].unescaped
+        key_path_entries = if @node_context.parent.arguments.arguments.size > 1
+          [@node_context.parent.arguments.arguments[1].unescaped]
         else
           parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
+          file_name = File.basename(@uri.path, '.rb')
 
           mod = underscore(parsed_doc.module_name)
-          "#{mod}.errors.#{node.unescaped}"
+          [
+            "#{mod}.errors.#{node.unescaped}",
+            "#{mod}.errors.#{file_name}.#{node.unescaped}"
+          ]
         end
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
-          location = find_locale_key_location(locale_file, key_path)
+          values = key_path_entries.map{ [_1, find_locale_value(locale_file, _1)] }
+          key_path = values.select{ |val| !val[1].nil? }.last
+          next unless key_path
+          
+          location = find_locale_key_location(locale_file, key_path[0])
 
           result << Interface::Location.new(
             uri: locale_file,

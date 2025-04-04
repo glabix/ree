@@ -47,29 +47,34 @@ module RubyLsp
 
         result = []
         error_keys = []
+        file_name = File.basename(uri.to_s, '.rb')
 
         parsed_doc.parse_error_definitions
         parsed_doc.error_definitions.each do |error_definition|
-          key_path = if error_definition.value.arguments.arguments.size > 1
-            error_definition.value.arguments.arguments[1].unescaped
+          key_path_entries = if error_definition.value.arguments.arguments.size > 1
+            [error_definition.value.arguments.arguments[1].unescaped]
           else
             mod = underscore(parsed_doc.module_name)
-            "#{mod}.errors.#{error_definition.value.arguments.arguments[0].unescaped}"
+            [
+              "#{mod}.errors.#{error_definition.value.arguments.arguments[0].unescaped}",
+              "#{mod}.errors.#{file_name}.#{error_definition.value.arguments.arguments[0].unescaped}"
+            ]
           end
 
-          error_keys << [key_path, error_definition]
+          error_keys << [key_path_entries, error_definition]
         end
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
           error_keys.each do |error_key|
-            key_path = error_key[0]
-            value = find_locale_value(locale_file, key_path)
+            key_path_entries = error_key[0]
+            value = key_path_entries.map{ find_locale_value(locale_file, _1) }.compact.first
+
             if !value || value == MISSING_LOCALE_PLACEHOLDER
               loc_key = File.basename(locale_file, '.yml')
               error_definition = error_key[1]
 
               result << RubyLsp::Interface::Diagnostic.new(
-                message: "Missing locale #{loc_key}: #{key_path}",
+                message: "Missing locale #{loc_key}: #{key_path_entries[0]} or #{key_path_entries[1]} ",
                 source: "Ree formatter",
                 severity: RubyLsp::Constant::DiagnosticSeverity::ERROR,
                 range: RubyLsp::Interface::Range.new( 

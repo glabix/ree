@@ -14,7 +14,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
 
   it "adds error placeholders to locale files" do
     source =  <<~RUBY
-      class SamplePackage::SomeClass
+      class SamplePackage::MyFile
         fn :some_class
 
         InvalidArg1Error = invalid_param_error(:some_error_code1)
@@ -25,13 +25,60 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     RUBY
 
-    subject.run_formatting(sample_file_uri, ruby_document(source))
+    subject.run_formatting(sample_package_file_uri('my_file'), ruby_document(source))
 
     en_locale_content = File.read(sample_package_locales_dir + '/en.yml')
     ru_locale_content = File.read(sample_package_locales_dir + '/ru.yml')
 
-    expect(en_locale_content.lines[10]).to match(/_MISSING_LOCALE_/)
-    expect(ru_locale_content.lines[10]).to match(/_MISSING_LOCALE_/)
+    expect(en_locale_content.lines[10]).to match(/my_file:/)
+    expect(ru_locale_content.lines[10]).to match(/my_file:/)
+
+    expect(en_locale_content.lines[11]).to match(/some_error_code1: _MISSING_LOCALE_/)
+    expect(ru_locale_content.lines[11]).to match(/some_error_code1: _MISSING_LOCALE_/)
+  end
+
+  it "doesn't add error placeholder if code follows package-specific convention" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        InvalidArg1Error = invalid_param_error(:some_error_code)
+
+        def call(arg1)
+          raise InvalidArg1Error.new
+        end
+      end
+    RUBY
+
+    subject.run_formatting(sample_package_file_uri('some_class'), ruby_document(source))
+
+    en_locale_content = File.read(sample_package_locales_dir + '/en.yml')
+    ru_locale_content = File.read(sample_package_locales_dir + '/ru.yml')
+
+    expect(en_locale_content.lines.select{ _1.match?(/some_error_code: _MISSING_LOCALE_/) }.size).to eq(0)
+    expect(ru_locale_content.lines.select{ _1.match?(/some_error_code: _MISSING_LOCALE_/) }.size).to eq(0)
+  end
+
+  it "doesn't add error placeholder if code follows class-specific convention" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        InvalidArg1Error = invalid_param_error(:class_specific_error_code)
+
+        def call(arg1)
+          raise InvalidArg1Error.new
+        end
+      end
+    RUBY
+
+    subject.run_formatting(sample_package_file_uri('some_class'), ruby_document(source))
+
+    en_locale_content = File.read(sample_package_locales_dir + '/en.yml')
+    ru_locale_content = File.read(sample_package_locales_dir + '/ru.yml')
+
+    expect(en_locale_content.lines.select{ _1.match?(/class_specific_error_code: _MISSING_LOCALE_/) }.size).to eq(0)
+    expect(ru_locale_content.lines.select{ _1.match?(/class_specific_error_code: _MISSING_LOCALE_/) }.size).to eq(0)
   end
 
   it "adds several levels of keys for error placeholders" do

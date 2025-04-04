@@ -1,3 +1,9 @@
+## [0.1.13] - 2025-04-04
+
+- Go To Definition for action and serializers in routes
+- support for `schema` objects
+- better support for both ree locale conventions
+
 ## [0.1.11] - 2025-03-28
 
 - fixed formatting errors for methods with `rescue`

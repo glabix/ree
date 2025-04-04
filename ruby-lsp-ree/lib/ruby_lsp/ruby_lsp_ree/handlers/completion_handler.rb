@@ -160,13 +160,14 @@ module RubyLsp
             class_name = full_class_name.split('::').last
             package_name = package_name_from_uri(entry.uri)
             file_name = File.basename(entry.uri.to_s)
+            entry_comment = entry.comments && entry.comments.size > 0 ? " (#{entry.comments})" : ''
 
             matched_import = parsed_doc.find_import_for_package(class_name, package_name)
 
             if matched_import   
               label_details = Interface::CompletionItemLabelDetails.new(
                 description: "imported from: :#{package_name}",
-                detail: ""
+                detail: entry_comment
               )
               
               imported_consts << Interface::CompletionItem.new(
@@ -183,7 +184,7 @@ module RubyLsp
             else
               label_details = Interface::CompletionItemLabelDetails.new(
                 description: "from: :#{package_name}",
-                detail: " #{file_name}"
+                detail: entry_comment + " #{file_name}"
               )
 
               not_imported_consts << Interface::CompletionItem.new(
