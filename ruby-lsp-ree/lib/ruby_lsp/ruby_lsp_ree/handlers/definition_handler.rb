@@ -194,19 +194,25 @@ module RubyLsp
 
         result = []
 
-        key_path = if @node_context.parent.arguments.arguments.size > 1
-          @node_context.parent.arguments.arguments[1].unescaped
+        key_path_entries = if @node_context.parent.arguments.arguments.size > 1
+          [@node_context.parent.arguments.arguments[1].unescaped]
         else
           parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
+          file_name = File.basename(@uri.path, '.rb')
 
           mod = underscore(parsed_doc.module_name)
-          "#{mod}.errors.#{node.unescaped}"
-            # TODO add second convention
-
+          [
+            "#{mod}.errors.#{node.unescaped}",
+            "#{mod}.errors.#{file_name}.#{node.unescaped}"
+          ]
         end
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
-          location = find_locale_key_location(locale_file, key_path)
+          values = key_path_entries.map{ [_1, find_locale_value(locale_file, _1)] }
+          key_path = values.select{ |val| !val[1].nil? }.last
+          next unless key_path
+          
+          location = find_locale_key_location(locale_file, key_path[0])
 
           result << Interface::Location.new(
             uri: locale_file,
