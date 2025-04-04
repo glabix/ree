@@ -109,19 +109,22 @@ module RubyLsp
 
         result = []
 
-        key_path = if @node_context.parent.arguments.arguments.size > 1
-          @node_context.parent.arguments.arguments[1].unescaped
+        key_path_entries = if @node_context.parent.arguments.arguments.size > 1
+          [@node_context.parent.arguments.arguments[1].unescaped]
         else
-          mod = underscore(parsed_doc.module_name)
-          "#{mod}.errors.#{node.unescaped}"
-            # TODO add second convention
+          file_name = File.basename(uri.path, '.rb')
 
+          mod = underscore(parsed_doc.module_name)
+          [
+            "#{mod}.errors.#{node.unescaped}",
+            "#{mod}.errors.#{file_name}.#{node.unescaped}"
+          ]
         end
 
         documentation = ''
 
         Dir.glob(File.join(locales_folder, '**/*.yml')).each do |locale_file|
-          value = find_locale_value(locale_file, key_path)
+          value = key_path_entries.map{ find_locale_value(locale_file, _1) }.compact.first
 
           loc_key = File.basename(locale_file, '.yml')
 
