@@ -14,7 +14,7 @@ module RubyLsp
         locales_folder = package_locales_folder_path(get_uri_path(uri))
         return source if !locales_folder || !File.directory?(locales_folder)
 
-        file_name = File.basename(uri, '.rb')
+        file_name = File.basename(uri.to_s, '.rb')
 
         result = []
         key_paths = []

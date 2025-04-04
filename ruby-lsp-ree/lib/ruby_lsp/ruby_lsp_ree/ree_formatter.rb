@@ -47,7 +47,7 @@ module RubyLsp
 
         result = []
         error_keys = []
-        file_name = File.basename(uri, '.rb')
+        file_name = File.basename(uri.to_s, '.rb')
 
         parsed_doc.parse_error_definitions
         parsed_doc.error_definitions.each do |error_definition|
