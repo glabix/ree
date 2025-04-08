@@ -10,7 +10,8 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
   attr_reader :class_node, :class_includes, 
     :values, :filters, :bean_methods, :links_container_block_node, :error_definitions, 
-    :error_definition_names, :doc_instance_methods, :links_container_node
+    :error_definition_names, :doc_instance_methods, :links_container_node, 
+    :defined_classes, :defined_consts
 
   def initialize(ast, package_name = nil)
     super
@@ -177,6 +178,24 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
       .select{ ERROR_DEFINITION_NAMES.include?(node_name(_1.value)) }
 
     @error_definition_names = @error_definitions.map(&:name)
+  end
+
+  def parse_defined_classes
+    @defined_classes = []
+    return unless has_body?
+
+    @defined_classes = class_node.body.body
+      .select{ _1.is_a?(Prism::ClassNode) }
+      .map(&:name)
+  end
+    
+  def parse_defined_consts
+    @defined_consts = []
+    return unless has_body?
+
+    @defined_consts += class_node.body.body
+      .select{ _1.is_a?(Prism::ConstantWriteNode) }
+      .map(&:name)
   end
 
   def class_name
