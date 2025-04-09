@@ -27,11 +27,63 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
 
   # TODO it "removes unused import link from DSL-using object" do
   # TODO it "removes unused import link from spec" do
-  # TODO it "removes do block if last unused import link removed" do
+  
+  it "removes do block if last unused import link removed" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :some_import1
+        end
+
+        def call(arg1)
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+    expect(result.lines[1].strip).to eq('fn :some_class')
+    expect(result.lines[2].strip).to eq('')
+  end
+
   # TODO it "removes unused import link if constant not used" do
   # TODO it "removes unused constant from import if not used" do
   # TODO it "removes unused constant from multi-constant import if not used" do
-  # TODO it "doesn't remove link if it is used as a call receiver" do
+  
+  it "doesn't remove link if it is used as a call receiver" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :some_import_object
+        end
+
+        def call(arg1)
+          some_import_object.call
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result).to eq(source)
+  end
+  
   # TODO it "doesn't remove link if imported constant is used" do
-  # TODO it "doesn't remove link if it is used on the top level of class" do
+  
+  it "doesn't remove link if it is used on the top level of class" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :some_import_fn
+        end
+
+        x = some_import_fn
+
+        def call(arg1)
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result).to eq(source)
+  end
 end
