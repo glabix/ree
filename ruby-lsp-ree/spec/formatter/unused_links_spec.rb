@@ -67,7 +67,25 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[3].strip).to eq('end')
   end
 
-  # TODO it "removes import block if constant is not used but link is used" do
+  it "removes import block if constant is not used but link is used" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :some_import1, import: -> { SomeConst }
+        end
+
+        def call(arg1)
+          some_import1
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+    expect(result.lines[1].strip).to eq('fn :some_class do')
+    expect(result.lines[2].strip).to eq('link :some_import1')
+    expect(result.lines[3].strip).to eq('end')
+  end
 
   # TODO it "removes unused import link for file-path imports" do
   # TODO it "removes unused import arg for file-path imports" do

@@ -81,10 +81,10 @@ class RubyLsp::Ree::ParsedLinkNode
     !!import_arg
   end
 
-  def import_arg_location
-    import_arg.location
+  def first_arg_location
+    @node.arguments.arguments.first.location
   end
-  
+
   def import_block_body_location
     import_arg.value.body.location
   end
