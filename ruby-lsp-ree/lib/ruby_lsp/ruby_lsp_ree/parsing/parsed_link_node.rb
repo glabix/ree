@@ -85,8 +85,12 @@ class RubyLsp::Ree::ParsedLinkNode
     @node.arguments.arguments.first.location
   end
 
-  def import_block_body_location
-    import_arg.value.body.location
+  def import_block_open_location
+    import_arg.value.opening_loc
+  end
+
+  def import_block_close_location
+    import_arg.value.closing_loc
   end
 
   private

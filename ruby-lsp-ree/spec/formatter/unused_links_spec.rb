@@ -203,9 +203,98 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     end
 
     context "multi-line imports" do
-      # TODO it "correctly removes link for unused constant from multi-line import" do
-  # TODO it "correctly removes import block constant from multi-line import" do
-  # TODO it "correctly removes unused constant from multi-line import" do
+      it "correctly removes link for unused constant" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link :some_import1, import: -> { 
+                SomeConst
+              }
+              link :some_import2
+            end
+    
+            def call(arg1)
+              some_import2
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    
+        expect(result.lines[1].strip).to eq('fn :some_class do')
+        expect(result.lines[2].strip).to eq('link :some_import2')
+        expect(result.lines[3].strip).to eq('end')
+      end
+  
+      it "correctly removes import block constant" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link :some_import1, import: -> { 
+                SomeConst
+              }
+            end
+    
+            def call(arg1)
+              some_import1
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+        expect(result.lines[1].strip).to eq('fn :some_class do')
+        expect(result.lines[2].strip).to eq('link :some_import1')
+        expect(result.lines[3].strip).to eq('end')
+      end
+      
+      it "correctly removes unused constant from new line" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link :some_import1, import: -> { 
+                SomeConst &
+                SomeConst1 &
+                SomeConst2
+              }
+            end
+    
+            def call(arg1)
+              SomeConst
+              SomeConst2
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+        expect(result.lines[1].strip).to eq('fn :some_class do')
+        expect(result.lines[2].strip).to eq('link :some_import1, import: -> { SomeConst & SomeConst2 }')
+        expect(result.lines[3].strip).to eq('end')
+      end
+
+      it "correctly removes unused constant from same line" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link :some_import1, import: -> { 
+                SomeConst & SomeConst1 & SomeConst2
+              }
+            end
+    
+            def call(arg1)
+              SomeConst
+              SomeConst2
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+        expect(result.lines[1].strip).to eq('fn :some_class do')
+        expect(result.lines[2].strip).to eq('link :some_import1, import: -> { SomeConst & SomeConst2 }')
+        expect(result.lines[3].strip).to eq('end')
+      end
     end
   end
 
