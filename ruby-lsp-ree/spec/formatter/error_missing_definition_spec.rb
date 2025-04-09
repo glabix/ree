@@ -54,6 +54,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         end
 
         def call(arg1)
+          somthing
           raise InvalidArg1Error.new
         end
       end

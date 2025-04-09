@@ -91,7 +91,6 @@ class RubyLsp::Ree::ParsedMethodNode
 
     method_body = get_method_body(@method_node)
 
-    local_method_names = local_methods.map(&:name)
     call_nodes = parse_body_call_objects(method_body)
     call_node_names = call_nodes.map(&:name)
    

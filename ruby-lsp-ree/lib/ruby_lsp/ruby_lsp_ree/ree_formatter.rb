@@ -2,6 +2,7 @@ require_relative 'formatters/sort_links_formatter'
 require_relative 'formatters/missing_error_definitions_formatter'
 require_relative 'formatters/missing_error_contracts_formatter'
 require_relative 'formatters/missing_error_locales_formatter'
+require_relative 'formatters/unused_links_formatter'
 
 module RubyLsp
   module Ree
@@ -23,7 +24,8 @@ module RubyLsp
           RubyLsp::Ree::SortLinksFormatter,
           RubyLsp::Ree::MissingErrorDefinitionsFormatter,
           RubyLsp::Ree::MissingErrorContractsFormatter,
-          RubyLsp::Ree::MissingErrorLocalesFormatter
+          RubyLsp::Ree::MissingErrorLocalesFormatter,
+          RubyLsp::Ree::UnusedLinksFormatter,
         ]
 
         formatters.reduce(source){ |s, formatter| formatter.call(s, uri, @message_queue) }

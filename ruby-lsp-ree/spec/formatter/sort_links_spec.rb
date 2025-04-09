@@ -13,6 +13,8 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         end
 
         def call
+          linked_service_2
+          linked_service_1
         end
       end
     RUBY

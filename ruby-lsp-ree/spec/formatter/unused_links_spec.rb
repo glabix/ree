@@ -31,4 +31,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   # TODO it "removes unused import link if constant not used" do
   # TODO it "removes unused constant from import if not used" do
   # TODO it "removes unused constant from multi-constant import if not used" do
+  # TODO it "doesn't remove link if it is used as a call receiver" do
+  # TODO it "doesn't remove link if imported constant is used" do
+  # TODO it "doesn't remove link if it is used on the top level of class" do
 end
