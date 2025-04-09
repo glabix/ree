@@ -15,9 +15,22 @@ module RubyLsp
         removed_links = 0
 
         parsed_doc.link_nodes.each do |link_node|
-          next if link_node.has_import_section?
+          removed_imports = 0
 
-          next if source_contains_link_usage?(source_lines, link_node)
+          if link_node.has_import_section?
+            link_node.imports.each do |link_import|
+              next if source_contains_link_import_usage?(source_lines, link_node, link_import)
+              
+              source_lines = remove_link_import_from_source(source_lines, link_node, link_import)
+              removed_imports += 1
+            end
+
+            if link_node.imports.size == removed_imports
+              remove_link_import_arg_from_source(source_lines, link_node)
+            end
+          end
+
+          next if source_contains_link_usage?(source_lines, link_node) || link_node.imports.size > removed_imports
 
           source_lines = remove_link_from_source(source_lines, link_node)
           removed_links += 1
@@ -37,8 +50,29 @@ module RubyLsp
         source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_node.name}\W/)}
       end
 
+      def source_contains_link_import_usage?(source_lines, link_node, link_import)
+        source_lines_except_link = source_lines[0...(link_node.location.start_line-1)] + source_lines[(link_node.location.end_line)..-1]
+        source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_import}\W/)}
+      end
+
       def remove_link_from_source(source_lines, link_node)
         source_lines[0...(link_node.location.start_line-1)] + source_lines[(link_node.location.end_line)..-1]
+      end
+
+      def remove_link_import_from_source(source_lines, link_node, link_import)
+        link_line = link_node.location.start_line - 1
+        imports_str = link_node.imports.reject{ _1 == link_import}.join(' & ')
+
+        block_start = link_node.import_block_body_location.start_column
+        source_lines[link_line] = source_lines[link_line][0..block_start] + " #{imports_str} }"
+        source_lines
+      end
+
+      def remove_link_import_arg_from_source(source_lines, link_node)
+        link_line = link_node.location.start_line - 1
+        import_start = link_node.import_arg_location.start_column
+        source_lines[link_line] = source_lines[link_line][0..import_start]
+        source_lines
       end
 
       def remove_link_block(source_lines)

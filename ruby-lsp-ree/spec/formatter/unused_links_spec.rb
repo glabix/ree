@@ -46,9 +46,37 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[2].strip).to eq('')
   end
 
-  # TODO it "removes unused import link if constant not used" do
+  it "removes unused import link if constant is not used" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :some_import1, import: -> { SomeConst }
+          link :some_import2
+        end
+
+        def call(arg1)
+          some_import2
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+    expect(result.lines[1].strip).to eq('fn :some_class do')
+    expect(result.lines[2].strip).to eq('link :some_import2')
+    expect(result.lines[3].strip).to eq('end')
+  end
+
+  # TODO it "removes import block if constant is not used but link is used" do
+
+  # TODO it "removes unused import link for file-path imports" do
+  # TODO it "removes unused import arg for file-path imports" do
+  # TODO it "removes unused constant for file-path multi-constant import" do
   # TODO it "removes unused constant from import if not used" do
   # TODO it "removes unused constant from multi-constant import if not used" do
+  # TODO it "correctly removes link for unused constant from multi-line import" do
+  # TODO it "correctly removes import block constant from multi-line import" do
+  # TODO it "correctly removes unused constant from multi-line import" do
   
   it "doesn't remove link if it is used as a call receiver" do
     source =  <<~RUBY
@@ -67,8 +95,23 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result).to eq(source)
   end
   
-  # TODO it "doesn't remove link if imported constant is used" do
-  
+  it "doesn't remove link if imported constant is used" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :some_import1, import: -> { SomeConst }
+        end
+
+        def call(arg1)
+          SomeConst
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result).to eq(source)
+  end
+
   it "doesn't remove link if it is used on the top level of class" do
     source =  <<~RUBY
       class SamplePackage::SomeClass

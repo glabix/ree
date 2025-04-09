@@ -107,7 +107,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
     @link_nodes = nodes.map do |link_node|
       link_node = RubyLsp::Ree::ParsedLinkNode.new(link_node, package_name)
-      link_node.parse_imports
+      link_node.parse_imports # TODO move parse imports inside link_node constructor
       link_node
     end
   end

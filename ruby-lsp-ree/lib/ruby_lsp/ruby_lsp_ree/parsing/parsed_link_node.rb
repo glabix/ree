@@ -81,6 +81,14 @@ class RubyLsp::Ree::ParsedLinkNode
     !!import_arg
   end
 
+  def import_arg_location
+    import_arg.location
+  end
+  
+  def import_block_body_location
+    import_arg.value.body.location
+  end
+
   private
 
   def last_arg
