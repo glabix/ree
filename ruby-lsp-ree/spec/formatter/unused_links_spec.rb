@@ -140,8 +140,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     end
 
     context "multi-constant imports" do
-      it "removes unused constant from multi-constant import if not used" do
-        # TODO add examples with const in the end and in the middle
+      it "removes unused constant from the first place" do
         source =  <<~RUBY
           class SamplePackage::SomeClass
             fn :some_class do
@@ -160,6 +159,47 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         expect(result.lines[2].strip).to eq('link :some_import1, import: -> { SomeConst2 }')
         expect(result.lines[3].strip).to eq('end')
       end    
+
+      it "removes unused constant from the last place" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link :some_import1, import: -> { SomeConst1 & SomeConst2 }
+            end
+    
+            def call(arg1)
+              SomeConst1
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    
+        expect(result.lines[1].strip).to eq('fn :some_class do')
+        expect(result.lines[2].strip).to eq('link :some_import1, import: -> { SomeConst1 }')
+        expect(result.lines[3].strip).to eq('end')
+      end
+      
+      it "removes unused constant from the middle place" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link :some_import1, import: -> { SomeConst1 & SomeConst2 & SomeConst3 }
+            end
+    
+            def call(arg1)
+              SomeConst1
+              SomeConst3
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    
+        expect(result.lines[1].strip).to eq('fn :some_class do')
+        expect(result.lines[2].strip).to eq('link :some_import1, import: -> { SomeConst1 & SomeConst3 }')
+        expect(result.lines[3].strip).to eq('end')
+      end
     end
 
     context "multi-line imports" do

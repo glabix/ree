@@ -62,9 +62,8 @@ module RubyLsp
       def remove_link_import_from_source(source_lines, link_node, link_import)
         link_line = link_node.location.start_line - 1
         imports_str = link_node.imports.reject{ _1 == link_import}.join(' & ')
-
         block_start = link_node.import_block_body_location.start_column-1
-        source_lines[link_line] = source_lines[link_line][0..block_start] + " #{imports_str} }\n"
+        source_lines[link_line] = source_lines[link_line][0...block_start] + " #{imports_str} }\n"
         source_lines
       end
 
