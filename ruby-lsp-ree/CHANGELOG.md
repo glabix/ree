@@ -1,3 +1,7 @@
+## [0.1.13] - 2025-04-11
+
+- added formatter config settings
+
 ## [0.1.13] - 2025-04-04
 
 - Go To Definition for action and serializers in routes
