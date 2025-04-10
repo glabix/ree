@@ -15,10 +15,12 @@ module RubyLsp
     class Addon < ::RubyLsp::Addon
       def activate(global_state, message_queue)
         @global_state = global_state
+        @settings = global_state.settings_for_addon(name) || {}
+
         @message_queue = message_queue
         @template_applicator = RubyLsp::Ree::ReeTemplateApplicator.new
 
-        global_state.register_formatter("ree_formatter", RubyLsp::Ree::ReeFormatter.new(@message_queue))
+        global_state.register_formatter("ree_formatter", RubyLsp::Ree::ReeFormatter.new(@message_queue, @settings[:formatter]))
         register_additional_file_watchers(global_state, message_queue)
       end
 
