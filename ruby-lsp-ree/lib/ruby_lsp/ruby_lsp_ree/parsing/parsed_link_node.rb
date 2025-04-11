@@ -98,7 +98,7 @@ class RubyLsp::Ree::ParsedLinkNode
     if object_name_type?
       import_arg.value.closing_loc
     else
-      import_arg.opening_loc
+      import_arg.closing_loc
     end
   end
 
