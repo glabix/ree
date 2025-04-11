@@ -39,7 +39,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       RUBY
   
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
-  
       expect(result.lines[1].strip).to eq('fn :some_class')
       expect(result.lines[2].strip).to eq('')
     end  
@@ -475,11 +474,14 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     end
   end
 
-  context "file with DSLs" do
+  context "files with links via LinkDSL" do
     # TODO it "removes unused import link from DSL-using object" do    
   end
 
   context "spec files" do
     # TODO it "removes unused import link from spec" do
+  end
+
+  context "files using Ree DSLs (dao)" do
   end
 end
