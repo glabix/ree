@@ -299,7 +299,44 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   end
 
   context "file-path links with constants import" do
-  # TODO it "removes unused import link for file-path imports" do
+    it "removes unused import link for file-path imports" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link "some/file/path", -> { SomeConst }
+            link :some_import
+          end
+  
+          def call(arg1)
+            some_import
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :some_import')
+      expect(result.lines[3].strip).to eq('end')
+    end
+
+    it "removes both file-path and object imports" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link "some/file/path", -> { SomeConst }
+            link :some_import
+          end
+  
+          def call(arg1)
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+      expect(result.lines[1].strip).to eq('fn :some_class')
+    end
   # TODO it "removes unused import arg for file-path imports" do
   # TODO it "removes unused constant for file-path multi-constant import" do
   # TODO it "removes unused constant from import if not used" do    

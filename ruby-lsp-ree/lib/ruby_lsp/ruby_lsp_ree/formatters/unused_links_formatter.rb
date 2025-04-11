@@ -13,6 +13,7 @@ module RubyLsp
 
         source_lines = source.lines
         removed_links = 0
+        links_count = parsed_doc.link_nodes.size
 
         parsed_doc.link_nodes.each do |link_node|
           removed_imports = 0
@@ -26,7 +27,7 @@ module RubyLsp
             end
 
             if link_node.imports.size == removed_imports
-              remove_link_import_arg_from_source(source_lines, link_node)
+              source_lines = remove_link_import_arg_from_source(source_lines, link_node)
             end
           end
 
@@ -36,7 +37,7 @@ module RubyLsp
           removed_links += 1
         end
 
-        if removed_links == parsed_doc.link_nodes.size
+        if removed_links == links_count
           source_lines = remove_link_block(source_lines)
         end
 
@@ -56,7 +57,10 @@ module RubyLsp
       end
 
       def remove_link_from_source(source_lines, link_node)
-        source_lines[0...(link_node.location.start_line-1)] + source_lines[(link_node.location.end_line)..-1]
+        ((link_node.location.start_line-1) .. (link_node.location.end_line-1)).each do |i|
+          source_lines[i] = ''
+        end
+        source_lines
       end
 
       def remove_link_import_from_source(source_lines, link_node, link_import)
@@ -93,7 +97,10 @@ module RubyLsp
         block_start = parsed_doc.links_container_block_node.location.start_column-1
 
         source_lines[link_container_start_line] = source_lines[link_container_start_line][0..block_start] + "\n"
-        source_lines[0..link_container_start_line] + source_lines[link_container_after_line..-1]
+        ((link_container_start_line+1) .. link_container_after_line).each do |i|
+          source_lines[i] = ''
+        end
+        source_lines
       end
     end
   end
