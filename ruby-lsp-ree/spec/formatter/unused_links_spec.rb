@@ -337,8 +337,69 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
 
       expect(result.lines[1].strip).to eq('fn :some_class')
     end
-  # TODO it "removes unused import arg for file-path imports" do
-  # TODO it "removes unused constant for file-path multi-constant import" do
+
+    context "multi-constant imports" do
+      it "removes unused constant from the first place" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link "some/file/path", -> { SomeConst1 & SomeConst2 }
+            end
+    
+            def call(arg1)
+              SomeConst2
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    
+        expect(result.lines[1].strip).to eq('fn :some_class do')
+        expect(result.lines[2].strip).to eq('link "some/file/path", -> { SomeConst2 }')
+        expect(result.lines[3].strip).to eq('end')
+      end    
+
+      it "removes unused constant from the last place" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link "some/file/path", -> { SomeConst1 & SomeConst2 }
+            end
+    
+            def call(arg1)
+              SomeConst1
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    
+        expect(result.lines[1].strip).to eq('fn :some_class do')
+        expect(result.lines[2].strip).to eq('link "some/file/path", -> { SomeConst1 }')
+        expect(result.lines[3].strip).to eq('end')
+      end
+      
+      it "removes unused constant from the middle place" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link "some/file/path", -> { SomeConst1 & SomeConst2 & SomeConst3 }
+            end
+    
+            def call(arg1)
+              SomeConst1
+              SomeConst3
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    
+        expect(result.lines[1].strip).to eq('fn :some_class do')
+        expect(result.lines[2].strip).to eq('link "some/file/path", -> { SomeConst1 & SomeConst3 }')
+        expect(result.lines[3].strip).to eq('end')
+      end
+    end
   # TODO it "removes unused constant from import if not used" do    
   end
 

@@ -125,7 +125,8 @@ class RubyLsp::Ree::ParsedLinkNode
       parse_object_link_multiple_imports(import_body)
     elsif last_arg.is_a?(Prism::LambdaNode)
       return [] unless last_arg.body
-      [last_arg.body.body.first.name.to_s]
+      import_body = last_arg.body.body.first
+      parse_object_link_multiple_imports(import_body)
     else
       return []
     end
