@@ -2,6 +2,7 @@ require_relative 'formatters/sort_links_formatter'
 require_relative 'formatters/missing_error_definitions_formatter'
 require_relative 'formatters/missing_error_contracts_formatter'
 require_relative 'formatters/missing_error_locales_formatter'
+require_relative 'formatters/unused_links_formatter'
 
 module RubyLsp
   module Ree
@@ -12,8 +13,9 @@ module RubyLsp
 
       MISSING_LOCALE_PLACEHOLDER = '_MISSING_LOCALE_'
 
-      def initialize(message_queue)
+      def initialize(message_queue, settings)
         @message_queue = message_queue
+        @settings = settings || {}
       end
 
       def run_formatting(uri, document)
@@ -23,8 +25,12 @@ module RubyLsp
           RubyLsp::Ree::SortLinksFormatter,
           RubyLsp::Ree::MissingErrorDefinitionsFormatter,
           RubyLsp::Ree::MissingErrorContractsFormatter,
-          RubyLsp::Ree::MissingErrorLocalesFormatter
-        ]
+          RubyLsp::Ree::MissingErrorLocalesFormatter,
+          RubyLsp::Ree::UnusedLinksFormatter,
+        ].select do |formatter|
+          formatter_name = formatter.name.split('::').last.to_sym
+          @settings[formatter_name] != false
+        end
 
         formatters.reduce(source){ |s, formatter| formatter.call(s, uri, @message_queue) }
       rescue => e
