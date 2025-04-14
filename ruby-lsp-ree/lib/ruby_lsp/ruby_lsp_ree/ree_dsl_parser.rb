@@ -12,6 +12,7 @@ module RubyLsp
 
       def contains_object_usage?(obj_name)
         return false unless @index
+        return false unless parsed_doc.includes_ree_dsl?
 
         parsed_doc.ree_dsls.any? do |ree_dsl|
           ree_dsl_contains_object_usage?(ree_dsl.name, obj_name)
