@@ -106,7 +106,7 @@ class RubyLsp::Ree::ParsedMethodNode
         call_nodes << node
       elsif node.respond_to?(:statements)
         call_nodes += parse_body_call_objects(node.statements.body)
-      elsif node.respond_to?(:block) && node.block 
+      elsif node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
         call_nodes += parse_body_call_objects(get_method_body(node.block))
       end
     end
