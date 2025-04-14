@@ -8,7 +8,7 @@ module RubyLsp
 
       def call(source, _uri)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
-        return source if !parsed_doc || !parsed_doc.class_node
+        return source if !parsed_doc
 
         editor = RubyLsp::Ree::ReeSourceEditor.new(source)
 
