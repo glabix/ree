@@ -10,6 +10,7 @@ module RubyLsp
 
       def call(source, uri)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
+        return source if !parsed_doc || !parsed_doc.has_root_class?
 
         locales_folder = package_locales_folder_path(get_uri_path(uri))
         return source if !locales_folder || !File.directory?(locales_folder)

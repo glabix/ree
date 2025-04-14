@@ -5,7 +5,7 @@ module RubyLsp
     class MissingErrorContractsFormatter < BaseFormatter
       def call(source, _uri)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
-        return source if !parsed_doc || !parsed_doc.class_node
+        return source if !parsed_doc || !parsed_doc.has_root_class?
 
         parsed_doc.parse_error_definitions
         parsed_doc.parse_instance_methods
