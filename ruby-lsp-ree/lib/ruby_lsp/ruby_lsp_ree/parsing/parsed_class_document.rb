@@ -39,7 +39,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def includes_ree_dsl?
-    @class_includes.map{ node_name(_1).downcase }.any?{ _1.match?(/ree/) && _1.match?(/dsl/)}
+    ree_dsls.size > 0
   end
 
   def includes_linked_constant?(const_name)
@@ -221,5 +221,9 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
   def imported_constants
     @link_nodes.map(&:imports).flatten.map(&:to_sym)
+  end
+
+  def ree_dsls
+    @class_includes.select{ node_name(_1).downcase.match?(/ree/) && node_name(_1).downcase.match?(/dsl/)}
   end
 end
