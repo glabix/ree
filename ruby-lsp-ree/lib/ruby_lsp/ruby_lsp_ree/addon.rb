@@ -19,8 +19,13 @@ module RubyLsp
 
         @message_queue = message_queue
         @template_applicator = RubyLsp::Ree::ReeTemplateApplicator.new
+        
+        global_state.register_formatter("ree_formatter", RubyLsp::Ree::ReeFormatter.new(
+          @message_queue, 
+          @settings[:formatter], 
+          @global_state.index
+        ))
 
-        global_state.register_formatter("ree_formatter", RubyLsp::Ree::ReeFormatter.new(@message_queue, @settings[:formatter]))
         register_additional_file_watchers(global_state, message_queue)
       end
 

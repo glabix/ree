@@ -1,5 +1,6 @@
 require_relative 'base_formatter'
 require_relative '../ree_source_editor'
+require_relative '../ree_dsl_parser'
 
 module RubyLsp
   module Ree
@@ -10,9 +11,11 @@ module RubyLsp
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
         return source if !parsed_doc
 
-        editor = RubyLsp::Ree::ReeSourceEditor.new(source)
-
         parsed_doc.parse_links
+
+        editor = RubyLsp::Ree::ReeSourceEditor.new(source)
+        dsl_parser = RubyLsp::Ree::ReeDslParser.new(parsed_doc, @index)
+
         links_count = parsed_doc.link_nodes.size
 
         removed_links = 0
@@ -22,7 +25,8 @@ module RubyLsp
 
           if link_node.has_import_section?
             link_node.imports.each do |link_import|
-              next if editor.contains_link_import_usage?(link_node, link_import)
+              # TODO extract condition
+              next if editor.contains_link_import_usage?(link_node, link_import) || dsl_parser.contains_object_usage?(link_import)
               
               editor.remove_link_import(link_node, link_import)
               removed_imports += 1
@@ -33,8 +37,8 @@ module RubyLsp
             end
           end
 
-          pp parsed_doc.includes_ree_dsl?
-          next if editor.contains_link_usage?(link_node) || link_node.imports.size > removed_imports
+          # TODO extract condition
+          next if editor.contains_link_usage?(link_node) || link_node.imports.size > removed_imports || dsl_parser.contains_object_usage?(link_node.name)
 
           editor.remove_link(link_node)
           removed_links += 1
