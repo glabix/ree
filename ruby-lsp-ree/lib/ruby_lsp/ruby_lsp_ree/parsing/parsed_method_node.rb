@@ -92,7 +92,8 @@ class RubyLsp::Ree::ParsedMethodNode
     method_body = get_method_body(@method_node)
 
     call_nodes = parse_body_call_objects(method_body)
-    call_node_names = call_nodes.map(&:name)
+    call_expressions = parse_body_call_expressions(method_body)
+    call_node_names = call_nodes.map(&:name) + call_expressions
    
     @nested_local_methods = local_methods.select{ call_node_names.include?(_1.name) }
     @nested_local_methods.each{ _1.parse_nested_local_methods(local_methods) }
@@ -112,6 +113,18 @@ class RubyLsp::Ree::ParsedMethodNode
     end
 
     call_nodes
+  end
+
+  def parse_body_call_expressions(node_body)
+    call_expressions = []
+    
+    node_body.each do |node|
+      if node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockArgumentNode) && node.block.expression.is_a?(Prism::SymbolNode)
+        call_expressions << node.block.expression.unescaped.to_sym
+      end
+    end
+
+    call_expressions
   end
 
   def get_method_body(node)
