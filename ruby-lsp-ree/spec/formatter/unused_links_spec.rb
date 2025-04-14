@@ -628,5 +628,42 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   end
 
   context "files using Ree DSLs (dao)" do
+    it "removes unused import link" do
+      source =  <<~RUBY
+        class SamplePackage::SomeDao
+          include ReeDao::DSL
+
+          dao :some_dao do
+            link :some_import1
+          end
+
+          def call(arg1)
+          end
+        end
+      RUBY
+
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+      expect(result.lines[3].strip).to eq('dao :some_dao')
+      expect(result.lines[4].strip).to eq('')
+    end
+
+    it "doesn't remove import link used in dao" do
+      source =  <<~RUBY
+        class SamplePackage::SomeDao
+          include ReeDao::DSL
+
+          dao :some_dao do
+            link :db, from: :some_db
+          end
+
+          def call(arg1)
+          end
+        end
+      RUBY
+
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result).to eq(source)
+    end
   end
 end

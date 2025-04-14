@@ -33,6 +33,7 @@ module RubyLsp
             end
           end
 
+          pp parsed_doc.includes_ree_dsl?
           next if editor.contains_link_usage?(link_node) || link_node.imports.size > removed_imports
 
           editor.remove_link(link_node)
