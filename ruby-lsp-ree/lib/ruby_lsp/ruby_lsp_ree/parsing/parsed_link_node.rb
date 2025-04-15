@@ -136,8 +136,10 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   def parse_object_link_multiple_imports(import_body)
-    if import_body.is_a?(Prism::CallNode)
-      parse_object_link_multiple_imports(import_body.receiver) + [import_body.arguments.arguments.first.name.to_s]
+    if import_body.is_a?(Prism::CallNode) && import_body.name == :as
+      [import_body.arguments.arguments.first.name.to_s]
+    elsif import_body.is_a?(Prism::CallNode) && import_body.name == :&
+      parse_object_link_multiple_imports(import_body.receiver) + parse_object_link_multiple_imports(import_body.arguments.arguments.first)
     else 
       [import_body.name.to_s]
     end
