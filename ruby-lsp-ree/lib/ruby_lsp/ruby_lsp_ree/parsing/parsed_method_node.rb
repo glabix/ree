@@ -82,6 +82,18 @@ class RubyLsp::Ree::ParsedMethodNode
   def contract_node_end_line
     @contract_node.location.end_line - 1
   end
+
+  def contract_node_start_line
+    @contract_node.location.start_line - 1
+  end
+
+  def contract_node_contract_end_position
+    @contract_node.message_loc.end_column - 1
+  end
+
+  def contract_in_parentheses?
+    @contract_node.opening == '(' && @contract_node.closing == ')'
+  end
   
   def parse_nested_local_methods(local_methods)
     unless @method_node.body
