@@ -81,6 +81,27 @@ class RubyLsp::Ree::ParsedLinkNode
     !!import_arg
   end
 
+  def first_arg_location
+    @node.arguments.arguments.first.location
+  end
+
+  def import_block_open_location
+    if object_name_type?
+      import_arg.value.opening_loc
+    else
+      import_arg.opening_loc
+    end
+  end
+
+  def import_block_close_location
+    # TODO maybe use two classes for link types
+    if object_name_type?
+      import_arg.value.closing_loc
+    else
+      import_arg.closing_loc
+    end
+  end
+
   private
 
   def last_arg
@@ -100,14 +121,25 @@ class RubyLsp::Ree::ParsedLinkNode
     
     if object_name_type?
       return [] unless import_arg
-      [import_arg.value.body.body.first.name.to_s]
+      import_body = import_arg.value.body.body.first
+      parse_object_link_multiple_imports(import_body)
     elsif last_arg.is_a?(Prism::LambdaNode)
-      [last_arg.body.body.first.name.to_s]
+      return [] unless last_arg.body
+      import_body = last_arg.body.body.first
+      parse_object_link_multiple_imports(import_body)
     else
       return []
     end
   rescue => e
     $stderr.puts("can't parse imports: #{e.message}")
     return []
+  end
+
+  def parse_object_link_multiple_imports(import_body)
+    if import_body.is_a?(Prism::CallNode)
+      parse_object_link_multiple_imports(import_body.receiver) + [import_body.arguments.arguments.first.name.to_s]
+    else 
+      [import_body.name.to_s]
+    end
   end
 end

@@ -10,6 +10,8 @@ Ree addon for Ruby LSP
 If everything was installed successfully, you should see Ree in the list of Ruby LSP addons.
 (In VS Code click `{}` brackets in the bottom right corner)
 
+## Formatter
+
 To use ree_formatter, add the following line into your `settings.json` file (e.g. `.vscode/settings.json`)
 ```json
 "rubyLsp.formatter": "ree_formatter"
@@ -20,6 +22,18 @@ To use diagnostics, add the following line into your `settings.json` file (e.g. 
 "rubyLsp.linters": ["ree_formatter"]
 ```
 
+To switch off/on formatter features, use Ruby LSP addon settings:
+```json
+"rubyLsp.addonSettings": {
+    "Ree Addon": {
+      "formatter": {
+        "MissingErrorLocalesFormatter": false
+      }
+    }
+  }
+```
+available formatters: `SortLinksFormatter`, `MissingErrorDefinitionsFormatter`, `MissingErrorContractsFormatter`, `MissingErrorLocalesFormatter`, `UnusedLinksFormatter`
+
 ## Functions
 
 - autocomplete for Ree objects
@@ -29,3 +43,4 @@ To use diagnostics, add the following line into your `settings.json` file (e.g. 
 - missing error locales detection
 - Go To Definition for Ree objects
 - hover information for Ree objects and error locales
+- Ree templates support

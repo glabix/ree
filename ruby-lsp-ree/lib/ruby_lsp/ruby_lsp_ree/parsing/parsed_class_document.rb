@@ -10,7 +10,8 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
   attr_reader :class_node, :class_includes, 
     :values, :filters, :bean_methods, :links_container_block_node, :error_definitions, 
-    :error_definition_names, :doc_instance_methods, :links_container_node
+    :error_definition_names, :doc_instance_methods, :links_container_node, 
+    :defined_classes, :defined_consts
 
   def initialize(ast, package_name = nil)
     super
@@ -35,6 +36,10 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
   def includes_routes_dsl?
     @class_includes.any?{ node_name(_1) == ROUTES_DSL_MODULE }
+  end
+
+  def includes_ree_dsl?
+    ree_dsls.size > 0
   end
 
   def includes_linked_constant?(const_name)
@@ -106,7 +111,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
     @link_nodes = nodes.map do |link_node|
       link_node = RubyLsp::Ree::ParsedLinkNode.new(link_node, package_name)
-      link_node.parse_imports
+      link_node.parse_imports # TODO move parse imports inside link_node constructor
       link_node
     end
   end
@@ -179,6 +184,24 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     @error_definition_names = @error_definitions.map(&:name)
   end
 
+  def parse_defined_classes
+    @defined_classes = []
+    return unless has_body?
+
+    @defined_classes = class_node.body.body
+      .select{ _1.is_a?(Prism::ClassNode) }
+      .map(&:name)
+  end
+    
+  def parse_defined_consts
+    @defined_consts = []
+    return unless has_body?
+
+    @defined_consts += class_node.body.body
+      .select{ _1.is_a?(Prism::ConstantWriteNode) }
+      .map(&:name)
+  end
+
   def class_name
     class_node.constant_path.name.to_s
   end
@@ -198,5 +221,9 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
   def imported_constants
     @link_nodes.map(&:imports).flatten.map(&:to_sym)
+  end
+
+  def ree_dsls
+    @class_includes.select{ node_name(_1).downcase.match?(/ree/) && node_name(_1).downcase.match?(/dsl/)}
   end
 end

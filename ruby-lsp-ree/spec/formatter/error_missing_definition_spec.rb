@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 RSpec.describe "RubyLsp::Ree::ReeFormatter" do
-  subject{ RubyLsp::Ree::ReeFormatter.new([]) }
+  subject{ RubyLsp::Ree::ReeFormatter.new([], {}) }
 
   before :each do
     @locales_cache = store_locales_cache
@@ -54,6 +54,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         end
 
         def call(arg1)
+          somthing
           raise InvalidArg1Error.new
         end
       end
@@ -156,6 +157,40 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
 
         def call(arg1)
           raise ArgumentError.new
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result).to eq(source)
+  end
+
+  it "doesn't add definition for custom defined class" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        class CustomError < StandardError; end
+
+        def call(arg1)
+          raise CustomError.new
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result).to eq(source)
+  end
+
+  it "doesn't add definition for custom class defined by assignment" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        CustomError = Class.new(StandardError)
+        
+        def call(arg1)
+          raise CustomError.new
         end
       end
     RUBY

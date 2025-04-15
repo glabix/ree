@@ -5,7 +5,7 @@ module RubyLsp
     class MissingErrorContractsFormatter < BaseFormatter
       def call(source, _uri)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
-        return source if !parsed_doc || !parsed_doc.class_node
+        return source if !parsed_doc || !parsed_doc.has_root_class?
 
         parsed_doc.parse_error_definitions
         parsed_doc.parse_instance_methods
@@ -40,10 +40,19 @@ module RubyLsp
             source_lines[line] = source_lines[line][0..position] + ", #{missed_errors.join(', ')}\n"
           end
         else
-          position = doc_instance_method.contract_node_end_position
-          line = doc_instance_method.contract_node_end_line
+          if doc_instance_method.contract_in_parentheses?
+            position = doc_instance_method.contract_node_end_position
+            line = doc_instance_method.contract_node_end_line
 
-          source_lines[line] = source_lines[line][0..position] + ".throws(#{missed_errors.join(', ')})\n"
+            source_lines[line] = source_lines[line][0..position] + ".throws(#{missed_errors.join(', ')})\n"
+          else
+            contract_end_position = doc_instance_method.contract_node_contract_end_position
+            start_line = doc_instance_method.contract_node_start_line
+            end_line = doc_instance_method.contract_node_end_line
+
+            source_lines[start_line] = source_lines[start_line][0..contract_end_position] + "(" + source_lines[start_line][contract_end_position+1..-1].lstrip
+            source_lines[end_line] = source_lines[end_line].chomp + ").throws(#{missed_errors.join(', ')})\n"
+          end
         end
 
         source_lines.join

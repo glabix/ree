@@ -7,13 +7,18 @@ module RubyLsp
 
       def call(source, _uri)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
-        return source if !parsed_doc || !parsed_doc.class_node
+        return source if !parsed_doc || !parsed_doc.has_root_class?
 
         parsed_doc.parse_error_definitions
         parsed_doc.parse_instance_methods
         parsed_doc.parse_links
+        parsed_doc.parse_defined_classes
+        parsed_doc.parse_defined_consts
 
-        existing_errors = parsed_doc.error_definition_names + parsed_doc.imported_constants
+        existing_error_classes = parsed_doc.error_definition_names + 
+          parsed_doc.imported_constants + 
+          parsed_doc.defined_classes + 
+          parsed_doc.defined_consts
 
         missed_errors = []
         parsed_doc.doc_instance_methods.each do |doc_instance_method|
@@ -21,7 +26,7 @@ module RubyLsp
 
           raised_errors = doc_instance_method.raised_errors_nested
 
-          missed_errors += raised_errors - existing_errors
+          missed_errors += raised_errors - existing_error_classes
         end
 
         missed_errors = missed_errors.uniq.reject{ Object.const_defined?(_1) }

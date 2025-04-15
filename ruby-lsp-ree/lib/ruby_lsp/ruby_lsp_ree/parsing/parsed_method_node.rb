@@ -82,6 +82,18 @@ class RubyLsp::Ree::ParsedMethodNode
   def contract_node_end_line
     @contract_node.location.end_line - 1
   end
+
+  def contract_node_start_line
+    @contract_node.location.start_line - 1
+  end
+
+  def contract_node_contract_end_position
+    @contract_node.message_loc.end_column - 1
+  end
+
+  def contract_in_parentheses?
+    @contract_node.opening == '(' && @contract_node.closing == ')'
+  end
   
   def parse_nested_local_methods(local_methods)
     unless @method_node.body
@@ -91,9 +103,9 @@ class RubyLsp::Ree::ParsedMethodNode
 
     method_body = get_method_body(@method_node)
 
-    local_method_names = local_methods.map(&:name)
     call_nodes = parse_body_call_objects(method_body)
-    call_node_names = call_nodes.map(&:name)
+    call_expressions = parse_body_call_expressions(method_body)
+    call_node_names = call_nodes.map(&:name) + call_expressions
    
     @nested_local_methods = local_methods.select{ call_node_names.include?(_1.name) }
     @nested_local_methods.each{ _1.parse_nested_local_methods(local_methods) }
@@ -107,12 +119,24 @@ class RubyLsp::Ree::ParsedMethodNode
         call_nodes << node
       elsif node.respond_to?(:statements)
         call_nodes += parse_body_call_objects(node.statements.body)
-      elsif node.respond_to?(:block) && node.block 
+      elsif node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
         call_nodes += parse_body_call_objects(get_method_body(node.block))
       end
     end
 
     call_nodes
+  end
+
+  def parse_body_call_expressions(node_body)
+    call_expressions = []
+    
+    node_body.each do |node|
+      if node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockArgumentNode) && node.block.expression.is_a?(Prism::SymbolNode)
+        call_expressions << node.block.expression.unescaped.to_sym
+      end
+    end
+
+    call_expressions
   end
 
   def get_method_body(node)
