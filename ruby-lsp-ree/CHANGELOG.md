@@ -1,6 +1,9 @@
-## [0.1.13] - 2025-04-11
+## [0.1.14] - 2025-04-15
 
+- do not create error definition for defined class
 - added formatter config settings
+- formatter: remove unused imports
+- fixed adding `throws` section to contract without parentheses
 
 ## [0.1.13] - 2025-04-04
 
