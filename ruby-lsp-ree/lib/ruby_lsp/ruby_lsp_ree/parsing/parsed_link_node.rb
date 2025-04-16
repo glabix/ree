@@ -1,10 +1,19 @@
 require 'prism'
 
 class RubyLsp::Ree::ParsedLinkNode
-  attr_reader :node, :document_package, :name, :imports
+  attr_reader :node, :document_package, :name
 
   FROM_ARG_KEY = 'from'
   IMPORT_ARG_KEY = 'import'
+
+  class ImportItem
+    attr_reader :name, :original_name
+
+    def initialize(name:, original_name: nil)
+      @name = name
+      @original_name = original_name
+    end
+  end
 
   def initialize(node, document_package = nil)
     @node = node
@@ -72,7 +81,11 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   def parse_imports
-    @imports ||= get_imports
+    @import_items ||= get_import_items
+  end
+
+  def imports
+    @import_items.map(&:name)
   end
 
   def has_import_section?
@@ -116,7 +129,7 @@ class RubyLsp::Ree::ParsedLinkNode
     end
   end
 
-  def get_imports
+  def get_import_items
     return [] if @node.arguments.arguments.size == 1
     
     if object_name_type?
@@ -136,12 +149,17 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   def parse_object_link_multiple_imports(import_body)
-    if import_body.is_a?(Prism::CallNode) && import_body.name == :as
-      [import_body.arguments.arguments.first.name.to_s]
-    elsif import_body.is_a?(Prism::CallNode) && import_body.name == :&
+    if import_body.is_a?(Prism::CallNode) && import_body.name == :&
       parse_object_link_multiple_imports(import_body.receiver) + parse_object_link_multiple_imports(import_body.arguments.arguments.first)
+    elsif import_body.is_a?(Prism::CallNode) && import_body.name == :as
+      [
+        ImportItem.new(
+          name: import_body.arguments.arguments.first.name.to_s,
+          original_name: import_body.receiver.name.to_s
+        )
+      ]
     else 
-      [import_body.name.to_s]
+      [ ImportItem.new(name: import_body.name.to_s) ]
     end
   end
 end
