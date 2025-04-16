@@ -1,7 +1,7 @@
 require 'prism'
 
 class RubyLsp::Ree::ParsedLinkNode
-  attr_reader :node, :document_package, :name
+  attr_reader :node, :document_package, :name, :import_items
 
   FROM_ARG_KEY = 'from'
   IMPORT_ARG_KEY = 'import'
@@ -12,6 +12,14 @@ class RubyLsp::Ree::ParsedLinkNode
     def initialize(name:, original_name: nil)
       @name = name
       @original_name = original_name
+    end
+
+    def to_s
+      if @original_name
+        "#{@original_name}.as(#{@name})"
+      else
+        @name
+      end
     end
   end
 

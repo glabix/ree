@@ -28,9 +28,8 @@ module RubyLsp
       end
 
       def remove_link_import(link_node, link_import)
-        imports_str = link_node.imports.reject{ _1 == link_import}.join(' & ')
+        imports_str = link_node.import_items.reject{ _1.name == link_import}.map(&:to_s).join(' & ')
         # BUG already removed import included into imports_str again
-        # BUG incorrect imports_str for aliases
 
         block_start_col = link_node.import_block_open_location.start_column
         block_line = link_node.import_block_open_location.start_line-1
