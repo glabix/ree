@@ -21,26 +21,22 @@ module RubyLsp
         removed_links = 0
 
         parsed_doc.link_nodes.each do |link_node|
-          removed_imports = 0
+          remove_imports = []
 
-          pp link_node.imports
           if link_node.has_import_section?
-            link_node.imports.each do |link_import|
+            remove_imports = link_node.imports.reject{ |link_import|
               # TODO extract condition
-              next if editor.contains_link_import_usage?(link_node, link_import) || dsl_parser.contains_object_usage?(link_import)
-              
-              editor.remove_link_import(link_node, link_import)
-              # TODO remove several imports at once
-              removed_imports += 1
-            end
+              editor.contains_link_import_usage?(link_node, link_import) || dsl_parser.contains_object_usage?(link_import)
+            }
+            editor.remove_link_imports(link_node, remove_imports)
 
-            if link_node.imports.size == removed_imports
+            if link_node.imports.size == remove_imports.size
               editor.remove_link_import_arg(link_node)
             end
           end
 
           # TODO extract condition
-          next if editor.contains_link_usage?(link_node) || link_node.imports.size > removed_imports || dsl_parser.contains_object_usage?(link_node.name)
+          next if editor.contains_link_usage?(link_node) || link_node.imports.size > remove_imports.size || dsl_parser.contains_object_usage?(link_node.name)
 
           editor.remove_link(link_node)
           removed_links += 1
