@@ -47,6 +47,34 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
     end
   end
 
+  it "returns params string based on signature" do
+    source =  <<~RUBY
+      class SomeClass
+        def something
+          func_with_three_args
+        end
+      end
+    RUBY
+
+    fn_source =  <<~RUBY
+      def func_with_three_args(string_field, id, third_arg)
+        puts id
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      index_fn_from_source(server, fn_source)
+
+      send_completion_request(server, uri, { line: 2, character: 8 })
+      
+      result = server.pop_response
+
+      expect(result.response.size).to eq(1)
+      expect(result.response.first.label).to eq('func_with_three_args')
+      expect(result.response.first.text_edit.new_text).to eq('func_with_three_args(${1:string_field}, ${2:id}, ${3:third_arg})')
+    end
+  end
+
   it "doesn't return params specification if arguments already entered" do
     source =  <<~RUBY
       class SomeClass
