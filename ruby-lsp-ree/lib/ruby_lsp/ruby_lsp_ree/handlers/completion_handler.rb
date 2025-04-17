@@ -31,7 +31,7 @@ module RubyLsp
 
         case @finder.object_type(ree_receiver)
         when :enum
-          get_enum_values_completion_items(ree_receiver, locatio, node)
+          get_enum_values_completion_items(ree_receiver, location, node)
         when :bean, :async_bean
           get_bean_methods_completion_items(ree_receiver, location, node)
         when :dao
@@ -43,119 +43,18 @@ module RubyLsp
 
       def get_bean_methods_completion_items(bean_obj, location, node)
         bean_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(bean_obj.uri, :bean)
-        
-        range = Interface::Range.new(
-          start: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
-          end: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
-        )
-
-        bean_node.bean_methods.map do |bean_method|
-          signature = bean_method.signatures.first
-
-          label_details = Interface::CompletionItemLabelDetails.new(
-            description: "method",
-            detail: get_detail_string(signature)
-          )
-
-          if node.arguments && node.name.to_s == bean_method.name
-            new_text = bean_method.name
-            method_range = range_from_location(node.message_loc)
-          else
-            new_text = get_method_string(bean_method.name, signature)
-            method_range = range
-          end
-
-          Interface::CompletionItem.new(
-            label: bean_method.name,
-            label_details: label_details,
-            filter_text: bean_method.name,
-            text_edit: Interface::TextEdit.new(
-              range:  method_range,
-              new_text: new_text
-            ),
-            kind: Constant::CompletionItemKind::METHOD,
-            insert_text_format: Constant::InsertTextFormat::SNIPPET,
-            data: {
-              owner_name: "Object",
-              guessed_type: false,
-            }
-          )
-        end
+        map_ree_object_methods_to_completion_items(bean_node.bean_methods, location, node, "method")
       end
 
       def get_dao_filters_completion_items(dao_obj, location, node)
         dao_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(dao_obj.uri, :dao)
-        
-        range = Interface::Range.new(
-          start: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
-          end: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
-        )
-
-        dao_node.filters.map do |filter|
-          signature = filter.signatures.first
-
-          label_details = Interface::CompletionItemLabelDetails.new(
-            description: "filter",
-            detail: get_detail_string(signature)
-          )
-
-          if node.arguments && node.name.to_s == filter.name
-            new_text = filter.name
-            method_range = range_from_location(node.message_loc)
-          else
-            new_text = get_method_string(filter.name, signature)
-            method_range = range
-          end
-
-          Interface::CompletionItem.new(
-            label: filter.name,
-            label_details: label_details,
-            filter_text: filter.name,
-            text_edit: Interface::TextEdit.new(
-              range:  method_range,
-              new_text: new_text
-            ),
-            kind: Constant::CompletionItemKind::METHOD,
-            insert_text_format: Constant::InsertTextFormat::SNIPPET,
-            data: {
-              owner_name: "Object",
-              guessed_type: false,
-            }
-          )
-        end
+        map_ree_object_methods_to_completion_items(dao_node.filters, location, node, "filter")
       end
 
       def get_enum_values_completion_items(enum_obj, location, node)
         enum_node = RubyLsp::Ree::ParsedDocumentBuilder.build_from_uri(enum_obj.uri, :enum)
-
         class_name = enum_node.full_class_name
-
-        label_details = Interface::CompletionItemLabelDetails.new(
-          description: "from: #{class_name}",
-          detail: ''
-        )
-
-        range = Interface::Range.new(
-          start: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
-          end: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
-        )
-
-        enum_node.values.map do |val|
-          Interface::CompletionItem.new(
-            label: val.name,
-            label_details: label_details,
-            filter_text: val.name,
-            text_edit: Interface::TextEdit.new(
-              range:  range,
-              new_text: val.name
-            ),
-            kind: Constant::CompletionItemKind::METHOD,
-            data: {
-              owner_name: "Object",
-              guessed_type: false,
-            }
-          )
-        end
+        map_ree_object_methods_to_completion_items(enum_node.values, location, node, "from: #{class_name}")
       end
 
       def get_class_name_completion_items(node)
@@ -295,6 +194,48 @@ module RubyLsp
             "${#{index+1}:#{signature_param.name}}"
           end
         end.join(', ')
+      end
+
+      private
+
+      def map_ree_object_methods_to_completion_items(ree_object_methods, location, node, description)
+        default_range = Interface::Range.new(
+          start: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
+          end: Interface::Position.new(line: location.start_line - 1, character: location.end_column + 1),
+        )
+
+        ree_object_methods.map do |object_method|
+          signature = object_method.signatures&.first
+
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: description,
+            detail: get_detail_string(signature)
+          )
+
+          if node.arguments && node.name.to_s == object_method.name
+            new_text = object_method.name
+            method_range = range_from_location(node.message_loc)
+          else
+            new_text = get_method_string(object_method.name, signature)
+            method_range = default_range
+          end
+
+          Interface::CompletionItem.new(
+            label: object_method.name,
+            label_details: label_details,
+            filter_text: object_method.name,
+            text_edit: Interface::TextEdit.new(
+              range:  method_range,
+              new_text: new_text
+            ),
+            kind: Constant::CompletionItemKind::METHOD,
+            insert_text_format: Constant::InsertTextFormat::SNIPPET,
+            data: {
+              owner_name: "Object",
+              guessed_type: false,
+            }
+          )
+        end
       end
     end
   end
