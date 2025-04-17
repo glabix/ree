@@ -223,13 +223,21 @@ module RubyLsp
             detail: get_detail_string(signature)
           )
 
+          if node.arguments && node.name.to_s == ree_object_name
+            new_text = ree_object_name
+            range = range_from_location(node.message_loc)
+          else
+            new_text = get_method_string(ree_object_name, signature)
+            range = range_from_location(node.location)
+          end
+
           Interface::CompletionItem.new(
             label: ree_object_name,
             label_details: label_details,
             filter_text: ree_object_name,
             text_edit: Interface::TextEdit.new(
-              range:  range_from_location(node.location),
-              new_text: get_method_string(ree_object_name, signature)
+              range:  range,
+              new_text: new_text
             ),
             kind: Constant::CompletionItemKind::METHOD,
             insert_text_format: Constant::InsertTextFormat::SNIPPET,
