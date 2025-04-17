@@ -111,6 +111,19 @@ class RubyLsp::Ree::ParsedMethodNode
     @nested_local_methods.each{ _1.parse_nested_local_methods(local_methods) }
   end
 
+  def parse_call_objects
+    method_body = get_method_body(@method_node)
+
+    call_nodes = parse_body_call_objects(method_body)
+    call_expressions = parse_body_call_expressions(method_body)
+
+    call_node_names = call_nodes.map(&:name) + call_expressions
+
+    call_node_names
+  end
+
+  private
+
   def parse_body_call_objects(node_body)
     call_nodes = []
     

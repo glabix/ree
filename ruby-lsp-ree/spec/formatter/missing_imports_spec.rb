@@ -33,4 +33,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   end
 
   # TODO it "adds missing import link with do block" do
+  # TODO it "adds missing import link for objects called outside method" do
+  # TODO it "adds missing import link for bean objects" do
 end

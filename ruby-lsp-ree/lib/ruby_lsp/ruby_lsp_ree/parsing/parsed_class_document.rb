@@ -142,6 +142,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_instance_methods
+    return if @doc_instance_methods
     @doc_instance_methods = []
 
     current_contract_node = nil
@@ -200,6 +201,21 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     @defined_consts += class_node.body.body
       .select{ _1.is_a?(Prism::ConstantWriteNode) }
       .map(&:name)
+  end
+
+  def parse_call_objects
+    @call_objects = []
+    return unless has_body?
+
+    @call_objects += class_node.body.body.select{ _1.is_a?(Prism::CallNode) }.map(&:name)
+
+    parse_instance_methods
+
+    @doc_instance_methods.each do |doc_instance_method|
+      @call_objects += doc_instance_method.parse_call_objects
+    end
+
+    @call_objects
   end
 
   def class_name
