@@ -75,6 +75,5 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
       expect(result.response.first.text_edit.range.start.character).to eq(4)
       expect(result.response.first.text_edit.range.end.character).to eq(4 + 'func_with_three_args'.size)
     end
-
   end
 end
