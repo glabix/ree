@@ -1,3 +1,8 @@
+## [0.1.15] - 2025-04-18
+
+- autocomplete - don't overwrite existing arguments
+- unused links formatter - handle const aliases
+
 ## [0.1.14] - 2025-04-15
 
 - do not create error definition for defined class

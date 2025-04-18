@@ -27,8 +27,8 @@ module RubyLsp
         set_empty_lines!(link_node.location.start_line-1, link_node.location.end_line-1)
       end
 
-      def remove_link_import(link_node, link_import)
-        imports_str = link_node.imports.reject{ _1 == link_import}.join(' & ')
+      def remove_link_imports(link_node, link_imports)
+        imports_str = link_node.import_items.reject{ link_imports.include?(_1.name) }.map(&:to_s).join(' & ')
 
         block_start_col = link_node.import_block_open_location.start_column
         block_line = link_node.import_block_open_location.start_line-1
