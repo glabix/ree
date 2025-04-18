@@ -1,6 +1,34 @@
+require 'prism'
+
 module RubyLspReeHelper
+  include RubyLsp::Ree::ReeLspUtils
+
   def index_fn(server, name, package = nil, uri = nil)
     index_ree_object(server, name, :fn, package, uri)
+  end
+
+  def index_fn_from_source(server, fn_source, uri = nil)
+    ast = Prism.parse(fn_source).value
+    fn_node = ast.statements.body.first
+    name = fn_node.name.to_s
+
+    type = :fn
+    file_uri = URI("file:///#{name}.rb")
+
+    signature_params = signature_params_from_node(fn_node.parameters)  
+    sugnatures = [RubyIndexer::Entry::Signature.new(signature_params)]
+    location = RubyIndexer::Location.new(0, 0, 0, 0)
+
+    server.global_state.index.add(RubyIndexer::Entry::Method.new(
+      name,
+      file_uri,
+      location,
+      location,
+      "ree_object\ntype: :#{type.to_s}",
+      sugnatures,
+      RubyIndexer::Entry::Visibility::PUBLIC,
+      nil,
+    ))
   end
 
   def index_ree_object(server, name, type, package = nil, uri = nil)
