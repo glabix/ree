@@ -7,6 +7,8 @@ module RubyLsp
       include RubyLsp::Ree::ReeLspUtils
 
       def call(source, uri)
+        return source unless @index
+
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
         return source if !parsed_doc || !parsed_doc.has_root_class?
 
@@ -25,7 +27,6 @@ module RubyLsp
 
           if ree_object
             editor.add_link(parsed_doc, ree_object, current_package)
-            # if found add link
           end
         end
 

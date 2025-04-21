@@ -4,7 +4,7 @@ module RubyLsp
       def self.call(source, uri, message_queue, index)
         new(message_queue, index).call(source, uri)
       rescue => e
-        $stderr.puts("error in #{self.class}: #{e.message} : #{e.backtrace.first}")
+        $stderr.puts("error in #{self}: #{e.message} : #{e.backtrace.first}")
         source
       end
 

@@ -28,12 +28,47 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     RUBY
 
     result = subject.run_formatting(sample_file_uri, ruby_document(source))
-
-    expect(result.lines[3].strip).to eq('link :seconds_ago')
+    expect(result.lines[2].strip).to eq('link :seconds_ago')
   end
 
-  # TODO it "adds import link from other package" do
-  # TODO it "adds missing import link with do block" do
+  it "adds import link from other package" do
+    source =  <<~RUBY
+      class MyPackage::SomeClass
+        fn :some_class do
+          link :some_import1
+        end
+
+        def call(arg1)
+          some_import1
+          seconds_ago
+        end
+      end
+    RUBY
+
+    file_uri = URI("file://my_package/package/my_package/some_class.rb")
+    result = subject.run_formatting(file_uri, ruby_document(source))
+
+    expect(result.lines[2].strip).to eq('link :seconds_ago, from: :sample_package')
+  end
+
+  it "adds missing import link with do block" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        def call(arg1)
+          seconds_ago
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+    expect(result.lines[1].strip).to eq('fn :some_class do')
+    expect(result.lines[2].strip).to eq('link :seconds_ago')
+    expect(result.lines[3].strip).to eq('end')
+  end
+
   # TODO it "adds missing import link for objects called outside method" do
   # TODO it "adds missing import link for bean objects" do
   # TODO it "adds multiple links" do

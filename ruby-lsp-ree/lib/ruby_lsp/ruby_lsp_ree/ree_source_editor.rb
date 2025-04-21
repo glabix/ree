@@ -67,28 +67,25 @@ module RubyLsp
       def add_link(parsed_doc, ree_object, current_package)
         object_package = package_name_from_uri(ree_object.uri)
 
-        pp current_package
-        pp object_package
-
         link_text = if current_package == object_package
-          "\s\slink :#{ree_object.name}\n"
+          "\s\slink :#{ree_object.name}"
         else
-          "\s\slink :#{ree_object.name}, from: :#{object_package}\n"
+          "\s\slink :#{ree_object.name}, from: :#{object_package}"
         end
 
         if parsed_doc.links_container_node
           link_text = "\s\s" + link_text
         end
         
-        new_text = "\n" + link_text
+        new_text = "\n" + link_text + "\n"
 
         if parsed_doc.has_blank_links_container?
-          new_text = "\sdo#{link_text}\n\s\send\n"
+          new_text = "\sdo#{new_text}\s\send\n"
         end
 
         line = parsed_doc.links_container_node.location.start_line - 1
 
-        source_lines[line] += new_text
+        source_lines[line] = source_lines[line].chomp + new_text
       end
     end
   end
