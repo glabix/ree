@@ -57,7 +57,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         fn :some_class
 
         def call(arg1)
-          seconds_ago
+          b = seconds_ago(1)
         end
       end
     RUBY
@@ -69,7 +69,25 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[3].strip).to eq('end')
   end
 
-  # TODO it "adds missing import link for objects called outside method" do
+  it "adds missing import link for objects called outside method" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+
+        SomeConst = seconds_ago(1)
+
+        def call(arg1)
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+    expect(result.lines[1].strip).to eq('fn :some_class do')
+    expect(result.lines[2].strip).to eq('link :seconds_ago')
+    expect(result.lines[3].strip).to eq('end')
+  end
+
   # TODO it "adds missing import link for bean objects" do
   # TODO it "adds multiple links" do
 end

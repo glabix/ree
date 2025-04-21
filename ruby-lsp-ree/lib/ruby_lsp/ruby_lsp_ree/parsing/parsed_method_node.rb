@@ -113,6 +113,7 @@ class RubyLsp::Ree::ParsedMethodNode
 
   def parse_call_objects
     method_body = get_method_body(@method_node)
+    return [] unless method_body
 
     call_nodes = parse_body_call_objects(method_body)
     call_expressions = parse_body_call_expressions(method_body)
@@ -134,6 +135,8 @@ class RubyLsp::Ree::ParsedMethodNode
         call_nodes += parse_body_call_objects(node.statements.body)
       elsif node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
         call_nodes += parse_body_call_objects(get_method_body(node.block))
+      elsif node.respond_to?(:value) && node.value
+        call_nodes += parse_body_call_objects([node.value])
       end
     end
 
@@ -153,6 +156,8 @@ class RubyLsp::Ree::ParsedMethodNode
   end
 
   def get_method_body(node)
+    return unless node.body
+
     if node.body.is_a?(Prism::BeginNode)
       node.body.statements.body
     else

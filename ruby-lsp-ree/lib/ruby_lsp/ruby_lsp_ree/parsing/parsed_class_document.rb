@@ -207,7 +207,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     @call_objects = []
     return unless has_body?
 
-    @call_objects += class_node.body.body.select{ _1.is_a?(Prism::CallNode) }.map(&:name)
+    @call_objects += parse_body_call_objects(class_node.body.body).map(&:name)
 
     parse_instance_methods
 
@@ -241,5 +241,26 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
   def ree_dsls
     @class_includes.select{ node_name(_1).downcase.match?(/ree/) && node_name(_1).downcase.match?(/dsl/)}
+  end
+
+  private 
+
+  # TODO duplicates with ParsedMethodNode.parse_body_call_objects
+  def parse_body_call_objects(node_body)
+    call_nodes = []
+    
+    node_body.each do |node|
+      if node.is_a?(Prism::CallNode) && !node.receiver
+        call_nodes << node
+      elsif node.respond_to?(:statements)
+        call_nodes += parse_body_call_objects(node.statements.body)
+      elsif node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
+        call_nodes += parse_body_call_objects(get_method_body(node.block))
+      elsif node.respond_to?(:value) && node.value
+        call_nodes += parse_body_call_objects([node.value])
+      end
+    end
+
+    call_nodes
   end
 end
