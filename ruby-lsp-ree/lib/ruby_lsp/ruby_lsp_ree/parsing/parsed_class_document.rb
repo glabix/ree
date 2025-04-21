@@ -2,6 +2,8 @@ require_relative 'parsed_base_document'
 require_relative 'parsed_link_node'
 require_relative 'parsed_method_node'
 require_relative "../ree_constants"
+require_relative "body_parsers/call_objects_parser"
+
 require 'ostruct'
 
 class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
@@ -203,19 +205,8 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
       .map(&:name)
   end
 
-  def parse_call_objects
-    @call_objects = []
-    return unless has_body?
-
-    @call_objects += parse_body_call_objects(class_node.body.body).map(&:name)
-
-    parse_instance_methods
-
-    @doc_instance_methods.each do |doc_instance_method|
-      @call_objects += doc_instance_method.parse_call_objects
-    end
-
-    @call_objects
+  def parse_fn_calls
+    RubyLsp::Ree::CallObjectsParser.new(self).class_call_objects
   end
 
   def class_name
@@ -241,26 +232,5 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
   def ree_dsls
     @class_includes.select{ node_name(_1).downcase.match?(/ree/) && node_name(_1).downcase.match?(/dsl/)}
-  end
-
-  private 
-
-  # TODO duplicates with ParsedMethodNode.parse_body_call_objects
-  def parse_body_call_objects(node_body)
-    call_nodes = []
-    
-    node_body.each do |node|
-      if node.is_a?(Prism::CallNode) && !node.receiver
-        call_nodes << node
-      elsif node.respond_to?(:statements)
-        call_nodes += parse_body_call_objects(node.statements.body)
-      elsif node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
-        call_nodes += parse_body_call_objects(get_method_body(node.block))
-      elsif node.respond_to?(:value) && node.value
-        call_nodes += parse_body_call_objects([node.value])
-      end
-    end
-
-    call_nodes
   end
 end
