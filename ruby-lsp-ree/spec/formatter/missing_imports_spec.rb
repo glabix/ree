@@ -7,6 +7,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   before :each do
     with_server('') do |server, uri|
       index_fn(server, 'seconds_ago', 'sample_package')
+      index_fn(server, 'create_item_cmd', 'create_package')
       @index = server.global_state.index 
     end
 
@@ -89,5 +90,24 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   end
 
   # TODO it "adds missing import link for bean objects" do
-  # TODO it "adds multiple links" do
+  
+  it "adds multiple links" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+          
+        def call(arg1)
+          seconds_ago
+          [1,2,3].map(&:create_item_cmd)
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+    expect(result.lines[1].strip).to eq('fn :some_class do')
+    expect(result.lines[2].strip).to eq('link :seconds_ago')
+    expect(result.lines[3].strip).to eq('link :create_item_cmd, from: :create_package')
+    expect(result.lines[4].strip).to eq('end')
+  end
 end

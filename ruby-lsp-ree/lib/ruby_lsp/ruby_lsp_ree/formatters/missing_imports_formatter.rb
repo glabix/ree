@@ -22,14 +22,13 @@ module RubyLsp
         pp call_objects
 
         filtered_call_objects = filter_call_objects(parsed_doc, call_objects)
-        filtered_call_objects.each do |call_object|
-          ree_object = finder.find_object(call_object.to_s)
+        objects_to_add = filtered_call_objects.map{ |call_object|
+          finder.find_object(call_object.to_s)
+        }.compact
 
-          if ree_object
-            editor.add_link(parsed_doc, ree_object, current_package)
-          end
-        end
-
+        return editor.source if objects_to_add.size == 0
+        
+        editor.add_links(parsed_doc, objects_to_add, current_package)
         editor.source
       end
 
