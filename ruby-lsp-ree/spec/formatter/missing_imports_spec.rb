@@ -6,7 +6,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
 
   before :each do
     with_server('') do |server, uri|
-      index_fn(server, 'seconds_ago')
+      index_fn(server, 'seconds_ago', 'sample_package')
       @index = server.global_state.index 
     end
 
@@ -32,7 +32,9 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[3].strip).to eq('link :seconds_ago')
   end
 
+  # TODO it "adds import link from other package" do
   # TODO it "adds missing import link with do block" do
   # TODO it "adds missing import link for objects called outside method" do
   # TODO it "adds missing import link for bean objects" do
+  # TODO it "adds multiple links" do
 end
