@@ -21,7 +21,7 @@ class RubyLsp::Ree::CallObjectsParser
     call_objects = []
     return unless parsed_doc.has_body?
 
-    call_objects += parse_body_call_objects(parsed_doc.class_node.body.body).map(&:name)
+    call_objects += parse_body_call_objects(parsed_doc.class_node.body.body)
 
     parsed_doc.parse_instance_methods
 

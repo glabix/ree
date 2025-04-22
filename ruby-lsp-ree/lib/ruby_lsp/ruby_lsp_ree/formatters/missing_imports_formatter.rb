@@ -20,13 +20,13 @@ module RubyLsp
         fn_calls = parsed_doc.parse_fn_calls
         filtered_fn_calls = filter_fn_calls(parsed_doc, fn_calls)
         objects_to_add = filtered_fn_calls.map{ |fn_call|
-          finder.find_object(fn_call.to_s)
+          finder.find_object(fn_call.name.to_s)
         }.compact
 
         bean_calls = parsed_doc.parse_bean_calls
         filtered_bean_calls = filter_bean_calls(parsed_doc, bean_calls)
         objects_to_add += filtered_bean_calls.map{ |bean_call|
-          finder.find_object(bean_call.to_s)
+          finder.find_object(bean_call.receiver_name.to_s)
         }.compact
 
         return editor.source if objects_to_add.size == 0
