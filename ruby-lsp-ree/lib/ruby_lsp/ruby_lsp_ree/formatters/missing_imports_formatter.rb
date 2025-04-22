@@ -38,8 +38,11 @@ module RubyLsp
       private
 
       def filter_fn_calls(parsed_doc, fn_calls)
-        #TODO implement
-        fn_calls
+        parsed_doc.parse_instance_methods
+
+        fn_calls.reject{ |fn_call| 
+          parsed_doc.doc_instance_methods.map(&:name).include?(fn_call.name) 
+        }
       end
 
       def filter_bean_calls(parsed_doc, bean_calls)

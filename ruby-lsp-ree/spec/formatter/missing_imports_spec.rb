@@ -204,7 +204,22 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[1].strip).to eq('fn :some_class')
   end
 
+  it "doesn't add import if local method exist" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
 
-  # TODO it "doesn't add import if local method exist" do
+        def call(arg1)
+          seconds_ago
+        end
+
+        def seconds_ago
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result.lines[1].strip).to eq('fn :some_class')
+  end
   # TODO it "doesn't add import if already imported" do
 end
