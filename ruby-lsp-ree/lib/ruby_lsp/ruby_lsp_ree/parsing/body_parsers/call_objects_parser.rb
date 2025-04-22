@@ -1,15 +1,18 @@
-require 'prism'
-
 class RubyLsp::Ree::CallObjectsParser
   attr_reader :parsed_doc
 
   class CallObject
-    attr_reader :name, :type, :receiver_name
+    attr_reader :name, :type, :receiver_name, :method_name
 
     def initialize(name:, type:, receiver_name: nil)
       @name = name
       @type = type
       @receiver_name = receiver_name
+      @method_name = nil
+    end
+
+    def set_method_name(method_name)
+      @method_name = method_name
     end
   end
 
@@ -41,6 +44,7 @@ class RubyLsp::Ree::CallObjectsParser
 
     call_objects = call_nodes + call_expressions
 
+    call_objects.each{ |call_object| call_object.set_method_name(method_object.name) }
     call_objects
   end
 
@@ -75,5 +79,15 @@ class RubyLsp::Ree::CallObjectsParser
     end
 
     call_expressions
+  end
+
+  def get_method_body(node)
+    return unless node.body
+
+    if node.body.is_a?(Prism::BeginNode)
+      node.body.statements.body
+    else
+      node.body.body
+    end
   end
 end

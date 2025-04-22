@@ -1,4 +1,5 @@
 require 'prism'
+require_relative "body_parsers/local_variables_parser"
 
 class RubyLsp::Ree::ParsedMethodNode
   attr_reader :method_node, :contract_node, :nested_local_methods
@@ -97,6 +98,10 @@ class RubyLsp::Ree::ParsedMethodNode
 
   def contract_in_parentheses?
     @contract_node.opening == '(' && @contract_node.closing == ')'
+  end
+
+  def parse_local_variables
+    RubyLsp::Ree::LocalVariablesParser.new(self).method_local_variables
   end
   
   def parse_nested_local_methods(local_methods)

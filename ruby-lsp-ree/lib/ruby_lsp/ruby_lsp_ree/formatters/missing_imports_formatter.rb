@@ -43,8 +43,15 @@ module RubyLsp
       end
 
       def filter_bean_calls(parsed_doc, bean_calls)
-        #TODO implement
-        bean_calls
+        bean_calls.select do |bean_call|
+          if !bean_call.method_name
+            true
+          else
+            method_obj = parsed_doc.doc_instance_methods.detect{ _1.name == bean_call.method_name }
+            local_variables = method_obj.parse_local_variables
+            !local_variables.map(&:name).include?(bean_call.receiver_name)
+          end
+        end
       end
     end
   end

@@ -127,6 +127,25 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[3].strip).to eq('end')
   end
 
+  it "adds missing import link for bean objects in class root" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+        
+        SOME_CONST = seconds_ago.call_method
+
+        def call(arg1)
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+    expect(result.lines[1].strip).to eq('fn :some_class do')
+    expect(result.lines[2].strip).to eq('link :seconds_ago')
+    expect(result.lines[3].strip).to eq('end')
+  end
+
   it "doesn't add import if local variable exist" do
     source =  <<~RUBY
       class SamplePackage::SomeClass
@@ -144,6 +163,47 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
 
     expect(result.lines[1].strip).to eq('fn :some_class')
   end
+
+  it "doesn't add import if local variable inside block" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+        
+        def call(arg1)
+          if a == 1
+            [1,2,3].each do |i|
+              seconds_ago = i
+            end
+          end
+
+          seconds_ago.call_method
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+    expect(result.lines[1].strip).to eq('fn :some_class')
+  end
+
+  it "doesn't add import if local variable assigned through multi assignment" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class
+        
+        def call(arg1)
+          x, seconds_ago = MyClass.new
+
+          seconds_ago.call_method
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+    expect(result.lines[1].strip).to eq('fn :some_class')
+  end
+
 
   # TODO it "doesn't add import if local method exist" do
   # TODO it "doesn't add import if already imported" do
