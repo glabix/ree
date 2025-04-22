@@ -96,7 +96,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           
         def call(arg1)
           seconds_ago
-          [1,2,3].map(&:create_item_cmd)
+          create_item_cmd
         end
       end
     RUBY
@@ -121,9 +121,12 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     RUBY
 
     result = subject.run_formatting(sample_file_uri, ruby_document(source))
-    
+
     expect(result.lines[1].strip).to eq('fn :some_class do')
     expect(result.lines[2].strip).to eq('link :seconds_ago')
     expect(result.lines[3].strip).to eq('end')
   end
+
+  # TODO it "doesn't add import if local variable exist" do
+  # TODO it "doesn't add import if local method exist" do
 end

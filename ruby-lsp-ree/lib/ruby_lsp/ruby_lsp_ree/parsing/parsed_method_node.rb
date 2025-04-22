@@ -24,6 +24,10 @@ class RubyLsp::Ree::ParsedMethodNode
     @method_node.location.end_line - 1
   end
 
+  def method_body
+    get_method_body(@method_node)
+  end
+
   def raised_errors_nested
     return @raised_errors_nested if @raised_errors_nested
     raised = raised_errors
