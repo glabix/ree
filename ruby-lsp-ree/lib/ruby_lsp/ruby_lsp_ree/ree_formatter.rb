@@ -24,12 +24,12 @@ module RubyLsp
         source = document.source
 
         formatters = [
-          RubyLsp::Ree::SortLinksFormatter,
           RubyLsp::Ree::MissingErrorDefinitionsFormatter,
           RubyLsp::Ree::MissingErrorContractsFormatter,
           RubyLsp::Ree::MissingErrorLocalesFormatter,
           RubyLsp::Ree::UnusedLinksFormatter,
           RubyLsp::Ree::MissingImportsFormatter,
+          RubyLsp::Ree::SortLinksFormatter,
         ].select do |formatter|
           formatter_name = formatter.name.split('::').last.to_sym
           @settings[formatter_name] != false

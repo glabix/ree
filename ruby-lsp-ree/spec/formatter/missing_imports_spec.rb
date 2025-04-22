@@ -103,8 +103,8 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
   
       expect(result.lines[1].strip).to eq('fn :some_class do')
-      expect(result.lines[2].strip).to eq('link :seconds_ago')
-      expect(result.lines[3].strip).to eq('link :create_item_cmd, from: :create_package')
+      expect(result.lines[2].strip).to eq('link :create_item_cmd, from: :create_package')
+      expect(result.lines[3].strip).to eq('link :seconds_ago')
       expect(result.lines[4].strip).to eq('end')
     end
 
