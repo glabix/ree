@@ -29,6 +29,7 @@ module RubyLsp
           finder.find_object(bean_call.receiver_name.to_s)
         }.compact
 
+        objects_to_add.uniq!{ |obj| obj.name }
         objects_to_add.reject!{ |obj| parsed_doc.includes_linked_object?(obj.name) }
         return editor.source if objects_to_add.size == 0
         
