@@ -33,7 +33,7 @@ module RubyLsp
         new_text = "\n" + link_text
 
         if @parsed_doc.has_blank_links_container?
-          new_text = "\sdo#{link_text}\n\s\send\n"
+          new_text = "\sdo#{new_text}\n\s\send\n"
         end
 
         range = get_range_for_fn_insert(@parsed_doc, link_text)
