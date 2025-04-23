@@ -262,5 +262,21 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   
       expect(result.lines[1].strip).to eq('fn :some_class')
     end
+
+    it "doesn't add import if bean has receiver" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class
+          
+          def call(arg1)
+            arg1.seconds_ago.call_method
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class')
+    end
   end
 end

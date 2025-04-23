@@ -55,7 +55,8 @@ class RubyLsp::Ree::CallObjectsParser
     
     node_body.each do |node|
       if node.is_a?(Prism::CallNode)
-        receiver_name = node.receiver.respond_to?(:name) ? node.receiver.name : nil
+        receiver = get_first_receiver(node)
+        receiver_name = receiver.respond_to?(:name) ? receiver.name : nil
         call_objects << CallObject.new(name: node.name, type: :method_call, receiver_name: receiver_name)
       elsif node.respond_to?(:statements)
         call_objects += parse_body_call_objects(node.statements.body)
@@ -89,5 +90,15 @@ class RubyLsp::Ree::CallObjectsParser
     else
       node.body.body
     end
+  end
+
+  def get_first_receiver(node)
+    return nil unless node.receiver
+
+    if node.receiver.is_a?(Prism::CallNode) && node.receiver.receiver
+      return get_first_receiver(node.receiver)
+    end
+
+    node.receiver
   end
 end
