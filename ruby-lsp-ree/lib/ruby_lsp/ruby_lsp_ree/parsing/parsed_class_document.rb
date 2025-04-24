@@ -2,6 +2,8 @@ require_relative 'parsed_base_document'
 require_relative 'parsed_link_node'
 require_relative 'parsed_method_node'
 require_relative "../ree_constants"
+require_relative "body_parsers/call_objects_parser"
+
 require 'ostruct'
 
 class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
@@ -142,6 +144,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_instance_methods
+    return if @doc_instance_methods
     @doc_instance_methods = []
 
     current_contract_node = nil
@@ -200,6 +203,14 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     @defined_consts += class_node.body.body
       .select{ _1.is_a?(Prism::ConstantWriteNode) }
       .map(&:name)
+  end
+
+  def parse_fn_calls
+    RubyLsp::Ree::CallObjectsParser.new(self).class_call_objects.select{ !_1.receiver_name }
+  end
+
+  def parse_bean_calls
+    RubyLsp::Ree::CallObjectsParser.new(self).class_call_objects.select{ _1.receiver_name }
   end
 
   def class_name

@@ -3,6 +3,7 @@ require_relative 'formatters/missing_error_definitions_formatter'
 require_relative 'formatters/missing_error_contracts_formatter'
 require_relative 'formatters/missing_error_locales_formatter'
 require_relative 'formatters/unused_links_formatter'
+require_relative 'formatters/missing_imports_formatter'
 
 module RubyLsp
   module Ree
@@ -23,11 +24,12 @@ module RubyLsp
         source = document.source
 
         formatters = [
-          RubyLsp::Ree::SortLinksFormatter,
           RubyLsp::Ree::MissingErrorDefinitionsFormatter,
           RubyLsp::Ree::MissingErrorContractsFormatter,
           RubyLsp::Ree::MissingErrorLocalesFormatter,
           RubyLsp::Ree::UnusedLinksFormatter,
+          RubyLsp::Ree::MissingImportsFormatter,
+          RubyLsp::Ree::SortLinksFormatter,
         ].select do |formatter|
           formatter_name = formatter.name.split('::').last.to_sym
           @settings[formatter_name] != false

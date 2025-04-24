@@ -1,3 +1,7 @@
+## [0.1.16] - 2025-04-24
+
+- formatter: add missing imports
+
 ## [0.1.15] - 2025-04-18
 
 - autocomplete - don't overwrite existing arguments
