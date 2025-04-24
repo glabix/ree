@@ -70,6 +70,11 @@ module RubyLsp
         current_package_object = ree_objects.detect{ package_name_from_uri(_1.uri) == current_package }
         return current_package_object if current_package_object
 
+        package_names = ree_objects.map{ package_name_from_uri(_1.uri) }
+        if package_names.sort == ['ree_date', 'ree_datetime'].sort
+          return ree_objects.detect{ package_name_from_uri(_1.uri) == 'ree_datetime' }
+        end
+
         ree_objects.first
       end
     end

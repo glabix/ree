@@ -391,8 +391,10 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         index_fn(server, 'duplicated_fn', 'package1')
         index_fn(server, 'duplicated_fn', 'sample_package')
         index_fn(server, 'duplicated_fn', 'package2')
+        
+        index_fn(server, 'do_something_with_my_date', 'ree_date')
+        index_fn(server, 'do_something_with_my_date', 'ree_datetime')
 
-        # index_fn(server, 'create_item_cmd', 'create_package')
         @index = server.global_state.index 
       end
     end
@@ -414,5 +416,25 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result.lines[2].strip).to eq('link :duplicated_fn')
       expect(result.lines[3].strip).to eq('end')
     end
+
+    it "chooses datatime between ree_datetime and ree_date" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class
+  
+          def call(arg1)
+            do_something_with_my_date
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :do_something_with_my_date, from: :ree_datetime')
+      expect(result.lines[3].strip).to eq('end')
+    end
+
+
   end
 end
