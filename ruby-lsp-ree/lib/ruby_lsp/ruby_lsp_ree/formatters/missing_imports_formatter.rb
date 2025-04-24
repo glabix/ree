@@ -20,13 +20,15 @@ module RubyLsp
         fn_calls = parsed_doc.parse_fn_calls
         filtered_fn_calls = filter_fn_calls(parsed_doc, fn_calls)
         objects_to_add = filtered_fn_calls.map{ |fn_call|
-          finder.find_object(fn_call.name.to_s)
+          ree_objects = finder.find_objects(fn_call.name.to_s)
+          choose_object_to_add(ree_objects, current_package)
         }.compact
 
         bean_calls = parsed_doc.parse_bean_calls
         filtered_bean_calls = filter_bean_calls(parsed_doc, bean_calls)
         objects_to_add += filtered_bean_calls.map{ |bean_call|
-          finder.find_object(bean_call.receiver_name.to_s)
+          ree_objects = finder.find_objects(bean_call.receiver_name.to_s)
+          choose_object_to_add(ree_objects, current_package)
         }.compact
 
         objects_to_add.uniq!{ |obj| obj.name }
@@ -59,6 +61,16 @@ module RubyLsp
             !local_variables.include?(bean_call.receiver_name) && !method_params.include?(bean_call.receiver_name)
           end
         end
+      end
+
+      def choose_object_to_add(ree_objects, current_package)
+        return if !ree_objects || ree_objects.size == 0
+        return ree_objects.first if ree_objects.size == 1
+
+        current_package_object = ree_objects.detect{ package_name_from_uri(_1.uri) == current_package }
+        return current_package_object if current_package_object
+
+        ree_objects.first
       end
     end
   end

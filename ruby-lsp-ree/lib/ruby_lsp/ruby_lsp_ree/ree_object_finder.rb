@@ -41,6 +41,13 @@ module RubyLsp
         objects_by_name.detect{ _1.comments.to_s.lines.first&.chomp == REE_OBJECT_STRING }
       end
 
+      def find_objects(name)
+        objects_by_name = @index[name]
+        return unless objects_by_name
+
+        objects_by_name.select{ _1.comments.to_s.lines.first&.chomp == REE_OBJECT_STRING }
+      end
+
       def find_object_for_package(name, package_name)
         objects_by_name = @index[name]
         return unless objects_by_name

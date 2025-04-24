@@ -187,7 +187,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result.lines[1].strip).to eq('fn :some_class do')
       expect(result.lines[2].strip).to eq('link :seconds_ago')
       expect(result.lines[3].strip).to eq('end')
-
     end
   end
 
@@ -383,6 +382,37 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
   
       expect(result.lines[1].strip).to eq('fn :some_class')
+    end
+  end
+
+  context "multiple found objects" do
+    before :each do
+      with_server('') do |server, uri|
+        index_fn(server, 'duplicated_fn', 'package1')
+        index_fn(server, 'duplicated_fn', 'sample_package')
+        index_fn(server, 'duplicated_fn', 'package2')
+
+        # index_fn(server, 'create_item_cmd', 'create_package')
+        @index = server.global_state.index 
+      end
+    end
+
+    it "adds import from same package by default" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class
+  
+          def call(arg1)
+            duplicated_fn
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :duplicated_fn')
+      expect(result.lines[3].strip).to eq('end')
     end
   end
 end
