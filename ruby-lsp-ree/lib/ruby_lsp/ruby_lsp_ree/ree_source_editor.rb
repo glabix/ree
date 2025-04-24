@@ -68,12 +68,11 @@ module RubyLsp
         new_text = ''
 
         ree_objects.each do |ree_object|
-          object_package = package_name_from_uri(ree_object.uri)
-
-          link_text = if current_package == object_package
+          link_text = if current_package == ree_object.object_package
             "\s\slink :#{ree_object.name}"
           else
-            "\s\slink :#{ree_object.name}, from: :#{object_package}"
+            package_str = ree_object.object_package == 'FILL_PACKAGE' ? 'FILL_PACKAGE' : ":#{ree_object.object_package}"
+            "\s\slink :#{ree_object.name}, from: #{package_str}"
           end
 
           if parsed_doc.links_container_node

@@ -417,7 +417,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result.lines[3].strip).to eq('end')
     end
 
-    it "chooses datatime between ree_datetime and ree_date" do
+    it "chooses datetime between ree_datetime and ree_date" do
       source =  <<~RUBY
         class SamplePackage::SomeClass
           fn :some_class
@@ -435,6 +435,22 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result.lines[3].strip).to eq('end')
     end
 
-
+    it "adds import with placeholder if multiple objects found" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class
+  
+          def call(arg1)
+            duplicated_fn
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting('', ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :duplicated_fn, from: FILL_PACKAGE')
+      expect(result.lines[3].strip).to eq('end')
+    end
   end
 end

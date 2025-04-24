@@ -67,15 +67,17 @@ module RubyLsp
         return if !ree_objects || ree_objects.size == 0
         return ree_objects.first if ree_objects.size == 1
 
-        current_package_object = ree_objects.detect{ package_name_from_uri(_1.uri) == current_package }
+        current_package_object = ree_objects.detect{ _1.object_package == current_package }
         return current_package_object if current_package_object
 
-        package_names = ree_objects.map{ package_name_from_uri(_1.uri) }
+        package_names = ree_objects.map(&:object_package)
         if package_names.sort == ['ree_date', 'ree_datetime'].sort
-          return ree_objects.detect{ package_name_from_uri(_1.uri) == 'ree_datetime' }
+          return ree_objects.detect{ _1.object_package == 'ree_datetime' }
         end
 
-        ree_objects.first
+        ree_object = ree_objects.first
+        ree_object.set_package!('FILL_PACKAGE')
+        ree_object
       end
     end
   end
