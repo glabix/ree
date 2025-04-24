@@ -58,6 +58,7 @@ class RubyLsp::Ree::CallObjectsParser
         receiver = get_first_receiver(node)
         receiver_name = receiver.respond_to?(:name) ? receiver.name : nil
         call_objects << CallObject.new(name: node.name, type: :method_call, receiver_name: receiver_name)
+        call_objects += parse_call_objects_from_args(node.arguments)
       elsif node.respond_to?(:statements)
         call_objects += parse_body_call_objects(node.statements.body)
       elsif node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
@@ -68,6 +69,11 @@ class RubyLsp::Ree::CallObjectsParser
     end
 
     call_objects
+  end
+
+  def parse_call_objects_from_args(node_arguments)
+    return [] if !node_arguments || !node_arguments.arguments
+    parse_body_call_objects(node_arguments.arguments)
   end
 
   def parse_body_call_expressions(node_body)

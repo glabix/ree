@@ -14,7 +14,10 @@ class RubyLsp::Ree::ParsedMethodNode
   end
 
   def param_names
-    @method_node.parameters.requireds.map(&:name) + @method_node.parameters.keywords.map(&:name) + [@method_node.parameters.rest&.name] + [@method_node.parameters.keyword_rest&.name]
+    @method_node.parameters.requireds.map(&:name) + 
+    @method_node.parameters.keywords.map(&:name) + 
+    [@method_node.parameters.rest&.name] + 
+    [@method_node.parameters.keyword_rest&.name]
   end
 
   def has_contract?
