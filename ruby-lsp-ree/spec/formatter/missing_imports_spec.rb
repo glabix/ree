@@ -173,7 +173,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   
           def call(arg1)
             local_method(
-              local_method(seconds_ago)
+              local_method([1, seconds_ago])
             )
           end
 
