@@ -263,6 +263,70 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result.lines[1].strip).to eq('fn :some_class')
     end
 
+    it "doesn't add import if receiver is method argument" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class
+          
+          def call(seconds_ago)
+            seconds_ago.call_method
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class')
+    end
+
+    it "doesn't add import if receiver is keyword argument" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class
+          
+          def call(seconds_ago:)
+            seconds_ago.call_method
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class')
+    end
+
+    it "doesn't add import if receiver is splat args" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class
+          
+          def call(*seconds_ago)
+            seconds_ago.call_method
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class')
+    end
+
+    it "doesn't add import if receiver is kwargs" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class
+          
+          def call(**seconds_ago)
+            seconds_ago.call_method
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class')
+    end
+
     it "doesn't add import if bean has receiver" do
       source =  <<~RUBY
         class SamplePackage::SomeClass

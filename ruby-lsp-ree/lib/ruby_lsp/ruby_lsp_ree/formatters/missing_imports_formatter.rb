@@ -53,8 +53,10 @@ module RubyLsp
             true
           else
             method_obj = parsed_doc.doc_instance_methods.detect{ _1.name == bean_call.method_name }
-            local_variables = method_obj.parse_local_variables
-            !local_variables.map(&:name).include?(bean_call.receiver_name)
+            local_variables = method_obj.parse_local_variables.map(&:name)
+            method_params = method_obj.param_names
+
+            !local_variables.include?(bean_call.receiver_name) && !method_params.include?(bean_call.receiver_name)
           end
         end
       end
