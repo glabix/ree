@@ -11,6 +11,8 @@ module RubyLsp
       REE_OBJECT_STRING = 'ree_object'
 
       class ReeObjectDecorator < SimpleDelegator
+        include RubyLsp::Ree::ReeLspUtils
+
         def object_package
           return @package_name if @package_name
 
