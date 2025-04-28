@@ -52,12 +52,19 @@ class RubyLsp::Ree::CallObjectsParser
 
   def parse_body_call_objects(node_body)
     call_objects = []
-    
+
     node_body.each do |node|
       if node.is_a?(Prism::CallNode)
-        receiver = get_first_receiver(node)
-        receiver_name = receiver.respond_to?(:name) ? receiver.name : nil
-        call_objects << CallObject.new(name: node.name, type: :method_call, receiver_name: receiver_name)
+        if node.receiver
+          receiver = get_first_receiver(node)
+      
+          if receiver.is_a?(Prism::CallNode)
+            call_objects += parse_body_call_objects([receiver])
+          end
+        else
+          call_objects << CallObject.new(name: node.name, type: :method_call)
+        end
+      
         call_objects += parse_call_objects_from_args(node.arguments)
       else
         if node.respond_to?(:elements)
