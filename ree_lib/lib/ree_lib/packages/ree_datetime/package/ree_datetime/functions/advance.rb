@@ -7,7 +7,7 @@ class ReeDatetime::Advance
     link :change
     link :seconds_since
     link :slice, from: :ree_hash
-    link :advance, from: :ree_date
+    link :advance_date, from: :ree_date
   end
 
   doc(<<~DOC)
@@ -30,7 +30,7 @@ class ReeDatetime::Advance
     ] => DateTime
   )
   def call(date_time, **opts)
-    changed_date = advance(
+    changed_date = advance_date(
       date_time.to_date,
       **slice(opts, [:years, :months, :quarters, :weeks, :days])
     )

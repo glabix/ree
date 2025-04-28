@@ -5,12 +5,12 @@ class ReeDate::NextMonth
 
   fn :next_month do
     link :today
-    link :advance
+    link :advance_date
   end
 
   doc("Short-hand for <tt>months_since(1)</tt>.")
   contract(Nilor[Date] => Date)
   def call(date = nil)
-    advance(date || today, months: 1)
+    advance_date(date || today, months: 1)
   end
 end
