@@ -1,3 +1,8 @@
+## [0.1.17] - 2025-04-28
+
+- add missing imports: improved handling imports with the same name
+- add missing imports: handle more cases with missing imports (nested calls, predicates, etc.)
+
 ## [0.1.16] - 2025-04-24
 
 - formatter: add missing imports

@@ -52,22 +52,49 @@ class RubyLsp::Ree::CallObjectsParser
 
   def parse_body_call_objects(node_body)
     call_objects = []
-    
+
     node_body.each do |node|
       if node.is_a?(Prism::CallNode)
-        receiver = get_first_receiver(node)
-        receiver_name = receiver.respond_to?(:name) ? receiver.name : nil
-        call_objects << CallObject.new(name: node.name, type: :method_call, receiver_name: receiver_name)
-      elsif node.respond_to?(:statements)
-        call_objects += parse_body_call_objects(node.statements.body)
-      elsif node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
-        call_objects += parse_body_call_objects(get_method_body(node.block))
-      elsif node.respond_to?(:value) && node.value
-        call_objects += parse_body_call_objects([node.value])
+        if node.receiver
+          receiver = get_first_receiver(node)
+      
+          if receiver.is_a?(Prism::CallNode)
+            call_objects += parse_body_call_objects([receiver])
+          end
+        else
+          call_objects << CallObject.new(name: node.name, type: :method_call)
+        end
+      
+        call_objects += parse_call_objects_from_args(node.arguments)
+      else
+        if node.respond_to?(:elements)
+          call_objects += parse_body_call_objects(node.elements)
+        end
+
+        if node.respond_to?(:predicate)
+          call_objects += parse_body_call_objects([node.predicate])
+        end
+        
+        if node.respond_to?(:statements)
+          call_objects += parse_body_call_objects(node.statements.body)
+        end
+        
+        if node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
+          call_objects += parse_body_call_objects(get_method_body(node.block))
+        end
+
+        if node.respond_to?(:value) && node.value
+          call_objects += parse_body_call_objects([node.value])
+        end
       end
     end
 
     call_objects
+  end
+
+  def parse_call_objects_from_args(node_arguments)
+    return [] if !node_arguments || !node_arguments.arguments
+    parse_body_call_objects(node_arguments.arguments)
   end
 
   def parse_body_call_expressions(node_body)

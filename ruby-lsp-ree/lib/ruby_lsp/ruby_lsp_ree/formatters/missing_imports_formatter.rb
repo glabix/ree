@@ -17,16 +17,12 @@ module RubyLsp
 
         current_package = package_name_from_uri(uri)
 
-        fn_calls = parsed_doc.parse_fn_calls
-        filtered_fn_calls = filter_fn_calls(parsed_doc, fn_calls)
-        objects_to_add = filtered_fn_calls.map{ |fn_call|
-          finder.find_object(fn_call.name.to_s)
-        }.compact
 
-        bean_calls = parsed_doc.parse_bean_calls
-        filtered_bean_calls = filter_bean_calls(parsed_doc, bean_calls)
-        objects_to_add += filtered_bean_calls.map{ |bean_call|
-          finder.find_object(bean_call.receiver_name.to_s)
+        method_calls = parsed_doc.parse_method_calls
+        filtered_method_calls = filter_method_calls(parsed_doc, method_calls)
+        objects_to_add = filtered_method_calls.map{ |fn_call|
+          ree_objects = finder.find_objects(fn_call.name.to_s)
+          choose_object_to_add(ree_objects, current_package)
         }.compact
 
         objects_to_add.uniq!{ |obj| obj.name }
@@ -39,24 +35,39 @@ module RubyLsp
 
       private
 
-      def filter_fn_calls(parsed_doc, fn_calls)
+      def filter_method_calls(parsed_doc, method_calls)
         parsed_doc.parse_instance_methods
 
-        fn_calls.reject{ |fn_call| 
-          parsed_doc.doc_instance_methods.map(&:name).include?(fn_call.name) 
-        }
-      end
-
-      def filter_bean_calls(parsed_doc, bean_calls)
-        bean_calls.select do |bean_call|
-          if !bean_call.method_name
+        method_calls.select do |method_call|
+          if !method_call.method_name
             true
+          elsif parsed_doc.doc_instance_methods.map(&:name).include?(method_call.name) 
+            false
           else
-            method_obj = parsed_doc.doc_instance_methods.detect{ _1.name == bean_call.method_name }
-            local_variables = method_obj.parse_local_variables
-            !local_variables.map(&:name).include?(bean_call.receiver_name)
+            method_obj = parsed_doc.doc_instance_methods.detect{ _1.name == method_call.method_name }
+            local_variables = method_obj.parse_local_variables.map(&:name)
+            method_params = method_obj.param_names
+
+            !local_variables.include?(method_call.name) && !method_params.include?(method_call.name)
           end
         end
+      end
+
+      def choose_object_to_add(ree_objects, current_package)
+        return if !ree_objects || ree_objects.size == 0
+        return ree_objects.first if ree_objects.size == 1
+
+        current_package_object = ree_objects.detect{ _1.object_package == current_package }
+        return current_package_object if current_package_object
+
+        package_names = ree_objects.map(&:object_package)
+        if package_names.sort == ['ree_date', 'ree_datetime'].sort
+          return ree_objects.detect{ _1.object_package == 'ree_datetime' }
+        end
+
+        ree_object = ree_objects.first
+        ree_object.set_package!('FILL_PACKAGE')
+        ree_object
       end
     end
   end

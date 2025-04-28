@@ -205,12 +205,8 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
       .map(&:name)
   end
 
-  def parse_fn_calls
-    RubyLsp::Ree::CallObjectsParser.new(self).class_call_objects.select{ !_1.receiver_name }
-  end
-
-  def parse_bean_calls
-    RubyLsp::Ree::CallObjectsParser.new(self).class_call_objects.select{ _1.receiver_name }
+  def parse_method_calls
+    RubyLsp::Ree::CallObjectsParser.new(self).class_call_objects
   end
 
   def class_name
