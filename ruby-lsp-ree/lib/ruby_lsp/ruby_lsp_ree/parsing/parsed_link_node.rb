@@ -47,7 +47,7 @@ class RubyLsp::Ree::ParsedLinkNode
   def from_arg_value
     return unless @from_param
 
-    @from_param.value.unescaped
+    @from_param.value.respond_to?(:unescaped) ? @from_param.value.unescaped : nil
   end
 
   def name_arg_node
