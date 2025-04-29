@@ -92,6 +92,21 @@ module RubyLsp
 
         source_lines[line] = source_lines[line].chomp + new_text
       end
+
+      def change_link_package(link_node, new_package)
+        # binding.irb
+
+        if link_node.from_param
+          from_param_location = link_node.from_param.value.location
+          line = from_param_location.start_line - 1
+          start_column = from_param_location.start_column - 1
+          end_column = from_param_location.end_column
+
+          source_lines[line] = source_lines[line][0..start_column] + ":#{new_package}" + source_lines[line][end_column..-1]
+        else
+          # TODO not implemented
+        end
+      end
     end
   end
 end
