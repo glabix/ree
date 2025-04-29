@@ -22,7 +22,7 @@ module RubyLsp
           ree_objects = finder.find_objects(link_node.name)
           
           if ree_objects.size == 1
-            editor.change_link_package(link_node, ree_objects.first.object_package)
+            editor.change_link_package(link_node, ree_objects.first.object_package, current_package)
           else
             # add warning
           end

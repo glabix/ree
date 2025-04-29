@@ -63,7 +63,22 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[2].strip).to eq('link :create_item_cmd, from: :create_package, import: -> { SomeEntity }')
   end
 
-  # TODO it "adds removes from section if no object found in from package but found in current" do
+  it "removes 'from' section if no object found in 'from' package but found in current" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :seconds_ago, from: :create_package, import: -> { SomeEntity }
+        end
+
+        def call(arg1)
+          SomeEntity
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result.lines[2].strip).to eq('link :seconds_ago, import: -> { SomeEntity }')
+  end
 
   context "multiple found link" do
     before :each do
