@@ -34,7 +34,7 @@ module RubyLsp
             end
           end
 
-          next if link_is_used?(link_node, remove_imports)
+          next if link_is_used?(link_node, remove_imports) || parsed_doc.includes_mapper_dsl?
 
           editor.remove_link(link_node)
           removed_links += 1

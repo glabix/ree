@@ -766,5 +766,23 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       result = @formatter.run_formatting(sample_file_uri, ruby_document(source))
       expect(result).to eq(source)
     end
+
+    it "doesn't remove import link from mapper" do
+      source =  <<~RUBY
+        class SamplePackage::SomeDtoSerializer
+          include ReeMapper::DSL
+
+          mapper :some_dto_serializer do
+            link :another_serializer
+          end
+
+          build_mapper.use(:serialize) do
+          end
+        end 
+      RUBY
+
+      result = @formatter.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result).to eq(source)
+    end
   end
 end

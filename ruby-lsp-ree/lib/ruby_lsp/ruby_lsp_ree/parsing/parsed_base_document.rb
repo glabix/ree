@@ -28,6 +28,10 @@ class RubyLsp::Ree::ParsedBaseDocument
     false
   end
 
+  def includes_mapper_dsl?
+    false
+  end
+
   def includes_linked_object?(obj_name)
     @link_nodes.map(&:name).include?(obj_name)
   end

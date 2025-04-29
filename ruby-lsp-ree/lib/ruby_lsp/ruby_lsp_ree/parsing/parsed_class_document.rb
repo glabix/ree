@@ -40,6 +40,10 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     @class_includes.any?{ node_name(_1) == ROUTES_DSL_MODULE }
   end
 
+  def includes_mapper_dsl?
+    @class_includes.any?{ node_name(_1) == MAPPER_DSL_MODULE }
+  end
+
   def includes_ree_dsl?
     ree_dsls.size > 0
   end
