@@ -90,7 +90,21 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       end
     end
 
-    #TODO it "doesn't change file if object by link not found and several candidates exist" do
-    #TODO it "adds warning if object by link not found and several candidates exist" do
+    it "doesn't change file if object by link not found and several candidates exist" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :duplicated_fn
+          end
+
+          def call(arg1)
+            duplicated_fn
+          end
+        end
+      RUBY
+
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result.lines[2].strip).to eq('link :duplicated_fn')
+    end
   end
 end

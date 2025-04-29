@@ -24,11 +24,18 @@ module RubyLsp
           if ree_objects.size == 1
             editor.change_link_package(link_node, ree_objects.first.object_package, current_package)
           else
-            # add warning
+            send_message(link_node.name)
           end
         end
 
         editor.source
+      end
+
+      private
+
+      def send_message(link_name)   
+        message = "Link package is invalid for: #{link_name}"
+        @message_queue << RubyLsp::Notification.window_show_message(message, type: Constant::MessageType::ERROR)
       end
     end
   end
