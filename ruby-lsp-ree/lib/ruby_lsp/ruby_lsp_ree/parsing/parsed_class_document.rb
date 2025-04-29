@@ -81,9 +81,11 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_class_includes
-    return unless has_body?
+    return @class_includes if @class_includes
+    @class_includes = []
+    return @class_includes unless has_body?
 
-    @class_includes ||= class_node.body.body.select{ node_name(_1) == :include }.map do |class_include|
+    @class_includes = class_node.body.body.select{ node_name(_1) == :include }.map do |class_include|
       first_arg = class_include.arguments.arguments.first
 
       include_name = case first_arg
