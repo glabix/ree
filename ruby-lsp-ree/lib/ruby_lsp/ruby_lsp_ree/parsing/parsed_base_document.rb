@@ -40,6 +40,12 @@ class RubyLsp::Ree::ParsedBaseDocument
     @link_nodes.detect{ node_name(_1) == name }
   end
 
+  def find_import_for_package(name, package_name)
+    @link_nodes.detect do |link_node|
+      link_node.imports.include?(name) && link_node.link_package_name == package_name
+    end
+  end
+
   def node_name(node)
     return nil unless node.respond_to?(:name)
 
