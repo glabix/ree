@@ -29,7 +29,40 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(result.lines[2].strip).to eq('link :create_item_cmd, from: :create_package')
   end
 
-  # TODO it "adds package if no object found in current package" do
+  it "adds package if no object found in current package" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :create_item_cmd
+        end
+
+        def call(arg1)
+          create_item_cmd
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result.lines[2].strip).to eq('link :create_item_cmd, from: :create_package')
+  end
+
+  it "correctly inserts from param if import constants exist" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :create_item_cmd, import: -> { SomeEntity }
+        end
+
+        def call(arg1)
+          SomeEntity
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result.lines[2].strip).to eq('link :create_item_cmd, from: :create_package, import: -> { SomeEntity }')
+  end
+
   # TODO it "adds removes from section if no object found in from package but found in current" do
 
   context "multiple found link" do

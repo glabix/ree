@@ -104,7 +104,11 @@ module RubyLsp
 
           source_lines[line] = source_lines[line][0..start_column] + ":#{new_package}" + source_lines[line][end_column..-1]
         else
-          # TODO not implemented
+          name_location = link_node.first_arg_location
+          line = name_location.start_line - 1
+          start_column = name_location.end_column - 1
+
+          source_lines[line] = source_lines[line][0..start_column] + ", from: :#{new_package}" + source_lines[line][start_column+1..-1]
         end
       end
     end

@@ -32,7 +32,7 @@ To switch off/on formatter features, use Ruby LSP addon settings:
     }
   }
 ```
-available formatters: `SortLinksFormatter`, `MissingErrorDefinitionsFormatter`, `MissingErrorContractsFormatter`, `MissingErrorLocalesFormatter`, `UnusedLinksFormatter`, `MissingImportsFormatter`
+available formatters: `SortLinksFormatter`, `MissingErrorDefinitionsFormatter`, `MissingErrorContractsFormatter`, `MissingErrorLocalesFormatter`, `UnusedLinksFormatter`, `MissingImportsFormatter`, `ImportPackagesFormatter`
 
 ## Functions
 
