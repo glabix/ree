@@ -28,12 +28,22 @@ class RubyLsp::Ree::ParsedBaseDocument
     false
   end
 
+  def includes_mapper_dsl?
+    false
+  end
+
   def includes_linked_object?(obj_name)
     @link_nodes.map(&:name).include?(obj_name)
   end
 
   def find_link_node(name)
     @link_nodes.detect{ node_name(_1) == name }
+  end
+
+  def find_import_for_package(name, package_name)
+    @link_nodes.detect do |link_node|
+      link_node.imports.include?(name) && link_node.link_package_name == package_name
+    end
   end
 
   def node_name(node)

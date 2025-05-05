@@ -40,6 +40,10 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     @class_includes.any?{ node_name(_1) == ROUTES_DSL_MODULE }
   end
 
+  def includes_mapper_dsl?
+    @class_includes.any?{ node_name(_1) == MAPPER_DSL_MODULE }
+  end
+
   def includes_ree_dsl?
     ree_dsls.size > 0
   end
@@ -51,12 +55,6 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   def find_link_with_imported_object(name)
     @link_nodes.detect do |link_node|
       link_node.imports.include?(name)
-    end
-  end
-
-  def find_import_for_package(name, package_name)
-    @link_nodes.detect do |link_node|
-      link_node.imports.include?(name) && link_node.link_package_name == package_name
     end
   end
 
@@ -77,9 +75,11 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_class_includes
-    return unless has_body?
+    return @class_includes if @class_includes
+    @class_includes = []
+    return @class_includes unless has_body?
 
-    @class_includes ||= class_node.body.body.select{ node_name(_1) == :include }.map do |class_include|
+    @class_includes = class_node.body.body.select{ node_name(_1) == :include }.map do |class_include|
       first_arg = class_include.arguments.arguments.first
 
       include_name = case first_arg

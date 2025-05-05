@@ -17,7 +17,6 @@ module RubyLsp
 
         current_package = package_name_from_uri(uri)
 
-
         method_calls = parsed_doc.parse_method_calls
         filtered_method_calls = filter_method_calls(parsed_doc, method_calls)
         objects_to_add = filtered_method_calls.map{ |fn_call|

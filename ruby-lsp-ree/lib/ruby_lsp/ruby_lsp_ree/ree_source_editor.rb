@@ -92,6 +92,34 @@ module RubyLsp
 
         source_lines[line] = source_lines[line].chomp + new_text
       end
+
+      def change_link_package(link_node, new_package, current_package)
+        if new_package == current_package # change package to current -> remove 'from' param
+          return unless link_node.from_param
+
+          from_param_location = link_node.from_param.location
+          name_location = link_node.first_arg_location
+
+          line = from_param_location.start_line - 1
+          start_column = name_location.end_column - 1
+          end_column = from_param_location.end_column
+
+          source_lines[line] = source_lines[line][0..start_column] + source_lines[line][end_column..-1]
+        elsif link_node.from_param
+          from_param_location = link_node.from_param.value.location
+          line = from_param_location.start_line - 1
+          start_column = from_param_location.start_column - 1
+          end_column = from_param_location.end_column
+
+          source_lines[line] = source_lines[line][0..start_column] + ":#{new_package}" + source_lines[line][end_column..-1]
+        else
+          name_location = link_node.first_arg_location
+          line = name_location.start_line - 1
+          start_column = name_location.end_column - 1
+
+          source_lines[line] = source_lines[line][0..start_column] + ", from: :#{new_package}" + source_lines[line][start_column+1..-1]
+        end
+      end
     end
   end
 end

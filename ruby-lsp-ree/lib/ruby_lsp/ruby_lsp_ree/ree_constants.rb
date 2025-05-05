@@ -3,6 +3,7 @@ module RubyLsp
     module ReeConstants
       LINK_DSL_MODULE = 'Ree::LinkDSL'
       ROUTES_DSL_MODULE = 'ReeRoutes::DSL'
+      MAPPER_DSL_MODULE = 'ReeMapper::DSL'
 
       LINKS_CONTAINER_TYPES = [
         :fn,

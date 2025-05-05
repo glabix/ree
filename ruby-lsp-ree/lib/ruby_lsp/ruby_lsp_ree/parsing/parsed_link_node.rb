@@ -1,7 +1,7 @@
 require 'prism'
 
 class RubyLsp::Ree::ParsedLinkNode
-  attr_reader :node, :document_package, :name, :import_items
+  attr_reader :node, :document_package, :name, :import_items, :from_param
 
   FROM_ARG_KEY = 'from'
   IMPORT_ARG_KEY = 'import'
@@ -27,6 +27,8 @@ class RubyLsp::Ree::ParsedLinkNode
     @node = node
     @document_package = document_package
     @name = parse_name
+
+    parse_params
   end
 
   def link_package_name
@@ -43,13 +45,9 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   def from_arg_value
-    @kw_args ||= @node.arguments.arguments.detect{ |arg| arg.is_a?(Prism::KeywordHashNode) }
-    return unless @kw_args
-
-    @from_param ||= @kw_args.elements.detect{ _1.key.unescaped == FROM_ARG_KEY }
     return unless @from_param
 
-    @from_param.value.unescaped
+    @from_param.value.respond_to?(:unescaped) ? @from_param.value.unescaped : nil
   end
 
   def name_arg_node
@@ -124,6 +122,14 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   private
+
+  def parse_params
+    @kw_args = @node.arguments.arguments.detect{ |arg| arg.is_a?(Prism::KeywordHashNode) }
+    @from_param = nil
+    return unless @kw_args
+
+    @from_param = @kw_args.elements.detect{ _1.key.unescaped == FROM_ARG_KEY }
+  end
 
   def last_arg
     @node.arguments.arguments.last

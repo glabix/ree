@@ -58,7 +58,7 @@ module RubyLsp
 
       def find_objects(name)
         objects_by_name = @index[name]
-        return unless objects_by_name
+        return [] unless objects_by_name
 
         ree_objects = objects_by_name.select{ _1.comments.to_s.lines.first&.chomp == REE_OBJECT_STRING }
         decorate_objects(ree_objects)
