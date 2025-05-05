@@ -9,12 +9,11 @@ module RubyLsp
       def call(source, uri)
         return source unless @index
 
-        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source, uri)
+        current_package = package_name_from_uri(uri)
+        parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source, package_name: current_package)
 
         finder = ReeObjectFinder.new(@index)
         editor = RubyLsp::Ree::ReeSourceEditor.new(source)
-
-        current_package = package_name_from_uri(uri)
 
         parsed_doc.link_nodes.select(&:object_name_type?).each do |link_node|
           next if finder.find_object_for_package(link_node.name, link_node.link_package_name)
