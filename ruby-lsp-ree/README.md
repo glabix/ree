@@ -44,3 +44,4 @@ available formatters: `SortLinksFormatter`, `MissingErrorDefinitionsFormatter`, 
 - Go To Definition for Ree objects
 - hover information for Ree objects and error locales
 - Ree templates support
+- add missing import links on save

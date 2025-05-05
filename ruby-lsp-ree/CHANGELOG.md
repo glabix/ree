@@ -1,3 +1,9 @@
+## [0.1.18] - 2025-05-05
+
+- formatter: do not remove links from mappers
+- formatter: change incorrect package for link on save
+- add missing imports: add more cases with missing imports
+
 ## [0.1.17] - 2025-04-28
 
 - add missing imports: improved handling imports with the same name
