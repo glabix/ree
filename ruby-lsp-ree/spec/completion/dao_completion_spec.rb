@@ -44,7 +44,7 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
       end
     RUBY
 
-    allow(RubyLsp::Ree::ParsedDocumentBuilder).to receive(:build_from_uri).and_return(RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(bean_source, :dao))
+    allow(RubyLsp::Ree::ParsedDocumentBuilder).to receive(:build_from_uri).and_return(RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(bean_source, type: :dao))
 
     with_server(source) do |server, uri|
       index_ree_object(server, 'some_dao', :dao, 'sample_package', URI.parse('some_dao.rb'))
@@ -79,7 +79,7 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
       end
     RUBY
 
-    allow(RubyLsp::Ree::ParsedDocumentBuilder).to receive(:build_from_uri).and_return(RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(bean_source, :dao))
+    allow(RubyLsp::Ree::ParsedDocumentBuilder).to receive(:build_from_uri).and_return(RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(bean_source, type: :dao))
 
     with_server(source) do |server, uri|
       index_ree_object(server, 'some_dao', :dao, 'sample_package', URI.parse('some_dao.rb'))
