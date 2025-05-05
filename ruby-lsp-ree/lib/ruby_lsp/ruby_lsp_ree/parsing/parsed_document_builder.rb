@@ -25,9 +25,9 @@ class RubyLsp::Ree::ParsedDocumentBuilder
     document
   end
 
-  def self.build_from_source(source, type = nil)
+  def self.build_from_source(source, type: nil, package_name: nil)
     ast = Prism.parse(source).value
-    build_document(ast, type)
+    build_document(ast, type, package_name)
   end
 
   def self.build_document(ast, type, package_name = nil)

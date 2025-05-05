@@ -46,7 +46,7 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
       end
     RUBY
 
-    allow(RubyLsp::Ree::ParsedDocumentBuilder).to receive(:build_from_uri).and_return(RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(bean_source, :bean))
+    allow(RubyLsp::Ree::ParsedDocumentBuilder).to receive(:build_from_uri).and_return(RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(bean_source, type: :bean))
 
     with_server(source) do |server, uri|
       index_ree_object(server, 'my_async_bean', :async_bean, 'sample_package', URI.parse('my_async_bean.rb'))
@@ -83,7 +83,7 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
       end
     RUBY
 
-    allow(RubyLsp::Ree::ParsedDocumentBuilder).to receive(:build_from_uri).and_return(RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(bean_source, :bean))
+    allow(RubyLsp::Ree::ParsedDocumentBuilder).to receive(:build_from_uri).and_return(RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(bean_source, type: :bean))
 
     with_server(source) do |server, uri|
       index_ree_object(server, 'my_async_bean', :async_bean, 'sample_package', URI.parse('my_async_bean.rb'))
