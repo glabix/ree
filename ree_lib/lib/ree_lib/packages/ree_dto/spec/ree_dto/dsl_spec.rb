@@ -69,6 +69,16 @@ RSpec.describe ReeDto::DSL do
     }
 
     it {
+      dto = ReeDto::DtoClass.new
+      
+      expect {
+        dto.with_default
+      }.to raise_error do |e|
+        expect(e.message).to eq("field `with_default` not set for: #<dto ReeDto::DtoClass >")
+      end
+    }
+
+    it {
       dto = ReeDto::DtoClass.new(string: "string")
       expect(dto.string).to eq("string")
 

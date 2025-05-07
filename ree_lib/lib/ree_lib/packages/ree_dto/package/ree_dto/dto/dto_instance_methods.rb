@@ -74,7 +74,7 @@ module ReeDto::DtoInstanceMethods
 
   contract Symbol => Bool
   def has_value?(name)
-    @_attrs.key?(name) || get_meta(name).has_default?
+    @_attrs.key?(name)
   end
 
   contract None => ArrayOf[Symbol]
