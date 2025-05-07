@@ -38,10 +38,11 @@ RSpec.describe ReeDto::DSL do
     }
 
     it {
-      dto = ReeDto::DtoClass.new
+      dto = ReeDto::DtoClass.build
+      
       expect(dto.with_default).to eq(1)
 
-      dto = ReeDto::DtoClass.new({})
+      dto = ReeDto::DtoClass.build({})
       expect(dto.with_default).to eq(1)
       expect(dto.get_value(:with_default)).to eq(1)
     }
