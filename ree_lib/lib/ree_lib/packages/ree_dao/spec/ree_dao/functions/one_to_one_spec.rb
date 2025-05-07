@@ -128,7 +128,7 @@ RSpec.describe :one_to_one do
     project = TestOneToOne::Project.new(id: 1)
 
     project.set_project_user(
-      TestOneToOne::ProjectUser.new
+      TestOneToOne::ProjectUser.build
     )
 
     TestOneToOne::ProjectsDao.new.put(project)

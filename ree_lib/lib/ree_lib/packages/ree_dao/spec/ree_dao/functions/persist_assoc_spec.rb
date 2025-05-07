@@ -112,11 +112,11 @@ RSpec.describe :persist_assoc do
     project = TestPersistAssoc::Project.new(id: 1)
 
     project.add_project_user(
-      TestPersistAssoc::ProjectUser.new
+      TestPersistAssoc::ProjectUser.build
     )
 
     project.add_project_user(
-      TestPersistAssoc::ProjectUser.new
+      TestPersistAssoc::ProjectUser.build
     )
 
     TestPersistAssoc::ProjectsDao.new.put(project)
@@ -138,11 +138,11 @@ RSpec.describe :persist_assoc do
     project = TestPersistAssoc::Project.new(id: 2)
 
     project.add_project_user(
-      TestPersistAssoc::ProjectUser.new
+      TestPersistAssoc::ProjectUser.build
     )
 
     project.add_project_user(
-      TestPersistAssoc::ProjectUser.new
+      TestPersistAssoc::ProjectUser.build
     )
 
     TestPersistAssoc::ProjectsDao.new.put(project)

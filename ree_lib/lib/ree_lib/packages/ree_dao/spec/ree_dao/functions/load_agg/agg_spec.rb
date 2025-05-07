@@ -458,10 +458,10 @@ RSpec.describe :agg do
     organizations.delete_all
     users.delete_all
 
-    organization = ReeDaoAggTest::Organization.new(name: "Test Org")
+    organization = ReeDaoAggTest::Organization.build(name: "Test Org")
     organizations.put(organization)
 
-    user = ReeDaoAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user = ReeDaoAggTest::User.build(name: "John", age: 33, organization_id: organization.id)
     users.put(user)
 
     expect {
@@ -473,24 +473,24 @@ RSpec.describe :agg do
     organizations.delete_all
     users.delete_all
 
-    organization = ReeDaoAggTest::Organization.new(name: "Test Org")
+    organization = ReeDaoAggTest::Organization.build(name: "Test Org")
     organizations.put(organization)
 
-    user_1 = ReeDaoAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
-    user_2 = ReeDaoAggTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
+    user_1 = ReeDaoAggTest::User.build(name: "John", age: 33, organization_id: organization.id)
+    user_2 = ReeDaoAggTest::User.build(name: "Sam", age: 21, organization_id: organization.id)
     users.put(user_1)
     users.put(user_2)
 
-    book_1 = ReeDaoAggTest::Book.new(user_id: user_1.id, title: "1984")
+    book_1 = ReeDaoAggTest::Book.build(user_id: user_1.id, title: "1984")
     books.put(book_1)
 
-    authors.put(ReeDaoAggTest::Author.new(book_id: book_1.id, name: "George Orwell"))
-    chapters.put(ReeDaoAggTest::Chapter.new(book_id: book_1.id, title: "interlude"))
+    authors.put(ReeDaoAggTest::Author.build(book_id: book_1.id, name: "George Orwell"))
+    chapters.put(ReeDaoAggTest::Chapter.build(book_id: book_1.id, title: "interlude"))
 
     res = agg_users_with_dto.call(
       users.all,
       to_dto: -> (user) {
-        ReeDaoAggTest::UserDto.new(
+        ReeDaoAggTest::UserDto.build(
           id: user.id,
           name: user.name,
           organization_id: user.organization_id,
@@ -511,15 +511,15 @@ RSpec.describe :agg do
     organizations.delete_all
     users.delete_all
 
-    org = ReeDaoAggTest::Organization.new(name: "Test Org")
+    org = ReeDaoAggTest::Organization.build(name: "Test Org")
     organizations.put(org)
 
-    user = ReeDaoAggTest::User.new(name: "John", age: 33, organization_id: org.id)
+    user = ReeDaoAggTest::User.build(name: "John", age: 33, organization_id: org.id)
     users.put(user)
 
-    book_1 = ReeDaoAggTest::Book.new(user_id: user.id, title: "1984")
-    book_2 = ReeDaoAggTest::Book.new(user_id: user.id, title: "1408")
-    book_3 = ReeDaoAggTest::Book.new(user_id: user.id, title: "1408")
+    book_1 = ReeDaoAggTest::Book.build(user_id: user.id, title: "1984")
+    book_2 = ReeDaoAggTest::Book.build(user_id: user.id, title: "1408")
+    book_3 = ReeDaoAggTest::Book.build(user_id: user.id, title: "1408")
 
     books.put(book_1)
     books.put(book_2)
