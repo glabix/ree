@@ -49,6 +49,12 @@ RSpec.describe ReeDto::DSL do
 
     it {
       dto = ReeDto::DtoClass.new
+      expect(dto.has_value?(:with_default)).to eq(false)
+      expect(dto.has_value?(:string)).to eq(false)
+    }
+
+    it {
+      dto = ReeDto::DtoClass.build
       expect(dto.has_value?(:with_default)).to eq(true)
       expect(dto.has_value?(:string)).to eq(false)
     }
@@ -64,7 +70,7 @@ RSpec.describe ReeDto::DSL do
       expect {
         dto.string
       }.to raise_error do |e|
-        expect(e.message).to eq("field `string` not set for: #<dto ReeDto::DtoClass with_default=1>")
+        expect(e.message).to eq("field `string` not set for: #<dto ReeDto::DtoClass >")
       end
     }
 
@@ -79,6 +85,16 @@ RSpec.describe ReeDto::DSL do
     }
 
     it {
+      dto = ReeDto::DtoClass.build
+
+      expect {
+        dto.string
+      }.to raise_error do |e|
+        expect(e.message).to eq("field `string` not set for: #<dto ReeDto::DtoClass with_default=1>")
+      end
+    }
+
+    it {
       dto = ReeDto::DtoClass.new(string: "string")
       expect(dto.string).to eq("string")
 
@@ -89,6 +105,20 @@ RSpec.describe ReeDto::DSL do
 
     it {
       dto = ReeDto::DtoClass.new
+      fields = []
+      values = []
+
+      dto.each_field do |name, value|
+        fields << name
+        values << value
+      end
+
+      expect(fields).to eq([])
+      expect(values).to eq([])
+    }
+
+    it {
+      dto = ReeDto::DtoClass.build
       fields = []
       values = []
 
@@ -180,16 +210,16 @@ RSpec.describe ReeDto::DSL do
 
     it {
       expect(
-        ReeDto::DtoClass.new(string: "str")
+        ReeDto::DtoClass.build(string: "str")
       ).not_to eq(
-        ReeDto::DtoClass.new(string: "str", with_default: 2)
+        ReeDto::DtoClass.build(string: "str", with_default: 2)
       )
     }
   end
 
   describe "#to_h" do
     it {
-      dto = ReeDto::DtoClass.new(string: "str")
+      dto = ReeDto::DtoClass.build(string: "str")
       expect(dto.to_h).to eq({ string: "str", with_default: 1 })
     }
   end
