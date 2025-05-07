@@ -10,6 +10,7 @@ class ReeDao::BuildConnection
   fn :build_connection do
     link :connections
     link 'ree_dao/dataset_extensions', -> { DatasetExtensions }
+    link 'ree_dao/build_methods', -> { BuildMethods }
   end
 
   TIMEZONES = [:utc, :local].freeze
@@ -92,6 +93,7 @@ class ReeDao::BuildConnection
     dataset_class = connection.dataset_class
     klass = Class.new(dataset_class)
     klass.extend(ReeDao::DatasetExtensions)
+    klass.extend(ReeDao::BuildMethods)
 
     connection.dataset_class = klass
 
