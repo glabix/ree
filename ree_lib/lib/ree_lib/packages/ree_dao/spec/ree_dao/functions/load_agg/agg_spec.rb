@@ -395,10 +395,10 @@ RSpec.describe :agg do
     organizations.delete_all
     users.delete_all
 
-    organization = ReeDaoAggTest::Organization.new(name: "Test Org")
+    organization = ReeDaoAggTest::Organization.build(name: "Test Org")
     organizations.put(organization)
 
-    user = ReeDaoAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
+    user = ReeDaoAggTest::User.build(name: "John", age: 33, organization_id: organization.id)
     users.put(user)
 
     expect {
@@ -413,37 +413,37 @@ RSpec.describe :agg do
     books.delete_all
     chapters.delete_all
 
-    organization = ReeDaoAggTest::Organization.new(name: "Test Org")
+    organization = ReeDaoAggTest::Organization.build(name: "Test Org")
     organizations.put(organization)
 
-    user_1 = ReeDaoAggTest::User.new(name: "John", age: 33, organization_id: organization.id)
-    user_2 = ReeDaoAggTest::User.new(name: "Sam", age: 21, organization_id: organization.id)
+    user_1 = ReeDaoAggTest::User.build(name: "John", age: 33, organization_id: organization.id)
+    user_2 = ReeDaoAggTest::User.build(name: "Sam", age: 21, organization_id: organization.id)
     users.put(user_1)
     users.put(user_2)
 
-    passport_1 = ReeDaoAggTest::UserPassport.new(user_id: user_1.id, info: "some info")
+    passport_1 = ReeDaoAggTest::UserPassport.build(user_id: user_1.id, info: "some info")
     user_passports.put(passport_1)
-    user_passports.put(ReeDaoAggTest::UserPassport.new(user_id: user_2.id, info: "another info"))
+    user_passports.put(ReeDaoAggTest::UserPassport.build(user_id: user_2.id, info: "another info"))
 
-    book_1 = ReeDaoAggTest::Book.new(user_id: user_1.id, title: "1984")
-    book_2 = ReeDaoAggTest::Book.new(user_id: user_1.id, title: "1408")
+    book_1 = ReeDaoAggTest::Book.build(user_id: user_1.id, title: "1984")
+    book_2 = ReeDaoAggTest::Book.build(user_id: user_1.id, title: "1408")
 
     books.put(book_1)
     books.put(book_2)
 
-    chapter = ReeDaoAggTest::Chapter.new(book_id: book_1.id, title: "beginning")
+    chapter = ReeDaoAggTest::Chapter.build(book_id: book_1.id, title: "beginning")
     chapters.put(chapter)
-    chapters.put(ReeDaoAggTest::Chapter.new(book_id: book_1.id, title: "interlude"))
-    chapters.put(ReeDaoAggTest::Chapter.new(book_id: book_1.id, title: "tragic ending"))
-    chapters.put(ReeDaoAggTest::Chapter.new(book_id: book_2.id, title: "beginning"))
-    chapters.put(ReeDaoAggTest::Chapter.new(book_id: book_2.id, title: "ending"))
+    chapters.put(ReeDaoAggTest::Chapter.build(book_id: book_1.id, title: "interlude"))
+    chapters.put(ReeDaoAggTest::Chapter.build(book_id: book_1.id, title: "tragic ending"))
+    chapters.put(ReeDaoAggTest::Chapter.build(book_id: book_2.id, title: "beginning"))
+    chapters.put(ReeDaoAggTest::Chapter.build(book_id: book_2.id, title: "ending"))
 
 
-    authors.put(ReeDaoAggTest::Author.new(book_id: book_1.id, name: "George Orwell"))
-    review = ReeDaoAggTest::Review.new(book_id: book_1.id, rating: 10)
+    authors.put(ReeDaoAggTest::Author.build(book_id: book_1.id, name: "George Orwell"))
+    review = ReeDaoAggTest::Review.build(book_id: book_1.id, rating: 10)
     reviews.put(review)
-    reviews.put(ReeDaoAggTest::Review.new(book_id: book_1.id, rating: 7))
-    review_authors.put(ReeDaoAggTest::ReviewAuthor.new(review_id: review.id, name: "John Review"))
+    reviews.put(ReeDaoAggTest::Review.build(book_id: book_1.id, rating: 7))
+    review_authors.put(ReeDaoAggTest::ReviewAuthor.build(review_id: review.id, name: "John Review"))
 
     res = agg_users.call(
       users.all,
