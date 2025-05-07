@@ -14,17 +14,22 @@ class ReeDto::DtoBuilder
     @collections = []
   end
 
-  contract(Symbol, Any, Kwargs[setter: Bool, default: Any] => FieldMeta)
-  def field(name, contract, setter: true, default: FieldMeta::NONE)
+  contract(Symbol, Any, Kwargs[setter: Bool, default: Any, field_type: Symbol] => FieldMeta)
+  def field(name, contract, setter: true, default: FieldMeta::NONE, field_type: :custom)
     existing = @fields.find { _1.name == name }
 
     if existing
       raise ArgumentError.new("field :#{name} already defined for #{@klass}")
     end
 
-    field = FieldMeta.new(name, contract, setter, default)
+    field = FieldMeta.new(name, contract, setter, default, field_type)
     @fields << field
     field
+  end
+
+  contract(Symbol, Any, Kwargs[setter: Bool, default: Any] => FieldMeta)
+  def db_field(name, contract, setter: true, default: FieldMeta::NONE)
+    field(name, contract, setter: setter, default: default, field_type: :db)
   end
 
   contract Symbol, Any, Optblock => CollectionMeta
