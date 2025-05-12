@@ -6,11 +6,12 @@ class ReeDto::DtoBuilder
   link "ree_dto/dto/field_meta", -> { FieldMeta }
   link "ree_dto/dto/collection_meta", -> { CollectionMeta }
 
-  attr_reader :fields, :collections
+  attr_reader :fields, :fields_with_default, :collections
 
   def initialize(klass)
     @klass = klass
     @fields = []
+    @fields_with_default = []
     @collections = []
   end
 
@@ -24,6 +25,7 @@ class ReeDto::DtoBuilder
 
     field = FieldMeta.new(name, contract, setter, default, field_type)
     @fields << field
+    @fields_with_default << field if field.has_default?
     field
   end
 
