@@ -4,7 +4,7 @@ class ReeDto::FieldMeta
 
   NONE = Object.new.freeze
 
-  attr_reader :name, :contract, :setter, :default
+  attr_reader :name, :contract, :setter, :default, :field_type
 
   contract Symbol, Any, Bool, Any, Symbol => Any
   def initialize(name, contract, setter, default, field_type)

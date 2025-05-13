@@ -42,7 +42,8 @@ module ReeDto::DtoInstanceMethods
 
   contract Symbol => Any
   def get_value(name)
-    @_attrs[name] || get_nil_or_raise(name)
+    return @_attrs[name] unless @_attrs[name].nil?
+    get_nil_or_raise(name)
   end
 
   contract None => Hash
