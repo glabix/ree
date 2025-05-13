@@ -22,11 +22,15 @@ module Ree::MethodDecorators
     end
 
     def self.included(base)
+      return if Ree::MethodDecorators.no_method_decorators?
+
       base.extend(ClassMethods)
     end
 
     def self.register(target, name, decorator_class)
       target.define_singleton_method(name) do |*args, **kwargs, &block|
+        next if Ree::MethodDecorators.decorator_disabled?(decorator_class)
+
         decorator = decorator_class.new(*args, **kwargs, &block)
         Ree::MethodDecorators::DefinitionStorage.set(self, name, decorator)
         decorator
