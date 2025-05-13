@@ -3,7 +3,7 @@
 class ReeMapper::ReeDtoOutput < ReeMapper::StrategyOutput
   contract(None => Any)
   def build_object
-    dto.new
+    dto.build
   end
 
   contract(Object, ReeMapper::Field, Any => nil)

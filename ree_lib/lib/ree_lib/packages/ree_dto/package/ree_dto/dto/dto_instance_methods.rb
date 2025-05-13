@@ -42,15 +42,8 @@ module ReeDto::DtoInstanceMethods
 
   contract Symbol => Any
   def get_value(name)
-    @_attrs.fetch(name) do
-      meta = get_meta(name)
-
-      if !meta.has_default?
-        raise FieldNotSetError.new("field `#{name}` not set for: #{self}")
-      else
-        @_attrs[name] = meta.default
-      end
-    end
+    return @_attrs[name] unless @_attrs[name].nil?
+    get_nil_or_raise(name)
   end
 
   contract None => Hash
@@ -82,7 +75,7 @@ module ReeDto::DtoInstanceMethods
 
   contract Symbol => Bool
   def has_value?(name)
-    @_attrs.key?(name) || get_meta(name).has_default?
+    @_attrs.key?(name)
   end
 
   contract None => ArrayOf[Symbol]
@@ -160,5 +153,10 @@ module ReeDto::DtoInstanceMethods
     else
       v.inspect
     end
+  end
+
+  def get_nil_or_raise(name)
+    return if @_attrs.has_key?(name)
+    raise FieldNotSetError.new("field `#{name}` not set for: #{self}")
   end
 end

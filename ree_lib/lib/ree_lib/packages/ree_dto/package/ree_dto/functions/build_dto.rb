@@ -23,6 +23,7 @@ class ReeDto::BuildDto
     builder.instance_exec(&proc)
 
     klass.send(:set_fields, builder.fields)
+    klass.send(:set_fields_with_default, builder.fields_with_default)
     klass.send(:set_collections, builder.collections)
 
     builder.fields.each do |field|
