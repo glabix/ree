@@ -138,4 +138,49 @@ RSpec.describe Ree::MethodDecorators do
       "[debug] addition returned: 6\n"
     ).to_stdout
   end
+
+  describe "module methods decoration" do
+    module CalculableModule
+      include Ree::MethodDecorators::Decoratable.with(
+        log: LogDecorator,
+      )
+
+      log :info
+      def calculate_for_module(a, b, c: 0)
+        puts "Performing module calculation"
+        a + b + c
+      end
+
+      log :debug
+      def self.module_function_calculate(a, b, c: 0)
+        puts "Performing module function calculation"
+        a + b + c
+      end
+    end
+
+    class ClassIncludingModule
+      include CalculableModule
+    end
+
+    it "applies decorators to methods defined in a module (when module is included)" do
+      instance = ClassIncludingModule.new
+      expect {
+        instance.calculate_for_module(1, 2, c: 3)
+      }.to output(
+        "[info] Calling calculate_for_module with args: [1, 2], kwargs: {c: 3}\n" \
+        "Performing module calculation\n" \
+        "[info] calculate_for_module returned: 6\n"
+      ).to_stdout
+    end
+
+    it "applies decorators to module functions (class methods on the module)" do
+      expect {
+        CalculableModule.module_function_calculate(1, 2, c: 3)
+      }.to output(
+        "[debug] Calling module_function_calculate with args: [1, 2], kwargs: {c: 3}\n" \
+        "Performing module function calculation\n" \
+        "[debug] module_function_calculate returned: 6\n"
+      ).to_stdout
+    end
+  end
 end
