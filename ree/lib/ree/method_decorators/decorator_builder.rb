@@ -94,7 +94,8 @@ module Ree::MethodDecorators
       decorators.reverse.reduce(base_call) do |chain, decorator|
         key = DecoratorStorage.key(target, method_name, decorator.class)
         <<~RUBY
-          Ree::MethodDecorators::DecoratorStorage.fetch("#{key}").hook(self, args, kwargs, blk) do |*args, **kwargs, &blk|
+          decorator = Ree::MethodDecorators::DecoratorStorage.fetch("#{key}")
+          decorator.hook(self, args, kwargs, blk) do |*args, **kwargs, &blk|
             #{chain}
           end
         RUBY

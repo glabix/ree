@@ -3,7 +3,7 @@
 module Ree::MethodDecorators
   # Storage for applied method decorators.
   #
-  # Permanently stores decorator instances by their object_id.
+  # Permanently stores decorator instances.
   # Used during method calls to access decorator configuration and behavior.
   #
   # @example
