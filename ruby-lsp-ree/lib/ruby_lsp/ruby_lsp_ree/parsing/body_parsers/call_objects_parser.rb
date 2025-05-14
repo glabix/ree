@@ -94,6 +94,10 @@ class RubyLsp::Ree::CallObjectsParser
         if node.respond_to?(:right) && node.right
           call_objects += parse_body_call_objects([node.right])
         end
+
+        if node.respond_to?(:parts) && node.parts
+          call_objects += parse_body_call_objects(node.parts)
+        end
       end
     end
 
