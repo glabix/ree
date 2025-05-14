@@ -23,6 +23,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     subject.run_formatting(sample_package_file_uri('dao/users'), ruby_document(source))
     entity_file_content = File.read(sample_package_entities_dir + '/user.rb')
 pp entity_file_content
-    expect(en_locale_content.lines[1].strip).to eq('db_field :id, Nilor[Integer], default: nil')
+    expect(entity_file_content.lines[6].strip).to eq('db_field :id, Nilor[Integer], default: nil')
   end
 end

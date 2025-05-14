@@ -94,6 +94,7 @@ class RubyLsp::Ree::ParsedDocumentBuilder
     
     document.parse_class_node
     document.parse_filters
+    document.parse_dao_fields
 
     document
   end  
