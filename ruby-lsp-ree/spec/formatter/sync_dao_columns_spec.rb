@@ -31,12 +31,59 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     RUBY
 
     subject.run_formatting(sample_package_file_uri('dao/users'), ruby_document(source))
-    entity_file_content = File.read(sample_package_entities_dir + '/user.rb')
-# pp entity_file_content
+    entity_file_content = File.read(entity_file_name)
     expect(entity_file_content.lines[6].strip).to eq('column :id, Nilor[Integer], default: nil')
   end
 
+  it "adds column to the empty build dto" do
+    entity_file_lines = File.read(entity_file_name).lines
+    entity_file_lines[5] = ''
+    File.write(entity_file_name, entity_file_lines.join)
+
+    source =  <<~RUBY
+      class SamplePackage::Users
+        include ReeDao::DSL
+
+        dao :users do
+          link :db, from: :sample_package_db
+          link "sample_package/entities/user", -> { User }
+        end
+
+        schema User do
+          integer :id, null: true
+        end
+      end
+    RUBY
+
+    subject.run_formatting(sample_package_file_uri('dao/users'), ruby_document(source))
+    entity_file_content = File.read(entity_file_name)
+    expect(entity_file_content.lines[4].strip).to eq('build_dto do')
+    expect(entity_file_content.lines[5].strip).to eq('column :id, Nilor[Integer], default: nil')
+    expect(entity_file_content.lines[6].strip).to eq('end')
+  end
+
+  it "adds multiple columns" do
+    source =  <<~RUBY
+      class SamplePackage::Users
+        include ReeDao::DSL
+
+        dao :users do
+          link :db, from: :sample_package_db
+          link "sample_package/entities/user", -> { User }
+        end
+
+        schema User do
+          integer :id, null: true
+          string :name
+        end
+      end
+    RUBY
+
+    subject.run_formatting(sample_package_file_uri('dao/users'), ruby_document(source))
+    entity_file_content = File.read(entity_file_name)
+    expect(entity_file_content.lines[6].strip).to eq('column :id, Nilor[Integer], default: nil')
+    expect(entity_file_content.lines[7].strip).to eq('column :name, String')
+  end
+
   # TODO it "adds default value" do
-  # TODO it "adds column to the empty build dto" do
-  # TODO it "adds multiple columns" do
 end

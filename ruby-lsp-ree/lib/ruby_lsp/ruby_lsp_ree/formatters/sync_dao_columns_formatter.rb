@@ -6,7 +6,7 @@ module RubyLsp
       include RubyLsp::Ree::ReeLspUtils
 
       def call(source, uri)
-        path = uri.path.to_s
+        path = get_uri_path(uri)
         path_parts = path.split('/')
         return source unless path_parts.include?('dao')
         
@@ -14,7 +14,7 @@ module RubyLsp
         return source if !parsed_doc
         
         parsed_doc.parse_class_includes
-        return unless parsed_doc.includes_dao_dsl?
+        return source unless parsed_doc.includes_dao_dsl?
 
         dao_folder_index = path_parts.index('dao')
         entities_folder = path_parts.take(dao_folder_index).join('/') + '/entities'
@@ -48,21 +48,12 @@ module RubyLsp
         missed_columns = parsed_doc.dao_fields.select{ missed_column_names.include?(_1.name) }
         add_columns(entity_path, entity_source, entity_doc, missed_columns)
 
-
-        # pp entities_folder
-        # pp entity_filename
-
-        # pp parsed_doc.dao_fields
-
         source
-        
       end
 
       private 
       
       def add_columns(entity_path, entity_source, entity_doc, missed_columns)
-        puts "add columns"
-        pp missed_columns
         return if !missed_columns || missed_columns.size == 0
 
         columns_strs = missed_columns.map do |col|
