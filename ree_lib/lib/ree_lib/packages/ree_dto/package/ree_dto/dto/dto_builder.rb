@@ -30,7 +30,7 @@ class ReeDto::DtoBuilder
   end
 
   contract(Symbol, Any, Kwargs[setter: Bool, default: Any] => FieldMeta)
-  def db_field(name, contract, setter: true, default: FieldMeta::NONE)
+  def column(name, contract, setter: true, default: FieldMeta::NONE)
     field(name, contract, setter: setter, default: default, field_type: :db)
   end
 
