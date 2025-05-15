@@ -158,15 +158,6 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     @doc_instance_methods
   end
 
-  def parse_filter_signature(filter_node)
-    return [] unless filter_node
-
-    lambda_node = filter_node.arguments&.arguments[1]
-    return [] unless lambda_node
-
-    parse_signatures_from_params(lambda_node.parameters.parameters)
-  end
-
   def parse_signatures_from_params(parameters)
     signature_params = signature_params_from_node(parameters)
     [RubyIndexer::Entry::Signature.new(signature_params)]

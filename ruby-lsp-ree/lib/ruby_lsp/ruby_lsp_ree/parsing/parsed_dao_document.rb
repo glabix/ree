@@ -66,6 +66,15 @@ class RubyLsp::Ree::ParsedDaoDocument < RubyLsp::Ree::ParsedClassDocument
       .map{ OpenStruct.new(name: _1.arguments.arguments.first.unescaped, signatures: parse_filter_signature(_1)) }
   end
 
+  def parse_filter_signature(filter_node)
+    return [] unless filter_node
+
+    lambda_node = filter_node.arguments&.arguments[1]
+    return [] if !lambda_node || !lambda_node.parameters
+
+    parse_signatures_from_params(lambda_node.parameters.parameters)
+  end
+
   def field_allows_null?(node)
     kw_node = node.arguments.arguments.detect{ _1.is_a?(Prism::KeywordHashNode) }
     return false unless kw_node

@@ -27,6 +27,9 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         schema User do
           integer :id, null: true
         end
+
+        filter :by_identity, -> (id) { where(identity_id: id) }
+        filter :active, -> { where(state: 'active') }
       end
     RUBY
 
