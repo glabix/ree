@@ -85,5 +85,45 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     expect(entity_file_content.lines[7].strip).to eq('column :name, String')
   end
 
-  # TODO it "adds default value" do
+  it "adds hash field for pg_jsonb" do
+    source =  <<~RUBY
+      class SamplePackage::Users
+        include ReeDao::DSL
+
+        dao :users do
+          link :db, from: :sample_package_db
+          link "sample_package/entities/user", -> { User }
+        end
+
+        schema User do
+          pg_jsonb :data
+        end
+      end
+    RUBY
+
+    subject.run_formatting(sample_package_file_uri('dao/users'), ruby_document(source))
+    entity_file_content = File.read(entity_file_name)
+    expect(entity_file_content.lines[6].strip).to eq('column :data, Nilor[Hash], default: nil')
+  end
+
+  it "adds correct field for custom types" do
+    source =  <<~RUBY
+      class SamplePackage::Users
+        include ReeDao::DSL
+
+        dao :users do
+          link :db, from: :sample_package_db
+          link "sample_package/entities/user", -> { User }
+        end
+
+        schema User do
+          user_types :user_type
+        end
+      end
+    RUBY
+
+    subject.run_formatting(sample_package_file_uri('dao/users'), ruby_document(source))
+    entity_file_content = File.read(entity_file_name)
+    expect(entity_file_content.lines[6].strip).to eq('column :user_type, UserTypes')
+  end
 end

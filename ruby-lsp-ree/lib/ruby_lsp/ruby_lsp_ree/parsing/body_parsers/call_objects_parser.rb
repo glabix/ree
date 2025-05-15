@@ -53,6 +53,8 @@ class RubyLsp::Ree::CallObjectsParser
   def parse_body_call_objects(node_body)
     call_objects = []
 
+    return call_objects unless node_body
+    
     node_body.each do |node|
       if node.is_a?(Prism::CallNode)
         if node.receiver

@@ -190,6 +190,17 @@ module RubyLsp
         word.downcase!
         word
       end
+
+      # copied from ree string_utils
+      def camelize(string, uppercase_first_letter = true)
+        if uppercase_first_letter
+          string = string.sub(/^[a-z\d]*/) { |match| match.capitalize }
+        else
+          string = string.sub(/^(?:(?=\b|[A-Z_])|\w)/) { |match| match.downcase }
+        end
+  
+        string.gsub(/(?:_|(\/))([a-z\d]*)/) { "#{$1}#{$2.capitalize}" }.gsub("/", "::")
+      end
     end
   end
 end
