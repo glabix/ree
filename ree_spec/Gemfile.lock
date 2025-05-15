@@ -1,10 +1,10 @@
 PATH
   remote: .
   specs:
-    ree_spec (0.0.8)
+    ree_spec (0.0.9)
       commander (~> 5.0.0)
       ree (~> 1.1.0)
-      ree_lib (~> 1.2.0)
+      ree_lib
 
 GEM
   remote: https://rubygems.org/
