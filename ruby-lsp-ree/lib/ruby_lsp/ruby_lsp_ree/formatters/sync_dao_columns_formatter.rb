@@ -66,7 +66,11 @@ module RubyLsp
         return if !missed_columns || missed_columns.size == 0
 
         columns_strs = missed_columns.map do |col|
-          "    column :#{col}"
+          str = "    column :#{col.name}, #{col.type}"
+          # if col.has_default?
+          #   str += ", default: #{col.default}"
+          # end
+          str
         end
 
         columns_str = columns_strs.join("\n") + "\n"

@@ -11,9 +11,9 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   include RubyLsp::Ree::ReeConstants
 
   attr_reader :class_node, :class_includes, 
-    :values, :filters, :bean_methods, :links_container_block_node, :error_definitions, 
+    :values, :bean_methods, :links_container_block_node, :error_definitions, 
     :error_definition_names, :doc_instance_methods, :links_container_node, 
-    :defined_classes, :defined_consts, :dao_fields
+    :defined_classes, :defined_consts
 
   def initialize(ast, package_name = nil)
     super
@@ -130,30 +130,12 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
       .map{ OpenStruct.new(name: _1.arguments.arguments.first.unescaped) }
   end
 
-  def parse_filters
-    return unless class_node
-    
-    @filters ||= class_node.body.body
-      .select{ node_name(_1) == :filter }
-      .map{ OpenStruct.new(name: _1.arguments.arguments.first.unescaped, signatures: parse_filter_signature(_1)) }
-
-  end
-
   def parse_bean_methods
     return unless has_body?
 
     @bean_methods ||= class_node.body.body
       .select{ _1.is_a?(Prism::DefNode) }
       .map{ OpenStruct.new(name: node_name(_1).to_s, signatures: parse_signatures_from_params(_1.parameters)) }
-  end
-
-  def parse_dao_fields
-    return unless has_body?
-   
-    schema_node = class_node.body.body
-      .detect{ |node| node.is_a?(Prism::CallNode) && node.name == :schema }
-
-    @dao_fields ||= schema_node.block.body.body.map{ _1.arguments.arguments.first.unescaped }
   end
 
   def parse_instance_methods

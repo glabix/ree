@@ -137,6 +137,14 @@ module RubyLspReeHelper
     )
   end
 
+  def store_file_cache(file_name)
+    File.read(file_name)
+  end
+
+  def restore_file_cache(file_name, cache)
+    File.write(file_name, cache)
+  end
+
   def store_locales_cache
     {
       en: File.read(sample_package_locales_dir + '/en.yml'),
