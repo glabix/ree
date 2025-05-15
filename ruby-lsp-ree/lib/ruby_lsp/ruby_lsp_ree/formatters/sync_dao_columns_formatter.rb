@@ -41,6 +41,11 @@ module RubyLsp
         end
 
         entity_path = entity_paths.first
+        entity_source = File.read(entity_path)
+        entity_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(entity_source, type: :entity)
+
+        missed_columns = parsed_doc.dao_fields - entity_doc.columns.map(&:name)
+        add_columns(entity_path, entity_source, entity_doc, missed_columns)
 
 
         pp entities_folder
@@ -50,6 +55,17 @@ module RubyLsp
 
         source
         
+      end
+
+      private 
+      
+      def add_columns(entity_path, entity_source, entity_doc, missed_columns)
+        return if !missed_columns || missed_columns.size == 0
+
+        source_lines = entity_source.lines
+
+
+        File.write(entity_path, source_lines.join)
       end
     end
   end

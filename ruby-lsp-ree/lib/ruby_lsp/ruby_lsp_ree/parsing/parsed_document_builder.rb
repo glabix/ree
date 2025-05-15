@@ -2,6 +2,7 @@ require 'prism'
 require_relative 'parsed_class_document'
 require_relative 'parsed_rspec_document'
 require_relative 'parsed_route_document'
+require_relative 'parsed_entity_document'
 
 class RubyLsp::Ree::ParsedDocumentBuilder
   extend RubyLsp::Ree::ReeLspUtils
@@ -40,6 +41,8 @@ class RubyLsp::Ree::ParsedDocumentBuilder
       build_bean_document(ast)
     when :route
       build_route_document(ast)
+    when :entity
+      build_entity_document(ast)
     else
       build_detected_document_type(ast, package_name)
     end
@@ -110,6 +113,10 @@ class RubyLsp::Ree::ParsedDocumentBuilder
 
   def self.build_route_document(ast)
     RubyLsp::Ree::ParsedRouteDocument.new(ast)
+  end
+
+  def self.build_entity_document(ast)
+    RubyLsp::Ree::ParsedEntityDocument.new(ast)
   end
 
   def self.is_ruby_file?(uri)
