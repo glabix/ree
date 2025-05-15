@@ -27,12 +27,15 @@ class RubyLsp::Ree::ParsedDaoDocument < RubyLsp::Ree::ParsedClassDocument
   private 
 
   def parse_dao_fields
+    @dao_fields = []
     return unless has_body?
    
     schema_node = class_node.body.body
       .detect{ |node| node.is_a?(Prism::CallNode) && node.name == :schema }
 
-    @dao_fields ||= schema_node.block.body.body.map do |node|
+    return unless schema_node
+    
+    @dao_fields = schema_node.block.body.body.map do |node|
       field_type = node.name.to_s.capitalize
       default_val = nil
 
