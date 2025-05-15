@@ -67,9 +67,9 @@ module RubyLsp
 
         columns_strs = missed_columns.map do |col|
           str = "    column :#{col.name}, #{col.type}"
-          # if col.has_default?
-          #   str += ", default: #{col.default}"
-          # end
+          if col.has_default?
+            str += ", default: #{col.default}"
+          end
           str
         end
 
@@ -84,7 +84,6 @@ module RubyLsp
         end
 
         line = prev_line_location.start_line - 1
-        pp source_lines[line]
 
         source_lines[line] += columns_str
 
