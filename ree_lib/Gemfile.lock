@@ -1,14 +1,14 @@
 PATH
   remote: .
   specs:
-    ree_lib (1.2.0)
+    ree_lib (1.3.0)
       bigdecimal (~> 3.1.9)
       binding_of_caller (~> 1.0.1)
       i18n (~> 1.14.7)
       loofah (~> 2.24.0)
       oj (~> 3.16.9)
       rainbow (~> 3.1.1)
-      ree (~> 1.1.0)
+      ree (~> 1.1.2)
       sequel (~> 5.88.0)
       tzinfo (~> 2.0.6)
 
@@ -37,6 +37,7 @@ GEM
     highline (3.0.1)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
+    logger (1.6.6)
     loofah (2.24.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
@@ -57,8 +58,9 @@ GEM
       rack (>= 1.3)
     rainbow (3.1.1)
     rake (13.2.1)
-    ree (1.1.1)
+    ree (1.1.2)
       commander (~> 5.0.0)
+      logger (~> 1.6.5)
     rexml (3.3.6)
       strscan
     roda (3.88.0)
