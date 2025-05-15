@@ -3,6 +3,6 @@ class SamplePackage::User
   include Ree::LinkDSL
 
   build_dto do
-    db_field :email, String
+    column :email, String
   end
 end
