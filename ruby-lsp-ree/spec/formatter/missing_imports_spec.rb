@@ -244,6 +244,39 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result.lines[2].strip).to eq('link :seconds_ago')
       expect(result.lines[3].strip).to eq('end')
     end
+
+    it "adds import into dto" do
+      source =  <<~'RUBY'
+        class SamplePackage::SomeClass
+          include Ree::LinkDSL
+  
+          def some_method
+            seconds_ago
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result.lines[3].strip).to eq('link :seconds_ago')
+    end
+
+    it "adds import into dto after last link" do
+      source =  <<~'RUBY'
+        class SamplePackage::SomeClass
+          include Ree::LinkDSL
+  
+          link :create_item_cmd
+
+          def some_method
+            create_item_cmd
+            seconds_ago
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result.lines[4].strip).to eq('link :seconds_ago')
+    end
   end
 
   context "bean method calls" do
