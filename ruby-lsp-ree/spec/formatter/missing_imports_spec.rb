@@ -293,13 +293,11 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
 
           def some_method
             seconds_ago
-
           end
         end
       RUBY
   
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
-      puts result
       expect(result.lines[3].strip).to eq('')
       expect(result.lines[4].strip).to eq('link :seconds_ago')
       expect(result.lines[5].strip).to eq('')

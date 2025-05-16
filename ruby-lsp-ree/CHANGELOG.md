@@ -2,6 +2,7 @@
 
 - formatter: add missing columns to entities
 - add missing imports: add missing imports from string interpolation and blocks
+- add missing imports: add imports in dtos
 - Go To Definition: fixed for entities inside dao
 
 ## [0.1.18] - 2025-05-05
