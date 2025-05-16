@@ -24,18 +24,27 @@ class RubyLsp::Ree::ParsedDaoDocument < RubyLsp::Ree::ParsedClassDocument
     parse_dao_fields
   end
 
+  def has_schema?
+    !!@schema_node
+  end
+
+  def schema_name
+    @schema_node.arguments.arguments.first.name.to_s
+  end
+
   private 
 
   def parse_dao_fields
     @dao_fields = []
+    @schema_node = nil
     return unless has_body?
    
-    schema_node = class_node.body.body
+    @schema_node = class_node.body.body
       .detect{ |node| node.is_a?(Prism::CallNode) && node.name == :schema }
 
-    return unless schema_node
+    return unless @schema_node
 
-    @dao_fields = schema_node.block.body.body.map do |node|
+    @dao_fields = @schema_node.block.body.body.map do |node|
       if node.name.to_s == 'pg_jsonb'
         field_type = "Nilor[Hash]"  
         default_val = "nil"

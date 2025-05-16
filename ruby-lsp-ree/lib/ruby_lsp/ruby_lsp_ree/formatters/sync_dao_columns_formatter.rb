@@ -15,21 +15,12 @@ module RubyLsp
         
         parsed_doc.parse_class_includes
         return source unless parsed_doc.includes_dao_dsl?
+        return source unless parsed_doc.has_schema?
 
         dao_folder_index = path_parts.index('dao')
         entities_folder = path_parts.take(dao_folder_index).join('/') + '/entities'
 
-        dao_filename = File.basename(path, '.rb')
-  
-        if dao_filename.end_with?('ies')
-          entity_filename = dao_filename[0..-4] + 'y'
-        elsif dao_filename.end_with?('es')
-          entity_filename = dao_filename[0..-3]
-        else
-          entity_filename = dao_filename[0..-2]
-        end
-
-        entity_filename = entity_filename + '.rb'
+        entity_filename = underscore(parsed_doc.schema_name) + '.rb'
 
         entity_paths = Dir[File.join(entities_folder, '**', entity_filename)]
         if entity_paths.size > 1
