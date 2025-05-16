@@ -20,6 +20,10 @@ class RubyLsp::Ree::ParsedBaseDocument
     false
   end
 
+  def includes_dao_dsl?
+    false
+  end
+
   def includes_routes_dsl?
     false
   end

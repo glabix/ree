@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ree_spec (0.0.9)
+    ree_spec (0.0.10)
       commander (~> 5.0.0)
       ree (~> 1.1.0)
       ree_lib

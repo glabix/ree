@@ -11,7 +11,7 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   include RubyLsp::Ree::ReeConstants
 
   attr_reader :class_node, :class_includes, 
-    :values, :filters, :bean_methods, :links_container_block_node, :error_definitions, 
+    :values, :bean_methods, :links_container_block_node, :error_definitions, 
     :error_definition_names, :doc_instance_methods, :links_container_node, 
     :defined_classes, :defined_consts
 
@@ -34,6 +34,10 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
   def includes_link_dsl?
     @class_includes.any?{ node_name(_1) == LINK_DSL_MODULE }
+  end
+
+  def includes_dao_dsl?
+    @class_includes.any?{ node_name(_1) == DAO_DSL_MODULE }
   end
 
   def includes_routes_dsl?
@@ -126,15 +130,6 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
       .map{ OpenStruct.new(name: _1.arguments.arguments.first.unescaped) }
   end
 
-  def parse_filters
-    return unless class_node
-    
-    @filters ||= class_node.body.body
-      .select{ node_name(_1) == :filter }
-      .map{ OpenStruct.new(name: _1.arguments.arguments.first.unescaped, signatures: parse_filter_signature(_1)) }
-
-  end
-
   def parse_bean_methods
     return unless has_body?
 
@@ -161,15 +156,6 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
     end
 
     @doc_instance_methods
-  end
-
-  def parse_filter_signature(filter_node)
-    return [] unless filter_node
-
-    lambda_node = filter_node.arguments&.arguments[1]
-    return [] unless lambda_node
-
-    parse_signatures_from_params(lambda_node.parameters.parameters)
   end
 
   def parse_signatures_from_params(parameters)

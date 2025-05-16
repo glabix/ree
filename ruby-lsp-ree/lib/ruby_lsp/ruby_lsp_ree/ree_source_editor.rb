@@ -88,9 +88,16 @@ module RubyLsp
           new_text = "\sdo#{new_text}\s\send\n"
         end
 
-        line = parsed_doc.links_container_node.location.start_line - 1
-
-        source_lines[line] = source_lines[line].chomp + new_text
+        if parsed_doc.links_container_node
+          line = parsed_doc.links_container_node.location.start_line - 1
+          source_lines[line] = source_lines[line].chomp + new_text
+        elsif parsed_doc.link_nodes.size > 0
+          line = parsed_doc.link_nodes.last.location.end_line - 1
+          source_lines[line] = source_lines[line].chomp + new_text
+        else
+          line = parsed_doc.class_includes.last.location.end_line - 1
+          source_lines[line] = source_lines[line].chomp + "\n" + new_text
+        end
       end
 
       def change_link_package(link_node, new_package, current_package)

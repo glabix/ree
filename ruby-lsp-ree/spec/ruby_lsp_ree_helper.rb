@@ -115,6 +115,10 @@ module RubyLspReeHelper
     File.join(sample_package_dir, 'package', 'sample_package', 'locales')
   end
 
+  def sample_package_entities_dir
+    File.join(sample_package_dir, 'package', 'sample_package', 'entities')
+  end
+
   def sample_package_file_uri(file_name)
     package_name = 'sample_package'
     URI("file://#{sample_package_dir}/package/#{package_name}/#{file_name}.rb")
@@ -131,6 +135,14 @@ module RubyLspReeHelper
       uri: URI.parse(''), 
       global_state: RubyLsp::GlobalState.new
     )
+  end
+
+  def store_file_cache(file_name)
+    File.read(file_name)
+  end
+
+  def restore_file_cache(file_name, cache)
+    File.write(file_name, cache)
   end
 
   def store_locales_cache
