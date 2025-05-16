@@ -6,6 +6,8 @@ module RubyLsp
     class MissingImportsFormatter < BaseFormatter
       include RubyLsp::Ree::ReeLspUtils
 
+      IGNORE_METHOD_CALL_NAMES = ['build_dto', 'schema']
+
       def call(source, uri)
         return source unless @index
 
@@ -25,6 +27,7 @@ module RubyLsp
         }.compact
 
         objects_to_add.uniq!{ |obj| obj.name }
+        objects_to_add.reject!{ |obj| IGNORE_METHOD_CALL_NAMES.include?(obj.name) }
         objects_to_add.reject!{ |obj| parsed_doc.includes_linked_object?(obj.name) }
         return editor.source if objects_to_add.size == 0
         

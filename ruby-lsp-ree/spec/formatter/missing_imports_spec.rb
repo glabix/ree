@@ -8,6 +8,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     with_server('') do |server, uri|
       index_fn(server, 'seconds_ago', 'sample_package')
       index_fn(server, 'create_item_cmd', 'create_package')
+      index_fn(server, 'build_dto', 'ree_dto')
       @index = server.global_state.index 
     end
   end
@@ -276,6 +277,32 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
       expect(result.lines[4].strip).to eq('link :seconds_ago')
+    end
+
+    it "doesn't add build_dto import into dto" do
+      source =  <<~'RUBY'
+        class SamplePackage::SomeClass
+          include Ree::LinkDSL
+          include ReeDto::DSL
+
+          link :seconds_ago
+
+          build_dto do
+            column :id, Nilor[Integer], default: nil
+          end
+
+          def some_method
+            seconds_ago
+
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      puts result
+      expect(result.lines[3].strip).to eq('')
+      expect(result.lines[4].strip).to eq('link :seconds_ago')
+      expect(result.lines[5].strip).to eq('')
     end
   end
 
