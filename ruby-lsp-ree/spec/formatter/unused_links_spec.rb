@@ -81,6 +81,51 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
       expect(result).to eq(source)
     end
+
+    it "removes import link if usage is a symbol" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_import1
+            link :some_import2
+          end
+
+          def call(arg1)
+            some_import2
+            :some_import1
+          end
+        end
+      RUBY
+
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :some_import2')
+      expect(result.lines[3].strip).to eq('end')
+    end
+
+    it "removes import link if usage is a call with receiver" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_import1
+            link :some_import2
+          end
+
+          def call(arg1)
+            some_import2
+            my_obj = MyObj.new
+            my_obj.some_import1
+          end
+        end
+      RUBY
+
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :some_import2')
+      expect(result.lines[3].strip).to eq('end')
+    end
   end
 
   context "object links with constants import" do
@@ -139,6 +184,28 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   
       expect(result.lines[1].strip).to eq('fn :some_class do')
       expect(result.lines[2].strip).to eq('link :some_import1')
+      expect(result.lines[3].strip).to eq('end')
+    end
+
+    it "removes import link if usage is a symbol" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_import1, import: -> { SomeConst }
+            link :some_import2
+          end
+
+          def call(arg1)
+            some_import2
+            :SomeConst
+          end
+        end
+      RUBY
+
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :some_import2')
       expect(result.lines[3].strip).to eq('end')
     end
 
