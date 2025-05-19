@@ -34,7 +34,7 @@ module RubyLsp
             end
           end
 
-          next if link_is_used?(link_node, remove_imports) || parsed_doc.includes_mapper_dsl?
+          next if link_is_used?(parsed_doc, link_node, remove_imports) || parsed_doc.includes_mapper_dsl?
 
           editor.remove_link(link_node)
           removed_links += 1
@@ -54,8 +54,8 @@ module RubyLsp
         editor.contains_link_import_usage?(link_node, link_import) || dsl_parser.contains_object_usage?(link_import)
       end
 
-      def link_is_used?(link_node, remove_imports)
-        editor.contains_link_usage?(link_node) || link_node.imports.size > remove_imports.size || dsl_parser.contains_object_usage?(link_node.name)
+      def link_is_used?(parsed_doc, link_node, remove_imports)
+        editor.contains_link_usage?(parsed_doc, link_node) || link_node.imports.size > remove_imports.size || dsl_parser.contains_object_usage?(link_node.name)
       end
     end
   end

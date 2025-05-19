@@ -13,7 +13,13 @@ module RubyLsp
         @source_lines.join
       end
 
-      def contains_link_usage?(link_node)
+      def contains_link_usage?(parsed_doc, link_node)
+        if parsed_doc.respond_to?(:parse_method_calls)
+          method_calls = parsed_doc.parse_method_calls
+          no_receiver_method_names = method_calls.reject(&:has_receiver?).map(&:name).map(&:to_s)
+          return no_receiver_method_names.include?(link_node.name)
+        end
+
         source_lines_except_link = source_lines[0...(link_node.location.start_line-1)] + source_lines[(link_node.location.end_line)..-1]
         source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_node.name}\W/)}
       end

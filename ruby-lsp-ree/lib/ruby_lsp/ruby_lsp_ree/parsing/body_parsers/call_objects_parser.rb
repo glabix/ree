@@ -14,6 +14,10 @@ class RubyLsp::Ree::CallObjectsParser
     def set_method_name(method_name)
       @method_name = method_name
     end
+
+    def has_receiver?
+      !!@receiver_name
+    end
   end
 
   def initialize(parsed_doc)
