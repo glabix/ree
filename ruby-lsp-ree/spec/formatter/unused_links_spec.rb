@@ -209,6 +209,25 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result.lines[3].strip).to eq('end')
     end
 
+    it "doesn't remove import link if usage is an object call" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_import1, import: -> { SomeConst }
+            link :some_import2
+          end
+
+          def call(arg1)
+            some_import2
+            raise SomeConst.new
+          end
+        end
+      RUBY
+
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result).to eq(source)
+    end
+
     context "multi-constant imports" do
       it "removes unused constant from the first place" do
         source =  <<~RUBY

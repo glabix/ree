@@ -3,6 +3,7 @@ require_relative 'parsed_link_node'
 require_relative 'parsed_method_node'
 require_relative "../ree_constants"
 require_relative "body_parsers/call_objects_parser"
+require_relative "body_parsers/const_objects_parser"
 
 require 'ostruct'
 
@@ -207,6 +208,10 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
 
   def parse_method_calls
     RubyLsp::Ree::CallObjectsParser.new(self).class_call_objects
+  end
+
+  def parse_const_objects
+    RubyLsp::Ree::ConstObjectsParser.new(self).class_const_objects
   end
 
   def class_name

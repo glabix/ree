@@ -24,7 +24,12 @@ module RubyLsp
         source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_node.name}\W/)}
       end
 
-      def contains_link_import_usage?(link_node, link_import)
+      def contains_link_import_usage?(parsed_doc, link_node, link_import)
+        if parsed_doc.respond_to?(:parse_const_objects)
+          const_objects = parsed_doc.parse_const_objects
+          return const_objects.map(&:name).map(&:to_s).include?(link_import)
+        end
+
         source_lines_except_link = source_lines[0...(link_node.location.start_line-1)] + source_lines[(link_node.location.end_line)..-1]
         source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_import}\W/)}
       end
