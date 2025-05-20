@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ReeMethodDecorators::GetAliasTarget
+class ReeDecorators::GetAliasTarget
   include Ree::FnDSL
 
   fn :get_alias_target do

@@ -59,8 +59,8 @@
       "entry_path": "packages/ree_mapper/package/ree_mapper.rb"
     },
     {
-      "name": "ree_method_decorators",
-      "entry_path": "packages/ree_method_decorators/package/ree_method_decorators.rb"
+      "name": "ree_decorators",
+      "entry_path": "packages/ree_decorators/package/ree_decorators.rb"
     },
     {
       "name": "ree_migrator",

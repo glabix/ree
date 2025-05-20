@@ -1,29 +1,22 @@
 # frozen_string_literal: true
 
-require 'securerandom'
-
-class ReeMethodDecorators::DecorateMethod
+class ReeDecorators::DecorateMethod
   include Ree::FnDSL
 
   fn :decorate_method do
     link :get_alias_target
+    link :decorator_store
 
     target :class
   end
 
   # @api private
   def call(target, method_name, is_class_method)
-    return if !target.instance_variable_defined?(ReeMethodDecorators::DSL::TMP_DECORATORS_STORAGE_KEY)
-    decorators = target.remove_instance_variable(ReeMethodDecorators::DSL::TMP_DECORATORS_STORAGE_KEY)
+    decorators = decorator_store.delete_pending_decorators(target)
 
     return if !decorators&.any?
 
-    decorators_storage = target.instance_variable_get(ReeMethodDecorators::DSL::DECORATORS_STORAGE_KEY)
-    if decorators_storage.nil?
-      decorators_storage = {}
-      target.instance_variable_set(ReeMethodDecorators::DSL::DECORATORS_STORAGE_KEY, decorators_storage)
-    end
-    decorators_storage[build_decorators_storage_key(method_name, is_class_method)] = decorators
+    decorator_store.set_method_decorators(target, decorators, method_name, is_class_method)
 
     # TODO: handle alias method name collision
     method_alias_name = build_method_alias_name(method_name)
@@ -39,8 +32,6 @@ class ReeMethodDecorators::DecorateMethod
 
     alias_target = get_alias_target(target, is_class_method)
 
-
-    # TODO: skip decorating if there is no hookable decorators
     alias_original_method(alias_target, method_alias_name, method_name)
     create_decorated_method(target, alias_target, method_alias_name, method_name, decorators.values, is_class_method)
 
@@ -63,13 +54,13 @@ class ReeMethodDecorators::DecorateMethod
     :"__original_#{method_name}_#{SecureRandom.hex}"
   end
 
-  def build_decorators_storage_key(method_name, is_class_method)
-    "#{method_name}_#{is_class_method ? "class" : "instance"}"
-  end
-
   def create_decorated_method(target, alias_target, method_alias_name, method_name, decorators, is_class_method)
     file, line = alias_target.instance_method(method_alias_name).source_location
-    hookable_decorators = decorators.select { _1.respond_to?(:hook) }
+    hookable_decorators = if ReeDecorators.no_decorators?
+      []
+    else
+      decorators.select { _1.respond_to?(:hook) && !ReeDecorators.decorator_disabled?(_1.class) }
+    end
 
     method_visibility = if private_method?(alias_target, method_alias_name, is_class_method)
       "private "
@@ -79,23 +70,46 @@ class ReeMethodDecorators::DecorateMethod
       nil
     end
 
+    decorator_chain = build_decorator_chain(hookable_decorators, method_name, method_alias_name)
+
+    params = if hookable_decorators.empty?
+      "..."
+    else
+      "*args, **kwargs, &blk"
+    end
+
+    get_decorators = if hookable_decorators.empty?
+      ""
+    else
+      <<~RUBY
+        decorators = ReeDecorators::DecoratorStore.new
+          .get_method_decorators(#{target.name}, :#{method_name}, #{is_class_method})
+      RUBY
+    end
+
     alias_target.class_eval(<<~RUBY, file, line)
-      #{method_visibility}def #{method_name}(*args, **kwargs, &blk)
-        decorators = #{target.name}
-          .instance_variable_get(ReeMethodDecorators::DSL::DECORATORS_STORAGE_KEY)
-          .fetch("#{build_decorators_storage_key(method_name, is_class_method)}")
-        #{build_decorator_chain(hookable_decorators, method_name, method_alias_name)}
+      #{method_visibility}def #{method_name}(#{params})
+        #{get_decorators}
+        #{decorator_chain}
       end
     RUBY
   end
 
   def build_decorator_chain(decorators, method_name, method_alias_name)
-    base_call = "#{method_alias_name}(*args, **kwargs, &blk)"
+    base_call = if decorators.empty?
+      "#{method_alias_name}(...)"
+    else
+      "#{method_alias_name}(*args, **kwargs, &blk)"
+    end
 
     decorators.reverse.reduce(base_call) do |chain, decorator|
       <<~RUBY
-        decorator = decorators.fetch(#{decorator.storage_key})
-        decorator.hook(self, args, kwargs, blk) do |*args, **kwargs, &blk|
+        decorator = decorators&.fetch(#{decorator.id}, nil)
+        if decorator.nil?
+          raise Ree::Error.new("Decorator #{decorator.class} not found for `#{method_name}` method")
+        end
+
+        decorator.hook(self, args, kwargs, blk) do |args, kwargs, blk|
           #{chain}
         end
       RUBY
