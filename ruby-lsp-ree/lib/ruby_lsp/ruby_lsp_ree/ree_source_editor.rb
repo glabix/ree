@@ -15,7 +15,7 @@ module RubyLsp
 
       def contains_link_usage?(link_node)
         source_lines_except_link = source_lines[0...(link_node.location.start_line-1)] + source_lines[(link_node.location.end_line)..-1]
-        source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_node.name}\W/)}
+        source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_node.usage_name}\W/)}
       end
 
       def contains_link_import_usage?(link_node, link_import)
