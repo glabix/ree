@@ -32,6 +32,10 @@ class RubyLsp::Ree::ParsedDaoDocument < RubyLsp::Ree::ParsedClassDocument
     @schema_node.arguments.arguments.first.name.to_s
   end
 
+  def set_dao_fields(fields)
+    @dao_fields = fields
+  end
+
   private 
 
   def parse_dao_fields

@@ -1,4 +1,5 @@
 require_relative 'base_formatter'
+require_relative '../ree_source_editor'
 
 module RubyLsp
   module Ree
@@ -16,6 +17,8 @@ module RubyLsp
         parsed_doc.parse_class_includes
         return source unless parsed_doc.includes_dao_dsl?
         return source unless parsed_doc.has_schema?
+
+        source = deduplicate_dao_fields(parsed_doc, source)
 
         dao_folder_index = path_parts.index('dao')
         entities_folder = path_parts.take(dao_folder_index).join('/') + '/entities'
@@ -70,6 +73,30 @@ module RubyLsp
         source_lines[line] += columns_str
 
         File.write(entity_path, source_lines.join)
+      end
+
+      def deduplicate_dao_fields(parsed_doc, source)
+        grouped_fields = parsed_doc.dao_fields.group_by(&:name)
+        uniq_fields = []
+        fields_to_remove = []
+
+        grouped_fields.each do |name, fields|
+          uniq_fields << fields.first
+          if fields.size > 1
+            fields_to_remove += fields[1..-1]
+          end
+        end
+
+        return source if fields_to_remove.size == 0
+
+        parsed_doc.set_dao_fields(uniq_fields)
+        editor = RubyLsp::Ree::ReeSourceEditor.new(source)
+
+        fields_to_remove.each do |field|
+          editor.remove_dao_field(field)
+        end
+
+        editor.source
       end
     end
   end
