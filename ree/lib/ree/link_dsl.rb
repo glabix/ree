@@ -72,6 +72,8 @@ module Ree::LinkDSL
       elsif target == :object
         mount_obj(obj, link_as, false)
       end
+
+      obj.on_link&.call(self)
     end
 
     def mount_obj(obj, link_as, mount_self)

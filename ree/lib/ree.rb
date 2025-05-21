@@ -6,11 +6,13 @@ require_relative 'ree/version'
 require 'fileutils'
 
 module Ree
+  autoload :ClassUtils, 'ree/utils/class_utils'
   autoload :Args, 'ree/args'
   autoload :BeanDSL, 'ree/bean_dsl'
   autoload :CLI, 'ree/cli'
   autoload :Container, 'ree/container'
   autoload :Contracts, 'ree/contracts'
+  autoload :MethodDecorators, 'ree/method_decorators'
   autoload :DomainError, 'ree/dsl/domain_error'
   autoload :Error, 'ree/error'
   autoload :ErrorDsl, 'ree/dsl/error_dsl'
