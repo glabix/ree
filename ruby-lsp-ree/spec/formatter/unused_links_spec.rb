@@ -81,6 +81,26 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
       expect(result).to eq(source)
     end
+
+    it "doesn't remove import link if alias is used" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_import, as: :some_import2
+          end
+
+          def call(arg1)
+            some_import2
+          end
+        end
+      RUBY
+
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :some_import, as: :some_import2')
+      expect(result.lines[3].strip).to eq('end')
+    end
   end
 
   context "object links with constants import" do

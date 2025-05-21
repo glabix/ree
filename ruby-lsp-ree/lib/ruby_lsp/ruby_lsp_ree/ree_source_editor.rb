@@ -15,7 +15,7 @@ module RubyLsp
 
       def contains_link_usage?(link_node)
         source_lines_except_link = source_lines[0...(link_node.location.start_line-1)] + source_lines[(link_node.location.end_line)..-1]
-        source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_node.name}\W/)}
+        source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_node.usage_name}\W/)}
       end
 
       def contains_link_import_usage?(link_node, link_import)
@@ -24,7 +24,7 @@ module RubyLsp
       end
 
       def remove_link(link_node)
-        set_empty_lines!(link_node.location.start_line-1, link_node.location.end_line-1)
+        set_empty_lines_for_location!(link_node.location)
       end
 
       def remove_link_imports(link_node, link_imports)
@@ -58,10 +58,8 @@ module RubyLsp
         set_empty_lines!(link_container_start_line+1, link_container_end_line)
       end
 
-      def set_empty_lines!(start_line, end_line)
-        (start_line .. end_line).each do |i|
-          source_lines[i] = ''
-        end
+      def remove_dao_field(field)
+        set_empty_lines_for_location!(field.location)
       end
 
       def add_links(parsed_doc, ree_objects, current_package)
@@ -125,6 +123,18 @@ module RubyLsp
           start_column = name_location.end_column - 1
 
           source_lines[line] = source_lines[line][0..start_column] + ", from: :#{new_package}" + source_lines[line][start_column+1..-1]
+        end
+      end
+
+      private
+
+      def set_empty_lines_for_location!(location)
+        set_empty_lines!(location.start_line-1, location.end_line-1)
+      end
+
+      def set_empty_lines!(start_line, end_line)
+        (start_line .. end_line).each do |i|
+          source_lines[i] = ''
         end
       end
     end

@@ -1,3 +1,8 @@
+## [0.1.21] - 2025-05-21
+
+- formatter: deduplicate dao columns
+- unused links formatter: handle link aliases
+
 ## [0.1.20] - 2025-05-15
 
 - formatter: add missing columns to entities

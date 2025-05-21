@@ -5,6 +5,7 @@ class RubyLsp::Ree::ParsedLinkNode
 
   FROM_ARG_KEY = 'from'
   IMPORT_ARG_KEY = 'import'
+  AS_ARG_KEY = 'as'
 
   class ImportItem
     attr_reader :name, :original_name
@@ -44,6 +45,11 @@ class RubyLsp::Ree::ParsedLinkNode
     @node.location
   end
 
+  def usage_name
+    return @alias_name if @alias_name
+    @name
+  end
+
   def from_arg_value
     return unless @from_param
 
@@ -73,17 +79,6 @@ class RubyLsp::Ree::ParsedLinkNode
 
   def object_name_type?
     link_type == :object_name
-  end
-
-  def parse_name
-    case name_arg_node
-    when Prism::SymbolNode
-      name_arg_node.value
-    when Prism::StringNode
-      name_arg_node.unescaped
-    else
-      ""
-    end
   end
 
   def parse_imports
@@ -123,12 +118,25 @@ class RubyLsp::Ree::ParsedLinkNode
 
   private
 
+  def parse_name
+    case name_arg_node
+    when Prism::SymbolNode
+      name_arg_node.value
+    when Prism::StringNode
+      name_arg_node.unescaped
+    else
+      ""
+    end
+  end
+
   def parse_params
     @kw_args = @node.arguments.arguments.detect{ |arg| arg.is_a?(Prism::KeywordHashNode) }
     @from_param = nil
     return unless @kw_args
 
     @from_param = @kw_args.elements.detect{ _1.key.unescaped == FROM_ARG_KEY }
+    @as_param = @kw_args.elements.detect{ _1.key.unescaped == AS_ARG_KEY }
+    @alias_name = @as_param ? @as_param.value.unescaped : nil
   end
 
   def last_arg
