@@ -17,6 +17,16 @@ RSpec.describe Ree::LinkDSL do
         1
       end
     end
+
+    class TestFn2
+      include Ree::FnDSL
+
+      fn :test_fn2
+
+      def call
+        2
+      end
+    end
   end
 
   Ree.disable_irb_mode
@@ -65,4 +75,68 @@ RSpec.describe Ree::LinkDSL do
       expect(e.message).to eq("package is not provided for link :test_fn")
     end
   }
+
+  context "multi-object links" do
+    it {
+      class TestClass
+        include Ree::LinkDSL
+
+        link :test_fn, :test_fn2, from: :test_link_dsl
+
+        def call
+          test_fn2
+        end
+      end
+
+      expect(TestClass.new.call).to eq(2)
+    }
+
+    it {
+      class TestLinkDsl::TestClass
+        include Ree::LinkDSL
+
+        link :test_fn, :test_fn2
+
+        def call
+          test_fn
+        end
+      end
+
+      expect(TestClass.new.call).to eq(2)
+    }
+
+    it {
+      expect {
+        class TestClass
+          include Ree::LinkDSL
+
+          link :test_fn, :test_fn2
+
+          def call
+            test_fn2
+          end
+        end
+      }.to raise_error do |e|
+        expect(e.code).to eq(:invalid_dsl_usage)
+        expect(e.message).to eq("package is not provided for link :test_fn")
+      end
+    }
+
+    it {
+      expect {
+        class TestClass
+          include Ree::LinkDSL
+
+          link :test_fn, :test_fn2, from: :test_link_dsl, target: :both
+
+          def call
+            test_fn2
+          end
+        end
+      }.to raise_error do |e|
+        expect(e.code).to eq(:invalid_link_option)
+        expect(e.message).to eq("options [:target] are not allowed for multi-object links")
+      end
+    }
+  end
 end

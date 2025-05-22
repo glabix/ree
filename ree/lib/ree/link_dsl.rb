@@ -27,7 +27,7 @@ module Ree::LinkDSL
     def link(*args, **kwargs)
       if args.first.is_a?(Symbol)
         if args.size > 1
-          _link_multiple_objects(*args, **kwargs)
+          _link_multiple_objects(args, **kwargs)
         else
           _link_object(*args, **kwargs)
         end
