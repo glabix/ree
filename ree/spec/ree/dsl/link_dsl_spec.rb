@@ -199,6 +199,20 @@ RSpec.describe Ree::LinkDSL do
     }
 
     it {
+      class TestLinkDsl::TestClass
+        include Ree::LinkDSL
+
+        import -> { TestFn2 }
+
+        def call
+          TestFn2.new.call
+        end
+      end
+
+      expect(TestLinkDsl::TestClass.new.call).to eq(2)
+    }
+
+    it {
       class TestClass
         include Ree::LinkDSL
 
