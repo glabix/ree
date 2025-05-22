@@ -29,6 +29,12 @@ RSpec.describe Ree::LinkDSL do
          end
       end
 
+      class ImportClass2
+        def self.call
+          4
+        end
+      end
+
       def call
         2
       end
@@ -37,37 +43,23 @@ RSpec.describe Ree::LinkDSL do
 
   Ree.disable_irb_mode
 
-  it {
-    class TestClass
-      include Ree::LinkDSL
-
-      link :test_fn, from: :test_link_dsl
-
-      def call
-        test_fn
-      end
-    end
-
-    expect(TestClass.new.call).to eq(1)
-  }
-
-  it {
-    class TestLinkDsl::TestClass
-      include Ree::LinkDSL
-
-      link :test_fn
-
-      def call
-        test_fn
-      end
-    end
-
-    expect(TestClass.new.call).to eq(1)
-  }
-
-  it {
-    expect {
+  context "single-object links" do
+    it {
       class TestClass
+        include Ree::LinkDSL
+
+        link :test_fn, from: :test_link_dsl
+
+        def call
+          test_fn
+        end
+      end
+
+      expect(TestClass.new.call).to eq(1)
+    }
+
+    it {
+      class TestLinkDsl::TestClass
         include Ree::LinkDSL
 
         link :test_fn
@@ -76,11 +68,28 @@ RSpec.describe Ree::LinkDSL do
           test_fn
         end
       end
-    }.to raise_error do |e|
-      expect(e.code).to eq(:invalid_dsl_usage)
-      expect(e.message).to eq("package is not provided for link :test_fn")
-    end
-  }
+
+      expect(TestClass.new.call).to eq(1)
+    }
+
+    it {
+      expect {
+        class TestClass
+          include Ree::LinkDSL
+
+          link :test_fn
+
+          def call
+            test_fn
+          end
+        end
+      }.to raise_error do |e|
+        expect(e.code).to eq(:invalid_dsl_usage)
+        expect(e.message).to eq("package is not provided for link :test_fn")
+      end
+    }
+
+  end
 
   context "multi-object links" do
     it {
@@ -159,6 +168,48 @@ RSpec.describe Ree::LinkDSL do
       end
 
       expect(TestClass.new.call).to eq(3)
+    }
+
+    it {
+      class TestLinkDsl::TestClass
+        include Ree::LinkDSL
+
+        import :test_fn2, -> { ImportClass2.as(ImportedClass) }
+
+        def call
+          ImportedClass.call
+        end
+      end
+
+      expect(TestLinkDsl::TestClass.new.call).to eq(4)
+    }
+
+    it {
+      class TestClass
+        include Ree::LinkDSL
+
+        import -> { TestFn2.as(TestFn) }, from: :test_link_dsl
+
+        def call
+          TestFn.new.call
+        end
+      end
+
+      expect(TestClass.new.call).to eq(2)
+    }
+
+    it {
+      class TestClass
+        include Ree::LinkDSL
+
+        import -> { TestFn2::ImportClass2 }, from: :test_link_dsl
+
+        def call
+          ImportedClass.call
+        end
+      end
+
+      expect(TestClass.new.call).to eq(4)
     }
   end
 end

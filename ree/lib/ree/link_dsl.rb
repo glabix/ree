@@ -42,15 +42,31 @@ module Ree::LinkDSL
       if args.first.is_a?(Symbol) # import from ree object
         _import_from_object(*args, **kwargs)
       else
+        _import_object_consts(*args, **kwargs)
       end
     end
 
     private
 
+    # @param [Proc] import_proc
+    # @param [Nilor[Symbol]] from
+    def _import_object_consts(import_proc, from: nil)
+      check_arg(from, :from, Symbol) if from
+
+      packages = Ree.container.packages_facade
+      link_package_name = get_link_package_name(from, '')
+
+      Ree::LinkImportBuilder.new(packages).build_for_objects(
+        self, link_package_name, import_proc
+      )
+    end
+
     # @param [Symbol] object_name
     # @param [Proc] import_proc
     # @param [Nilor[Symbol]] from
     def _import_from_object(object_name, import_proc, from: nil)
+      check_arg(from, :from, Symbol) if from
+
       packages = Ree.container.packages_facade
       link_package_name = get_link_package_name(from, object_name)
 

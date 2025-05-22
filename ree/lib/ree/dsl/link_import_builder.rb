@@ -55,6 +55,35 @@ class Ree::LinkImportBuilder
     nil
   end
 
+  # @param [Class] klass Object class
+  # @param [Symbol] package_name
+  # @param [Proc] proc
+  # @return [ArrayOf[String]] List of names of imported constants
+  def build_for_objects(klass, package_name, proc)
+    const_list, removed_constants = Ree::ImportDsl.new.execute(klass, proc)
+
+    package = @packages_facade.get_package(package_name)
+
+    const_list.each do |const_obj|
+      object_name = Ree::StringUtils.underscore(const_obj.name).to_sym
+
+      object = package.get_object(object_name)
+      @packages_facade.load_package_object(package_name, object_name)
+
+      if object.klass.const_defined?(const_obj.name)
+        set_const(klass, object.klass.const_get(const_obj.name), const_obj)
+      elsif package.module.const_defined?(const_obj.name)
+        set_const(klass, package.module.const_get(const_obj.name), const_obj)
+      else
+        raise Ree::Error.new("'#{const_obj.name}' is not found in :#{object.name}")
+      end
+    end
+
+    assign_removed_constants(klass, removed_constants)
+
+    const_list.map(&:name)
+  end
+
   private
 
   def assign_removed_constants(klass, removed_constants)
