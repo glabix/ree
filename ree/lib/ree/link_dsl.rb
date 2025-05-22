@@ -26,7 +26,11 @@ module Ree::LinkDSL
 
     def link(*args, **kwargs)
       if args.first.is_a?(Symbol)
-        _link_object(*args, **kwargs)
+        if args.size > 1
+          _link_multiple_objects(*args, **kwargs)
+        else
+          _link_object(*args, **kwargs)
+        end
       elsif args.first.is_a?(String)
         _link_file(args[0], args[1])
       else
@@ -35,6 +39,20 @@ module Ree::LinkDSL
     end
 
     private
+
+    # @param [ArrayOf[Symbol]] object_names
+    # @param [Hash] kwargs
+    def _link_multiple_objects(object_names, **kwargs)
+      check_arg(kwargs[:from], :from, Symbol) if kwargs[:from]
+
+      if kwargs.reject{ |k, _v| k == :from }.size > 0
+        raise Ree::Error.new("options #{kwargs.reject{ |k, _v| k == :from }.keys} are not allowed for multi-object links", :invalid_link_option)
+      end
+
+      object_names.each do |object_name|
+        _link_object(object_name, from: kwargs[:from])
+      end
+    end
 
     # @param [Symbol] object_name
     # @param [Nilor[Symbol]] as
