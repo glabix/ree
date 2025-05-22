@@ -23,6 +23,12 @@ RSpec.describe Ree::LinkDSL do
 
       fn :test_fn2
 
+      class ImportClass
+         def self.call
+           3
+         end
+      end
+
       def call
         2
       end
@@ -137,6 +143,22 @@ RSpec.describe Ree::LinkDSL do
         expect(e.code).to eq(:invalid_link_option)
         expect(e.message).to eq("options [:target] are not allowed for multi-object links")
       end
+    }
+  end
+
+  context "import links" do
+    it {
+      class TestClass
+        include Ree::LinkDSL
+
+        import :test_fn2, -> { ImportClass }, from: :test_link_dsl
+
+        def call
+          ImportClass.call
+        end
+      end
+
+      expect(TestClass.new.call).to eq(3)
     }
   end
 end

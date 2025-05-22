@@ -38,7 +38,26 @@ module Ree::LinkDSL
       end
     end
 
+    def import(*args, **kwargs)
+      if args.first.is_a?(Symbol) # import from ree object
+        _import_from_object(*args, **kwargs)
+      else
+      end
+    end
+
     private
+
+    # @param [Symbol] object_name
+    # @param [Proc] import_proc
+    # @param [Nilor[Symbol]] from
+    def _import_from_object(object_name, import_proc, from: nil)
+      packages = Ree.container.packages_facade
+      link_package_name = get_link_package_name(from, object_name)
+
+      Ree::LinkImportBuilder.new(packages).build(
+        self, link_package_name, object_name, import_proc
+      )
+    end
 
     # @param [ArrayOf[Symbol]] object_names
     # @param [Hash] kwargs
