@@ -61,14 +61,17 @@ class Ree::LinkImportBuilder
   # @return [ArrayOf[String]] List of names of imported constants
   def build_for_objects(klass, package_name, proc)
     const_list, removed_constants = Ree::ImportDsl.new.execute(klass, proc)
-
     package = @packages_facade.get_package(package_name)
 
     const_list.each do |const_obj|
-      object_name = Ree::StringUtils.underscore(const_obj.name).to_sym
+      if const_obj.module_name
+        object_name = Ree::StringUtils.underscore(const_obj.module_name).to_sym
+      else
+        object_name = Ree::StringUtils.underscore(const_obj.name).to_sym
+      end
 
       object = package.get_object(object_name)
-      @packages_facade.load_package_object(package_name, object_name)
+      @packages_facade.load_package_object(package_name, object_name) if object
 
       if object.klass.const_defined?(const_obj.name)
         set_const(klass, object.klass.const_get(const_obj.name), const_obj)
@@ -98,7 +101,7 @@ class Ree::LinkImportBuilder
       target_klass.send(:remove_const, const_obj.get_as.name) rescue nil
       target_klass.const_set(const_obj.get_as.name, ref_class)
 
-      if target_klass.const_get(const_obj.name).is_a?(Ree::ImportDsl::ClassConstant)
+      if target_klass.const_defined?(const_obj.name) && target_klass.const_get(const_obj.name).is_a?(Ree::ImportDsl::ClassConstant)
         target_klass.send(:remove_const, const_obj.name)
       end
     else

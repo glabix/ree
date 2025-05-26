@@ -27,7 +27,7 @@ class Ree::ImportDsl
   rescue NameError => e
     proc
       .binding
-      .eval("#{e.name} = Ree::ImportDsl::ClassConstant.new('#{e.name}')")
+      .eval("#{e.name} = Ree::ImportDsl::ConstantContextBuilder.get_context('#{e.name}')")
 
     retry
   ensure
@@ -73,6 +73,75 @@ class Ree::ImportDsl
       @const = const
     end
   end
+
+  class ConstantContextBuilder
+    def self.get_context(name, module_name = nil)
+      context = Class.new(ConstantContext)
+      context.instance_variable_set(:@name, name)     
+      context.instance_variable_set(:@module_name, module_name)     
+      context.instance_variable_set(:@as, nil)     
+      context.instance_variable_set(:@constants, [])     
+      context    
+    end
+  end
+
+  class ConstantContext
+    def self.const_missing(const_name)
+      ConstantContextBuilder.get_context(const_name, name)
+    end
+
+    def self.name
+      @name
+    end
+
+    def self.module_name
+      @module_name
+    end
+
+    def self.get_as
+      @as
+    end
+
+    def self.constants
+      @constants
+    end
+
+    def self.as(obj)
+      if !obj.is_a?(Class)
+        raise Ree::ImportDsl::UnlinkConstError.new(obj)
+      end
+
+      @as = if has_context_ancestor?(obj)
+        obj
+      else
+        ConstantContextBuilder.get_context(obj.to_s.split("::").last)
+      end
+
+      self
+    end
+
+    def self.&(obj)
+      if !obj.is_a?(Class)
+        raise Ree::ImportDsl::UnlinkConstError.new(obj)
+      end
+
+      new_obj = if has_context_ancestor?(obj)
+        obj
+      else
+        ConstantContextBuilder.get_context(obj.to_s.split("::").last)
+      end
+
+      return self if @constants.detect { |_| _.name == new_obj.name }
+      @constants.push(new_obj)
+
+      self
+    end
+
+    def self.has_context_ancestor?(obj)
+      obj.ancestors.include?(ConstantContext)
+    end
+
+  end 
 
   class ClassConstant
     attr_reader :name, :constants
@@ -126,6 +195,7 @@ class Ree::ImportDsl
 
     klass.constants.each do |const_sym|
       const = klass.const_get(const_sym)
+      # next if ConstantContext.has_context_ancestor?(const)
       next if const.is_a?(ClassConstant)
 
       if constant.is_a?(Class) || constant.is_a?(Module)
@@ -156,7 +226,8 @@ class Ree::ImportDsl
     end
 
     if parent_constant?(klass, const_name)
-      klass.const_set(const_name, ClassConstant.new(const_name.to_s))
+      # klass.const_set(const_name, ClassConstant.new(const_name.to_s))
+      klass.const_set(const_name, ConstantContextBuilder.get_context(const_name.to_s))
       retry_after = true
     end
 
@@ -167,6 +238,7 @@ class Ree::ImportDsl
 
   def store_removed_constant(name, constant)
     return if constant.is_a?(ClassConstant)
+    # return if ConstantContext.has_context_ancestor?(constant)
     get_removed_constants << RemovedConstant.new(name, constant.dup)
   end
 

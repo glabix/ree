@@ -216,14 +216,19 @@ RSpec.describe Ree::LinkDSL do
       class TestClass
         include Ree::LinkDSL
 
-        import -> { TestFn2::ImportClass2 }, from: :test_link_dsl
+        import -> { TestFn2::ImportClass2 & TestFn2::ImportClass.as(ImportedClass) }, from: :test_link_dsl
 
-        def call
+        def call1
+          ImportClass2.call
+        end
+
+        def call2
           ImportedClass.call
         end
       end
 
-      expect(TestClass.new.call).to eq(4)
+      expect(TestClass.new.call1).to eq(4)
+      expect(TestClass.new.call2).to eq(3)
     }
   end
 end
