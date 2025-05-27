@@ -144,51 +144,6 @@ class Ree::ImportDsl
 
   end 
 
-  class ClassConstant
-    attr_reader :name, :constants
-
-    def initialize(name)
-      @name = name
-      @as = nil
-      @constants = []
-    end
-
-    def &(obj)
-      if !obj.is_a?(ClassConstant)
-        raise Ree::ImportDsl::UnlinkConstError.new(obj)
-      end
-
-      new_obj = if obj.is_a?(Class)
-        ClassConstant.new(obj.to_s.split("::").last)
-      else
-        obj
-      end
-
-      return self if @constants.detect { |_| _.name == new_obj.name }
-      @constants.push(new_obj)
-
-      self
-    end
-
-    def get_as
-      @as
-    end
-
-    def as(obj)
-      if !obj.is_a?(ClassConstant)
-        raise Ree::ImportDsl::UnlinkConstError.new(obj)
-      end
-
-      @as = if obj.is_a?(Class)
-        ClassConstant.new(obj.to_s.split("::").last)
-      else
-        obj
-      end
-
-      self
-    end
-  end
-
   private
 
   def remove_or_assign_const(klass, constant)
