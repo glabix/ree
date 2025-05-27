@@ -13,26 +13,15 @@ class Ree::LinkImportBuilder
   def build(klass, package_name, object_name, proc)
     const_list, removed_constants = Ree::ImportDsl.new.execute(klass, proc)
 
-    puts "================= link import builder build"
-
     @packages_facade.load_package_object(package_name, object_name)
 
     package = @packages_facade.get_package(package_name)
     object = package.get_object(object_name)
 
     const_list.each do |const_obj|
-      pp const_obj
-      pp const_obj.is_a?(Class)
-      if const_obj.is_a?(Class)
-        pp const_obj.ancestors
-      end
-
       if object.klass.const_defined?(const_obj.name)
-        puts "object.klass.const_defined?"
         set_const(klass, object.klass.const_get(const_obj.name), const_obj)
       elsif package.module.const_defined?(const_obj.name)
-        puts "package.module.const_defined?"
-
         set_const(klass, package.module.const_get(const_obj.name), const_obj)
       else
         raise Ree::Error.new("'#{const_obj.name}' is not found in :#{object.name}")
@@ -51,8 +40,6 @@ class Ree::LinkImportBuilder
   def build_for_const(klass, source_const, proc)
     const_list, removed_constants = Ree::ImportDsl.new.execute(klass, proc)
     mod_const = Object.const_get(source_const.name.split("::").first)
-
-    puts "================= link import builder build_for_const"
 
     const_list.each do |const_obj|
       if source_const.const_defined?(const_obj.name)
@@ -76,11 +63,7 @@ class Ree::LinkImportBuilder
     const_list, removed_constants = Ree::ImportDsl.new.execute(klass, proc)
     package = @packages_facade.get_package(package_name)
 
-    puts "================= link import builder build_for_objects"
-
     const_list.each do |const_obj|
-      pp const_obj
-      
       if const_obj.module_name
         object_name = Ree::StringUtils.underscore(const_obj.module_name).to_sym
       else
@@ -114,13 +97,10 @@ class Ree::LinkImportBuilder
   end
 
   def set_const(target_klass, ref_class, const_obj)
-    puts "set_const(#{target_klass}, #{ref_class}, #{const_obj})"
-
     if const_obj.get_as
       target_klass.send(:remove_const, const_obj.get_as.name) rescue nil
       target_klass.const_set(const_obj.get_as.name, ref_class)
 
-      # if target_klass.const_defined?(const_obj.name) && target_klass.const_get(const_obj.name).is_a?(Ree::ImportDsl::ClassConstant)
       if target_klass.const_defined?(const_obj.name) && Ree::ImportDsl::ConstantContext.has_context_ancestor?(target_klass.const_get(const_obj.name))
         target_klass.send(:remove_const, const_obj.name)
       end
