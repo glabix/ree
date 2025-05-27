@@ -86,62 +86,63 @@ class Ree::ImportDsl
   end
 
   class ConstantContext
-    def self.const_missing(const_name)
-      ConstantContextBuilder.get_context(const_name, name)
-    end
-
-    def self.name
-      @name
-    end
-
-    def self.module_name
-      @module_name
-    end
-
-    def self.get_as
-      @as
-    end
-
-    def self.constants
-      @constants
-    end
-
-    def self.as(obj)
-      if !obj.is_a?(Class)
-        raise Ree::ImportDsl::UnlinkConstError.new(obj)
+    class << self
+      def const_missing(const_name)
+        ConstantContextBuilder.get_context(const_name, name)
       end
 
-      @as = if has_context_ancestor?(obj)
-        obj
-      else
-        ConstantContextBuilder.get_context(obj.to_s.split("::").last)
+      def name
+        @name
       end
 
-      self
-    end
-
-    def self.&(obj)
-      if !obj.is_a?(Class)
-        raise Ree::ImportDsl::UnlinkConstError.new(obj)
+      def module_name
+        @module_name
       end
 
-      new_obj = if has_context_ancestor?(obj)
-        obj
-      else
-        ConstantContextBuilder.get_context(obj.to_s.split("::").last)
+      def get_as
+        @as
       end
 
-      return self if @constants.detect { |_| _.name == new_obj.name }
-      @constants.push(new_obj)
+      def constants
+        @constants
+      end
 
-      self
+      def as(obj)
+        if !obj.is_a?(Class)
+          raise Ree::ImportDsl::UnlinkConstError.new(obj)
+        end
+
+        @as = if has_context_ancestor?(obj)
+          obj
+        else
+          ConstantContextBuilder.get_context(obj.to_s.split("::").last)
+        end
+
+        self
+      end
+
+      def &(obj)
+        if !obj.is_a?(Class)
+          raise Ree::ImportDsl::UnlinkConstError.new(obj)
+        end
+
+        new_obj = if has_context_ancestor?(obj)
+          obj
+        else
+          ConstantContextBuilder.get_context(obj.to_s.split("::").last)
+        end
+
+        return self if @constants.detect { |_| _.name == new_obj.name }
+        @constants.push(new_obj)
+
+        self
+      end
+
+      def has_context_ancestor?(obj)
+        return false unless obj.is_a?(Class)
+        obj.ancestors.include?(ConstantContext)
+      end
     end
-
-    def self.has_context_ancestor?(obj)
-      return false unless obj.is_a?(Class)
-      obj.ancestors.include?(ConstantContext)
-    end
-
   end 
 
   private
