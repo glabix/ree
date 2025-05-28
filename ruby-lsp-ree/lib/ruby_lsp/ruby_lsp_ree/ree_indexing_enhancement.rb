@@ -12,9 +12,10 @@ module RubyLsp
       def on_call_node_enter(node)
         return unless @listener.current_owner
       
-        if node.name == SCHEMA_NODE_NAME
-          return index_ree_schema(node)
-        end
+        # remove for now as it breaks go-to-definition for entities
+        # if node.name == SCHEMA_NODE_NAME
+        #   return index_ree_schema(node)
+        # end
 
         return unless REE_INDEXED_OBJECTS.include?(node.name)
         return unless node.arguments

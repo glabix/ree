@@ -5,6 +5,7 @@ require_relative 'formatters/missing_error_locales_formatter'
 require_relative 'formatters/unused_links_formatter'
 require_relative 'formatters/missing_imports_formatter'
 require_relative 'formatters/import_packages_formatter'
+require_relative 'formatters/sync_dao_columns_formatter'
 
 module RubyLsp
   module Ree
@@ -32,6 +33,7 @@ module RubyLsp
           RubyLsp::Ree::MissingImportsFormatter,
           RubyLsp::Ree::ImportPackagesFormatter,
           RubyLsp::Ree::SortLinksFormatter,
+          RubyLsp::Ree::SyncDaoColumnsFormatter,
         ].select do |formatter|
           formatter_name = formatter.name.split('::').last.to_sym
           @settings[formatter_name] != false

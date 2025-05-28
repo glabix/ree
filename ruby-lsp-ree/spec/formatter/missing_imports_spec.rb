@@ -8,6 +8,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     with_server('') do |server, uri|
       index_fn(server, 'seconds_ago', 'sample_package')
       index_fn(server, 'create_item_cmd', 'create_package')
+      index_fn(server, 'build_dto', 'ree_dto')
       @index = server.global_state.index 
     end
   end
@@ -205,6 +206,101 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result.lines[1].strip).to eq('fn :some_class do')
       expect(result.lines[2].strip).to eq('link :seconds_ago')
       expect(result.lines[3].strip).to eq('end')
+    end
+
+    it "adds import from string interpolation" do
+      source =  <<~'RUBY'
+        class SamplePackage::SomeClass
+          fn :some_class
+  
+          def call(arg1)
+            puts "it hapened #{seconds_ago} seconds ago"
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :seconds_ago')
+      expect(result.lines[3].strip).to eq('end')
+    end
+
+    it "adds import from block calls" do
+      source =  <<~'RUBY'
+        class SamplePackage::SomeClass
+          fn :some_class
+  
+          def call(arg1)
+            [1,2,3].map do |i|
+              seconds_ago(i)
+            end
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :seconds_ago')
+      expect(result.lines[3].strip).to eq('end')
+    end
+
+    it "adds import into dto" do
+      source =  <<~'RUBY'
+        class SamplePackage::SomeClass
+          include Ree::LinkDSL
+  
+          def some_method
+            seconds_ago
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result.lines[3].strip).to eq('link :seconds_ago')
+    end
+
+    it "adds import into dto after last link" do
+      source =  <<~'RUBY'
+        class SamplePackage::SomeClass
+          include Ree::LinkDSL
+  
+          link :create_item_cmd
+
+          def some_method
+            create_item_cmd
+            seconds_ago
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result.lines[4].strip).to eq('link :seconds_ago')
+    end
+
+    it "doesn't add build_dto import into dto" do
+      source =  <<~'RUBY'
+        class SamplePackage::SomeClass
+          include Ree::LinkDSL
+          include ReeDto::DSL
+
+          link :seconds_ago
+
+          build_dto do
+            column :id, Nilor[Integer], default: nil
+          end
+
+          def some_method
+            seconds_ago
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result.lines[3].strip).to eq('')
+      expect(result.lines[4].strip).to eq('link :seconds_ago')
+      expect(result.lines[5].strip).to eq('')
     end
   end
 

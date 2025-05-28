@@ -1,3 +1,15 @@
+## [0.1.21] - 2025-05-21
+
+- formatter: deduplicate dao columns
+- unused links formatter: handle link aliases
+
+## [0.1.20] - 2025-05-15
+
+- formatter: add missing columns to entities
+- add missing imports: add missing imports from string interpolation and blocks
+- add missing imports: add imports in dtos
+- Go To Definition: fixed for entities inside dao
+
 ## [0.1.18] - 2025-05-05
 
 - formatter: do not remove links from mappers

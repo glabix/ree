@@ -14,6 +14,8 @@ class RubyLsp::Ree::ParsedMethodNode
   end
 
   def param_names
+    return [] unless @method_node.parameters
+    
     @method_node.parameters.requireds.map(&:name) + 
     @method_node.parameters.keywords.map(&:name) + 
     [@method_node.parameters.rest&.name] + 

@@ -4,6 +4,7 @@ module RubyLsp
       LINK_DSL_MODULE = 'Ree::LinkDSL'
       ROUTES_DSL_MODULE = 'ReeRoutes::DSL'
       MAPPER_DSL_MODULE = 'ReeMapper::DSL'
+      DAO_DSL_MODULE = 'ReeDao::DSL'
 
       LINKS_CONTAINER_TYPES = [
         :fn,

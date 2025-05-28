@@ -57,6 +57,8 @@ class RubyLsp::Ree::CallObjectsParser
   def parse_body_call_objects(node_body)
     call_objects = []
 
+    return call_objects unless node_body
+    
     node_body.each do |node|
       if node.is_a?(Prism::CallNode)
         if node.receiver
@@ -82,10 +84,6 @@ class RubyLsp::Ree::CallObjectsParser
         if node.respond_to?(:statements)
           call_objects += parse_body_call_objects(node.statements.body)
         end
-        
-        if node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
-          call_objects += parse_body_call_objects(get_method_body(node.block))
-        end
 
         if node.respond_to?(:value) && node.value
           call_objects += parse_body_call_objects([node.value])
@@ -98,6 +96,14 @@ class RubyLsp::Ree::CallObjectsParser
         if node.respond_to?(:right) && node.right
           call_objects += parse_body_call_objects([node.right])
         end
+
+        if node.respond_to?(:parts) && node.parts
+          call_objects += parse_body_call_objects(node.parts)
+        end
+      end
+
+      if node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
+        call_objects += parse_body_call_objects(get_method_body(node.block))
       end
     end
 
