@@ -75,10 +75,10 @@ module RubyLsp
         result = []
         
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
-        link_node = parsed_doc.find_link_node(message)
+        link_node = parsed_doc.find_link_by_usage_name(message)
 
         definition_item = if link_node
-          @finder.find_object_for_package(message, link_node.link_package_name)
+          @finder.find_object_for_package(link_node.name, link_node.link_package_name)
         else
           @finder.find_object(message)
         end

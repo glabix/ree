@@ -44,6 +44,10 @@ class RubyLsp::Ree::ParsedBaseDocument
     @link_nodes.detect{ node_name(_1) == name }
   end
 
+  def find_link_by_usage_name(name)
+    @link_nodes.detect{ _1.usage_name == name }
+  end
+
   def find_import_for_package(name, package_name)
     @link_nodes.detect do |link_node|
       link_node.imports.include?(name) && link_node.link_package_name == package_name
