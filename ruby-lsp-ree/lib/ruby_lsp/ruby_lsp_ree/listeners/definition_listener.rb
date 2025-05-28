@@ -45,7 +45,11 @@ module RubyLsp
         definition_items = if @ree_context.is_error_definition?
           @handler.get_error_code_definition_items(node)
         elsif @ree_context.is_link_object?
-          @handler.get_linked_object_definition_items(node)
+          if @ree_context.is_package_argument?
+            @handler.get_package_definition_items(node)
+          else
+            @handler.get_linked_object_definition_items(node)
+          end
         else
           @handler.get_routes_definition_items(node)
         end
