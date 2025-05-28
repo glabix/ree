@@ -17,7 +17,7 @@ module RubyLsp
         if parsed_doc.respond_to?(:parse_method_calls)
           method_calls = parsed_doc.parse_method_calls
           no_receiver_method_names = method_calls.reject(&:has_receiver?).map(&:name).map(&:to_s)
-          return no_receiver_method_names.include?(link_node.name)
+          return no_receiver_method_names.include?(link_node.usage_name)
         end
 
         source_lines_except_link = source_lines[0...(link_node.location.start_line-1)] + source_lines[(link_node.location.end_line)..-1]
