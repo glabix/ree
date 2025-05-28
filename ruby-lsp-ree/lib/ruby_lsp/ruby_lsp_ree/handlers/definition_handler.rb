@@ -106,7 +106,7 @@ module RubyLsp
         link_node = RubyLsp::Ree::ParsedLinkNode.new(parent_node, package_name_from_uri(@uri))
         package_name = link_node.link_package_name
 
-        method_candidates = @index[node.unescaped]
+        method_candidates = @index[link_node.name]
         return [] if !method_candidates || method_candidates.size == 0
         
         method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
