@@ -34,6 +34,10 @@ class RubyLsp::Ree::ConstObjectsParser
 
     const_objects = parse_body_const_objects(method_body)
 
+    if method_object.has_contract?
+      const_objects += parse_body_const_objects([method_object.contract_node])
+    end
+
     # const_objects.each{ |const_object| const_object.set_method_name(method_object.name) }
     const_objects
   end
@@ -75,6 +79,10 @@ class RubyLsp::Ree::ConstObjectsParser
 
         if node.respond_to?(:value) && node.value
           const_objects += parse_body_const_objects([node.value])
+        end
+
+        if node.respond_to?(:key) && node.key
+          const_objects += parse_body_const_objects([node.key])
         end
 
         if node.respond_to?(:left) && node.left

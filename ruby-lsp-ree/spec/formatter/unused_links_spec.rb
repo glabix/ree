@@ -582,6 +582,84 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         expect(result.lines[3].strip).to eq('end')
       end
     end
+
+    context "consts in contracts" do  
+      it "doesn't remove import link used in contract" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link :some_import
+              link "some/file/path", -> { SomeConst }
+            end
+    
+            contract(SomeConst => Hash) 
+            def call(arg1)
+              some_import
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+        expect(result).to eq(source)
+      end
+
+      it "doesn't remove import link used in multi-arg contract" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link :some_import
+              link "some/file/path", -> { SomeConst }
+            end
+    
+            contract(Integer, SomeConst => Hash) 
+            def call(arg1, arg2)
+              some_import
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+        expect(result).to eq(source)
+      end
+
+      it "doesn't remove import link used as return value" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link :some_import
+              link "some/file/path", -> { SomeConst }
+            end
+    
+            contract(Integer => SomeConst) 
+            def call(arg1)
+              some_import
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+        expect(result).to eq(source)
+      end
+
+      it "doesn't remove import link used as throw value" do
+        source =  <<~RUBY
+          class SamplePackage::SomeClass
+            fn :some_class do
+              link :some_import
+              link "some/file/path", -> { SomeConst }
+            end
+    
+            contract(Integer => Hash).throws(NoMethodError & SomeConst) 
+            def call(arg1)
+              some_import
+            end
+          end
+        RUBY
+    
+        result = subject.run_formatting(sample_file_uri, ruby_document(source))
+        expect(result).to eq(source)
+      end
+    end
   end
 
   context "aliased constants" do
