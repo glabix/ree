@@ -55,11 +55,33 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           end
   
           def call(arg1)
+
             some_import_object.call
           end
         end
       RUBY
-  
+
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result).to eq(source)
+    end
+
+    it "doesn't remove link if it is used in a call chain" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_types
+          end
+
+          def call(arg1)
+            some_var = my_dataset
+              .by_user(user_id)
+              .by_type(some_types.type_1, arg1)
+              .by_arg(arg1)
+              .first
+          end
+        end
+      RUBY
+
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
       expect(result).to eq(source)
     end

@@ -52,11 +52,7 @@ class RubyLsp::Ree::ConstObjectsParser
         const_objects << ConstObject.new(name: node.name)
       elsif node.is_a?(Prism::CallNode)
         if node.receiver
-          receiver = get_first_receiver(node)
-      
-          if receiver
-            const_objects += parse_body_const_objects([receiver])
-          end
+          const_objects += parse_body_const_objects([node.receiver])
         end
       
         const_objects += parse_const_objects_from_args(node.arguments)
@@ -111,15 +107,5 @@ class RubyLsp::Ree::ConstObjectsParser
     else
       node.body.body
     end
-  end
-
-  def get_first_receiver(node)
-    return nil unless node.receiver
-
-    if node.receiver.is_a?(Prism::CallNode) && node.receiver.receiver
-      return get_first_receiver(node.receiver)
-    end
-
-    node.receiver
   end
 end
