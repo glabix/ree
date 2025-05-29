@@ -85,6 +85,27 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
       expect(result).to eq(source)
     end
+
+    it "doesn't remove link if it is used in a condition" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_import1
+          end
+
+          def call(arg1)
+            if true
+              return
+            else
+              some_import1
+            end
+          end
+        end
+      RUBY
+
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result).to eq(source)
+    end
   
     it "doesn't remove link if it is used on the top level of class" do
       source =  <<~RUBY

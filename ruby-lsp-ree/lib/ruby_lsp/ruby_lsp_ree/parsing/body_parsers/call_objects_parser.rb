@@ -81,6 +81,10 @@ class RubyLsp::Ree::CallObjectsParser
           call_objects += parse_body_call_objects(node.statements.body)
         end
 
+        if node.respond_to?(:subsequent)
+          call_objects += parse_body_call_objects([node.subsequent])
+        end
+
         if node.respond_to?(:value) && node.value
           call_objects += parse_body_call_objects([node.value])
         end
