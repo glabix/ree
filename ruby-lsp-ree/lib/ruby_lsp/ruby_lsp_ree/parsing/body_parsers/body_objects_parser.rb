@@ -1,0 +1,117 @@
+require 'prism'
+
+class RubyLsp::Ree::BodyObjectsParser
+  class ConstObject
+    attr_reader :name
+
+    def initialize(name:)
+      @name = name
+    end
+  end
+
+  class CallObject
+    attr_reader :name, :type, :receiver_name, :method_name
+
+    def initialize(name:, type:, receiver_name: nil)
+      @name = name
+      @type = type
+      @receiver_name = receiver_name
+      @method_name = nil
+    end
+
+    def set_method_name(method_name)
+      @method_name = method_name
+    end
+
+    def has_receiver?
+      !!@receiver_name
+    end
+  end
+
+  def initialize(target_type)
+    @target_type = target_type
+  end
+
+  def parse(node_body)
+    target_objects = []
+
+    return target_objects unless node_body
+    
+    node_body.each do |node|
+      if node.is_a?(Prism::ConstantReadNode) && @target_type == :const_object
+        target_objects << ConstObject.new(name: node.name)
+      end
+
+      if node.is_a?(Prism::CallNode)
+        if node.receiver
+          target_objects += parse([node.receiver])
+        else
+          if @target_type == :call_object
+            target_objects << CallObject.new(name: node.name, type: :method_call)
+          end
+        end
+      
+        target_objects += parse_target_objects_from_args(node.arguments)
+      else
+        if node.respond_to?(:elements)
+          target_objects += parse(node.elements)
+        end
+
+        if node.respond_to?(:predicate)
+          target_objects += parse([node.predicate])
+        end
+        
+        if node.respond_to?(:statements)
+          target_objects += parse(node.statements.body)
+        end
+
+        if node.respond_to?(:subsequent)
+          target_objects += parse([node.subsequent])
+        end
+
+        if node.respond_to?(:value) && node.value
+          target_objects += parse([node.value])
+        end
+
+        if node.respond_to?(:key) && node.key
+          target_objects += parse([node.key])
+        end
+
+        if node.respond_to?(:left) && node.left
+          target_objects += parse([node.left])
+        end
+
+        if node.respond_to?(:right) && node.right
+          target_objects += parse([node.right])
+        end
+
+        if node.respond_to?(:parts) && node.parts
+          target_objects += parse(node.parts)
+        end
+      end
+
+      if node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
+        target_objects += parse(get_method_body(node.block))
+      end
+    end
+
+    target_objects
+  end
+
+  private
+
+  def parse_target_objects_from_args(node_arguments)
+    return [] if !node_arguments || !node_arguments.arguments
+    parse(node_arguments.arguments)
+  end
+
+  def get_method_body(node)
+    return unless node.body
+
+    if node.body.is_a?(Prism::BeginNode)
+      node.body.statements.body
+    else
+      node.body.body
+    end
+  end
+end

@@ -75,10 +75,10 @@ module RubyLsp
         result = []
         
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
-        link_node = parsed_doc.find_link_node(message)
+        link_node = parsed_doc.find_link_by_usage_name(message)
 
         definition_item = if link_node
-          @finder.find_object_for_package(message, link_node.link_package_name)
+          @finder.find_object_for_package(link_node.name, link_node.link_package_name)
         else
           @finder.find_object(message)
         end
@@ -106,7 +106,7 @@ module RubyLsp
         link_node = RubyLsp::Ree::ParsedLinkNode.new(parent_node, package_name_from_uri(@uri))
         package_name = link_node.link_package_name
 
-        method_candidates = @index[node.unescaped]
+        method_candidates = @index[link_node.name]
         return [] if !method_candidates || method_candidates.size == 0
         
         method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
@@ -224,6 +224,32 @@ module RubyLsp
         end
 
         result
+      end
+
+      def get_package_definition_items(node)
+        package_name = node.unescaped
+
+        parent_node = @node_context.parent
+        link_node = RubyLsp::Ree::ParsedLinkNode.new(parent_node, package_name_from_uri(@uri))
+
+        method_candidates = @index[link_node.name]
+        return [] if !method_candidates || method_candidates.size == 0
+        
+        method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
+        return [] unless method
+
+        package_path = package_path_from_uri(method.uri.to_s)
+        package_main_file_path = File.join(package_path, 'package', "#{package_name}.rb")
+
+        [
+          Interface::Location.new(
+            uri: package_main_file_path,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: 0, character: 0),
+              end: Interface::Position.new(line: 0, character: 0),
+            ),
+          )
+        ]
       end
     end
   end

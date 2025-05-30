@@ -11,7 +11,7 @@ module RubyLsp
         file_name = file_path + ".rb"
         Dir[File.join('**', file_name)].first
       end
-      
+
       def package_name_from_uri(uri)
         uri_parts = uri.to_s.split('/')
         
@@ -28,6 +28,15 @@ module RubyLsp
         return unless spec_folder_index
 
         uri_parts[spec_folder_index + 1]
+      end
+
+      def package_path_from_uri(uri)
+        uri_parts = uri.to_s.split('/')
+        
+        package_folder_index = uri_parts.find_index('package')
+        return unless package_folder_index
+
+        uri_parts.take(package_folder_index).join('/')
       end
 
       def path_from_package_folder(uri)
