@@ -1,3 +1,9 @@
+## [0.1.22] - 2025-05-30
+
+- unused links formatter: improve usage detection
+- Go To Definition: handle link aliases
+- Go To Definition: go to package from link params
+
 ## [0.1.21] - 2025-05-21
 
 - formatter: deduplicate dao columns
