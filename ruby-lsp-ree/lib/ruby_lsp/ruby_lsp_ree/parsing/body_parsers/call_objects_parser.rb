@@ -23,10 +23,10 @@ class RubyLsp::Ree::CallObjectsParser
   end
 
   def method_call_objects(method_object)
-    method_body = method_object.method_body
+    method_body = method_object.full_method_body
     return [] unless method_body
 
-    call_objects = @body_parser.parse(method_body)
+    call_objects = @body_parser.parse([method_body])
 
     call_objects.each{ |call_object| call_object.set_method_name(method_object.name) }
     call_objects

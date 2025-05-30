@@ -23,10 +23,10 @@ class RubyLsp::Ree::ConstObjectsParser
   end
 
   def method_const_objects(method_object)
-    method_body = method_object.method_body
+    method_body = method_object.full_method_body
     return [] unless method_body
 
-    const_objects = @body_parser.parse(method_body)
+    const_objects = @body_parser.parse([method_body])
 
     if method_object.has_contract?
       const_objects += @body_parser.parse([method_object.contract_node])
