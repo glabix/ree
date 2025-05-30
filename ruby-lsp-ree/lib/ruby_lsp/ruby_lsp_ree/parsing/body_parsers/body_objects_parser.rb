@@ -66,7 +66,7 @@ class RubyLsp::Ree::BodyObjectsParser
         end
         
         if node.respond_to?(:statements)
-          target_objects += parse(node.statements.body)
+          target_objects += parse([node.statements])
         end
 
         if node.respond_to?(:subsequent)
@@ -115,7 +115,11 @@ class RubyLsp::Ree::BodyObjectsParser
       end
 
       if node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)
-        target_objects += parse(get_method_body(node.block))
+        if node.block.body.is_a?(Array)
+          target_objects += parse(node.block.body)
+        else
+          target_objects += parse([node.block.body])
+        end
       end
     end
 
