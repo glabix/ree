@@ -1,25 +1,29 @@
 # frozen_string_literal: true
 
 RSpec.describe Ree::LinkDSL do
-  Ree.enable_irb_mode
+  before :all do
+    Ree.enable_irb_mode
 
-  module TestLinkDsl
-    include Ree::PackageDSL
+    module TestLinkDsl
+      include Ree::PackageDSL
 
-    package
+      package
 
-    class TestFn
-      include Ree::FnDSL
+      class TestFn
+        include Ree::FnDSL
 
-      fn :test_fn
+        fn :test_fn
 
-      def call
-        1
+        def call
+          1
+        end
       end
     end
   end
 
-  Ree.disable_irb_mode
+  after :all do
+    Ree.disable_irb_mode
+  end
 
   it {
     class TestClass
@@ -65,4 +69,28 @@ RSpec.describe Ree::LinkDSL do
       expect(e.message).to eq("package is not provided for link :test_fn")
     end
   }
+
+  it "applies on_link hook" do
+    module TestLinkDsl
+      class OnLinkFn
+        include Ree::FnDSL
+
+        fn :on_link_fn do
+          on_link do |target_class|
+            target_class.define_singleton_method(:on_link_value) { "Hello from OnLinkFn" }
+          end
+        end
+
+        def call = nil
+      end
+
+      class OnLinkedTestClass
+        include Ree::LinkDSL
+
+        link :on_link_fn
+      end
+    end
+
+    expect(TestLinkDsl::OnLinkedTestClass.on_link_value).to eq("Hello from OnLinkFn")
+  end
 end

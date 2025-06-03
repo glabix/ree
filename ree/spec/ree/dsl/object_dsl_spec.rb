@@ -3,13 +3,16 @@
 RSpec.describe Ree::ObjectDsl do
   before :all do
     Ree.enable_irb_mode
+
+    module ObjectDslPackage
+      include Ree::PackageDSL
+
+      package
+    end
   end
 
   after :all do
     Ree.disable_irb_mode
-  end
-
-  module ObjectDslPackage
   end
 
   it 'does not allow to use dsl for anonymous classes' do
@@ -66,5 +69,33 @@ RSpec.describe Ree::ObjectDsl do
     }.to raise_error(Ree::Error) do |e|
       expect(e.message).to eq(":object does not correspond to class name ObjectClass. Change object name to 'object_class' or change name of the class")
     end
+  end
+
+  it 'applies on_link hook' do
+    module ObjectDslPackage
+      class OnLinkFn
+        include Ree::FnDSL
+
+        fn :on_link_fn do
+          on_link do |target_class|
+            target_class.define_singleton_method(:on_link_value) { "Hello from OnLinkFn" }
+          end
+        end
+
+        def call = nil
+      end
+
+      class OnLinkedFn
+        include Ree::FnDSL
+
+        fn :on_linked_fn do
+          link :on_link_fn
+        end
+
+        def call = self.class.on_link_value
+      end
+    end
+
+    expect(ObjectDslPackage::OnLinkedFn.new.call).to eq("Hello from OnLinkFn")
   end
 end

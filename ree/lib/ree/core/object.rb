@@ -5,7 +5,7 @@ class Ree::Object
               :package_name, :factory, :after_init,
               :class_name, :links, :mount_as, :freeze,
               :errors, :linked_const_list, :compiled_frozen,
-              :singleton, :tags, :target, :with_caller
+              :singleton, :tags, :target, :with_caller, :on_link
 
   # @param [Symbol] name Object name
   # @param [String] schema_rpath Object schema path relative to project root dir
@@ -25,6 +25,7 @@ class Ree::Object
     @compiled_frozen = @freeze
     @linked_const_list = []
     @tags = []
+    @on_link = nil
   end
 
   def reset
@@ -39,6 +40,7 @@ class Ree::Object
     @links = []
     @errors = []
     @linked_const_list = []
+    @on_link = nil
   end
 
   # @param [ArrayOf[String]] list List of imported constants, modules and classes
@@ -156,5 +158,10 @@ class Ree::Object
   def add_tags(list)
     @tags += list
     @tags.uniq!
+  end
+
+  # @param [Proc, nil] block
+  def set_on_link(block)
+    @on_link = block
   end
 end
