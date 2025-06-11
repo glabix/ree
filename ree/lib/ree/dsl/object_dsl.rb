@@ -46,6 +46,14 @@ class Ree::ObjectDsl
     @object.add_tags(list)
   end
 
+  def import(*args, **kwargs)
+    if args.first.is_a?(Symbol) # import from ree object
+      _import_from_object(*args, **kwargs)
+    else
+      _import_object_consts(*args, **kwargs)
+    end
+  end
+
   # @param [Symbol] object_name
   # @param [Nilor[Symbol]] as
   # @param [Nilor[Symbol]] from
@@ -317,8 +325,6 @@ class Ree::ObjectDsl
     object
   end
 
-  private
-
   def check_package_dependency_added(package_name)
     @packages_facade.load_package_entry(package_name)
     return if package_name == @package.name
@@ -346,5 +352,27 @@ class Ree::ObjectDsl
     DOC
 
     raise Ree::Error.new(msg, code)
+  end
+
+  def _import_object_consts(import_proc, from: nil)
+    check_arg(from, :from, Symbol) if from
+
+    packages = Ree.container.packages_facade
+    link_package_name = get_link_package_name(from, '')
+
+    Ree::LinkImportBuilder.new(packages).build_for_objects(
+      self, link_package_name, import_proc
+    )
+  end
+
+  def _import_from_object(object_name, import_proc, from: nil)
+    check_arg(from, :from, Symbol) if from
+
+    packages = Ree.container.packages_facade
+    link_package_name = get_link_package_name(from, object_name)
+
+    Ree::LinkImportBuilder.new(packages).build(
+      self, link_package_name, object_name, import_proc
+    )
   end
 end
