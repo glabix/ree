@@ -375,4 +375,17 @@ class Ree::ObjectDsl
       self, link_package_name, object_name, import_proc
     )
   end
+
+  def get_link_package_name(from, object_name)
+    return from if from
+
+    package_name = Ree::StringUtils.underscore(self.name.split('::').first).to_sym
+    result = Ree.container.packages_facade.has_package?(package_name) ? package_name : nil
+
+    if result.nil?
+      raise Ree::Error.new("package is not provided for link :#{object_name}", :invalid_dsl_usage)
+    end
+
+    result
+  end
 end
