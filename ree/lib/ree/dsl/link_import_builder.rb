@@ -73,7 +73,7 @@ class Ree::LinkImportBuilder
       object = package.get_object(object_name)
       @packages_facade.load_package_object(package_name, object_name) if object
 
-      if object.klass.const_defined?(const_obj.name)
+      if object && object.klass.const_defined?(const_obj.name)
         set_const(klass, object.klass.const_get(const_obj.name), const_obj)
       elsif package.module.const_defined?(const_obj.name)
         set_const(klass, package.module.const_get(const_obj.name), const_obj)
