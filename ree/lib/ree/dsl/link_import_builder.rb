@@ -78,7 +78,7 @@ class Ree::LinkImportBuilder
       elsif package.module.const_defined?(const_obj.name)
         set_const(klass, package.module.const_get(const_obj.name), const_obj)
       else
-        raise Ree::Error.new("'#{const_obj.name}' is not found in :#{object.name}")
+        raise Ree::Error.new("'#{const_obj.name}' is not found in :#{object.try(:name)}")
       end
     end
 
