@@ -78,7 +78,7 @@ class Ree::LinkImportBuilder
         next
       end
 
-      load_const_file(const_obj.name)
+      load_const_file(const_obj.name, package)
 
       if package.module.const_defined?(const_obj.name)
         set_const(klass, package.module.const_get(const_obj.name), const_obj)
