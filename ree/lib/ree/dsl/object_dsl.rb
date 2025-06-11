@@ -27,9 +27,14 @@ class Ree::ObjectDsl
   end
 
   # Proxy method for link_object & link_file
+  # 
   def link(*args, **kwargs)
     if args.first.is_a?(Symbol)
-      link_object(*args, **kwargs)
+      if args.size > 1
+        link_multiple_objects(args, **kwargs)
+      else
+        link_object(*args, **kwargs)
+      end
     elsif args.first.is_a?(String)
       link_file(args[0], args[1])
     else
@@ -83,6 +88,20 @@ class Ree::ObjectDsl
     Ree.logger.debug("  #{@object.klass}.link(:#{link_object_name}, from: #{link_package_name}, as: #{link_as})")
 
     @packages_facade.load_package_object(link_package_name, link_object_name)
+  end
+
+  # @param [ArrayOf[Symbol]] object_names
+  # @param [Hash] kwargs
+  def link_multiple_objects(object_names, **kwargs)
+    check_arg(kwargs[:from], :from, Symbol) if kwargs[:from]
+
+    if kwargs.reject{ |k, _v| k == :from }.size > 0
+      raise Ree::Error.new("options #{kwargs.reject{ |k, _v| k == :from }.keys} are not allowed for multi-object links", :invalid_link_option)
+    end
+
+    object_names.each do |object_name|
+      link_object(object_name, from: kwargs[:from])
+    end
   end
 
   # @param [Symbol] target (:object, :class, :both, default: :object)
