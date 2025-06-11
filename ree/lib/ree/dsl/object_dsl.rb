@@ -358,10 +358,10 @@ class Ree::ObjectDsl
     check_arg(from, :from, Symbol) if from
 
     packages = Ree.container.packages_facade
-    link_package_name = get_link_package_name(from, '')
+    link_package_name = from.nil? ? @object.package_name : from
 
     Ree::LinkImportBuilder.new(packages).build_for_objects(
-      self, link_package_name, import_proc
+      @object.klass, link_package_name, import_proc
     )
   end
 
@@ -369,23 +369,10 @@ class Ree::ObjectDsl
     check_arg(from, :from, Symbol) if from
 
     packages = Ree.container.packages_facade
-    link_package_name = get_link_package_name(from, object_name)
+    link_package_name = from.nil? ? @object.package_name : from
 
     Ree::LinkImportBuilder.new(packages).build(
-      self, link_package_name, object_name, import_proc
+      @object.klass, link_package_name, object_name, import_proc
     )
-  end
-
-  def get_link_package_name(from, object_name)
-    return from if from
-
-    package_name = Ree::StringUtils.underscore(self.name.split('::').first).to_sym
-    result = Ree.container.packages_facade.has_package?(package_name) ? package_name : nil
-
-    if result.nil?
-      raise Ree::Error.new("package is not provided for link :#{object_name}", :invalid_dsl_usage)
-    end
-
-    result
   end
 end
