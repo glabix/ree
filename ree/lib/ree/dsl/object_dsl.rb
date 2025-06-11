@@ -357,10 +357,9 @@ class Ree::ObjectDsl
   def _import_object_consts(import_proc, from: nil)
     check_arg(from, :from, Symbol) if from
 
-    packages = Ree.container.packages_facade
     link_package_name = from.nil? ? @object.package_name : from
 
-    Ree::LinkImportBuilder.new(packages).build_for_objects(
+    Ree::LinkImportBuilder.new(@packages_facade).build_for_objects(
       @object.klass, link_package_name, import_proc
     )
   end
@@ -368,10 +367,9 @@ class Ree::ObjectDsl
   def _import_from_object(object_name, import_proc, from: nil)
     check_arg(from, :from, Symbol) if from
 
-    packages = Ree.container.packages_facade
     link_package_name = from.nil? ? @object.package_name : from
 
-    Ree::LinkImportBuilder.new(packages).build(
+    Ree::LinkImportBuilder.new(@packages_facade).build(
       @object.klass, link_package_name, object_name, import_proc
     )
   end
