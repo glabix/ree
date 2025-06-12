@@ -79,7 +79,7 @@ class Ree::LinkImportBuilder
       end
 
       load_const_file(const_obj.name, package)
-      long_const_name = "#{const_obj.module_name}::#{const_obj.name}"
+      long_const_name = const_obj.module_name ? "#{const_obj.module_name}::#{const_obj.name}" : const_obj.name
 
       if package.module.const_defined?(const_obj.name)
         set_const(klass, package.module.const_get(const_obj.name), const_obj)
@@ -119,6 +119,7 @@ class Ree::LinkImportBuilder
   end
 
   def load_const_file(const_name, package)
+    return unless package.dir
     path = Dir[File.join(Ree::PathHelper.abs_package_dir(package), Ree::PACKAGE, '**', "#{Ree::StringUtils.underscore(const_name)}.rb")].first
     return unless path
     Ree.container.packages_facade.load_file(path, package.name)
