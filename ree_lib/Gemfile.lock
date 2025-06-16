@@ -1,14 +1,14 @@
 PATH
   remote: .
   specs:
-    ree_lib (1.3.0)
+    ree_lib (1.3.1)
       bigdecimal (~> 3.1.9)
       binding_of_caller (~> 1.0.1)
       i18n (~> 1.14.7)
       loofah (~> 2.24.0)
       oj (~> 3.16.9)
       rainbow (~> 3.1.1)
-      ree (~> 1.1.2)
+      ree
       sequel (~> 5.88.0)
       tzinfo (~> 2.0.6)
 
