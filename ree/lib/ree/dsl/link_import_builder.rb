@@ -55,6 +55,46 @@ class Ree::LinkImportBuilder
     nil
   end
 
+  # @param [Class] klass Object class
+  # @param [Symbol] package_name
+  # @param [Proc] proc
+  # @return [ArrayOf[String]] List of names of imported constants
+  def build_for_objects(klass, package_name, proc)
+    const_list, removed_constants = Ree::ImportDsl.new.execute(klass, proc)
+    package = @packages_facade.get_package(package_name)
+
+    const_list.each do |const_obj|
+      if const_obj.module_name
+        object_name = Ree::StringUtils.underscore(const_obj.module_name).to_sym
+      else
+        object_name = Ree::StringUtils.underscore(const_obj.name).to_sym
+      end
+
+      object = package.get_object(object_name)
+      @packages_facade.load_package_object(package_name, object_name) if object
+
+      if object && object.klass && object.klass.const_defined?(const_obj.name)
+        set_const(klass, object.klass.const_get(const_obj.name), const_obj)
+        next
+      end
+
+      load_const_file(const_obj.name, package)
+      long_const_name = const_obj.module_name ? "#{const_obj.module_name}::#{const_obj.name}" : const_obj.name
+
+      if package.module.const_defined?(const_obj.name)
+        set_const(klass, package.module.const_get(const_obj.name), const_obj)
+      elsif package.module.const_defined?(long_const_name)
+        set_const(klass, package.module.const_get(long_const_name), const_obj)
+      else
+        raise Ree::Error.new("'#{const_obj.name}' is not found in :#{object&.name}")
+      end
+    end
+
+    assign_removed_constants(klass, removed_constants)
+
+    const_list.map(&:name)
+  end
+
   private
 
   def assign_removed_constants(klass, removed_constants)
@@ -69,12 +109,19 @@ class Ree::LinkImportBuilder
       target_klass.send(:remove_const, const_obj.get_as.name) rescue nil
       target_klass.const_set(const_obj.get_as.name, ref_class)
 
-      if target_klass.const_get(const_obj.name).is_a?(Ree::ImportDsl::ClassConstant)
+      if target_klass.const_defined?(const_obj.name) && Ree::ImportDsl::ConstantContext.has_context_ancestor?(target_klass.const_get(const_obj.name))
         target_klass.send(:remove_const, const_obj.name)
       end
     else
       target_klass.send(:remove_const, const_obj.name) rescue nil
       target_klass.const_set(const_obj.name, ref_class)
     end
+  end
+
+  def load_const_file(const_name, package)
+    return unless package.dir
+    path = Dir[File.join(Ree::PathHelper.abs_package_dir(package), Ree::PACKAGE, '**', "#{Ree::StringUtils.underscore(const_name)}.rb")].first
+    return unless path
+    Ree.container.packages_facade.load_file(path, package.name)
   end
 end

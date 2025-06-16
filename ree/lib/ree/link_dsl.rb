@@ -26,7 +26,11 @@ module Ree::LinkDSL
 
     def link(*args, **kwargs)
       if args.first.is_a?(Symbol)
-        _link_object(*args, **kwargs)
+        if args.size > 1
+          _link_multiple_objects(args, **kwargs)
+        else
+          _link_object(*args, **kwargs)
+        end
       elsif args.first.is_a?(String)
         _link_file(args[0], args[1])
       else
@@ -34,7 +38,56 @@ module Ree::LinkDSL
       end
     end
 
+    def import(*args, **kwargs)
+      if args.first.is_a?(Symbol) # import from ree object
+        _import_from_object(*args, **kwargs)
+      else
+        _import_object_consts(*args, **kwargs)
+      end
+    end
+
     private
+
+    # @param [Proc] import_proc
+    # @param [Nilor[Symbol]] from
+    def _import_object_consts(import_proc, from: nil)
+      check_arg(from, :from, Symbol) if from
+
+      packages = Ree.container.packages_facade
+      link_package_name = get_link_package_name(from, '')
+
+      Ree::LinkImportBuilder.new(packages).build_for_objects(
+        self, link_package_name, import_proc
+      )
+    end
+
+    # @param [Symbol] object_name
+    # @param [Proc] import_proc
+    # @param [Nilor[Symbol]] from
+    def _import_from_object(object_name, import_proc, from: nil)
+      check_arg(from, :from, Symbol) if from
+
+      packages = Ree.container.packages_facade
+      link_package_name = get_link_package_name(from, object_name)
+
+      Ree::LinkImportBuilder.new(packages).build(
+        self, link_package_name, object_name, import_proc
+      )
+    end
+
+    # @param [ArrayOf[Symbol]] object_names
+    # @param [Hash] kwargs
+    def _link_multiple_objects(object_names, **kwargs)
+      check_arg(kwargs[:from], :from, Symbol) if kwargs[:from]
+
+      if kwargs.reject{ |k, _v| k == :from }.size > 0
+        raise Ree::Error.new("options #{kwargs.reject{ |k, _v| k == :from }.keys} are not allowed for multi-object links", :invalid_link_option)
+      end
+
+      object_names.each do |object_name|
+        _link_object(object_name, from: kwargs[:from])
+      end
+    end
 
     # @param [Symbol] object_name
     # @param [Nilor[Symbol]] as
