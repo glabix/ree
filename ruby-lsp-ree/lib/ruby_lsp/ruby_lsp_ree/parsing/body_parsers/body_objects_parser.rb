@@ -48,7 +48,7 @@ class RubyLsp::Ree::BodyObjectsParser < RubyLsp::Ree::BasicParser
         if node.receiver
           target_objects += parse([node.receiver])
         else
-          next if node.name == :link # don't parse objects inside links
+          next if node.name == :link || node.name == :import # don't parse objects inside links
 
           if @target_type == :call_object
             target_objects << CallObject.new(name: node.name, type: :method_call)

@@ -2,6 +2,7 @@ require 'prism'
 require_relative 'parsed_link_node'
 require_relative 'parsed_object_link_node'
 require_relative 'parsed_file_path_link_node'
+require_relative 'parsed_import_link_node'
 
 class RubyLsp::Ree::ParsedLinkNodeBuilder
   def self.build_from_node(node, package_name)
@@ -12,7 +13,7 @@ class RubyLsp::Ree::ParsedLinkNodeBuilder
     elsif first_arg.is_a?(Prism::StringNode)
       RubyLsp::Ree::ParsedFilePathLinkNode.new(node, package_name)
     else
-      raise "not implemented"
+      RubyLsp::Ree::ParsedImportLinkNode.new(node, package_name)
     end
 
     link_node.parse_imports

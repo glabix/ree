@@ -95,7 +95,6 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   def has_import_section?
-    return false if @node.arguments.arguments.size == 1
     !!import_arg
   end
 
@@ -129,10 +128,6 @@ class RubyLsp::Ree::ParsedLinkNode
 
   def parse_linked_objects
     raise "abstract method"
-  end
-
-  def last_arg
-    @node.arguments.arguments.last
   end
 
   def import_arg

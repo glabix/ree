@@ -17,17 +17,19 @@ module RubyLsp
           a_name = a.node.arguments.arguments.first
           b_name = b.node.arguments.arguments.first
 
-          if a_name.is_a?(Prism::SymbolNode) && !b_name.is_a?(Prism::SymbolNode)
-            -1
-          elsif b_name.is_a?(Prism::SymbolNode) && !a_name.is_a?(Prism::SymbolNode)
-            1
+          if a.class == b.class
+            if a_name.respond_to?(:unescaped) && b_name.respond_to?(:unescaped)
+              a_name.unescaped <=> b_name.unescaped
+            else
+              0  
+            end
           else
-            a_name.unescaped <=> b_name.unescaped
+            sort_by_type(a, b)
           end
         }
 
         # check if no re-order
-        if parsed_doc.link_nodes.map{ _1.node.arguments.arguments.first.unescaped } == sorted_link_nodes.map{ _1.node.arguments.arguments.first.unescaped }
+        if parsed_doc.link_nodes == sorted_link_nodes
           return source
         end
 
@@ -45,6 +47,16 @@ module RubyLsp
         end
 
         source_lines.join()
+      end
+
+      def sort_by_type(a, b)
+        return -1 if a.object_name_type?
+        return 1 if b.object_name_type?
+          
+        return -1 if a.file_path_type?
+        return 1 if b.file_path_type?
+            
+        0
       end
     end
   end

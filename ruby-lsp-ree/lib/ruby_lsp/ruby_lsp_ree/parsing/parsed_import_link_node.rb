@@ -1,15 +1,15 @@
 require_relative 'parsed_link_node'
 
-class RubyLsp::Ree::ParsedFilePathLinkNode < RubyLsp::Ree::ParsedLinkNode
+class RubyLsp::Ree::ParsedImportLinkNode < RubyLsp::Ree::ParsedLinkNode
   def link_package_name
-    @name.split('/').first
+    from_arg_value || document_package
   end
 
   def link_type
-    :file_path
+    :import_link
   end
 
-  def file_path_type?
+  def import_link_type?
     true
   end
 
@@ -24,7 +24,7 @@ class RubyLsp::Ree::ParsedFilePathLinkNode < RubyLsp::Ree::ParsedLinkNode
   private
 
   def parse_name
-    name_arg_node.unescaped
+    ''
   end
 
   def parse_linked_objects
@@ -36,9 +36,8 @@ class RubyLsp::Ree::ParsedFilePathLinkNode < RubyLsp::Ree::ParsedLinkNode
   end
 
   def get_import_items
-    return [] unless has_import_section?   
-    return [] unless import_arg.body
-      
+    return [] unless has_import_section?
+    
     import_body = import_arg.body.body.first
     parse_object_link_multiple_imports(import_body)
   end
