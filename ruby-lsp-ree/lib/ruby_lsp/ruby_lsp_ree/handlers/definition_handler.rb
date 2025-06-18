@@ -1,6 +1,7 @@
 require_relative "../utils/ree_lsp_utils"
 require_relative "../ree_object_finder"
 require_relative "../parsing/parsed_link_node"
+require_relative "../parsing/parsed_link_node_builder"
 require_relative "../parsing/parsed_document_builder"
 require_relative "../utils/ree_locale_utils"
 
@@ -24,8 +25,7 @@ module RubyLsp
 
         link_nodes = if @node_context.parent.is_a?(Prism::CallNode) && @node_context.parent.name == :link
           # inside link node
-          link_node = RubyLsp::Ree::ParsedLinkNode.new(@node_context.parent)
-          link_node.parse_imports
+          link_node = RubyLsp::Ree::ParsedLinkNodeBuilder.build_from_node(@node_context.parent, nil)
           [link_node]
         else
           parsed_doc = if @node_context.parent.is_a?(Prism::CallNode)
@@ -103,7 +103,7 @@ module RubyLsp
         result = []
         parent_node = @node_context.parent
 
-        link_node = RubyLsp::Ree::ParsedLinkNode.new(parent_node, package_name_from_uri(@uri))
+        link_node = RubyLsp::Ree::ParsedLinkNodeBuilder.build_from_node(parent_node, package_name_from_uri(@uri))
         package_name = link_node.link_package_name
 
         method_candidates = @index[link_node.name]
@@ -230,7 +230,7 @@ module RubyLsp
         package_name = node.unescaped
 
         parent_node = @node_context.parent
-        link_node = RubyLsp::Ree::ParsedLinkNode.new(parent_node, package_name_from_uri(@uri))
+        link_node = RubyLsp::Ree::ParsedLinkNodeBuilder.build_from_node(parent_node, package_name_from_uri(@uri))
 
         method_candidates = @index[link_node.name]
         return [] if !method_candidates || method_candidates.size == 0
