@@ -1,6 +1,6 @@
-require 'prism'
+require_relative 'basic_parser'
 
-class RubyLsp::Ree::BodyObjectsParser
+class RubyLsp::Ree::BodyObjectsParser < RubyLsp::Ree::BasicParser
   class ConstObject
     attr_reader :name
 
@@ -131,15 +131,5 @@ class RubyLsp::Ree::BodyObjectsParser
   def parse_target_objects_from_args(node_arguments)
     return [] if !node_arguments || !node_arguments.arguments
     parse(node_arguments.arguments)
-  end
-
-  def get_method_body(node)
-    return unless node.body
-
-    if node.body.is_a?(Prism::BeginNode)
-      node.body.statements.body
-    else
-      node.body.body
-    end
   end
 end
