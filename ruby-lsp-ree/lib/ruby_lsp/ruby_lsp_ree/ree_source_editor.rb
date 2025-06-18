@@ -13,15 +13,15 @@ module RubyLsp
         @source_lines.join
       end
 
-      def contains_link_usage?(parsed_doc, link_node)
+      def contains_linked_object_usage?(parsed_doc, link_node, linked_object)
         if parsed_doc.respond_to?(:parse_method_calls)
           method_calls = parsed_doc.parse_method_calls
           no_receiver_method_names = method_calls.reject(&:has_receiver?).map(&:name).map(&:to_s)
-          return no_receiver_method_names.include?(link_node.usage_name)
+          return no_receiver_method_names.include?(linked_object.usage_name)
         end
 
         source_lines_except_link = source_lines[0...(link_node.location.start_line-1)] + source_lines[(link_node.location.end_line)..-1]
-        source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_node.usage_name}\W/)}
+        source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{linked_object.usage_name}\W/)}
       end
 
       def contains_link_import_usage?(parsed_doc, link_node, link_import)
@@ -36,6 +36,27 @@ module RubyLsp
 
       def remove_link(link_node)
         set_empty_lines_for_location!(link_node.location)
+      end
+
+      def remove_linked_objects(link_node, linked_objects)
+        return if linked_objects.size == 0
+
+        if link_node.multi_object_link?
+          set_empty_lines_for_location!(link_node.location)
+          line = link_node.location.start_line - 1
+          offset = link_node.location.start_column - 1
+          offset_str = " " * offset
+          # TODO use renderer class
+          linked_object_names = linked_objects.map(&:name)
+          remaining_objects = link_node.linked_objects.select{ !linked_object_names.include?(_1.name) }
+          source_lines[line] = "#{offset_str}link #{remaining_objects.map{ ":#{_1.name}" }.join(', ')}"
+          if link_node.from_arg_value
+            source_lines[line] += ", from: :#{link_node.from_arg_value}"
+          end
+          source_lines[line] += "\n"
+        else
+          set_empty_lines_for_location!(link_node.location)
+        end
       end
 
       def remove_link_imports(link_node, link_imports)

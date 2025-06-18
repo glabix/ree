@@ -1,7 +1,7 @@
 require 'prism'
 
 class RubyLsp::Ree::ParsedLinkNode
-  attr_reader :node, :document_package, :name, :import_items, :from_param
+  attr_reader :node, :document_package, :name, :import_items, :from_param, :linked_objects
 
   FROM_ARG_KEY = 'from'
   IMPORT_ARG_KEY = 'import'
@@ -24,12 +24,32 @@ class RubyLsp::Ree::ParsedLinkNode
     end
   end
 
+  class LinkedObject
+    attr_reader :name, :alias_name, :location
+
+    def initialize(name:, alias_name:, location:)
+      @name = name
+      @alias_name = alias_name
+      @location = location
+    end
+
+    def usage_name
+      return @alias_name if @alias_name
+      @name
+    end
+  end
+
   def initialize(node, document_package = nil)
     @node = node
     @document_package = document_package
     @name = parse_name
 
     parse_params
+    parse_linked_objects
+  end
+
+  def multi_object_link?
+    @linked_objects.size > 1
   end
 
   def link_package_name
@@ -139,13 +159,23 @@ class RubyLsp::Ree::ParsedLinkNode
     @alias_name = @as_param ? @as_param.value.unescaped : nil
   end
 
+  def parse_linked_objects
+    @linked_objects = []
+    return if file_path_type?
+
+    @linked_objects = @node.arguments.arguments.select{ _1.is_a?(Prism::SymbolNode) }.map do |arg|
+      LinkedObject.new(name: arg.unescaped, alias_name: @alias_name, location: arg.location)
+    end
+  end
+
   def last_arg
     @node.arguments.arguments.last
   end
 
   def import_arg
     if object_name_type?
-      last_arg.elements.detect{ _1.key.unescaped == IMPORT_ARG_KEY }
+      return unless @kw_args
+      @kw_args.elements.detect{ _1.key.unescaped == IMPORT_ARG_KEY }
     else
       last_arg
     end
