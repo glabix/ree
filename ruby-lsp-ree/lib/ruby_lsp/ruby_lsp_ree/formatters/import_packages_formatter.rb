@@ -11,6 +11,7 @@ module RubyLsp
 
         current_package = package_name_from_uri(uri)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source, package_name: current_package)
+        return source if !parsed_doc
 
         finder = ReeObjectFinder.new(@index)
         editor = RubyLsp::Ree::ReeSourceEditor.new(source)
