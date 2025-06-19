@@ -8,6 +8,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     with_server('') do |server, uri|
       index_fn(server, 'seconds_ago', 'sample_package')
       index_fn(server, 'create_item_cmd', 'create_package')
+      index_fn(server, 'create_item2', 'create_package')
       index_fn(server, 'build_dto', 'ree_dto')
       @index = server.global_state.index 
     end
@@ -144,6 +145,27 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   
       expect(result.lines[1].strip).to eq('fn :some_class do')
       expect(result.lines[2].strip).to eq('link :seconds_ago')
+      expect(result.lines[3].strip).to eq('end')
+    end
+
+    it "doesn't add import if already imported in multi-object link" do
+      source =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :create_item_cmd, :create_item2, from: :create_package
+          end
+  
+          def call(arg1)
+            create_item_cmd
+            create_item2
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :create_item_cmd, :create_item2, from: :create_package')
       expect(result.lines[3].strip).to eq('end')
     end
 
