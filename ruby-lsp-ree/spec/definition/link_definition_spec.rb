@@ -78,5 +78,30 @@ RSpec.describe "RubyLsp::Ree::DefinitionListener" do
     end
   end
 
-  # TODO it "returns correct result for const in import link" do
+  it "returns correct result for const in import link" do
+    source =  <<~RUBY
+      class SomeClass
+        fn :some_class do
+          import -> { User }, from: :some_package
+        end
+
+        def something
+          User
+        end
+      end
+    RUBY
+
+    file_uri = URI("file:///some_package/package/some_package/user.rb")
+
+    with_server(source) do |server, uri|
+      index_class(server, 'User', file_uri)
+
+      send_definition_request(server, uri, { line: 2, character: 17 })
+      
+      result = server.pop_response
+
+      expect(result.response.size).to eq(1)
+      expect(result.response.first.uri).to eq(file_uri.to_s)
+    end
+  end
 end

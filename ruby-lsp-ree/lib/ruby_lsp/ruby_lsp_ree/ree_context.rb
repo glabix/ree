@@ -21,7 +21,7 @@ module RubyLsp
       def is_link_object?
         return false unless has_call_parent?
 
-        @node_context.parent.name == :link
+        @node_context.parent.name == :link ||  @node_context.parent.name == :import
       end
 
       def is_package_argument?

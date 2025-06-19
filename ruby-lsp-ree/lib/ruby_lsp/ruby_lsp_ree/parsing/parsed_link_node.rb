@@ -86,6 +86,10 @@ class RubyLsp::Ree::ParsedLinkNode
     false
   end
 
+  def import_link_type?
+    false
+  end
+
   def parse_imports
     @import_items ||= get_import_items
   end
@@ -108,6 +112,10 @@ class RubyLsp::Ree::ParsedLinkNode
 
   def import_block_close_location
     raise "abstract method"
+  end
+
+  def has_linked_object?(object_name)
+    @linked_objects.map(&:name).include?(object_name)
   end
 
   private

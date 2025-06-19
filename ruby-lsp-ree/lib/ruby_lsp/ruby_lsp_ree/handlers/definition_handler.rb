@@ -4,6 +4,7 @@ require_relative "../parsing/parsed_link_node"
 require_relative "../parsing/parsed_link_node_builder"
 require_relative "../parsing/parsed_document_builder"
 require_relative "../utils/ree_locale_utils"
+require_relative "../ree_context"
 
 module RubyLsp
   module Ree
@@ -18,13 +19,13 @@ module RubyLsp
         @node_context = node_context
         @root_node = @node_context.instance_variable_get(:@nesting_nodes).first
         @finder = ReeObjectFinder.new(@index)
+        @ree_context = RubyLsp::Ree::ReeContext.new(node_context)
       end
-
 
       def get_constant_definition_items(node)
         result = []
 
-        link_nodes = if @node_context.parent.is_a?(Prism::CallNode) && @node_context.parent.name == :link
+        link_nodes = if @ree_context.is_link_object?
           # inside link node
           link_node = RubyLsp::Ree::ParsedLinkNodeBuilder.build_from_node(@node_context.parent, nil)
           [link_node]
@@ -37,7 +38,7 @@ module RubyLsp
 
           parsed_doc.link_nodes
         end
-        
+
         link_nodes.each do |link_node|
           if link_node.imports.include?(node.name.to_s)
             uri = ''
@@ -46,6 +47,16 @@ module RubyLsp
               next unless path
 
               uri = File.join(Dir.pwd, path)
+            elsif link_node.import_link_type?
+              class_candidates = @finder.search_classes(node.name.to_s)
+              next unless class_candidates
+
+              class_candidates = class_candidates.flatten
+              package_name = link_node.link_package_name || package_name_from_uri(@uri)
+              class_candidate = class_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
+              next unless class_candidate
+
+              uri = class_candidate.uri.to_s
             else
               package_name = link_node.link_package_name || package_name_from_uri(@uri)
 
@@ -107,7 +118,7 @@ module RubyLsp
         link_node = RubyLsp::Ree::ParsedLinkNodeBuilder.build_from_node(parent_node, package_name_from_uri(@uri))
         package_name = link_node.link_package_name
 
-        object_name = if link_node.multi_object_link? && node.is_a?(Prism::SymbolNode)
+        object_name = if link_node.multi_object_link? && node.is_a?(Prism::SymbolNode) && link_node.has_linked_object?(node.unescaped)
           node.unescaped
         else
           link_node.name
