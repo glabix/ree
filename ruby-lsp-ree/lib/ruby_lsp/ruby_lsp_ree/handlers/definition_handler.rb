@@ -20,6 +20,7 @@ module RubyLsp
         @finder = ReeObjectFinder.new(@index)
       end
 
+
       def get_constant_definition_items(node)
         result = []
 
@@ -106,7 +107,13 @@ module RubyLsp
         link_node = RubyLsp::Ree::ParsedLinkNodeBuilder.build_from_node(parent_node, package_name_from_uri(@uri))
         package_name = link_node.link_package_name
 
-        method_candidates = @index[link_node.name]
+        object_name = if link_node.multi_object_link? && node.is_a?(Prism::SymbolNode)
+          node.unescaped
+        else
+          link_node.name
+        end
+
+        method_candidates = @index[object_name]
         return [] if !method_candidates || method_candidates.size == 0
         
         method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
