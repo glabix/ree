@@ -297,7 +297,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       source =  <<~RUBY
         class SamplePackage::SomeClass
           fn :some_class do
-            import -> { SomeConst }
+            import -> { SomeConst }, from: :some_package
           end
 
           def call(arg1)
@@ -309,7 +309,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
 
       expect(result.lines[1].strip).to eq('fn :some_class do')
-      expect(result.lines[2].strip).to eq('import -> { SomeConst }')
+      expect(result.lines[2].strip).to eq('import -> { SomeConst }, from: :some_package')
       expect(result.lines[3].strip).to eq('end')
     end
 
@@ -317,7 +317,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       source =  <<~RUBY
         class SamplePackage::SomeClass
           fn :some_class do
-            import -> { SomeConst & SomeConst2 }
+            import -> { SomeConst & SomeConst2 }, from: :some_package
           end
 
           def call(arg1)
@@ -329,7 +329,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
 
       expect(result.lines[1].strip).to eq('fn :some_class do')
-      expect(result.lines[2].strip).to eq('import -> { SomeConst }')
+      expect(result.lines[2].strip).to eq('import -> { SomeConst }, from: :some_package')
       expect(result.lines[3].strip).to eq('end')
     end
 

@@ -60,13 +60,16 @@ module RubyLsp
       end
 
       def remove_link_imports(link_node, link_imports)
+        return if link_imports.size == 0
         imports_str = link_node.import_items.reject{ link_imports.include?(_1.name) }.map(&:to_s).join(' & ')
 
         block_start_col = link_node.import_block_open_location.start_column
         block_line = link_node.import_block_open_location.start_line-1
         block_end_line = link_node.import_block_close_location.end_line-1
+        block_end_col = link_node.import_block_close_location.end_column
+        # TODO use renderer class
 
-        source_lines[block_line] = source_lines[block_line][0..block_start_col] + " #{imports_str} }\n"
+        source_lines[block_line] = source_lines[block_line][0..block_start_col] + " #{imports_str} }" + source_lines[block_end_line][block_end_col..-1]
         set_empty_lines!(block_line+1, block_end_line)
       end
 

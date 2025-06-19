@@ -25,6 +25,7 @@ module RubyLsp
         parsed_doc.link_nodes.each do |link_node|
           remove_imports = []
 
+          link_node.has_import_section?
           if link_node.has_import_section?
             remove_imports = link_node.imports.reject{ |imp| import_is_used?(parsed_doc, link_node, imp) }
             editor.remove_link_imports(link_node, remove_imports)
