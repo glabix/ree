@@ -250,13 +250,10 @@ module RubyLsp
         parent_node = @node_context.parent
         link_node = RubyLsp::Ree::ParsedLinkNodeBuilder.build_from_node(parent_node, package_name_from_uri(@uri))
 
-        method_candidates = @index[link_node.name]
-        return [] if !method_candidates || method_candidates.size == 0
-        
-        method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
-        return [] unless method
+        object_uri = find_object_uri_for_package(link_node, package_name).to_s
+        return [] unless object_uri
 
-        package_path = package_path_from_uri(method.uri.to_s)
+        package_path = package_path_from_uri(object_uri.to_s)
         package_main_file_path = File.join(package_path, 'package', "#{package_name}.rb")
 
         [
@@ -268,6 +265,31 @@ module RubyLsp
             ),
           )
         ]
+      end
+
+      private
+
+      def find_object_uri_for_package(link_node, package_name)
+        if link_node.import_link_type?
+          class_candidates = @finder.search_classes(link_node.imports.first)
+          return nil unless class_candidates
+
+          class_candidates = class_candidates.flatten
+          class_candidate = class_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
+          return nil unless class_candidate
+
+          class_candidate.uri
+        else
+          link_node.name
+
+          method_candidates = @index[link_node.name]
+          return nil if !method_candidates || method_candidates.size == 0
+          
+          method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
+          return  unless method
+
+          method.uri
+        end
       end
     end
   end

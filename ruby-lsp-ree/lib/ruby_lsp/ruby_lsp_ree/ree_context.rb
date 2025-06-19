@@ -27,7 +27,9 @@ module RubyLsp
       def is_package_argument?
         return false unless has_call_parent?
         return false if !@node_context.parent.arguments || @node_context.parent.arguments.arguments.size < 2
-        return false if @node_context.node.unescaped == @node_context.parent.arguments.arguments.first.unescaped
+        
+        first_arg = @node_context.parent.arguments.arguments.first
+        return false if @node_context.node.unescaped == symbol_node_name(first_arg)
 
         kw_args = @node_context.parent.arguments.arguments.detect{ |arg| arg.is_a?(Prism::KeywordHashNode) }
         return false unless kw_args
@@ -40,6 +42,11 @@ module RubyLsp
 
       def has_call_parent?
         @node_context && @node_context.parent && @node_context.parent.is_a?(Prism::CallNode)
+      end
+
+      def symbol_node_name(node)
+        return nil unless node.is_a?(Prism::SymbolNode)
+        node.unescaped
       end
     end
   end
