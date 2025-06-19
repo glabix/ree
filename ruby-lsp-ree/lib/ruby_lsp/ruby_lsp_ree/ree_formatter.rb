@@ -54,6 +54,7 @@ module RubyLsp
 
       def detect_missing_error_locales(uri, document)
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(document.source)
+        return [] unless parsed_doc
 
         locales_folder = package_locales_folder_path(uri.path)
         return [] if !locales_folder || !File.directory?(locales_folder)
