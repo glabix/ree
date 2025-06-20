@@ -1,7 +1,7 @@
 require 'prism'
 
 class RubyLsp::Ree::ParsedLinkNode
-  attr_reader :node, :document_package, :name, :import_items, :from_param, :linked_objects
+  attr_reader :node, :document_package, :name, :import_items, :from_param, :linked_objects, :kw_args
 
   FROM_ARG_KEY = 'from'
   IMPORT_ARG_KEY = 'import'
