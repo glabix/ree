@@ -616,7 +616,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       source =  <<~RUBY
         class SamplePackage::SomeClass
           fn :some_class do
-            link "some/file/path", -> { SomeConst }
+            link 'some/file/path', -> { SomeConst }
             link :some_import
           end
   
@@ -637,7 +637,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       source =  <<~RUBY
         class SamplePackage::SomeClass
           fn :some_class do
-            link "some/file/path", -> { SomeConst }
+            link 'some/file/path', -> { SomeConst }
             link :some_import
           end
   
@@ -656,7 +656,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         source =  <<~RUBY
           class SamplePackage::SomeClass
             fn :some_class do
-              link "some/file/path", -> { SomeConst1 & SomeConst2 }
+              link 'some/file/path', -> { SomeConst1 & SomeConst2 }
             end
     
             def call(arg1)
@@ -668,7 +668,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         result = subject.run_formatting(sample_file_uri, ruby_document(source))
     
         expect(result.lines[1].strip).to eq('fn :some_class do')
-        expect(result.lines[2].strip).to eq('link "some/file/path", -> { SomeConst2 }')
+        expect(result.lines[2].strip).to eq("link 'some/file/path', -> { SomeConst2 }")
         expect(result.lines[3].strip).to eq('end')
       end    
 
@@ -676,7 +676,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         source =  <<~RUBY
           class SamplePackage::SomeClass
             fn :some_class do
-              link "some/file/path", -> { SomeConst1 & SomeConst2 }
+              link 'some/file/path', -> { SomeConst1 & SomeConst2 }
             end
     
             def call(arg1)
@@ -688,7 +688,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         result = subject.run_formatting(sample_file_uri, ruby_document(source))
     
         expect(result.lines[1].strip).to eq('fn :some_class do')
-        expect(result.lines[2].strip).to eq('link "some/file/path", -> { SomeConst1 }')
+        expect(result.lines[2].strip).to eq("link 'some/file/path', -> { SomeConst1 }")
         expect(result.lines[3].strip).to eq('end')
       end
       
@@ -696,7 +696,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         source =  <<~RUBY
           class SamplePackage::SomeClass
             fn :some_class do
-              link "some/file/path", -> { SomeConst1 & SomeConst2 & SomeConst3 }
+              link 'some/file/path', -> { SomeConst1 & SomeConst2 & SomeConst3 }
             end
     
             def call(arg1)
@@ -709,7 +709,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         result = subject.run_formatting(sample_file_uri, ruby_document(source))
     
         expect(result.lines[1].strip).to eq('fn :some_class do')
-        expect(result.lines[2].strip).to eq('link "some/file/path", -> { SomeConst1 & SomeConst3 }')
+        expect(result.lines[2].strip).to eq("link 'some/file/path', -> { SomeConst1 & SomeConst3 }")
         expect(result.lines[3].strip).to eq('end')
       end
     end
@@ -719,7 +719,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         source =  <<~RUBY
           class SamplePackage::SomeClass
             fn :some_class do
-              link "some/file/path", -> { 
+              link 'some/file/path', -> { 
                 SomeConst
               }
               link :some_import2
@@ -742,7 +742,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         source =  <<~RUBY
           class SamplePackage::SomeClass
             fn :some_class do
-              link "some/file/path", -> { 
+              link 'some/file/path', -> { 
                 SomeConst &
                 SomeConst1 &
                 SomeConst2
@@ -759,7 +759,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         result = subject.run_formatting(sample_file_uri, ruby_document(source))
 
         expect(result.lines[1].strip).to eq('fn :some_class do')
-        expect(result.lines[2].strip).to eq('link "some/file/path", -> { SomeConst & SomeConst2 }')
+        expect(result.lines[2].strip).to eq("link 'some/file/path', -> { SomeConst & SomeConst2 }")
         expect(result.lines[3].strip).to eq('end')
       end
 
@@ -767,7 +767,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         source =  <<~RUBY
           class SamplePackage::SomeClass
             fn :some_class do
-              link "some/file/path", -> { 
+              link 'some/file/path', -> { 
                 SomeConst & SomeConst1 & SomeConst2
               }
             end
@@ -782,7 +782,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         result = subject.run_formatting(sample_file_uri, ruby_document(source))
 
         expect(result.lines[1].strip).to eq('fn :some_class do')
-        expect(result.lines[2].strip).to eq('link "some/file/path", -> { SomeConst & SomeConst2 }')
+        expect(result.lines[2].strip).to eq("link 'some/file/path', -> { SomeConst & SomeConst2 }")
         expect(result.lines[3].strip).to eq('end')
       end
     end
@@ -793,7 +793,8 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           class SamplePackage::SomeClass
             fn :some_class do
               link :some_import
-              link "some/file/path", -> { SomeConst }
+
+              link 'some/file/path', -> { SomeConst }
             end
     
             contract(SomeConst => Hash) 
@@ -812,7 +813,8 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           class SamplePackage::SomeClass
             fn :some_class do
               link :some_import
-              link "some/file/path", -> { SomeConst }
+
+              link 'some/file/path', -> { SomeConst }
             end
     
             contract(Integer, SomeConst => Hash) 
@@ -831,7 +833,8 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           class SamplePackage::SomeClass
             fn :some_class do
               link :some_import
-              link "some/file/path", -> { SomeConst }
+
+              link 'some/file/path', -> { SomeConst }
             end
     
             contract(Integer => SomeConst) 
@@ -850,7 +853,8 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           class SamplePackage::SomeClass
             fn :some_class do
               link :some_import
-              link "some/file/path", -> { SomeConst }
+
+              link 'some/file/path', -> { SomeConst }
             end
     
             contract(Integer => Hash).throws(NoMethodError & SomeConst) 
@@ -869,7 +873,8 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           class SamplePackage::SomeClass
             fn :some_class do
               link :some_import
-              link "some/file/path", -> { SomeConst }
+          
+              link 'some/file/path', -> { SomeConst }
             end
     
             contract(ArrayOf[SomeConst] => Hash) 
