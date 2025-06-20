@@ -1,7 +1,7 @@
 require 'prism'
 
 class RubyLsp::Ree::ParsedLinkNode
-  attr_reader :node, :document_package, :name, :import_items, :from_param
+  attr_reader :node, :document_package, :name, :import_items, :from_param, :linked_objects, :kw_args
 
   FROM_ARG_KEY = 'from'
   IMPORT_ARG_KEY = 'import'
@@ -24,21 +24,36 @@ class RubyLsp::Ree::ParsedLinkNode
     end
   end
 
+  class LinkedObject
+    attr_reader :name, :alias_name, :location
+
+    def initialize(name:, alias_name:, location:)
+      @name = name
+      @alias_name = alias_name
+      @location = location
+    end
+
+    def usage_name
+      return @alias_name if @alias_name
+      @name
+    end
+  end
+
   def initialize(node, document_package = nil)
     @node = node
     @document_package = document_package
     @name = parse_name
 
     parse_params
+    parse_linked_objects
+  end
+
+  def multi_object_link?
+    false
   end
 
   def link_package_name
-    case link_type
-    when :object_name
-      from_arg_value || document_package
-    when :file_path
-      @name.split('/').first
-    end
+    raise "abstract method"
   end
 
   def location
@@ -52,7 +67,6 @@ class RubyLsp::Ree::ParsedLinkNode
 
   def from_arg_value
     return unless @from_param
-
     @from_param.value.respond_to?(:unescaped) ? @from_param.value.unescaped : nil
   end
 
@@ -61,24 +75,19 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   def link_type
-    return @link_type if @link_type
-    
-    @link_type = case name_arg_node
-    when Prism::SymbolNode
-      :object_name
-    when Prism::StringNode
-      :file_path
-    else
-      nil
-    end
+    raise "abstract method"
   end
 
   def file_path_type?
-    link_type == :file_path
+    false
   end
 
   def object_name_type?
-    link_type == :object_name
+    false
+  end
+
+  def import_link_type?
+    false
   end
 
   def parse_imports
@@ -90,9 +99,11 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   def has_import_section?
-    return false if @node.arguments.arguments.size == 1
-
     !!import_arg
+  end
+
+  def has_kwargs?
+    !!@kw_args
   end
 
   def first_arg_location
@@ -100,33 +111,21 @@ class RubyLsp::Ree::ParsedLinkNode
   end
 
   def import_block_open_location
-    if object_name_type?
-      import_arg.value.opening_loc
-    else
-      import_arg.opening_loc
-    end
+    raise "abstract method"
   end
 
   def import_block_close_location
-    # TODO maybe use two classes for link types
-    if object_name_type?
-      import_arg.value.closing_loc
-    else
-      import_arg.closing_loc
-    end
+    raise "abstract method"
+  end
+
+  def has_linked_object?(object_name)
+    @linked_objects.map(&:name).include?(object_name)
   end
 
   private
 
   def parse_name
-    case name_arg_node
-    when Prism::SymbolNode
-      name_arg_node.value
-    when Prism::StringNode
-      name_arg_node.unescaped
-    else
-      ""
-    end
+    raise "abstract method"
   end
 
   def parse_params
@@ -139,35 +138,16 @@ class RubyLsp::Ree::ParsedLinkNode
     @alias_name = @as_param ? @as_param.value.unescaped : nil
   end
 
-  def last_arg
-    @node.arguments.arguments.last
+  def parse_linked_objects
+    raise "abstract method"
   end
 
   def import_arg
-    if object_name_type?
-      last_arg.elements.detect{ _1.key.unescaped == IMPORT_ARG_KEY }
-    else
-      last_arg
-    end
+    raise "abstract method"
   end
 
   def get_import_items
-    return [] if @node.arguments.arguments.size == 1
-    
-    if object_name_type?
-      return [] unless import_arg
-      import_body = import_arg.value.body.body.first
-      parse_object_link_multiple_imports(import_body)
-    elsif last_arg.is_a?(Prism::LambdaNode)
-      return [] unless last_arg.body
-      import_body = last_arg.body.body.first
-      parse_object_link_multiple_imports(import_body)
-    else
-      return []
-    end
-  rescue => e
-    $stderr.puts("can't parse imports: #{e.message}")
-    return []
+    raise "abstract method"
   end
 
   def parse_object_link_multiple_imports(import_body)

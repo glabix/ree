@@ -60,7 +60,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     RUBY
 
     result = subject.run_formatting(sample_file_uri, ruby_document(source))
-    expect(result.lines[2].strip).to eq('link :create_item_cmd, from: :create_package, import: -> { SomeEntity }')
+    expect(result.lines[2].strip).to eq('link :create_item_cmd, import: -> { SomeEntity }, from: :create_package')
   end
 
   it "removes 'from' section if no object found in 'from' package but found in current" do

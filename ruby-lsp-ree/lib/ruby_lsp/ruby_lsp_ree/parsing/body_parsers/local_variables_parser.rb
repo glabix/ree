@@ -1,4 +1,6 @@
-class RubyLsp::Ree::LocalVariablesParser
+require_relative 'basic_parser'
+
+class RubyLsp::Ree::LocalVariablesParser < RubyLsp::Ree::BasicParser
   attr_reader :parsed_doc, :method_object
 
   class LocalVariable
@@ -38,15 +40,5 @@ class RubyLsp::Ree::LocalVariablesParser
     end
   
     local_variables
-  end
-
-  def get_method_body(node)
-    return unless node.body
-
-    if node.body.is_a?(Prism::BeginNode)
-      node.body.statements.body
-    else
-      node.body.body
-    end
   end
 end

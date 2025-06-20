@@ -4,6 +4,7 @@ require_relative 'parsed_method_node'
 require_relative "../ree_constants"
 require_relative "body_parsers/call_objects_parser"
 require_relative "body_parsers/const_objects_parser"
+require_relative "body_parsers/links_parser"
 
 require 'ostruct'
 
@@ -106,21 +107,18 @@ class RubyLsp::Ree::ParsedClassDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_links
-    return unless has_body?
+    @link_nodes = []
+    return [] unless has_body?
 
-    nodes = if links_container_node && @links_container_block_node && @links_container_block_node.body
-      @links_container_block_node.body.body.select{ |node| node_name(node) == :link }
+    links_container_body = if links_container_node && @links_container_block_node && @links_container_block_node.body
+      @links_container_block_node.body.body 
     elsif class_includes.any?{ node_name(_1) == LINK_DSL_MODULE }
-      class_node.body.body.select{ |node| node_name(node) == :link }
+      class_node.body.body
     else
-      []
+      return []
     end
 
-    @link_nodes = nodes.map do |link_node|
-      link_node = RubyLsp::Ree::ParsedLinkNode.new(link_node, package_name)
-      link_node.parse_imports # TODO move parse imports inside link_node constructor
-      link_node
-    end
+    @link_nodes = RubyLsp::Ree::LinksParser.new(links_container_body, package_name).parse_links
   end
 
   def parse_values
