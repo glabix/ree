@@ -79,6 +79,48 @@ module RubyLsp
           link_text += "\n#{offset_str}}"
         end
 
+        if link_node.has_kwargs?
+          kwargs_str = link_node.kw_args.elements.map{ "#{_1.key.unescaped}: :#{_1.value.unescaped}"}.join(', ')
+          link_text += ", #{kwargs_str}"
+        end
+
+        link_text += "\n"
+        link_text
+      end
+
+      def render_import_link(link_node, offset_str)
+        link_text = "#{offset_str}import ->{"
+
+        imports_str = link_node.import_items.map(&:to_s).join(' & ')
+  
+        if (link_text+imports_str).size < LINE_LENGTH
+          link_text + " #{imports_str} }"
+        else
+          link_text += "\n"
+
+          imports_str = "#{offset_str}  "
+          last_line = imports_str
+          link_node.import_items.each_with_index do |import_item, index|
+            last_line = imports_str.lines.last
+
+            if index == 0
+              imports_str += import_item.to_s
+              next
+            end
+
+            if (last_line + " & #{import_item.to_s}").size <= LINE_LENGTH
+              imports_str += " & #{import_item.to_s}"
+            else
+              imports_str += " &\n#{offset_str}  #{import_item.to_s}"
+            end
+          end
+        end
+
+        if link_node.has_kwargs?
+          kwargs_str = link_node.kw_args.elements.map{ "#{_1.key.unescaped}: :#{_1.value.unescaped}"}.join(', ')
+          link_text += ", #{kwargs_str}"
+        end
+
         link_text += "\n"
         link_text
       end
