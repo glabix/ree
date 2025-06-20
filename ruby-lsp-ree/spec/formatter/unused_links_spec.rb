@@ -437,8 +437,9 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       source =  <<~RUBY
         class SamplePackage::SomeClass
           fn :some_class do
-            link :some_import1, import: -> { SomeConst }
             link :some_import2
+
+            link :some_import1, import: -> { SomeConst }
           end
 
           def call(arg1)
