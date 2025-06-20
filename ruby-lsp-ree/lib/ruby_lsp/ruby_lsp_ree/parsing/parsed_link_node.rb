@@ -102,6 +102,10 @@ class RubyLsp::Ree::ParsedLinkNode
     !!import_arg
   end
 
+  def has_kwargs?
+    !!@kw_args
+  end
+
   def first_arg_location
     @node.arguments.arguments.first.location
   end

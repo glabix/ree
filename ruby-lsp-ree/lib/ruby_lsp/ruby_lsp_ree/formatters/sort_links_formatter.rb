@@ -1,4 +1,6 @@
 require_relative 'base_formatter'
+require_relative '../ree_source_editor'
+require_relative '../renderers/link_renderer'
 
 module RubyLsp
   module Ree
@@ -7,56 +9,34 @@ module RubyLsp
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
         return source if !parsed_doc || !parsed_doc.link_nodes&.any?
 
-        if parsed_doc.link_nodes.any?{ _1.location.start_line != _1.location.end_line }
-          $stderr.puts("multiline link definitions, don't sort")
-          return source
+        # Order of groups:
+        # - links from the current package without options
+        # - links from the current package with options
+        # - links from other packages
+        # - links with filenames
+        # - import links
+
+        editor = RubyLsp::Ree::ReeSourceEditor.new(source)
+        renderer = RubyLsp::Ree::LinkRenderer.new
+        # cleanup old links
+        parsed_doc.link_nodes.each do |link_node|
+          editor.remove_link(link_node)
         end
 
-        # sort link nodes
-        sorted_link_nodes = parsed_doc.link_nodes.sort{ |a, b|
-          a_name = a.node.arguments.arguments.first
-          b_name = b.node.arguments.arguments.first
+        link_groups = [
+          parsed_doc.link_nodes.select(&:object_name_type?).select{ !_1.has_kwargs? },
+          parsed_doc.link_nodes.select(&:object_name_type?).select(&:has_kwargs?).select{ !_1.from_arg_value },
+          parsed_doc.link_nodes.select(&:object_name_type?).select{ !!_1.from_arg_value },
+          parsed_doc.link_nodes.select(&:file_path_type?),
+          parsed_doc.link_nodes.select(&:import_link_type?),
+        ]
 
-          if a.class == b.class
-            if a_name.respond_to?(:unescaped) && b_name.respond_to?(:unescaped)
-              a_name.unescaped <=> b_name.unescaped
-            else
-              0  
-            end
-          else
-            sort_by_type(a, b)
-          end
-        }
-
-        # check if no re-order
-        if parsed_doc.link_nodes == sorted_link_nodes
-          return source
+        link_groups_texts = link_groups.map do |link_group|
+          link_group.map{ renderer.render(_1) }.join('')
         end
 
-        # insert nodes to source
-        link_lines = parsed_doc.link_nodes.map{ _1.location.start_line }
-
-        source_lines = source.lines
-
-        sorted_lines = sorted_link_nodes.map do |sorted_link|
-          source_lines[sorted_link.location.start_line - 1]
-        end
-
-        link_lines.each_with_index do |link_line, index|
-          source_lines[link_line - 1] = sorted_lines[index]
-        end
-
-        source_lines.join()
-      end
-
-      def sort_by_type(a, b)
-        return -1 if a.object_name_type?
-        return 1 if b.object_name_type?
-          
-        return -1 if a.file_path_type?
-        return 1 if b.file_path_type?
-            
-        0
+        editor.insert_link_block(parsed_doc, link_groups_texts.join("\n"))
+        editor.source
       end
     end
   end
