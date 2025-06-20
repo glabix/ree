@@ -97,6 +97,12 @@ module RubyLsp
         set_empty_lines_for_location!(field.location)
       end
 
+      def cleanup_blank_lines(start_line, end_line)
+        (start_line .. end_line).each do |i|
+          source_lines[i] = '' if source_lines[i].strip == ''
+        end
+      end
+
       def insert_link_block(parsed_doc, links_text)
         line = if parsed_doc.links_container_node
           parsed_doc.links_container_node.location.start_line

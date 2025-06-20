@@ -22,6 +22,7 @@ module RubyLsp
         parsed_doc.link_nodes.each do |link_node|
           editor.remove_link(link_node)
         end
+        editor.cleanup_blank_lines(parsed_doc.link_nodes.first.location.start_line-1, parsed_doc.link_nodes.last.location.end_line-1)
 
         link_groups = [
           parsed_doc.link_nodes.select(&:object_name_type?).select{ !_1.has_kwargs? },
