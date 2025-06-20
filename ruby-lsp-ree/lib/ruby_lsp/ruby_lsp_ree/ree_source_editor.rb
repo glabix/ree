@@ -97,6 +97,16 @@ module RubyLsp
         set_empty_lines_for_location!(field.location)
       end
 
+      def insert_link_block(parsed_doc, links_text)
+        line = if parsed_doc.links_container_node
+          parsed_doc.links_container_node.location.start_line
+        else
+          parsed_doc.link_nodes.first.location.start_line - 1
+        end
+
+        source_lines[line] = links_text
+      end
+
       def add_links(parsed_doc, ree_objects, current_package)
         new_text = ''
 

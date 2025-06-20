@@ -50,12 +50,12 @@ module RubyLsp
       end
 
       def render_file_path_link(link_node, offset_str)
-        link_text = "#{offset_str}link #{link_node.name}, -> {"
+        link_text = "#{offset_str}link '#{link_node.name}', -> {"
         
         imports_str = link_node.import_items.map(&:to_s).join(' & ')
 
         if (link_text+imports_str).size < LINE_LENGTH
-          link_text + " #{imports_str} }"
+          link_text += " #{imports_str} }"
         else
           link_text += "\n"
 
@@ -76,6 +76,7 @@ module RubyLsp
             end
           end
 
+          link_text += imports_str
           link_text += "\n#{offset_str}}"
         end
 
@@ -89,12 +90,12 @@ module RubyLsp
       end
 
       def render_import_link(link_node, offset_str)
-        link_text = "#{offset_str}import ->{"
+        link_text = "#{offset_str}import -> {"
 
         imports_str = link_node.import_items.map(&:to_s).join(' & ')
   
         if (link_text+imports_str).size < LINE_LENGTH
-          link_text + " #{imports_str} }"
+          link_text += " #{imports_str} }"
         else
           link_text += "\n"
 
@@ -114,6 +115,9 @@ module RubyLsp
               imports_str += " &\n#{offset_str}  #{import_item.to_s}"
             end
           end
+
+          link_text += imports_str
+          link_text += "\n#{offset_str}}"
         end
 
         if link_node.has_kwargs?
