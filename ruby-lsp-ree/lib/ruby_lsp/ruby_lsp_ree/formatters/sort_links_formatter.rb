@@ -25,11 +25,11 @@ module RubyLsp
         editor.cleanup_blank_lines(parsed_doc.link_nodes.first.location.start_line-1, parsed_doc.link_nodes.last.location.end_line-1)
 
         link_groups = [
-          parsed_doc.link_nodes.select(&:object_name_type?).select{ !_1.has_kwargs? },
-          parsed_doc.link_nodes.select(&:object_name_type?).select(&:has_kwargs?).select{ !_1.from_arg_value },
-          parsed_doc.link_nodes.select(&:object_name_type?).select{ !!_1.from_arg_value },
-          parsed_doc.link_nodes.select(&:file_path_type?),
-          parsed_doc.link_nodes.select(&:import_link_type?),
+          parsed_doc.link_nodes.select(&:object_name_type?).select{ !_1.has_kwargs? }.sort_by(&:name),
+          parsed_doc.link_nodes.select(&:object_name_type?).select(&:has_kwargs?).select{ !_1.from_arg_value }.sort_by(&:name),
+          parsed_doc.link_nodes.select(&:object_name_type?).select{ !!_1.from_arg_value }.sort_by(&:link_package_name),
+          parsed_doc.link_nodes.select(&:file_path_type?).sort_by(&:name),
+          parsed_doc.link_nodes.select(&:import_link_type?).sort_by(&:link_package_name),
         ]
 
         link_groups_texts = link_groups.map do |link_group|
