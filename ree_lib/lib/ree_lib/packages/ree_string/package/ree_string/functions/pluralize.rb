@@ -5,9 +5,11 @@ class ReeString::Pluralize
 
   fn :pluralize
 
-  contract(Integer, String, String => String)
-  def call(count, single, plural)
+  contract(Integer, String, String, Bool => String)
+  def call(count, single, plural, prefixed = true)
     word = count == 1 ? single : plural
+    return word if !prefixed
+
     "#{count} #{word}"
   end
 end

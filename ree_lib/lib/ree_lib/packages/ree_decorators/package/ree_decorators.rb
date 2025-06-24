@@ -1,10 +1,12 @@
 require 'securerandom'
 require 'ostruct'
+require 'set'
 
 module ReeDecorators
   include Ree::PackageDSL
 
   package do
+    depends_on :ree_string
   end
 
   # @param [Array<Class>] decorators
@@ -56,3 +58,8 @@ module ReeDecorators
 end
 
 require_relative "ree_decorators/dsl"
+
+require_relative "ree_decorators/errors/base_contract_error"
+require_relative "ree_decorators/errors/bad_contract_error"
+require_relative "ree_decorators/errors/contract_error"
+require_relative "ree_decorators/errors/return_contract_error"
