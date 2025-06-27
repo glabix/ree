@@ -1,8 +1,10 @@
 require_relative "../utils/ree_lsp_utils"
 require_relative "../ree_object_finder"
 require_relative "../parsing/parsed_link_node"
+require_relative "../parsing/parsed_link_node_builder"
 require_relative "../parsing/parsed_document_builder"
 require_relative "../utils/ree_locale_utils"
+require_relative "../ree_context"
 
 module RubyLsp
   module Ree
@@ -17,15 +19,15 @@ module RubyLsp
         @node_context = node_context
         @root_node = @node_context.instance_variable_get(:@nesting_nodes).first
         @finder = ReeObjectFinder.new(@index)
+        @ree_context = RubyLsp::Ree::ReeContext.new(node_context)
       end
 
       def get_constant_definition_items(node)
         result = []
 
-        link_nodes = if @node_context.parent.is_a?(Prism::CallNode) && @node_context.parent.name == :link
+        link_nodes = if @ree_context.is_link_object?
           # inside link node
-          link_node = RubyLsp::Ree::ParsedLinkNode.new(@node_context.parent)
-          link_node.parse_imports
+          link_node = RubyLsp::Ree::ParsedLinkNodeBuilder.build_from_node(@node_context.parent, nil)
           [link_node]
         else
           parsed_doc = if @node_context.parent.is_a?(Prism::CallNode)
@@ -36,7 +38,7 @@ module RubyLsp
 
           parsed_doc.link_nodes
         end
-        
+
         link_nodes.each do |link_node|
           if link_node.imports.include?(node.name.to_s)
             uri = ''
@@ -45,6 +47,16 @@ module RubyLsp
               next unless path
 
               uri = File.join(Dir.pwd, path)
+            elsif link_node.import_link_type?
+              class_candidates = @finder.search_classes(node.name.to_s)
+              next unless class_candidates
+
+              class_candidates = class_candidates.flatten
+              package_name = link_node.link_package_name || package_name_from_uri(@uri)
+              class_candidate = class_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
+              next unless class_candidate
+
+              uri = class_candidate.uri.to_s
             else
               package_name = link_node.link_package_name || package_name_from_uri(@uri)
 
@@ -103,10 +115,16 @@ module RubyLsp
         result = []
         parent_node = @node_context.parent
 
-        link_node = RubyLsp::Ree::ParsedLinkNode.new(parent_node, package_name_from_uri(@uri))
+        link_node = RubyLsp::Ree::ParsedLinkNodeBuilder.build_from_node(parent_node, package_name_from_uri(@uri))
         package_name = link_node.link_package_name
 
-        method_candidates = @index[link_node.name]
+        object_name = if link_node.multi_object_link? && node.is_a?(Prism::SymbolNode) && link_node.has_linked_object?(node.unescaped)
+          node.unescaped
+        else
+          link_node.name
+        end
+
+        method_candidates = @index[object_name]
         return [] if !method_candidates || method_candidates.size == 0
         
         method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
@@ -230,15 +248,12 @@ module RubyLsp
         package_name = node.unescaped
 
         parent_node = @node_context.parent
-        link_node = RubyLsp::Ree::ParsedLinkNode.new(parent_node, package_name_from_uri(@uri))
+        link_node = RubyLsp::Ree::ParsedLinkNodeBuilder.build_from_node(parent_node, package_name_from_uri(@uri))
 
-        method_candidates = @index[link_node.name]
-        return [] if !method_candidates || method_candidates.size == 0
-        
-        method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
-        return [] unless method
+        object_uri = find_object_uri_for_package(link_node, package_name).to_s
+        return [] unless object_uri
 
-        package_path = package_path_from_uri(method.uri.to_s)
+        package_path = package_path_from_uri(object_uri.to_s)
         package_main_file_path = File.join(package_path, 'package', "#{package_name}.rb")
 
         [
@@ -250,6 +265,31 @@ module RubyLsp
             ),
           )
         ]
+      end
+
+      private
+
+      def find_object_uri_for_package(link_node, package_name)
+        if link_node.import_link_type?
+          class_candidates = @finder.search_classes(link_node.imports.first)
+          return nil unless class_candidates
+
+          class_candidates = class_candidates.flatten
+          class_candidate = class_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
+          return nil unless class_candidate
+
+          class_candidate.uri
+        else
+          link_node.name
+
+          method_candidates = @index[link_node.name]
+          return nil if !method_candidates || method_candidates.size == 0
+          
+          method = method_candidates.detect{ package_name_from_uri(_1.uri) == package_name }
+          return  unless method
+
+          method.uri
+        end
       end
     end
   end

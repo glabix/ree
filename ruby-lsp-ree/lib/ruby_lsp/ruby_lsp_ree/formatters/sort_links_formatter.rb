@@ -1,4 +1,6 @@
 require_relative 'base_formatter'
+require_relative '../ree_source_editor'
+require_relative '../renderers/link_renderer'
 
 module RubyLsp
   module Ree
@@ -7,44 +9,35 @@ module RubyLsp
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_source(source)
         return source if !parsed_doc || !parsed_doc.link_nodes&.any?
 
-        if parsed_doc.link_nodes.any?{ _1.location.start_line != _1.location.end_line }
-          $stderr.puts("multiline link definitions, don't sort")
-          return source
+        # Order of groups:
+        # - links from the current package without options
+        # - links from the current package with options
+        # - links from other packages
+        # - links with filenames
+        # - import links
+
+        editor = RubyLsp::Ree::ReeSourceEditor.new(source)
+        renderer = RubyLsp::Ree::LinkRenderer.new
+        # cleanup old links
+        parsed_doc.link_nodes.each do |link_node|
+          editor.remove_link(link_node)
+        end
+        editor.cleanup_blank_lines(parsed_doc.link_nodes.first.location.start_line-1, parsed_doc.link_nodes.last.location.end_line-1)
+
+        link_groups = [
+          parsed_doc.link_nodes.select(&:object_name_type?).select{ !_1.has_kwargs? }.sort_by(&:name),
+          parsed_doc.link_nodes.select(&:object_name_type?).select(&:has_kwargs?).select{ !_1.from_arg_value }.sort_by(&:name),
+          parsed_doc.link_nodes.select(&:object_name_type?).select{ !!_1.from_arg_value }.sort_by(&:link_package_name),
+          parsed_doc.link_nodes.select(&:file_path_type?).sort_by(&:name),
+          parsed_doc.link_nodes.select(&:import_link_type?).sort_by(&:link_package_name),
+        ]
+
+        link_groups_texts = link_groups.map do |link_group|
+          link_group.map{ renderer.render(_1) }.join('')
         end
 
-        # sort link nodes
-        sorted_link_nodes = parsed_doc.link_nodes.sort{ |a, b|
-          a_name = a.node.arguments.arguments.first
-          b_name = b.node.arguments.arguments.first
-
-          if a_name.is_a?(Prism::SymbolNode) && !b_name.is_a?(Prism::SymbolNode)
-            -1
-          elsif b_name.is_a?(Prism::SymbolNode) && !a_name.is_a?(Prism::SymbolNode)
-            1
-          else
-            a_name.unescaped <=> b_name.unescaped
-          end
-        }
-
-        # check if no re-order
-        if parsed_doc.link_nodes.map{ _1.node.arguments.arguments.first.unescaped } == sorted_link_nodes.map{ _1.node.arguments.arguments.first.unescaped }
-          return source
-        end
-
-        # insert nodes to source
-        link_lines = parsed_doc.link_nodes.map{ _1.location.start_line }
-
-        source_lines = source.lines
-
-        sorted_lines = sorted_link_nodes.map do |sorted_link|
-          source_lines[sorted_link.location.start_line - 1]
-        end
-
-        link_lines.each_with_index do |link_line, index|
-          source_lines[link_line - 1] = sorted_lines[index]
-        end
-
-        source_lines.join()
+        editor.insert_link_block(parsed_doc, link_groups_texts.select{ _1.size > 0 }.join("\n"))
+        editor.source
       end
     end
   end

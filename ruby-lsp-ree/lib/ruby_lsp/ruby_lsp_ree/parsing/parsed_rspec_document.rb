@@ -1,5 +1,6 @@
 require_relative 'parsed_base_document'
 require_relative 'parsed_link_node'
+require_relative "body_parsers/links_parser"
 require 'ostruct'
 
 class RubyLsp::Ree::ParsedRspecDocument < RubyLsp::Ree::ParsedBaseDocument
@@ -36,12 +37,7 @@ class RubyLsp::Ree::ParsedRspecDocument < RubyLsp::Ree::ParsedBaseDocument
   end
 
   def parse_links
-    nodes = @describe_node.block.body.body.select{ |node| node.name == :link }
-
-    @link_nodes = nodes.map do |link_node|
-      link_node = RubyLsp::Ree::ParsedLinkNode.new(link_node, package_name)
-      link_node.parse_imports
-      link_node
-    end
+    container = @describe_node.block.body.body
+    @link_nodes = RubyLsp::Ree::LinksParser.new(container, package_name).parse_links
   end
 end

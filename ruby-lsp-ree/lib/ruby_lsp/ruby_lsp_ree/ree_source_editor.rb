@@ -13,15 +13,15 @@ module RubyLsp
         @source_lines.join
       end
 
-      def contains_link_usage?(parsed_doc, link_node)
+      def contains_linked_object_usage?(parsed_doc, link_node, linked_object)
         if parsed_doc.respond_to?(:parse_method_calls)
           method_calls = parsed_doc.parse_method_calls
           no_receiver_method_names = method_calls.reject(&:has_receiver?).map(&:name).map(&:to_s)
-          return no_receiver_method_names.include?(link_node.usage_name)
+          return no_receiver_method_names.include?(linked_object.usage_name)
         end
 
         source_lines_except_link = source_lines[0...(link_node.location.start_line-1)] + source_lines[(link_node.location.end_line)..-1]
-        source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{link_node.usage_name}\W/)}
+        source_lines_except_link.any?{ |source_line| source_line.match?(/\W#{linked_object.usage_name}\W/)}
       end
 
       def contains_link_import_usage?(parsed_doc, link_node, link_import)
@@ -38,14 +38,38 @@ module RubyLsp
         set_empty_lines_for_location!(link_node.location)
       end
 
+      def remove_linked_objects(link_node, linked_objects)
+        return if linked_objects.size == 0
+
+        if link_node.multi_object_link?
+          set_empty_lines_for_location!(link_node.location)
+          line = link_node.location.start_line - 1
+          offset = link_node.location.start_column - 1
+          offset_str = " " * offset
+          # TODO use renderer class
+          linked_object_names = linked_objects.map(&:name)
+          remaining_objects = link_node.linked_objects.select{ !linked_object_names.include?(_1.name) }
+          source_lines[line] = "#{offset_str}link #{remaining_objects.map{ ":#{_1.name}" }.join(', ')}"
+          if link_node.from_arg_value
+            source_lines[line] += ", from: :#{link_node.from_arg_value}"
+          end
+          source_lines[line] += "\n"
+        else
+          set_empty_lines_for_location!(link_node.location)
+        end
+      end
+
       def remove_link_imports(link_node, link_imports)
+        return if link_imports.size == 0
         imports_str = link_node.import_items.reject{ link_imports.include?(_1.name) }.map(&:to_s).join(' & ')
 
         block_start_col = link_node.import_block_open_location.start_column
         block_line = link_node.import_block_open_location.start_line-1
         block_end_line = link_node.import_block_close_location.end_line-1
+        block_end_col = link_node.import_block_close_location.end_column
+        # TODO use renderer class
 
-        source_lines[block_line] = source_lines[block_line][0..block_start_col] + " #{imports_str} }\n"
+        source_lines[block_line] = source_lines[block_line][0..block_start_col] + " #{imports_str} }" + source_lines[block_end_line][block_end_col..-1]
         set_empty_lines!(block_line+1, block_end_line)
       end
 
@@ -71,6 +95,22 @@ module RubyLsp
 
       def remove_dao_field(field)
         set_empty_lines_for_location!(field.location)
+      end
+
+      def cleanup_blank_lines(start_line, end_line)
+        (start_line .. end_line).each do |i|
+          source_lines[i] = '' if source_lines[i].strip == ''
+        end
+      end
+
+      def insert_link_block(parsed_doc, links_text)
+        line = if parsed_doc.links_container_node
+          parsed_doc.links_container_node.location.start_line
+        else
+          parsed_doc.link_nodes.first.location.start_line - 1
+        end
+
+        source_lines[line] = links_text
       end
 
       def add_links(parsed_doc, ree_objects, current_package)

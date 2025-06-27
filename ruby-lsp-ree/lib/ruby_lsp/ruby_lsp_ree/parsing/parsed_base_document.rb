@@ -37,7 +37,7 @@ class RubyLsp::Ree::ParsedBaseDocument
   end
 
   def includes_linked_object?(obj_name)
-    @link_nodes.map(&:name).include?(obj_name)
+    @link_nodes.map(&:linked_objects).flatten.map(&:name).include?(obj_name)
   end
 
   def find_link_node(name)

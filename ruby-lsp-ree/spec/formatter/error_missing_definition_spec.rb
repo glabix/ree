@@ -61,7 +61,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
     RUBY
 
     result = subject.run_formatting(sample_file_uri, ruby_document(source))
-
     expect(result.lines[5].strip).to eq('InvalidArg1Error = invalid_param_error(:invalid_arg1_error)')
   end
 
