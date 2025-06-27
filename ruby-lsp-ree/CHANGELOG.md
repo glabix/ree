@@ -1,3 +1,8 @@
+## [0.1.24] - 2025-06-27
+
+- ree 1.2 syntax support
+- links section sorting updated
+
 ## [0.1.22] - 2025-05-30
 
 - unused links formatter: improve usage detection
