@@ -49,7 +49,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   
       file_uri = URI("file://my_package/package/my_package/some_class.rb")
       result = subject.run_formatting(file_uri, ruby_document(source))
-      expect(result.lines[4].strip).to eq('link :seconds_ago, from: :sample_package')
+      expect(result.lines[3].strip).to eq('link :seconds_ago, from: :sample_package')
     end
 
     it "adds missing import link with do block" do
@@ -105,9 +105,8 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   
       expect(result.lines[1].strip).to eq('fn :some_class do')
       expect(result.lines[2].strip).to eq('link :seconds_ago')
-      expect(result.lines[3].strip).to eq('')
-      expect(result.lines[4].strip).to eq('link :create_item_cmd, from: :create_package')
-      expect(result.lines[5].strip).to eq('end')
+      expect(result.lines[3].strip).to eq('link :create_item_cmd, from: :create_package')
+      expect(result.lines[4].strip).to eq('end')
     end
 
     it "doesn't add import if local method exist" do

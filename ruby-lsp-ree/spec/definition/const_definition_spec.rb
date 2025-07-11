@@ -31,4 +31,34 @@ RSpec.describe "RubyLsp::Ree::DefinitionListener" do
       expect(result.response.first.uri).to eq(file_uri.to_s)
     end
   end
+
+  it "returns only exact class matches" do
+    source =  <<~RUBY
+      class SomeClass
+        fn :some_class do
+          import -> { UserAvatar }, from: :some_package
+          import -> { User }, from: :some_package
+        end
+
+        def something
+          User
+        end
+      end
+    RUBY
+
+    file_uri1 = URI("file:///some_package/package/some_package/some_package_fn1.rb")
+    file_uri2 = URI("file:///some_package/package/some_package/some_package_fn2.rb")
+
+    with_server(source) do |server, uri|
+      index_class(server, 'UserAvatar', file_uri2)
+      index_class(server, 'User', file_uri1)
+
+      send_definition_request(server, uri, { line: 7, character: 5 })
+      
+      result = server.pop_response
+
+      expect(result.response.size).to eq(1)
+      expect(result.response.first.uri).to eq(file_uri1.to_s)
+    end
+  end
 end

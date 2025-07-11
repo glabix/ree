@@ -48,7 +48,7 @@ module RubyLsp
 
               uri = File.join(Dir.pwd, path)
             elsif link_node.import_link_type?
-              class_candidates = @finder.search_classes(node.name.to_s)
+              class_candidates = @finder.find_classes(node.name.to_s)
               next unless class_candidates
 
               class_candidates = class_candidates.flatten
@@ -271,7 +271,7 @@ module RubyLsp
 
       def find_object_uri_for_package(link_node, package_name)
         if link_node.import_link_type?
-          class_candidates = @finder.search_classes(link_node.imports.first)
+          class_candidates = @finder.find_classes(link_node.imports.first)
           return nil unless class_candidates
 
           class_candidates = class_candidates.flatten

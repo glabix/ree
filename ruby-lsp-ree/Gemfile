@@ -9,6 +9,6 @@ gem "rake", "~> 13.0"
 
 group :test do
   gem 'rspec'
-  gem 'ruby-lsp'
+  gem 'ruby-lsp', '~> 0.25.0'
   gem "sorbet-static-and-runtime"
 end

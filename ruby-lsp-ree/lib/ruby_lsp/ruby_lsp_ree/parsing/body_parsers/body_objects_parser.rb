@@ -61,6 +61,14 @@ class RubyLsp::Ree::BodyObjectsParser < RubyLsp::Ree::BasicParser
           target_objects += parse(node.elements)
         end
 
+        if node.respond_to?(:conditions)
+          target_objects += parse(node.conditions)
+        end
+
+        if node.respond_to?(:expression)
+          target_objects += parse([node.expression])
+        end
+        
         if node.respond_to?(:predicate)
           target_objects += parse([node.predicate])
         end

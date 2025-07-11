@@ -1,3 +1,8 @@
+## [0.1.25] - 2025-07-11
+
+- links section sorting - remove new lines between groups
+- fixed go-to-definition for consts from imports 
+
 ## [0.1.24] - 2025-06-27
 
 - ree 1.2 syntax support

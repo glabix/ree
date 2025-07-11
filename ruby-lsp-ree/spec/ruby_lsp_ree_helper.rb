@@ -26,7 +26,7 @@ module RubyLspReeHelper
       location,
       "ree_object\ntype: :#{type.to_s}",
       sugnatures,
-      RubyIndexer::Entry::Visibility::PUBLIC,
+      :public,
       nil,
     ))
   end
@@ -48,7 +48,7 @@ module RubyLspReeHelper
       location,
       "ree_object\ntype: :#{type.to_s}",
       [],
-      RubyIndexer::Entry::Visibility::PUBLIC,
+      :public,
       nil,
     ))
   end

@@ -1,6 +1,7 @@
 require_relative "../utils/ree_lsp_utils"
 require_relative "../ree_object_finder"
 require_relative '../completion/completion_items_mapper'
+require_relative "../ree_context"
 
 module RubyLsp
   module Ree
@@ -18,6 +19,7 @@ module RubyLsp
         @root_node = @node_context.instance_variable_get(:@nesting_nodes).first
         @finder = ReeObjectFinder.new(@index)
         @mapper = RubyLsp::Ree::CompletionItemsMapper.new(@index)
+        @ree_context = RubyLsp::Ree::ReeContext.new(node_context)
       end
 
       def get_ree_receiver(receiver_node)
@@ -65,7 +67,7 @@ module RubyLsp
 
         parsed_doc = RubyLsp::Ree::ParsedDocumentBuilder.build_from_ast(@root_node, @uri)
 
-        @mapper.map_class_name_objects(class_name_objects.take(CANDIDATES_LIMIT), node, parsed_doc)
+        @mapper.map_class_name_objects(class_name_objects.take(CANDIDATES_LIMIT), node, parsed_doc,  @ree_context)
       end
 
       def get_ree_objects_completions_items(node)
