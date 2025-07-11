@@ -438,7 +438,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
         class SamplePackage::SomeClass
           fn :some_class do
             link :some_import2
-
             link :some_import1, import: -> { SomeConst }
           end
 
@@ -794,7 +793,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           class SamplePackage::SomeClass
             fn :some_class do
               link :some_import
-
               link 'some/file/path', -> { SomeConst }
             end
     
@@ -814,7 +812,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           class SamplePackage::SomeClass
             fn :some_class do
               link :some_import
-
               link 'some/file/path', -> { SomeConst }
             end
     
@@ -834,7 +831,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           class SamplePackage::SomeClass
             fn :some_class do
               link :some_import
-
               link 'some/file/path', -> { SomeConst }
             end
     
@@ -854,7 +850,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           class SamplePackage::SomeClass
             fn :some_class do
               link :some_import
-
               link 'some/file/path', -> { SomeConst }
             end
     
@@ -874,7 +869,6 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
           class SamplePackage::SomeClass
             fn :some_class do
               link :some_import
-          
               link 'some/file/path', -> { SomeConst }
             end
     

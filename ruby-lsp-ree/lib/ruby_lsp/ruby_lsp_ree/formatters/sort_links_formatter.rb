@@ -36,7 +36,7 @@ module RubyLsp
           link_group.map{ renderer.render(_1) }.join('')
         end
 
-        editor.insert_link_block(parsed_doc, link_groups_texts.select{ _1.size > 0 }.join("\n"))
+        editor.insert_link_block(parsed_doc, link_groups_texts.select{ _1.size > 0 }.join(''))
         editor.source
       end
     end
