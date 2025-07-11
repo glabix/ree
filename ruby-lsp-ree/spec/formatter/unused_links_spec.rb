@@ -86,7 +86,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result).to eq(source)
     end
 
-    it "doesn't remove link if it is used in a condition" do
+    it "doesn't remove link if it is used in if condition" do
       source =  <<~RUBY
         class SamplePackage::SomeClass
           fn :some_class do
@@ -105,6 +105,88 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
 
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
       expect(result).to eq(source)
+    end
+
+    it "doesn't remove link if it is used in case condition" do
+      source1 =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_import1
+          end
+
+          def call(arg1)
+            case arg1 
+            when 0
+              return 0
+            when 1
+              some_import1
+            else
+              return nil
+            end
+          end
+        end
+      RUBY
+
+      source2 =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_import1
+          end
+
+          def call(arg1)
+            case arg1 
+            when 1
+              return 1
+            else
+              some_import1
+            end
+          end
+        end
+      RUBY
+
+      source3 =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_import1
+          end
+
+          def call(arg1)
+            case some_import1 
+            when 1
+              return 1
+            else
+              return nil
+            end
+          end
+        end
+      RUBY
+
+      source4 =  <<~RUBY
+        class SamplePackage::SomeClass
+          fn :some_class do
+            link :some_import1
+          end
+
+          def call(arg1)
+            case arg1
+            when some_import1 
+              return 1
+            else
+              return nil
+            end
+          end
+        end
+      RUBY
+
+      result1 = subject.run_formatting(sample_file_uri, ruby_document(source1))
+      result2 = subject.run_formatting(sample_file_uri, ruby_document(source2))
+      result3 = subject.run_formatting(sample_file_uri, ruby_document(source3))
+      result4 = subject.run_formatting(sample_file_uri, ruby_document(source4))
+
+      expect(result1).to eq(source1)
+      expect(result2).to eq(source2)
+      expect(result3).to eq(source3)
+      expect(result4).to eq(source4)
     end
 
     it "doesn't remove link if it is used in a rescue" do
