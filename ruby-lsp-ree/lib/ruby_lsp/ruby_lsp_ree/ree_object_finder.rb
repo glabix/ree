@@ -49,6 +49,13 @@ module RubyLsp
         @index.instance_variable_get(:@entries).values_at(*keys)
       end
 
+      def find_classes(name)
+        keys = @index
+          .names
+          .select{ _1.split('::').last == name}
+        @index.instance_variable_get(:@entries).values_at(*keys)
+      end
+      
       def find_object(name)
         objects_by_name = @index[name]
         return unless objects_by_name
