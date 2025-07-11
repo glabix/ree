@@ -90,7 +90,7 @@ module RubyLsp
         end
       end
 
-      def map_class_name_objects(class_name_objects, node, parsed_doc)
+      def map_class_name_objects(class_name_objects, node, parsed_doc, ree_context)
         imported_consts = []
         not_imported_consts = []
 
@@ -128,6 +128,7 @@ module RubyLsp
                 detail: entry_comment + " #{file_name}"
               )
 
+              addition_edits = ree_context.is_link_object? ? [] : ConstAdditionalTextEditsCreator.call(parsed_doc, class_name, package_name, entry)
               not_imported_consts << Interface::CompletionItem.new(
                 label: class_name,
                 label_details: label_details,
@@ -137,7 +138,7 @@ module RubyLsp
                   new_text: class_name,
                 ),
                 kind: Constant::CompletionItemKind::CLASS,
-                additional_text_edits: ConstAdditionalTextEditsCreator.call(parsed_doc, class_name, package_name, entry)
+                additional_text_edits: addition_edits
               )
             end
           end

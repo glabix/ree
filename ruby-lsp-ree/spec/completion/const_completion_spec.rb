@@ -214,7 +214,7 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
       expect(result.response[0].additional_text_edits.first.new_text).to eq('& User }')
     end
   end
-  
+
   it "adds import section to already linked file path" do
     source = <<~RUBY
       class SomeFn
@@ -279,6 +279,34 @@ RSpec.describe "RubyLsp::Ree::CompletionListener" do
       result = server.pop_response
       expect(result.response.size).to eq(1)
       expect(result.response[0].additional_text_edits.first.new_text).to eq('& User }')
+    end
+  end
+
+  it "doesn't add anything for autocomplete inside import call" do
+    source =  <<~RUBY
+      class SomeFn
+        fn :some_fn do
+          import -> { Us }
+        end
+
+        def something
+        end
+      end
+    RUBY
+
+    file_uri = URI("file:///some_package/package/some_package/some_package_fn.rb")
+
+    with_server(source) do |server, uri|
+      index_class(server, 'User', file_uri)
+
+      send_completion_request(server, uri, { line: 2, character: 18 })
+
+      result = server.pop_response
+
+      expect(result.response.size).to eq(1)
+      expect(result.response[0].label).to eq('User')
+      expect(result.response[0].label_details.description).to eq('from: :some_package')
+      expect(result.response[0].additional_text_edits).to eq([])
     end
   end
 end
