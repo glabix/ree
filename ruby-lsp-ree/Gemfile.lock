@@ -26,11 +26,10 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.2)
-    ruby-lsp (0.23.11)
+    ruby-lsp (0.25.0)
       language_server-protocol (~> 3.17.0)
       prism (>= 1.2, < 2.0)
-      rbs (>= 3, < 4)
-      sorbet-runtime (>= 0.5.10782)
+      rbs (>= 3, < 5)
     sorbet (0.5.11835)
       sorbet-static (= 0.5.11835)
     sorbet-runtime (0.5.11835)
@@ -47,7 +46,7 @@ PLATFORMS
 DEPENDENCIES
   rake (~> 13.0)
   rspec
-  ruby-lsp
+  ruby-lsp (~> 0.25.0)
   ruby-lsp-ree!
   sorbet-static-and-runtime
 
