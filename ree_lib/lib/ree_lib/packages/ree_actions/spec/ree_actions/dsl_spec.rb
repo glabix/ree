@@ -65,6 +65,45 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
     }.to raise_error(ReeActions::ParamError)
   }
 
+   it {
+    module ReeActionsTest
+      include Ree::PackageDSL
+
+      package do
+        depends_on :ree_mapper
+        depends_on :ree_dao
+      end
+
+      class TestActionWithSplatOpts
+        include ReeActions::DSL
+
+        action :test_action_with_splat_opts
+
+        ActionCaster = build_mapper.use(:cast) do
+          integer :user_id
+        end
+
+        contract Any, ActionCaster.dto(:cast), Ksplat[password?: String], Optblock => Integer
+        def call(user_access, attrs, **opts, &proc)
+          proc.call(opts)
+          attrs[:user_id]
+        end
+      end
+    end
+
+    action = ReeActionsTest::TestActionWithSplatOpts.new
+
+    result = action.call('user_access', {user_id: 1}, password: "pass") do |opts|
+      expect(opts[:password]).to eq("pass")
+    end
+
+    expect(result).to eq(1)
+
+    expect {
+      ReeActionsTest::TestAction.new.call('user_access', {user_id: 'not integer'})
+    }.to raise_error(ReeActions::ParamError)
+  }
+
   it {
     module ReeActionsTest
       include Ree::PackageDSL
