@@ -47,7 +47,7 @@ class Roda
           message = <<~DOC
             Request/Response details:
               Request: #{env["REQUEST_METHOD"]} #{env["QUERY_STRING"] && !env["QUERY_STRING"].empty? ? env["SCRIPT_NAME"].to_s + env["PATH_INFO"] + "?#{env["QUERY_STRING"]}": env["SCRIPT_NAME"].to_s + env["PATH_INFO"]} #{opts[:ree_logger_log_params] ? "\n  Params: " + request.params.inspect : ""}
-              Response status: #{response.status || "-"}#{(400..499).include?(response.status) ? "\n  Response body: " + response.body[0] : ""}
+              Response status: #{response.status || "-"}#{(400..499).include?(response.status) ? "\n  Response body: " + response.body[0].to_s : ""}
               Time Taken: #{elapsed_time}
           DOC
 
