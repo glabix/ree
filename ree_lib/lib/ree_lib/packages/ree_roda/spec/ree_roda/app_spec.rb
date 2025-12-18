@@ -110,6 +110,19 @@ RSpec.describe ReeRoda::App do
         default_warden_scope :identity
         opts = {from: :ree_roda_test}
 
+        get "some_other_route" do
+          summary "Another route"
+          warden_scope :visitor
+          sections "some_action"
+          action :cmd, **opts
+          override do |r|
+            r.json do
+              r.response.status = 200
+              "hello"
+            end
+          end
+        end
+
         get "api/action/:id" do
           summary "Some action"
           warden_scope :visitor
@@ -291,5 +304,11 @@ RSpec.describe ReeRoda::App do
   it {
     get "api/serializer_error"
     expect(last_response.status).to eq(500)
+  }
+
+  it {
+    get "some_other_route"
+    expect(last_response.status).to eq(200)
+    expect(last_response.status).not_to eq(404)
   }
 end

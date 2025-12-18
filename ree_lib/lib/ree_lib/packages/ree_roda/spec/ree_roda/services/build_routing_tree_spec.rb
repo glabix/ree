@@ -231,8 +231,9 @@ RSpec.describe :build_routing_tree do
   }
 
   it {
-    tree = build_routing_tree(routes)
+    trees = build_routing_tree(routes)
 
+    tree = trees.first
     # check that all end nodes have routes
     # and that not end nodes don't have route
     id_nodes = [*tree.find_by_value(value: ":id", depth: 2), *tree.find_by_value(value: ":id", depth: 4)]
