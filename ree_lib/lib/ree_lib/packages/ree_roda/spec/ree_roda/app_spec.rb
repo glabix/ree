@@ -75,6 +75,21 @@ RSpec.describe ReeRoda::App do
       end
     end
 
+    class ReeRodaTest::WardenScopeCmd
+      include ReeActions::DSL
+
+      action :warden_scope_cmd
+
+      ActionCaster = build_mapper.use(:cast) do
+        string? :user
+        string? :another_user
+      end
+
+      def call(access, attrs)
+        {result: access.to_s}
+      end
+    end
+
     class ReeRodaTest::ActionCmd
       include ReeActions::DSL
 
@@ -200,6 +215,13 @@ RSpec.describe ReeRoda::App do
           action :serializer_error_cmd, **opts
           serializer :serializer, **opts
         end
+
+        get "check_warden" do
+          summary "Action to check Warden scopes"
+          warden_scope :user, :another_user
+          sections "some_action"
+          action :warden_scope_cmd, **opts
+        end
       end
     end
 
@@ -215,13 +237,43 @@ RSpec.describe ReeRoda::App do
       end
     end
 
+    class UserStrategy < Warden::Strategies::Base
+      include Ree::LinkDSL
+
+      def valid?
+        params = request.params
+        return true if !params["user"].nil?
+      end
+
+      def authenticate!
+        success!({user: "user"})
+      end
+    end
+
+    class AnotherUserStrategy < Warden::Strategies::Base
+      include Ree::LinkDSL
+
+      def valid?
+        params = request.params
+        return true if !params["another_user"].nil?
+      end
+
+      def authenticate!
+        success!({user: "another_user"})
+      end
+    end
+
     Warden::Strategies.add(:visitor, VisitorStrategy)
+    Warden::Strategies.add(:user, UserStrategy)
+    Warden::Strategies.add(:another_user, AnotherUserStrategy)
 
     class TestApp < ReeRoda::App
       use Warden::Manager do |config|
         config.default_strategies :visitor
         config.default_scope = :visitor
         config.scope_defaults :visitor, strategies: [:visitor], store: false
+        config.scope_defaults :user, strategies: [:user], store: false
+        config.scope_defaults :another_user, strategies: [:another_user], store: false
 
         config.failure_app = -> (env) {
           [
@@ -310,5 +362,19 @@ RSpec.describe ReeRoda::App do
     get "some_other_route"
     expect(last_response.status).to eq(200)
     expect(last_response.status).not_to eq(404)
+  }
+
+  it {
+    # first scope is passed
+    get "check_warden?user=hello"
+    expect(last_response.status).to eq(200)
+
+    # second scope is passed
+    get "check_warden?another_user=hello"
+    expect(last_response.status).to eq(200)
+
+    # all scopes failed
+    get "check_warden"
+    expect(last_response.status).to eq(401)
   }
 end

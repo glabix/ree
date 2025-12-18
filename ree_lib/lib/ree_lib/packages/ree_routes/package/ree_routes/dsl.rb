@@ -44,8 +44,8 @@ module ReeRoutes
         Ree.container.compile(@dsl.package, name)
       end
 
-      def default_warden_scope(method_name)
-        @default_warden_scope = method_name
+      def default_warden_scope(*method_names)
+        @default_warden_scopes = method_names
       end
 
       [:get, :post, :put, :delete, :patch, :head, :options].each do |request_method|
@@ -66,8 +66,8 @@ module ReeRoutes
         builder = ReeRoutes::RouteBuilder.new
         builder.instance_exec(&proc)
 
-        if @default_warden_scope && !builder.get_route.warden_scope
-          builder.warden_scope(@default_warden_scope)
+        if @default_warden_scopes && (!builder.get_route.warden_scopes || builder.get_route.warden_scopes.empty?)
+          builder.warden_scope(*@default_warden_scopes)
         end
 
         uri = URI.parse(path) rescue nil

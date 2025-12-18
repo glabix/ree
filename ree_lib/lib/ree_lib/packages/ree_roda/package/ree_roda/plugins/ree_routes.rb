@@ -77,10 +77,28 @@ class Roda
                 r.instance_exec(r, &route.override)
               else
                 r.send(route.respond_to) do
-                  r.env["warden"].authenticate!(scope: route.warden_scope)
+                  authenticated_user = nil
+                  authenticated_scope = nil
+
+                  route.warden_scopes.each do |scope|
+                    if r.env["warden"].authenticate(scope: scope)
+                      user = r.env["warden"].user(scope)
+                      if user
+                        authenticated_user = user
+                        authenticated_scope = scope
+                        break
+                      end
+                    end
+                  end
+
+                  # all scopes are failed, throwing failure
+                  if authenticated_user.nil?
+                    r.env["warden"].custom_failure!
+                    throw(:warden, scope: route.warden_scopes.first, reason: "authentication_failed")
+                  end
 
                   if context.opts[:ree_routes_before]
-                    r.instance_exec(@_request, route.warden_scope, &r.scope.opts[:ree_routes_before])
+                    r.instance_exec(@_request, authenticated_scope, &r.scope.opts[:ree_routes_before])
                   end
 
                   params = r.params
@@ -101,7 +119,7 @@ class Roda
                     v.is_a?(Array) ? v.select { not_blank.call(_1) } : v
                   end
 
-                  accessor = r.env["warden"].user(route.warden_scope)
+                  accessor = authenticated_user
                   action_result = get_cached_action(route).call(accessor, filtered_params)
 
                   if route.serializer
