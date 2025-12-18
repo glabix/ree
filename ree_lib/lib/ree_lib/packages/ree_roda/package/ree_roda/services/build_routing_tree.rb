@@ -88,7 +88,6 @@ class ReeRoda::BuildRoutingTree
     end
 
     def print_proc_tree(tree = self, is_root_array: false)
-      # Если это массив деревьев
       if tree.is_a?(Array)
         puts "Multiple root trees found:"
         tree.each_with_index do |t, i|
@@ -98,18 +97,15 @@ class ReeRoda::BuildRoutingTree
         return nil
       end
 
-      # Для параметризованных корней
       if tree.depth == 0
         param_value = tree.values[0].start_with?(":") ? String : "\"#{tree.values[0]}\""
 
         puts "r.on #{param_value} do"
 
-        # Рекурсивно обрабатываем детей
         tree.children.each do |child|
           print_proc_tree(child)
         end
 
-        # Обработка маршрутов в корневом узле
         if tree.routes.any?
           puts "  r.is do"
           tree.routes.each do |route|
@@ -130,7 +126,6 @@ class ReeRoda::BuildRoutingTree
         puts "end"
 
       else
-        # Для вложенных узлов
         has_arbitrary_param = tree.values[0].start_with?(":")
         param_value = has_arbitrary_param ? String : "\"#{tree.values[0]}\""
 
@@ -139,12 +134,11 @@ class ReeRoda::BuildRoutingTree
         if tree.children.length > 0 || tree.routes.length > 0
           puts "#{indent}r.on #{param_value} do"
 
-          # Обрабатываем детей
+
           tree.children.each do |child|
             print_proc_tree(child)
           end
 
-          # Обрабатываем маршруты в текущем узле
           if tree.routes.any?
             puts "#{indent}  r.is do"
             tree.routes.each do |route|
@@ -184,36 +178,38 @@ class ReeRoda::BuildRoutingTree
       splitted = route.path.split("/").reject(&:empty?)
       matched_tree = nil
 
-      # Ищем дерево с подходящим корнем
+      root_part = splitted[0]
+
+      # find tree for root segment
       trees.each do |tree|
-        if tree.values.include?(splitted[0])
+        if tree.values.include?(root_part)
           matched_tree = tree
           break
         end
       end
 
       if matched_tree.nil?
-        # Создаем новое дерево для этого корня
-        matched_tree = RoutingTree.new([splitted[0]], 0, :string)
+        # create new tree for root
+        matched_tree = RoutingTree.new([root_part], 0, :string)
         trees << matched_tree
       end
 
       parent_tree = matched_tree
 
-      # Добавляем остальные части пути
-      splitted[1..-1].each_with_index do |v, j|
-        current = parent_tree.find_by_value(value: v, depth: j + 1)
+      # process other parts
+      splitted[1..-1].each_with_index do |v, i|
+        current = parent_tree.find_by_value(value: v, depth: i+1)
 
         if current
           parent_tree = current
         else
-          # Проверяем, можно ли добавить к существующему параметризованному узлу
+          # check if we can add it to existing param node
           if parent_tree.children.any? { |c| c.type == :param } && v.start_with?(":")
             param_child = parent_tree.children.find { |c| c.type == :param }
             param_child.values << v if !param_child.values.include?(v)
             parent_tree = param_child
           else
-            new_tree = parent_tree.add_child(v, j + 1, v.start_with?(":") ? :param : :string)
+            new_tree = parent_tree.add_child(v, i+1, v.start_with?(":") ? :param : :string)
             parent_tree = new_tree
           end
         end
