@@ -58,11 +58,13 @@ class Roda
             end
           end
 
-          routing_tree = ReeRoda::BuildRoutingTree.new.call(@ree_routes)
-          route_tree_proc = build_traverse_tree_proc(routing_tree, context)
+          routing_trees = ReeRoda::BuildRoutingTree.new.call(@ree_routes)
 
-          list << Proc.new do |r|
-            r.instance_exec(r, &route_tree_proc)
+          routing_trees.each do |routing_tree|
+            route_tree_proc = build_traverse_tree_proc(routing_tree, context)
+            list << Proc.new do |r|
+              r.instance_exec(r, &route_tree_proc)
+            end
           end
 
           opts[:ree_routes_proc] = list
@@ -75,10 +77,28 @@ class Roda
                 r.instance_exec(r, &route.override)
               else
                 r.send(route.respond_to) do
-                  r.env["warden"].authenticate!(scope: route.warden_scope)
+                  authenticated_user = nil
+                  authenticated_scope = nil
+
+                  route.warden_scopes.each do |scope|
+                    if r.env["warden"].authenticate(scope: scope)
+                      user = r.env["warden"].user(scope)
+                      if user
+                        authenticated_user = user
+                        authenticated_scope = scope
+                        break
+                      end
+                    end
+                  end
+
+                  # all scopes are failed, throwing failure
+                  if authenticated_user.nil?
+                    r.env["warden"].custom_failure!
+                    throw(:warden, scope: route.warden_scopes.first, reason: "authentication_failed")
+                  end
 
                   if context.opts[:ree_routes_before]
-                    r.instance_exec(@_request, route.warden_scope, &r.scope.opts[:ree_routes_before])
+                    r.instance_exec(@_request, authenticated_scope, &r.scope.opts[:ree_routes_before])
                   end
 
                   params = r.params
@@ -99,7 +119,7 @@ class Roda
                     v.is_a?(Array) ? v.select { not_blank.call(_1) } : v
                   end
 
-                  accessor = r.env["warden"].user(route.warden_scope)
+                  accessor = authenticated_user
                   action_result = get_cached_action(route).call(accessor, filtered_params)
 
                   if route.serializer
@@ -128,98 +148,151 @@ class Roda
         end
 
         def build_traverse_tree_proc(tree, context)
-          has_arbitrary_param = tree.values[0].start_with?(":")
-          route_parts = has_arbitrary_param ? tree.values.map { _1.gsub(":", "") } : tree.values
-          procs = []
+          return Proc.new {} if tree.nil?
 
-          child_procs = tree.children.map do |child|
-            build_traverse_tree_proc(child, context)
-          end
-
-          route_procs = tree.routes.map do |route|
-            route_proc(route, context)
-          end
-
-          procs << if tree.children.length > 0
-            if has_arbitrary_param
-              Proc.new do |r|
-                r.on String do |param_val|
-                  route_parts.each do |route_part|
-                    r.params[route_part] = param_val
-                  end
-
-                  child_procs.each do |child_proc|
-                    r.instance_exec(r, &child_proc)
-                  end
-
-                  r.is do
-                    route_procs.each do |route_proc|
-                      r.instance_exec(r, &route_proc)
-                    end
-
-                    nil
-                  end
-
-                  nil
-                end
-              end
-            else
-              Proc.new do |r|
-                r.on route_parts[0] do
-                  child_procs.each do |child_proc|
-                    r.instance_exec(r, &child_proc)
-                  end
-
-                  r.is do
-                    route_procs.each do |route_proc|
-                      r.instance_exec(r, &route_proc)
-                    end
-
-                    nil
-                  end
-
-                  nil
-                end
-              end
-            end
+          if tree.depth == 0
+            process_root_node(tree, context)
           else
-            Proc.new do |r|
-              if has_arbitrary_param
-                r.is String do |param_val|
-                  route_parts.each do |route_part|
-                    r.params[route_part] = param_val
-                  end
-
-                  r.is do
-                    route_procs.each do |route_proc|
-                      r.instance_exec(r, &route_proc)
-                    end
-
-                    nil
-                  end
-
-                  nil
-                end
-              else
-                r.is route_parts[0] do
-                  r.is do
-                    route_procs.each do |route_proc|
-                      r.instance_exec(r, &route_proc)
-                    end
-
-                    nil
-                  end
-
-                  nil
-                end
-              end
-            end
+            process_nested_node(tree, context)
           end
+        end
+
+        def process_root_node(tree, context)
+          root_value = tree.values[0]
+          has_arbitrary_param = root_value.start_with?(":")
+
+          child_procs = build_child_procs(tree, context)
+          route_procs = build_route_procs(tree, context)
+
+          if has_arbitrary_param
+            build_param_root_proc(root_value, child_procs, route_procs)
+          else
+            build_string_root_proc(root_value, child_procs, route_procs)
+          end
+        end
+
+        def process_nested_node(tree, context)
+          has_arbitrary_param = tree.values[0].start_with?(":")
+
+          child_procs = build_child_procs(tree, context)
+          route_procs = build_route_procs(tree, context)
+
+          if has_arbitrary_param
+            build_param_nested_proc(tree, child_procs, route_procs)
+          else
+            build_string_nested_proc(tree, child_procs, route_procs)
+          end
+        end
+
+        def build_param_root_proc(root_value, child_procs, route_procs)
+          param_name = root_value.gsub(":", "")
 
           Proc.new do |r|
-            procs.each do |proc|
-              r.instance_exec(r, &proc)
+            r.on String do |param_val|
+              r.params[param_name] = param_val
+
+              child_procs.each do |child_proc|
+                r.instance_exec(r, &child_proc)
+              end
+
+              if route_procs.any?
+                r.is do
+                  route_procs.each do |route_proc|
+                    r.instance_exec(r, &route_proc)
+                  end
+
+                  nil
+                end
+              end
+
+              nil
             end
+          end
+        end
+
+        def build_string_root_proc(root_value, child_procs, route_procs)
+          Proc.new do |r|
+            r.on root_value do
+              child_procs.each do |child_proc|
+                r.instance_exec(r, &child_proc)
+              end
+
+              if route_procs.any?
+                r.is do
+                  route_procs.each do |route_proc|
+                    r.instance_exec(r, &route_proc)
+                  end
+
+                  nil
+                end
+              end
+
+              nil
+            end
+          end
+        end
+
+        def build_param_nested_proc(tree, child_procs, route_procs)
+          route_parts = tree.values.map { |v| v.gsub(":", "") }
+
+          Proc.new do |r|
+            r.on String do |param_val|
+              route_parts.each do |route_part|
+                r.params[route_part] = param_val
+              end
+
+              child_procs.each do |child_proc|
+                r.instance_exec(r, &child_proc)
+              end
+
+              if route_procs.any?
+                r.is do
+                  route_procs.each do |route_proc|
+                    r.instance_exec(r, &route_proc)
+                  end
+
+                  nil
+                end
+              end
+
+              nil
+            end
+          end
+        end
+
+        def build_string_nested_proc(tree, child_procs, route_procs)
+          route_part = tree.values[0]
+
+          Proc.new do |r|
+            r.on route_part do
+              child_procs.each do |child_proc|
+                r.instance_exec(r, &child_proc)
+              end
+
+              if route_procs.any?
+                r.is do
+                  route_procs.each do |route_proc|
+                    r.instance_exec(r, &route_proc)
+                  end
+
+                  nil
+                end
+              end
+
+              nil
+            end
+          end
+        end
+
+        def build_child_procs(tree, context)
+          tree.children.map do |child|
+            build_traverse_tree_proc(child, context)
+          end
+        end
+
+        def build_route_procs(tree, context)
+          tree.routes.map do |route|
+            route_proc(route, context)
           end
         end
       end

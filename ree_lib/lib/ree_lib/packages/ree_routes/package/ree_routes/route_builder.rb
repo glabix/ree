@@ -10,9 +10,9 @@ class ReeRoutes::RouteBuilder
     @route.respond_to = :json
   end
 
-  contract Symbol => Symbol
-  def warden_scope(scope)
-    @route.warden_scope = scope
+  contract SplatOf[Symbol] => ArrayOf[Symbol]
+  def warden_scope(*scopes)
+    @route.warden_scopes = scopes.flatten
   end
 
   contract Symbol => Symbol

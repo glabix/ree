@@ -50,18 +50,20 @@ RSpec.describe ReeRoutes::DSL, type: [:autoclean] do
       include ReeRoutes::DSL
 
       routes :routes do
-        default_warden_scope :user
+        default_warden_scope :identity, :user
 
         post "users" do
           summary "Test route"
           action :cmd, from: :ree_routes_test
           serializer :serializer, from: :ree_routes_test
+          warden_scope :identity, :user
           respond_to :json
         end
 
         get "files.csv" do
           summary "Test route"
           action :cmd, from: :ree_routes_test
+          warden_scope :user
           respond_to :csv
         end
       end

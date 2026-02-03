@@ -59,7 +59,24 @@ class ReeRoda::BuildRoutingTree
     end
 
     def print_tree(tree = self)
-      puts "#{get_offset(tree.depth)}#{tree.values.inspect} - #{tree.depth}"
+      if tree.is_a?(Array)
+        puts "Multiple trees:"
+        tree.each_with_index do |t, i|
+          puts "\nTree #{i + 1}:"
+          print_tree(t)
+        end
+        return nil
+      end
+
+      puts "#{get_offset(tree.depth)}#{tree.values.inspect} - depth: #{tree.depth}, type: #{tree.type}"
+
+      if tree.routes.any?
+        tree.routes.each do |route|
+          puts "#{get_offset(tree.depth + 1)}- #{route.request_method} #{route.path}"
+          puts "#{get_offset(tree.depth + 2)}  summary: #{route.summary}"
+          puts "#{get_offset(tree.depth + 2)}  override: #{route.override ? 'YES' : 'NO'}"
+        end
+      end
 
       if tree.children.length > 0
         tree.children.each do |child|
@@ -70,48 +87,76 @@ class ReeRoda::BuildRoutingTree
       nil
     end
 
-    def print_proc_tree(tree = self)
-      param_value = tree.values[0].start_with?(":") ? String : "\"#{tree.values[0]}\""
+    def print_proc_tree(tree = self, is_root_array: false)
+      if tree.is_a?(Array)
+        puts "Multiple root trees found:"
+        tree.each_with_index do |t, i|
+          puts "\nTree #{i + 1}:"
+          print_proc_tree(t)
+        end
+        return nil
+      end
 
-      if tree.routes.length == 0
-        if tree.children.length > 0
-          puts "#{get_offset(tree.depth)}r.on #{param_value} do"
+      if tree.depth == 0
+        param_value = tree.values[0].start_with?(":") ? String : "\"#{tree.values[0]}\""
 
-          tree.children.each do |child|
-            print_proc_tree(child)
-          end
+        puts "r.on #{param_value} do"
 
-          puts "#{get_offset(tree.depth)}end"
+        tree.children.each do |child|
+          print_proc_tree(child)
         end
 
-        nil
+        if tree.routes.any?
+          puts "  r.is do"
+          tree.routes.each do |route|
+            puts "    r.#{route.request_method} do"
+            if route.override
+              puts "      # OVERRIDE: custom logic"
+              puts "      # Summary: #{route.summary}"
+            else
+              puts "      # Action: #{route.action&.name}"
+              puts "      # Serializer: #{route.serializer&.name}" if route.serializer
+              puts "      # Warden scope: #{route.warden_scope}"
+            end
+            puts "    end"
+          end
+          puts "  end"
+        end
+
+        puts "end"
+
       else
-        if tree.children.length > 0
-          puts "#{get_offset(tree.depth)}r.on #{param_value} do"
+        has_arbitrary_param = tree.values[0].start_with?(":")
+        param_value = has_arbitrary_param ? String : "\"#{tree.values[0]}\""
+
+        indent = "  " * tree.depth
+
+        if tree.children.length > 0 || tree.routes.length > 0
+          puts "#{indent}r.on #{param_value} do"
+
 
           tree.children.each do |child|
             print_proc_tree(child)
           end
 
-          puts "#{get_offset(tree.depth + 1)}r.is do"
-          tree.routes.each do |route|
-            puts "#{get_offset(tree.depth + 2)}r.#{route.request_method} do"
-            puts "#{get_offset(tree.depth + 2)}end"
+          if tree.routes.any?
+            puts "#{indent}  r.is do"
+            tree.routes.each do |route|
+              puts "#{indent}    r.#{route.request_method} do"
+              if route.override
+                puts "#{indent}      # OVERRIDE: custom logic"
+                puts "#{indent}      # Summary: #{route.summary}"
+              else
+                puts "#{indent}      # Action: #{route.action&.name}"
+                puts "#{indent}      # Serializer: #{route.serializer&.name}" if route.serializer
+                puts "#{indent}      # Warden scope: #{route.warden_scope}"
+              end
+              puts "#{indent}    end"
+            end
+            puts "#{indent}  end"
           end
-          puts "#{get_offset(tree.depth + 1)}end"
 
-          puts "#{get_offset(tree.depth)}end"
-        else
-          puts "#{get_offset(tree.depth)}r.is #{param_value} do"
-
-          puts "#{get_offset(tree.depth + 1)}r.is do"
-          tree.routes.each do |route|
-            puts "#{get_offset(tree.depth + 2)}r.#{route.request_method} do"
-            puts "#{get_offset(tree.depth + 2)}end"
-          end
-          puts "#{get_offset(tree.depth + 1)}end"
-
-          puts "#{get_offset(tree.depth)}end"
+          puts "#{indent}end"
         end
       end
 
@@ -125,46 +170,54 @@ class ReeRoda::BuildRoutingTree
     end
   end
 
-  contract(ArrayOf[ReeRoutes::Route] => Nilor[RoutingTree])
+  contract(ArrayOf[ReeRoutes::Route] => ArrayOf[RoutingTree])
   def call(routes)
-    tree = nil
+    trees = []
 
     routes.each do |route|
-      splitted = route.path.split("/")
-      parent_tree = tree
+      splitted = route.path.split("/").reject(&:empty?)
+      matched_tree = nil
 
-      splitted.each_with_index do |v, j|
-        if tree.nil?
-          tree = RoutingTree.new([v], j, :string)
-          parent_tree = tree
-          next
+      root_part = splitted[0]
+
+      # find tree for root segment
+      trees.each do |tree|
+        if tree.values.include?(root_part)
+          matched_tree = tree
+          break
         end
+      end
 
-        current = parent_tree.find_by_value(value: v, depth: j)
+      if matched_tree.nil?
+        # create new tree for root
+        matched_tree = RoutingTree.new([root_part], 0, :string)
+        trees << matched_tree
+      end
+
+      parent_tree = matched_tree
+
+      # process other parts
+      splitted[1..-1].each_with_index do |v, i|
+        current = parent_tree.find_by_value(value: v, depth: i+1)
 
         if current
           parent_tree = current
-          current.add_route(route) if j == (splitted.length - 1)
         else
-          if !parent_tree.any_child_has_value?(v)
-            if parent_tree.children.any? { |c| c.type == :param } && v.start_with?(":")
-              param_child = parent_tree.children.find { |c| c.type == :param }
-              param_child.values << v if !param_child.values.include?(v)
-              param_child.add_route(route) if j == (splitted.length - 1)
-              parent_tree = param_child
-
-              next
-            end
-
-            new_tree = parent_tree.add_child(v, j, v.start_with?(":") ? :param : :string)
+          # check if we can add it to existing param node
+          if parent_tree.children.any? { |c| c.type == :param } && v.start_with?(":")
+            param_child = parent_tree.children.find { |c| c.type == :param }
+            param_child.values << v if !param_child.values.include?(v)
+            parent_tree = param_child
+          else
+            new_tree = parent_tree.add_child(v, i+1, v.start_with?(":") ? :param : :string)
             parent_tree = new_tree
           end
-
-          parent_tree.add_route(route) if j == (splitted.length - 1)
         end
       end
+
+      parent_tree.add_route(route)
     end
 
-    tree
+    trees
   end
 end
