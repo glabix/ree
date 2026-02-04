@@ -5,12 +5,12 @@ class ReeDate::Tomorrow
 
   fn :tomorrow do
     link :today
-    link :advance
+    link :advance_date
   end
 
   doc("Returns a new date representing tomorrow.")
   contract(Nilor[Date] => Date)
   def call(date = nil)
-    advance(date || today, days: 1)
+    advance_date(date || today, days: 1)
   end
 end
