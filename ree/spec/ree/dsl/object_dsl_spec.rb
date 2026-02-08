@@ -200,4 +200,32 @@ RSpec.describe Ree::ObjectDsl do
 
     expect(ObjectDslPackage::ObjectClass6.new.call).to eq(6)
   end
+
+  it 'applies on_link hook' do
+    module ObjectDslPackage
+      class OnLinkFn
+        include Ree::FnDSL
+
+        fn :on_link_fn do
+          on_link do |target_class|
+            target_class.define_singleton_method(:on_link_value) { "Hello from OnLinkFn" }
+          end
+        end
+
+        def call = nil
+      end
+
+      class OnLinkedFn
+        include Ree::FnDSL
+
+        fn :on_linked_fn do
+          link :on_link_fn
+        end
+
+        def call = self.class.on_link_value
+      end
+    end
+
+    expect(ObjectDslPackage::OnLinkedFn.new.call).to eq("Hello from OnLinkFn")
+  end
 end
