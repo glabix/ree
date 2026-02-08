@@ -160,15 +160,35 @@ class Ree::ObjectCompiler
       #{str}
     ruby_eval
 
-    if Ree.benchmark_mode? && object.fn? && !klass.instance_variable_get(:@__ree_benchmark_prepended)
-      klass.instance_variable_set(:@__ree_benchmark_prepended, true)
+    if Ree.benchmark_mode? && object.fn? && !klass.method_defined?(:__call_without_benchmark)
       benchmark_name = "#{object.package_name}/#{object.name}"
-      benchmark_mod = Module.new do
-        define_method(:call) do |*args, **kwargs, &block|
-          Ree::BenchmarkTracer.trace(benchmark_name) { super(*args, **kwargs, &block) }
+
+      wrap_call_with_benchmark = proc do |target_klass|
+        target_klass.alias_method(:__call_without_benchmark, :call)
+
+        target_klass.define_method(:call) do |*args, **kwargs, &block|
+          Ree::BenchmarkTracer.trace(benchmark_name) do
+            __call_without_benchmark(*args, **kwargs, &block)
+          end
         end
       end
-      klass.prepend(benchmark_mod)
+
+      if klass.method_defined?(:call)
+        wrap_call_with_benchmark.call(klass)
+      else
+        klass.instance_variable_set(:@__ree_benchmark_wrap, wrap_call_with_benchmark)
+
+        klass.define_singleton_method(:method_added) do |method_name|
+          if method_name == :call && !method_defined?(:__call_without_benchmark)
+            wrap = instance_variable_get(:@__ree_benchmark_wrap)
+            if wrap
+              remove_instance_variable(:@__ree_benchmark_wrap)
+              wrap.call(self)
+            end
+          end
+          super(method_name)
+        end
+      end
     end
 
     # compile all linked objects

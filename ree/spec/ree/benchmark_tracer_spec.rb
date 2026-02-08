@@ -75,6 +75,7 @@ RSpec.describe Ree::BenchmarkTracer do
 
         fn :inner_fn
 
+        contract None => Any
         def call
           :inner_result
         end
@@ -87,6 +88,7 @@ RSpec.describe Ree::BenchmarkTracer do
           link :inner_fn
         end
 
+        contract None => Any
         def call
           inner_fn
         end
@@ -100,6 +102,7 @@ RSpec.describe Ree::BenchmarkTracer do
           link :inner_fn
         end
 
+        contract None => Any
         def call
           inner_fn
         end
@@ -138,15 +141,22 @@ RSpec.describe Ree::BenchmarkTracer do
       expect(lines[1]).to match(/^  benchmark_test_pkg\/inner_fn \(\d+\.\d+ms\)$/)
     end
 
-    it 'does not double-prepend on recompilation' do
+    it 'does not double-wrap on recompilation' do
       klass = BenchmarkTestPkg::InnerFn
-      ancestors_before = klass.ancestors.dup
+
+      methods_before = klass.instance_methods.grep(/benchmark/)
 
       obj = Ree.container.packages_facade.get_package(:benchmark_test_pkg).get_object(:inner_fn)
       obj.set_as_compiled(false)
       Ree::ObjectCompiler.new(Ree.container.packages_facade).call(:benchmark_test_pkg, :inner_fn)
 
-      expect(klass.ancestors).to eq(ancestors_before)
+      methods_after = klass.instance_methods.grep(/benchmark/)
+      expect(methods_after).to eq(methods_before)
+
+      output = with_captured_stdout do
+        klass.new.call
+      end
+      expect(output).to match(/^benchmark_test_pkg\/inner_fn \(\d+\.\d+ms\)\n$/)
     end
   end
 
