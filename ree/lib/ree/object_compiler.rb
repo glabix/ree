@@ -199,6 +199,8 @@ class Ree::ObjectCompiler
       if !obj.compiled?
         self.call(obj.package_name, obj.name)
       end
+
+      obj.on_link&.call(klass)
     end
 
     object

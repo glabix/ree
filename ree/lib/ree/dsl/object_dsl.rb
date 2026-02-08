@@ -134,6 +134,11 @@ class Ree::ObjectDsl
     @object.set_as_with_caller
   end
 
+  # @param [Proc] block
+  def on_link(&block)
+    @object.set_on_link(block)
+  end
+
   # @param [Symbol] method_name
   def factory(method_name)
     if !@object.object?
