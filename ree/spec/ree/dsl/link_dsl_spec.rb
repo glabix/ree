@@ -39,6 +39,18 @@ RSpec.describe Ree::LinkDSL do
         2
       end
     end
+
+    class OnLinkFn
+      include Ree::FnDSL
+
+      fn :on_link_fn do
+        on_link do |target_class|
+          target_class.define_singleton_method(:on_link_value) { "Hello from OnLinkFn" }
+        end
+      end
+
+      def call = nil
+    end
   end
 
   Ree.disable_irb_mode
@@ -230,5 +242,17 @@ RSpec.describe Ree::LinkDSL do
       expect(TestClass.new.call1).to eq(4)
       expect(TestClass.new.call2).to eq(3)
     }
+  end
+
+  context "on_link hook" do
+    it do
+      class OnLinkedTestClass
+        include Ree::LinkDSL
+  
+        link :test_fn, :on_link_fn, from: :test_link_dsl
+      end
+
+      expect(OnLinkedTestClass.on_link_value).to eq("Hello from OnLinkFn")
+    end
   end
 end
