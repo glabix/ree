@@ -23,6 +23,10 @@
       "entry_path": "packages/ree_datetime/package/ree_datetime.rb"
     },
     {
+      "name": "ree_decorators",
+      "entry_path": "packages/ree_decorators/package/ree_decorators.rb"
+    },
+    {
       "name": "ree_dto",
       "entry_path": "packages/ree_dto/package/ree_dto.rb"
     },
@@ -99,7 +103,5 @@
       "entry_path": "packages/ree_validator/package/ree_validator.rb"
     }
   ],
-  "gem_packages": [
-
-  ]
+  "gem_packages": []
 }
