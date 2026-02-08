@@ -160,6 +160,17 @@ class Ree::ObjectCompiler
       #{str}
     ruby_eval
 
+    if Ree.benchmark_mode? && object.fn? && !klass.instance_variable_get(:@__ree_benchmark_prepended)
+      klass.instance_variable_set(:@__ree_benchmark_prepended, true)
+      benchmark_name = "#{object.package_name}/#{object.name}"
+      benchmark_mod = Module.new do
+        define_method(:call) do |*args, **kwargs, &block|
+          Ree::BenchmarkTracer.trace(benchmark_name) { super(*args, **kwargs, &block) }
+        end
+      end
+      klass.prepend(benchmark_mod)
+    end
+
     # compile all linked objects
     links.each do |link|
       pckg = @packages_facade.get_loaded_package(link.package_name)

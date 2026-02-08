@@ -8,6 +8,7 @@ require 'fileutils'
 module Ree
   autoload :Args, 'ree/args'
   autoload :BeanDSL, 'ree/bean_dsl'
+  autoload :BenchmarkTracer, 'ree/benchmark_tracer'
   autoload :CLI, 'ree/cli'
   autoload :Container, 'ree/container'
   autoload :Contracts, 'ree/contracts'
@@ -107,6 +108,18 @@ module Ree
 
     def irb_mode?
       !!@irb_mode
+    end
+
+    def enable_benchmark_mode
+      @benchmark_mode = true
+    end
+
+    def disable_benchmark_mode
+      @benchmark_mode = false
+    end
+
+    def benchmark_mode?
+      !!@benchmark_mode
     end
 
     def set_logger_debug
