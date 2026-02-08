@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ree (1.2.0)
+    ree (1.2.1)
       commander (~> 5.0.0)
       logger (~> 1.6.5)
 
