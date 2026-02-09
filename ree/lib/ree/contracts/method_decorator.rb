@@ -51,21 +51,18 @@ module Ree::Contracts
       @doc = engine.fetch_doc
     end
 
-    def call
-      return if Ree::Contracts.no_contracts?
-      return unless contract_definition
+    def call(plugin_mode: true)
+      return nil if Ree::Contracts.no_contracts?
+      return nil unless contract_definition
 
+      # Store decorator for runtime lookups (still needed)
       self.class.add_decorator(self)
 
-      original_alias = :"__ree_original_#{method_name}"
-      param_source = if alias_target.method_defined?(original_alias)
-        original_alias
-      else
-        method_name
-      end
-
+      # Get method parameters from the method (before aliasing)
+      # Note: We get params from the current method, not __ree_original_#{method_name}
+      # because the alias hasn't been created yet when plugins are called
       @method_parameters = alias_target
-        .instance_method(param_source)
+        .instance_method(method_name)
         .parameters
         .freeze
 
@@ -77,31 +74,18 @@ module Ree::Contracts
 
       @return_validator = Validators.fetch_for(contract_definition.return_contract)
 
-      make_alias
-      make_definition
-    end
-
-    def execute_on(target, args, kwargs, &blk)
-      @args.call(args, kwargs, blk)
-      result = target.send(method_alias, *args, **kwargs, &blk)
-
-      if !return_validator.call(result)
-        raise ReturnContractError, "Invalid return value for #{printed_name}\n  #{
-          return_validator.message(result, 'returns', 0).strip
-        }"
+      if plugin_mode
+        # Plugin mode: Return wrapper lambda for composition
+        build_contract_wrapper
+      else
+        # Legacy mode: Apply wrapper directly (for Contractable standalone usage)
+        apply_contract_wrapper_directly
       end
-
-      result
     end
 
     # Unique ID of this Method Decorator
     def id
       @id ||= self.class.decorator_id(target, method_name, is_class_method)
-    end
-
-    # Alias name for original method
-    def method_alias
-      @method_alias ||= :"__original_#{method_name}_#{SecureRandom.hex}"
     end
 
     # Target class to be used for alias method definition
@@ -112,54 +96,90 @@ module Ree::Contracts
       end
     end
 
-    private
+    # Public method used by legacy contract wrapper (called from class_eval'd method)
+    def validate_and_call(instance, method_alias, args, kwargs, &blk)
+      @args.call(args, kwargs, blk)
+      result = instance.send(method_alias, *args, **kwargs, &blk)
 
-    def make_alias
-      alias_target.alias_method(method_alias, method_name)
+      unless @return_validator.call(result)
+        raise ReturnContractError, "Invalid return value for #{printed_name}\n  #{
+          @return_validator.message(result, 'returns', 0).strip
+        }"
+      end
+
+      result
     end
 
-    def make_definition
+    private
+
+    def build_contract_wrapper
+      args_validator = @args
+      return_validator = @return_validator
+      decorator_printed_name = printed_name
+
+      Proc.new do |instance, next_layer, *args, **kwargs, &block|
+        # Validate arguments
+        args_validator.call(args, kwargs, block)
+
+        # Call next layer
+        result = next_layer.call(*args, **kwargs, &block)
+
+        # Validate return value
+        unless return_validator.call(result)
+          raise ReturnContractError, "Invalid return value for #{decorator_printed_name}\n  #{
+            return_validator.message(result, 'returns', 0).strip
+          }"
+        end
+
+        result
+      end
+    end
+
+    def apply_contract_wrapper_directly
+      # Legacy mode for Contractable standalone usage
+      # Detect visibility BEFORE creating alias
+      visibility = if alias_target.private_instance_methods.include?(method_name)
+        :private
+      elsif alias_target.protected_instance_methods.include?(method_name)
+        :protected
+      else
+        :public
+      end
+
+      # Create our own alias and wrapper
+      method_alias = :"__original_#{method_name}_#{SecureRandom.hex}"
+      alias_target.alias_method(method_alias, method_name)
+
+      args_validator = @args
+      return_validator = @return_validator
+      decorator_printed_name = printed_name
+
       file, line = alias_target.instance_method(method_alias).source_location
 
       alias_target.class_eval(%Q(
         def #{method_name}(*args, **kwargs, &blk)
           decorator = Ree::Contracts::MethodDecorator.get_decorator('#{id}')
-          decorator.execute_on(self, args, kwargs, &blk)
+          decorator.validate_and_call(self, #{method_alias.inspect}, args, kwargs, &blk)
         end
       ), file, line - 3)
 
-      make_private if private_method?
-      make_protected if protected_method?
+      # Restore visibility
+      case visibility
+      when :private
+        alias_target.send(:private, method_name, method_alias)
+      when :protected
+        alias_target.send(:protected, method_name, method_alias)
+      end
     end
 
     def private_method?
-      return target.private_methods.include?(method_alias) if is_class_method
-      target.private_instance_methods.include?(method_alias)
+      return target.private_methods.include?(method_name) if is_class_method
+      target.private_instance_methods.include?(method_name)
     end
 
     def protected_method?
-      return target.protected_methods.include?(method_alias) if is_class_method
-      target.protected_instance_methods.include?(method_alias)
-    end
-
-    def make_private
-      _method_name = method_name
-      _method_alias = method_alias
-
-      alias_target.class_eval do
-        private _method_name
-        private _method_alias
-      end
-    end
-
-    def make_protected
-      _method_name = method_name
-      _method_alias = method_alias
-
-      alias_target.class_eval do
-        protected _method_name
-        protected _method_alias
-      end
+      return target.protected_methods.include?(method_name) if is_class_method
+      target.protected_instance_methods.include?(method_name)
     end
 
     def printed_name

@@ -12,66 +12,48 @@ class Ree::BenchmarkMethodPlugin
   end
 
   def call
-    return unless @method_name == :call && ree_fn?
+    return nil unless @method_name == :call && ree_fn?
 
     config = @target.instance_variable_get(:@__ree_benchmark_config)
-    
+    benchmark_name = build_benchmark_name
+
     if config
-      wrap_as_entry_point(config)
+      build_entry_point_wrapper(benchmark_name, config)
     else
-      wrap_as_collector
+      build_collector_wrapper(benchmark_name)
     end
   end
 
   private
 
-  def wrap_as_entry_point(config)
-    alias_target = @is_class_method ? eigenclass : @target
-    method_name = @method_name
-    method_alias = :"__benchmark_#{method_name}"
-
-    return if alias_target.method_defined?(method_alias)
-
-    alias_target.alias_method(method_alias, method_name)
-
-    benchmark_name = build_benchmark_name
-    output_proc = config[:output] || -> (res) { $stdout.puts(res) }
+  def build_entry_point_wrapper(benchmark_name, config)
+    output_proc = config[:output] || ->(res) { $stdout.puts(res) }
     deep = config.fetch(:deep, true)
     once = config.fetch(:once, false)
     benchmark_done = false
 
-    alias_target.define_method(method_name) do |*args, **kwargs, &block|
+    Proc.new do |instance, next_layer, *args, **kwargs, &block|
       if Ree::BenchmarkTracer.active?
         Ree::BenchmarkTracer.collect(benchmark_name) do
-          send(method_alias, *args, **kwargs, &block)
+          next_layer.call(*args, **kwargs, &block)
         end
       elsif once && benchmark_done
         Ree::BenchmarkTracer.collect(benchmark_name) do
-          send(method_alias, *args, **kwargs, &block)
+          next_layer.call(*args, **kwargs, &block)
         end
       else
         benchmark_done = true if once
         Ree::BenchmarkTracer.trace(benchmark_name, output_proc: output_proc, deep: deep) do
-          send(method_alias, *args, **kwargs, &block)
+          next_layer.call(*args, **kwargs, &block)
         end
       end
     end
   end
 
-  def wrap_as_collector
-    alias_target = @is_class_method ? eigenclass : @target
-    method_name = @method_name
-    method_alias = :"__benchmark_#{method_name}"
-
-    return if alias_target.method_defined?(method_alias)
-
-    alias_target.alias_method(method_alias, method_name)
-
-    benchmark_name = build_benchmark_name
-
-    alias_target.define_method(method_name) do |*args, **kwargs, &block|
+  def build_collector_wrapper(benchmark_name)
+    Proc.new do |instance, next_layer, *args, **kwargs, &block|
       Ree::BenchmarkTracer.collect(benchmark_name) do
-        send(method_alias, *args, **kwargs, &block)
+        next_layer.call(*args, **kwargs, &block)
       end
     end
   end
@@ -98,9 +80,5 @@ class Ree::BenchmarkMethodPlugin
     return false unless facade.has_object?(pkg, obj)
 
     facade.get_object(pkg, obj).fn?
-  end
-
-  def eigenclass
-    class << @target; self; end
   end
 end

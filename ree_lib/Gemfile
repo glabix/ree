@@ -5,6 +5,9 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in ree_lib.gemspec
 gemspec
 
+# Use local ree gem for development
+gem "ree", path: "../ree"
+
 gem "rake", "~> 13.0"
 
 group :test do

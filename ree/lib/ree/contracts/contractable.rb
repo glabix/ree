@@ -7,14 +7,14 @@ require_relative 'engine_proxy'
 module Ree::Contracts
   module Contractable
     def method_added(name)
-      return if _ree_method_added_hook_active?
-      MethodDecorator.new(name, false, self).call
+      return super if _ree_method_added_hook_active?
+      MethodDecorator.new(name, false, self).call(plugin_mode: false)
       super
     end
 
     def singleton_method_added(name)
-      return if _ree_method_added_hook_active?
-      MethodDecorator.new(name, true, self).call
+      return super if _ree_method_added_hook_active?
+      MethodDecorator.new(name, true, self).call(plugin_mode: false)
       super
     end
 

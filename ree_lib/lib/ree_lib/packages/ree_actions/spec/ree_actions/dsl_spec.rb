@@ -25,11 +25,13 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
   end
 
   before do
+    Ree.enable_benchmark_mode
     Ree.enable_irb_mode
   end
 
   after do
     Ree.disable_irb_mode
+    Ree.disable_benchmark_mode
   end
 
   it {
@@ -41,10 +43,24 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
         depends_on :ree_dao
       end
 
+      class TestFn
+        include Ree::FnDSL
+
+        fn :test_fn
+
+        contract None = Integer
+        def call
+          1
+        end
+      end
+
       class TestAction
         include ReeActions::DSL
 
-        action :test_action
+        action :test_action do
+          benchmark
+          link :test_fn
+        end
 
         ActionCaster = build_mapper.use(:cast) do
           integer :user_id
@@ -52,6 +68,7 @@ RSpec.describe ReeActions::DSL, type: [:autoclean] do
 
         contract Any, ActionCaster.dto(:cast) => Integer
         def call(user_access, attrs)
+          test_fn
           attrs[:user_id]
         end
       end
