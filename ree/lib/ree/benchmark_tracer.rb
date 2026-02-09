@@ -34,6 +34,11 @@ class Ree::BenchmarkTracer
       result
     end
 
+    def active?
+      stack = Thread.current[THREAD_KEY]
+      stack && !stack.empty?
+    end
+
     # Collector trace — only participates if a trace is already active
     def collect(name)
       stack = Thread.current[THREAD_KEY]

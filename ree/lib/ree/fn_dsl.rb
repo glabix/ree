@@ -21,9 +21,6 @@ module Ree::FnDSL
       dsl.tags(["fn"])
       dsl.object.set_as_compiled(false)
 
-      self.instance_variable_set(:@__ree_package_name, dsl.package.name)
-      self.instance_variable_set(:@__ree_object_name, name)
-
       Ree.container.compile(dsl.package, name)
     end
   end

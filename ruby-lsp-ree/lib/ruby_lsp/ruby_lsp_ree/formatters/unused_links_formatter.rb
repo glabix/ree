@@ -51,7 +51,10 @@ module RubyLsp
 
         if removed_links == links_count
           parsed_doc.parse_links_container_node
-          editor.remove_link_block(parsed_doc.links_container_node, parsed_doc.links_container_block_node)
+
+          if !has_non_link_dsl_calls?(parsed_doc)
+            editor.remove_link_block(parsed_doc.links_container_node, parsed_doc.links_container_block_node)
+          end
         end
 
         editor.source
@@ -65,6 +68,17 @@ module RubyLsp
 
       def link_object_is_used?(parsed_doc, link_node, linked_object)
         editor.contains_linked_object_usage?(parsed_doc, link_node, linked_object) || dsl_parser.contains_object_usage?(linked_object.usage_name)
+      end
+
+      NON_LINK_DSL_METHODS = [:benchmark, :singleton, :freeze, :with_caller, :factory, :after_init, :target, :tags].freeze
+
+      def has_non_link_dsl_calls?(parsed_doc)
+        block_node = parsed_doc.links_container_block_node
+        return false unless block_node&.body&.body
+
+        block_node.body.body.any? do |node|
+          node.is_a?(Prism::CallNode) && NON_LINK_DSL_METHODS.include?(node.name)
+        end
       end
     end
   end

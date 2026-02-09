@@ -333,6 +333,11 @@ class Ree::ObjectDsl
       .set_package(package.name)
       .set_rpath(object_rpath)
 
+    if mount_as == :fn
+      klass.instance_variable_set(:@__ree_package_name, package.name)
+      klass.instance_variable_set(:@__ree_object_name, object_name)
+    end
+
     package.set_object(object)
     object.set_loaded
 

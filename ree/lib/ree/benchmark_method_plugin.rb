@@ -12,14 +12,14 @@ class Ree::BenchmarkMethodPlugin
   end
 
   def call
-    config = @target.instance_variable_get(:@__ree_benchmark_config)
+    return unless @method_name == :call && ree_fn?
 
-    if @method_name == :call
-      if config
-        wrap_as_entry_point(config)
-      else
-        wrap_as_collector
-      end
+    config = @target.instance_variable_get(:@__ree_benchmark_config)
+    
+    if config
+      wrap_as_entry_point(config)
+    else
+      wrap_as_collector
     end
   end
 
@@ -41,7 +41,11 @@ class Ree::BenchmarkMethodPlugin
     benchmark_done = false
 
     alias_target.define_method(method_name) do |*args, **kwargs, &block|
-      if once && benchmark_done
+      if Ree::BenchmarkTracer.active?
+        Ree::BenchmarkTracer.collect(benchmark_name) do
+          send(method_alias, *args, **kwargs, &block)
+        end
+      elsif once && benchmark_done
         Ree::BenchmarkTracer.collect(benchmark_name) do
           send(method_alias, *args, **kwargs, &block)
         end
@@ -83,6 +87,17 @@ class Ree::BenchmarkMethodPlugin
     end
 
     @method_name == :call ? base : "#{base}##{@method_name}"
+  end
+
+  def ree_fn?
+    pkg = @target.instance_variable_get(:@__ree_package_name)
+    obj = @target.instance_variable_get(:@__ree_object_name)
+    return false unless pkg && obj
+
+    facade = Ree.container.packages_facade
+    return false unless facade.has_object?(pkg, obj)
+
+    facade.get_object(pkg, obj).fn?
   end
 
   def eigenclass
