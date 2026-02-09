@@ -12,6 +12,7 @@ class Accounts::RegisterAccountCmd
   fn :register_account_cmd do
     singleton
     freeze false
+    benchmark once: false, deep: true
 
     link :build_user, import: -> { User }
     link :except, from: :hash_utils
