@@ -8,6 +8,7 @@ require 'fileutils'
 module Ree
   autoload :Args, 'ree/args'
   autoload :BeanDSL, 'ree/bean_dsl'
+  autoload :BenchmarkMethodPlugin, 'ree/benchmark_method_plugin'
   autoload :BenchmarkTracer, 'ree/benchmark_tracer'
   autoload :CLI, 'ree/cli'
   autoload :Container, 'ree/container'
@@ -22,6 +23,7 @@ module Ree
   autoload :LinkDSL, 'ree/link_dsl'
   autoload :LinkImportBuilder, 'ree/dsl/link_import_builder'
   autoload :LinkValidator, 'ree/core/link_validator'
+  autoload :MethodAddedHook, 'ree/method_added_hook'
   autoload :Object, 'ree/core/object'
   autoload :ObjectCompiler, 'ree/object_compiler'
   autoload :ObjectDsl, 'ree/dsl/object_dsl'
@@ -120,6 +122,14 @@ module Ree
 
     def benchmark_mode?
       !!@benchmark_mode
+    end
+
+    def method_added_plugins
+      @method_added_plugins ||= []
+    end
+
+    def register_method_added_plugin(plugin_class)
+      method_added_plugins << plugin_class
     end
 
     def set_logger_debug
@@ -235,3 +245,6 @@ end
 
 require_relative 'ree/dsl/object_hooks'
 require_relative 'ree/dsl/package_require'
+
+Ree.register_method_added_plugin(Ree::BenchmarkMethodPlugin)
+Ree.register_method_added_plugin(Ree::Contracts::MethodDecorator)

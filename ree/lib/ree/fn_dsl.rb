@@ -3,6 +3,7 @@
 module Ree::FnDSL
   def self.included(base)
     base.extend(ClassMethods)
+    base.extend(Ree::MethodAddedHook)
     base.include(Ree::Inspectable)
   end
 
@@ -19,6 +20,9 @@ module Ree::FnDSL
       dsl.instance_exec(&proc) if block_given?
       dsl.tags(["fn"])
       dsl.object.set_as_compiled(false)
+
+      self.instance_variable_set(:@__ree_package_name, dsl.package.name)
+      self.instance_variable_set(:@__ree_object_name, name)
 
       Ree.container.compile(dsl.package, name)
     end

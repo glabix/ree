@@ -3,6 +3,10 @@
 module Ree::Contracts
   class MethodDecorator
     class << self
+      def active?
+        !Ree::Contracts.no_contracts?
+      end
+
       def decorator_id(target, method_name, is_class_method)
         "#{target.object_id}#{target.name}#{method_name}#{is_class_method}"
       end
@@ -53,8 +57,15 @@ module Ree::Contracts
 
       self.class.add_decorator(self)
 
+      original_alias = :"__ree_original_#{method_name}"
+      param_source = if alias_target.method_defined?(original_alias)
+        original_alias
+      else
+        method_name
+      end
+
       @method_parameters = alias_target
-        .instance_method(method_name)
+        .instance_method(param_source)
         .parameters
         .freeze
 

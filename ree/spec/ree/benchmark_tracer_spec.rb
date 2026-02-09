@@ -62,101 +62,225 @@ RSpec.describe Ree::BenchmarkTracer do
     end
   end
 
-  describe 'integration with ObjectCompiler' do
+  describe '.collect' do
+    after do
+      Thread.current[:ree_benchmark_tracer] = nil
+    end
+
+    it 'is a no-op when no trace is active' do
+      output = with_captured_stdout do
+        result = Ree::BenchmarkTracer.collect('some/fn') { 42 }
+        expect(result).to eq(42)
+      end
+
+      expect(output).to eq('')
+    end
+
+    it 'participates in an active trace' do
+      output = with_captured_stdout do
+        Ree::BenchmarkTracer.trace('parent/fn') do
+          Ree::BenchmarkTracer.collect('child/fn') { nil }
+        end
+      end
+
+      lines = output.split("\n")
+      expect(lines.size).to eq(2)
+      expect(lines[0]).to match(/^parent\/fn \(\d+\.\d+ms\)$/)
+      expect(lines[1]).to match(/^  child\/fn \(\d+\.\d+ms\)$/)
+    end
+  end
+
+  describe '.format_tree' do
+    it 'shows only root node when deep: false' do
+      output = with_captured_stdout do
+        Ree::BenchmarkTracer.trace('parent/fn', deep: false) do
+          Ree::BenchmarkTracer.trace('child/fn') { nil }
+        end
+      end
+
+      lines = output.split("\n")
+      expect(lines.size).to eq(1)
+      expect(lines[0]).to match(/^parent\/fn \(\d+\.\d+ms\)$/)
+    end
+
+    it 'shows full tree when deep: true' do
+      output = with_captured_stdout do
+        Ree::BenchmarkTracer.trace('parent/fn', deep: true) do
+          Ree::BenchmarkTracer.trace('child/fn') { nil }
+        end
+      end
+
+      lines = output.split("\n")
+      expect(lines.size).to eq(2)
+      expect(lines[0]).to match(/^parent\/fn \(\d+\.\d+ms\)$/)
+      expect(lines[1]).to match(/^  child\/fn \(\d+\.\d+ms\)$/)
+    end
+  end
+
+  describe 'output_proc' do
+    it 'routes output through custom lambda' do
+      collected = nil
+
+      silent_output = with_captured_stdout do
+        Ree::BenchmarkTracer.trace('test/fn', output_proc: -> (res) { collected = res }) { 42 }
+      end
+
+      expect(silent_output).to eq('')
+      expect(collected).to match(/^test\/fn \(\d+\.\d+ms\)$/)
+    end
+  end
+
+  describe 'integration with plugin system' do
     Ree.enable_benchmark_mode
     Ree.enable_irb_mode
 
-    module BenchmarkTestPkg
+    module BenchmarkPluginTestPkg
       include Ree::PackageDSL
       package
 
-      class InnerFn
+      class CollectorFn
         include Ree::FnDSL
 
-        fn :inner_fn
+        fn :collector_fn
 
-        contract None => Any
-        def call
-          :inner_result
+        contract Integer => Integer
+        def call(x)
+          x + 1
         end
       end
 
-      class OuterFn
+      class EntryPointFn
         include Ree::FnDSL
 
-        fn :outer_fn do
-          link :inner_fn
+        fn :entry_point_fn do
+          link :collector_fn
+          benchmark
         end
 
-        contract None => Any
-        def call
-          inner_fn
+        contract Integer => Integer
+        def call(x)
+          collector_fn(x)
         end
       end
 
-      class WithCallerFn
+      class ShallowEntryFn
         include Ree::FnDSL
 
-        fn :with_caller_fn do
-          with_caller
-          link :inner_fn
+        fn :shallow_entry_fn do
+          link :collector_fn
+          benchmark deep: false
         end
 
-        contract None => Any
-        def call
-          inner_fn
+        contract Integer => Integer
+        def call(x)
+          collector_fn(x)
+        end
+      end
+
+      class OnceFn
+        include Ree::FnDSL
+
+        fn :once_fn do
+          benchmark once: true
+        end
+
+        contract Integer => Integer
+        def call(x)
+          x * 2
+        end
+      end
+
+      class CustomOutputFn
+        include Ree::FnDSL
+
+        fn :custom_output_fn do
+          benchmark output: -> (res) { $custom_benchmark_output = res }
+        end
+
+        contract Integer => Integer
+        def call(x)
+          x + 10
         end
       end
     end
 
     Ree.disable_irb_mode
 
-    it 'traces fn call and prints to stdout' do
+    it 'entry point fn produces benchmark output' do
       output = with_captured_stdout do
-        BenchmarkTestPkg::InnerFn.new.call
-      end
-
-      expect(output).to match(/^benchmark_test_pkg\/inner_fn \(\d+\.\d+ms\)\n$/)
-    end
-
-    it 'traces nested fn calls as indented tree' do
-      output = with_captured_stdout do
-        BenchmarkTestPkg::OuterFn.new.call
+        BenchmarkPluginTestPkg::EntryPointFn.new.call(1)
       end
 
       lines = output.split("\n")
       expect(lines.size).to eq(2)
-      expect(lines[0]).to match(/^benchmark_test_pkg\/outer_fn \(\d+\.\d+ms\)$/)
-      expect(lines[1]).to match(/^  benchmark_test_pkg\/inner_fn \(\d+\.\d+ms\)$/)
+      expect(lines[0]).to match(/^benchmark_plugin_test_pkg\/entry_point_fn \(\d+\.\d+ms\)$/)
+      expect(lines[1]).to match(/^  benchmark_plugin_test_pkg\/collector_fn \(\d+\.\d+ms\)$/)
     end
 
-    it 'traces with_caller fn calls' do
+    it 'collector fn alone produces no output' do
       output = with_captured_stdout do
-        BenchmarkTestPkg::WithCallerFn.new.set_caller(self).call
+        BenchmarkPluginTestPkg::CollectorFn.new.call(1)
+      end
+
+      expect(output).to eq('')
+    end
+
+    it 'deep: false shows only root node' do
+      output = with_captured_stdout do
+        BenchmarkPluginTestPkg::ShallowEntryFn.new.call(1)
       end
 
       lines = output.split("\n")
-      expect(lines.size).to eq(2)
-      expect(lines[0]).to match(/^benchmark_test_pkg\/with_caller_fn \(\d+\.\d+ms\)$/)
-      expect(lines[1]).to match(/^  benchmark_test_pkg\/inner_fn \(\d+\.\d+ms\)$/)
+      expect(lines.size).to eq(1)
+      expect(lines[0]).to match(/^benchmark_plugin_test_pkg\/shallow_entry_fn \(\d+\.\d+ms\)$/)
     end
 
-    it 'does not double-wrap on recompilation' do
-      klass = BenchmarkTestPkg::InnerFn
-
-      methods_before = klass.instance_methods.grep(/benchmark/)
-
-      obj = Ree.container.packages_facade.get_package(:benchmark_test_pkg).get_object(:inner_fn)
-      obj.set_as_compiled(false)
-      Ree::ObjectCompiler.new(Ree.container.packages_facade).call(:benchmark_test_pkg, :inner_fn)
-
-      methods_after = klass.instance_methods.grep(/benchmark/)
-      expect(methods_after).to eq(methods_before)
-
-      output = with_captured_stdout do
-        klass.new.call
+    it 'once: true outputs only on first call' do
+      first_output = with_captured_stdout do
+        BenchmarkPluginTestPkg::OnceFn.new.call(5)
       end
-      expect(output).to match(/^benchmark_test_pkg\/inner_fn \(\d+\.\d+ms\)\n$/)
+
+      expect(first_output).to match(/^benchmark_plugin_test_pkg\/once_fn \(\d+\.\d+ms\)\n$/)
+
+      second_output = with_captured_stdout do
+        BenchmarkPluginTestPkg::OnceFn.new.call(5)
+      end
+
+      expect(second_output).to eq('')
+    end
+
+    it 'custom output: routes output through lambda' do
+      $custom_benchmark_output = nil
+
+      silent = with_captured_stdout do
+        BenchmarkPluginTestPkg::CustomOutputFn.new.call(5)
+      end
+
+      expect(silent).to eq('')
+      expect($custom_benchmark_output).to match(/^benchmark_plugin_test_pkg\/custom_output_fn \(\d+\.\d+ms\)$/)
+    end
+
+    it 'contract still validates args on benchmarked fn' do
+      expect {
+        with_captured_stdout do
+          BenchmarkPluginTestPkg::EntryPointFn.new.call("not_an_integer")
+        end
+      }.to raise_error(Ree::Contracts::ContractError)
+    end
+
+    it 'contract still validates args on collector fn' do
+      expect {
+        BenchmarkPluginTestPkg::CollectorFn.new.call("not_an_integer")
+      }.to raise_error(Ree::Contracts::ContractError)
+    end
+
+    it 'returns correct result through benchmark + contract wrappers' do
+      result = nil
+      with_captured_stdout do
+        result = BenchmarkPluginTestPkg::EntryPointFn.new.call(5)
+      end
+
+      expect(result).to eq(6)
     end
   end
 

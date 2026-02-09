@@ -5,7 +5,8 @@ class Ree::Object
               :package_name, :factory, :after_init,
               :class_name, :links, :mount_as, :freeze,
               :errors, :linked_const_list, :compiled_frozen,
-              :singleton, :tags, :target, :with_caller
+              :singleton, :tags, :target, :with_caller,
+              :benchmark_config
 
   # @param [Symbol] name Object name
   # @param [String] schema_rpath Object schema path relative to project root dir
@@ -25,6 +26,7 @@ class Ree::Object
     @compiled_frozen = @freeze
     @linked_const_list = []
     @tags = []
+    @benchmark_config = nil
   end
 
   def reset
@@ -39,6 +41,7 @@ class Ree::Object
     @links = []
     @errors = []
     @linked_const_list = []
+    @benchmark_config = nil
   end
 
   # @param [ArrayOf[String]] list List of imported constants, modules and classes
@@ -151,6 +154,14 @@ class Ree::Object
   # @param [Symbol] After init method name
   def set_after_init(val)
     @after_init = val; self
+  end
+
+  def set_benchmark_config(config)
+    @benchmark_config = config; self
+  end
+
+  def benchmark?
+    !!@benchmark_config
   end
 
   def add_tags(list)
