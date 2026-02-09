@@ -85,7 +85,7 @@ module Ree
 
       def encrypt_ruby_files(aes_key, iv)
         count = 0
-        pattern = File.join(@target_path, '*/package/**/*.rb')
+        pattern = File.join(@target_path, '**/package/**/*.rb')
 
         Dir.glob(pattern).each do |file_path|
           basename = File.basename(file_path)

@@ -186,6 +186,50 @@ RSpec.describe Ree::Licensing::Obfuscator do
       expect(greeter).to include('def self.greet')
     end
 
+    it 'handles nested package directories (e.g. bc/accounts/package/)' do
+      # Add a nested package like a real Ree project
+      FileUtils.mkdir_p(File.join(source_path, 'bc/accounts/package/accounts'))
+      File.write(
+        File.join(source_path, 'bc/accounts/package/accounts.rb'),
+        <<~RUBY
+          module NestedPackageEntry
+            def self.value
+              99
+            end
+          end
+        RUBY
+      )
+      File.write(
+        File.join(source_path, 'bc/accounts/package/accounts/service.rb'),
+        <<~RUBY
+          module NestedService
+            def self.call
+              "nested"
+            end
+          end
+        RUBY
+      )
+
+      result = described_class.run(
+        source_path: source_path,
+        target_path: target_path,
+        client_id: @client['client_id'],
+        expires_at: (Date.today + 365).to_s,
+        clients_dir: clients_dir,
+        stdout: stdout
+      )
+
+      # 2 from my_package + 2 from bc/accounts = 4
+      expect(result[:encrypted_count]).to eq(4)
+
+      # Verify nested files are encrypted
+      nested_entry = File.binread(File.join(target_path, 'bc/accounts/package/accounts.rb'))
+      expect(nested_entry).not_to include('module')
+    ensure
+      Object.send(:remove_const, :NestedPackageEntry) if defined?(NestedPackageEntry)
+      Object.send(:remove_const, :NestedService) if defined?(NestedService)
+    end
+
     it 'raises error for unknown client' do
       expect {
         described_class.run(
