@@ -95,7 +95,22 @@ class Ree::PackageLoader
 
     Ree.logger.debug("load_file(:#{package_name}, '#{path}')")
 
-    Kernel.require(path)
+    if Ree.obfuscated?
+      load_encrypted_file(path)
+    else
+      Kernel.require(path)
+    end
+  end
+
+  private
+
+  def load_encrypted_file(path)
+    license = Ree.license
+    full_path = path.end_with?('.rb') ? path : "#{path}.rb"
+    encrypted_data = File.binread(full_path)
+    bytecode = license.decrypt_file(encrypted_data)
+    iseq = RubyVM::InstructionSequence.load_from_binary(bytecode)
+    iseq.eval
   end
 end
 

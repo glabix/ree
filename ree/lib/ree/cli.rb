@@ -8,5 +8,11 @@ module Ree
     autoload :GenerateTemplate, 'ree/cli/generate_template'
     autoload :Indexing, 'ree/cli/indexing'
     autoload :SpecRunner, 'ree/cli/spec_runner'
+
+    module Licensing
+      autoload :RegisterClient, 'ree/cli/licensing/register_client'
+      autoload :Obfuscate, 'ree/cli/licensing/obfuscate'
+      autoload :RenewLicense, 'ree/cli/licensing/renew_license'
+    end
   end
 end

@@ -53,6 +53,15 @@ module Ree
   autoload :TemplateHandler, 'ree/handlers/template_handler'
   autoload :TemplateRenderer, 'ree/templates/template_renderer'
 
+  module Licensing
+    autoload :ClientStore, 'ree/licensing/client_store'
+    autoload :Encryptor, 'ree/licensing/encryptor'
+    autoload :Decryptor, 'ree/licensing/decryptor'
+    autoload :BytecodeCompiler, 'ree/licensing/bytecode_compiler'
+    autoload :LicenseGenerator, 'ree/licensing/license_generator'
+    autoload :Obfuscator, 'ree/licensing/obfuscator'
+  end
+
   PACKAGE = 'package'
   SCHEMAS = 'schemas'
   SCHEMA = 'schema'
@@ -122,6 +131,20 @@ module Ree
 
     def benchmark_mode?
       !!@benchmark_mode
+    end
+
+    def obfuscated?
+      ENV.has_key?('REE_LICENSE_KEY')
+    end
+
+    def license
+      @license ||= if obfuscated?
+        Ree::Licensing::Decryptor.load_license(ENV['REE_LICENSE_KEY'])
+      end
+    end
+
+    def reset_license
+      @license = nil
     end
 
     def method_added_plugins

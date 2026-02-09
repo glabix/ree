@@ -2,12 +2,14 @@ PATH
   remote: .
   specs:
     ree (1.2.4)
+      base64
       commander (~> 5.0.0)
       logger (~> 1.6.5)
 
 GEM
   remote: https://rubygems.org/
   specs:
+    base64 (0.3.0)
     commander (5.0.0)
       highline (~> 3.0.0)
     debug (1.9.1)

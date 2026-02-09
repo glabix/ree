@@ -29,5 +29,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "commander", "~> 5.0.0"
   spec.add_dependency "logger", "~> 1.6.5"
+  spec.add_dependency "base64"
   spec.add_development_dependency "debug"
 end

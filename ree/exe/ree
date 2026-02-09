@@ -223,6 +223,87 @@ class ReeCliRunner
       end
     end
 
+    command :"licensing.register_client" do |c|
+      c.syntax      = 'ree licensing.register_client --name=NAME --contact=CONTACT'
+      c.description = 'register a new licensing client'
+      c.summary     = '> ' + c.description
+      c.example     'register a client', 'ree licensing.register_client --name="Glabix" --contact="hello@glabix.com" --metadata="type=enterprise,country=RU"'
+      c.option      '--name NAME', String, 'Client name'
+      c.option      '--contact CONTACT', String, 'Client contact email'
+      c.option      '--metadata METADATA', String, 'Client metadata (key=value pairs separated by commas)'
+      c.option      '--clients_dir DIR', String, 'Directory for clients.json (default: current dir)'
+      c.action do |args, options|
+        options_hash = options.__hash__
+        options_hash.delete(:trace)
+
+        raise Ree::Error.new("--name is required") unless options_hash[:name]
+        raise Ree::Error.new("--contact is required") unless options_hash[:contact]
+
+        Ree::CLI::Licensing::RegisterClient.run(
+          name: options_hash[:name],
+          contact: options_hash[:contact],
+          metadata_str: options_hash[:metadata],
+          clients_dir: options_hash[:clients_dir] || Dir.pwd
+        )
+      end
+    end
+
+    command :"licensing.obfuscate" do |c|
+      c.syntax      = 'ree licensing.obfuscate --source_path=PATH --target_path=PATH --client_id=ID --expires_at=DATE'
+      c.description = 'obfuscate a Ree project for distribution'
+      c.summary     = '> ' + c.description
+      c.example     'obfuscate project', 'ree licensing.obfuscate --source_path=./project --target_path=./dist --client_id=client_abc123 --expires_at="2026-12-31"'
+      c.option      '--source_path PATH', String, 'Source project path'
+      c.option      '--target_path PATH', String, 'Target distribution path'
+      c.option      '--client_id ID', String, 'Client ID from clients.json'
+      c.option      '--expires_at DATE', String, 'License expiration date (YYYY-MM-DD)'
+      c.option      '--exclude_files FILES', String, 'Comma-separated list of files to exclude'
+      c.option      '--clients_dir DIR', String, 'Directory for clients.json (default: current dir)'
+      c.action do |args, options|
+        options_hash = options.__hash__
+        options_hash.delete(:trace)
+
+        raise Ree::Error.new("--source_path is required") unless options_hash[:source_path]
+        raise Ree::Error.new("--target_path is required") unless options_hash[:target_path]
+        raise Ree::Error.new("--client_id is required") unless options_hash[:client_id]
+        raise Ree::Error.new("--expires_at is required") unless options_hash[:expires_at]
+
+        Ree::CLI::Licensing::Obfuscate.run(
+          source_path: options_hash[:source_path],
+          target_path: options_hash[:target_path],
+          client_id: options_hash[:client_id],
+          expires_at: options_hash[:expires_at],
+          exclude_files: options_hash[:exclude_files] || "",
+          clients_dir: options_hash[:clients_dir] || Dir.pwd
+        )
+      end
+    end
+
+    command :"licensing.renew_license" do |c|
+      c.syntax      = 'ree licensing.renew_license --client_id=ID --expires_at=DATE'
+      c.description = 'renew a license for an existing client'
+      c.summary     = '> ' + c.description
+      c.example     'renew license', 'ree licensing.renew_license --client_id=client_abc123 --expires_at="2028-01-01"'
+      c.option      '--client_id ID', String, 'Client ID from clients.json'
+      c.option      '--expires_at DATE', String, 'New license expiration date (YYYY-MM-DD)'
+      c.option      '--output_path PATH', String, 'Output path for license.json'
+      c.option      '--clients_dir DIR', String, 'Directory for clients.json (default: current dir)'
+      c.action do |args, options|
+        options_hash = options.__hash__
+        options_hash.delete(:trace)
+
+        raise Ree::Error.new("--client_id is required") unless options_hash[:client_id]
+        raise Ree::Error.new("--expires_at is required") unless options_hash[:expires_at]
+
+        Ree::CLI::Licensing::RenewLicense.run(
+          client_id: options_hash[:client_id],
+          expires_at: options_hash[:expires_at],
+          output_path: options_hash[:output_path],
+          clients_dir: options_hash[:clients_dir] || Dir.pwd
+        )
+      end
+    end
+
     command :"gen.index_project" do |c|
       c.syntax      = 'ree gen.index_project'
       c.description = 'generate index schema of methods'
