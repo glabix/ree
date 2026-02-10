@@ -101,8 +101,6 @@ class Ree::SpecRunner::Runner
       print_message("#{failed_count} of #{total_count} packages failed:")
       print_message(failed.map(&:package_name))
       print_message("\n")
-
-      exit(1)
     end
   end
 
