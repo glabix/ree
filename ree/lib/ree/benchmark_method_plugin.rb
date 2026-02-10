@@ -29,6 +29,7 @@ class Ree::BenchmarkMethodPlugin
   def build_entry_point_wrapper(benchmark_name, config)
     output_proc = config[:output] || ->(res) { $stdout.puts(res) }
     deep = config.fetch(:deep, true)
+    hide_ree_lib = config.fetch(:hide_ree_lib, true)
     once = config.fetch(:once, false)
     benchmark_done = false
 
@@ -43,7 +44,7 @@ class Ree::BenchmarkMethodPlugin
         end
       else
         benchmark_done = true if once
-        Ree::BenchmarkTracer.trace(benchmark_name, output_proc: output_proc, deep: deep) do
+        Ree::BenchmarkTracer.trace(benchmark_name, output_proc: output_proc, deep: deep, hide_ree_lib: hide_ree_lib) do
           next_layer.call(*args, **kwargs, &block)
         end
       end

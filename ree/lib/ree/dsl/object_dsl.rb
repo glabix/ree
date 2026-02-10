@@ -170,15 +170,16 @@ class Ree::ObjectDsl
     @object.set_after_init(method_name)
   end
 
-  def benchmark(once: false, deep: true, output: -> (res) { $stdout.puts(res) })
+  def benchmark(once: false, deep: true, hide_ree_lib: true, output: -> (res) { $stdout.puts(res) })
     if !@object.fn?
       raise_error("`benchmark` is only available for fn objects")
     end
 
     check_bool(once, :once)
     check_bool(deep, :deep)
+    check_bool(hide_ree_lib, :hide_ree_lib)
 
-    config = { once: once, deep: deep, output: output }
+    config = { once: once, deep: deep, hide_ree_lib: hide_ree_lib, output: output }
     @object.set_benchmark_config(config)
 
     @object.klass.instance_variable_set(:@__ree_benchmark_config, config)

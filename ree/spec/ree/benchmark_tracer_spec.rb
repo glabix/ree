@@ -130,6 +130,82 @@ RSpec.describe Ree::BenchmarkTracer do
     end
   end
 
+  describe 'hide_ree_lib filtering' do
+    after do
+      Thread.current[:ree_benchmark_tracer] = nil
+    end
+
+    it 'hides nodes starting with ree_ by default' do
+      output = with_captured_stdout do
+        Ree::BenchmarkTracer.trace('my_app/entry_fn') do
+          Ree::BenchmarkTracer.collect('ree_dao/load') { nil }
+          Ree::BenchmarkTracer.collect('my_app/business_logic') { nil }
+        end
+      end
+
+      lines = output.split("\n")
+      expect(lines.size).to eq(2)
+      expect(lines[0]).to match(/^my_app\/entry_fn \(\d+\.\d+ms\)$/)
+      expect(lines[1]).to match(/^  my_app\/business_logic \(\d+\.\d+ms\)$/)
+      expect(output).not_to include('ree_dao')
+    end
+
+    it 'shows ree_ nodes when hide_ree_lib: false' do
+      output = with_captured_stdout do
+        Ree::BenchmarkTracer.trace('my_app/entry_fn', hide_ree_lib: false) do
+          Ree::BenchmarkTracer.collect('ree_dao/load') { nil }
+          Ree::BenchmarkTracer.collect('my_app/business_logic') { nil }
+        end
+      end
+
+      lines = output.split("\n")
+      expect(lines.size).to eq(3)
+      expect(lines[0]).to match(/^my_app\/entry_fn \(\d+\.\d+ms\)$/)
+      expect(lines[1]).to match(/^  ree_dao\/load \(\d+\.\d+ms\)$/)
+      expect(lines[2]).to match(/^  my_app\/business_logic \(\d+\.\d+ms\)$/)
+    end
+
+    it 'promotes children of filtered nodes to parent level' do
+      output = with_captured_stdout do
+        Ree::BenchmarkTracer.trace('my_app/entry_fn') do
+          Ree::BenchmarkTracer.collect('ree_dao/load') do
+            Ree::BenchmarkTracer.collect('ree_mapper/cast') { nil }
+            Ree::BenchmarkTracer.collect('my_app/db_query') { nil }
+          end
+        end
+      end
+
+      lines = output.split("\n")
+      expect(lines.size).to eq(2)
+      expect(lines[0]).to match(/^my_app\/entry_fn \(\d+\.\d+ms\)$/)
+      expect(lines[1]).to match(/^  my_app\/db_query \(\d+\.\d+ms\)$/)
+      expect(output).not_to include('ree_dao')
+      expect(output).not_to include('ree_mapper')
+    end
+
+    it 'handles mixed ree_ and non-ree_ nodes correctly' do
+      output = with_captured_stdout do
+        Ree::BenchmarkTracer.trace('my_app/controller') do
+          Ree::BenchmarkTracer.collect('my_app/service') do
+            Ree::BenchmarkTracer.collect('ree_dao/find') { nil }
+            Ree::BenchmarkTracer.collect('my_app/validation') { nil }
+          end
+          Ree::BenchmarkTracer.collect('ree_json/parse') { nil }
+          Ree::BenchmarkTracer.collect('my_app/response') { nil }
+        end
+      end
+
+      lines = output.split("\n")
+      expect(lines.size).to eq(4)
+      expect(lines[0]).to match(/^my_app\/controller \(\d+\.\d+ms\)$/)
+      expect(lines[1]).to match(/^  my_app\/service \(\d+\.\d+ms\)$/)
+      expect(lines[2]).to match(/^    my_app\/validation \(\d+\.\d+ms\)$/)
+      expect(lines[3]).to match(/^  my_app\/response \(\d+\.\d+ms\)$/)
+      expect(output).not_to include('ree_dao')
+      expect(output).not_to include('ree_json')
+    end
+  end
+
   describe 'integration with plugin system' do
     Ree.enable_benchmark_mode
     Ree.enable_irb_mode
