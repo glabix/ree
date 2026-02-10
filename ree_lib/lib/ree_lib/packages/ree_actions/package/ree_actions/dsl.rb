@@ -1,17 +1,20 @@
 # frozen_string_literal: true
 package_require("ree_mapper/errors/type_error")
 package_require("ree_mapper/errors/coercion_error")
+package_require("ree_actions/method_plugin")
 
 module ReeActions
   module DSL
     def self.included(base)
       base.extend(ClassMethods)
+      base.extend(Ree::MethodAddedHook)
       base.include(ReeMapper::DSL)
       base.include(Ree::Inspectable)
     end
 
     def self.extended(base)
       base.extend(ClassMethods)
+      base.extend(Ree::MethodAddedHook)
       base.include(ReeMapper::DSL)
     end
 
@@ -31,39 +34,11 @@ module ReeActions
 
         Ree.container.compile(dsl.package, name)
       end
-
-      def method_added(method_name)
-        return super if method_name != :call
-
-        if @__original_call_defined
-          remove_instance_variable(:@__original_call_defined)
-          return
-        end
-
-        @__original_call_defined = true
-
-        alias_method(:__original_call, :call)
-
-        define_method :call do |user_access, attrs, **opts, &proc|
-          if self.class.const_defined?(:ActionCaster)
-            caster = self.class.const_get(:ActionCaster)
-
-            if !caster.respond_to?(:cast)
-              raise ArgumentError.new("ActionCaster does not respond to `cast` method")
-            end
-
-            attrs = begin
-              caster.cast(attrs)
-            rescue ReeMapper::TypeError, ReeMapper::CoercionError => e
-              raise ReeActions::ParamError, e.message
-            end
-          end
-
-          __original_call(user_access, attrs, **opts, &proc)
-        end
-
-        nil
-      end
     end
   end
+end
+
+# Register the method plugin if the plugin system is available
+if defined?(Ree) && Ree.respond_to?(:register_method_added_plugin)
+  Ree.register_method_added_plugin(ReeActions::MethodPlugin)
 end
