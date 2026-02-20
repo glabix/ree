@@ -14,10 +14,6 @@ RSpec.describe :logger do
     end
   end
 
-  before(:each) do
-    allow(Rollbar).to receive(:log)
-  end
-
   let(:log_file_path) { ENV['LOG_FILE_PATH'] }
 
   let(:exception) {
@@ -26,25 +22,16 @@ RSpec.describe :logger do
 
   it {
     expect { logger.info('hello world') }.to output(/hello world/).to_stdout
-    expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("hello world")
   }
 
   it {
-    expect { logger.info('hello world', { rollbar_scope: {fingerprint: 'test', test: 'test'}, param: 1, another_param: { name: 'John'} }) }.to output(/John/).to_stdout
-    expect(Rollbar).to have_received(:log)
-    expect(File.read(log_file_path)).to match("John")
-  }
-
-  it {
     expect { logger.debug('debug message') }.to_not output(/debug message/).to_stdout
-    expect(Rollbar).not_to have_received(:log)
     expect(File.read(log_file_path)).to_not match("debug")
   }
 
   it {
     expect { logger.warn('warning message') }.to output(/warning message/).to_stdout
-    expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("warning message")
   }
 
@@ -54,20 +41,17 @@ RSpec.describe :logger do
     }
     expect(output).to match(/some error message/)
     expect(output).to_not match(/method|args/)
-    expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("some error message")
     expect(File.read(log_file_path)).to_not match("PARAMETERS: {:method=>{:name=>:call, :args=>{:block=>{}}}}")
   }
 
   it {
     expect { logger.fatal('some fatal message', {}, exception) }.to output(/some fatal message/).to_stdout
-    expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("some fatal message")
   }
 
   it {
     expect { logger.unknown('unknown message') }.to output(/unknown message/).to_stdout
-    expect(Rollbar).to have_received(:log)
     expect(File.read(log_file_path)).to match("unknown message")
   }
 end

@@ -4,9 +4,7 @@ class ReeMapper::BuildMapperFactory
   include Ree::FnDSL
 
   fn :build_mapper_factory do
-    link 'ree_mapper/mapper', -> { Mapper }
-    link 'ree_mapper/mapper_factory', -> { MapperFactory }
-    link 'ree_mapper/mapper_strategy', -> { MapperStrategy }
+    import -> { Mapper & MapperFactory & MapperStrategy}
   end
 
   contract(ArrayOf[MapperStrategy] => SubclassOf[MapperFactory])

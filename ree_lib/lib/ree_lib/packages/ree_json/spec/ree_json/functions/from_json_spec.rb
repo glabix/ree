@@ -8,11 +8,6 @@ RSpec.describe :from_json do
   }
 
   it {
-    result = from_json("{\":id\":{\"^o\":\"Object\"}}", mode: :object)
-    expect(result[:id]).to be_a(Object)
-  }
-
-  it {
     expect(from_json("null")).to eq(nil)
   }
 
@@ -37,14 +32,10 @@ RSpec.describe :from_json do
   }
 
   it {
-    expect(from_json("{\"^o\":\"Object\"}", mode: :object)).to be_a(Object)
-  }
-
-  it {
     expect{from_json("{213: \"123\"}")}.to raise_error(ReeJson::FromJson::ParseJsonError)
   }
 
   it {
-    expect { from_json(nil, mode: :strict) }.to raise_error(ReeJson::FromJson::ParseJsonError)
+    expect { from_json(nil) }.to raise_error(Ree::Contracts::ContractError)
   }
 end

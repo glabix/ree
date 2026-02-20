@@ -1,28 +1,26 @@
 class ReeJson::FromJson
   include Ree::FnDSL
 
-  fn :from_json do
-    link 'ree_json/constants', -> {
-      DEFAULT_OPTIONS & MODES & ESCAPE_MODES & TIME_FORMATS
-    }
-  end
+  fn :from_json
 
   ParseJsonError = Class.new(StandardError)
 
   contract(
-    Any,
+    String,
     Ksplat[
-      mode?: Or[*MODES],
       symbol_keys?: Bool,
       RestKeys => Any
     ] => Any
   ).throws(ParseJsonError)
   def call(object, **opts)
-    options = DEFAULT_OPTIONS
-      .merge(opts)
+    options = {}
 
-    Oj.load(object, options)
-  rescue ArgumentError, EncodingError, TypeError
+    if opts.delete(:symbol_keys)
+      options[:symbolize_names] = true
+    end
+
+    JSON.parse(object, **options)
+  rescue JSON::ParserError, ArgumentError, EncodingError, TypeError
     raise ParseJsonError.new
   end
 end

@@ -5,15 +5,17 @@ class ReeMapper::BuildMapperStrategy
 
   fn :build_mapper_strategy
 
-  contract(Kwargs[
-    method:          Symbol,
-    dto:             Class,
-    always_optional: Bool
-  ] => ReeMapper::MapperStrategy)
+  contract(
+    Kwargs[
+      method: Symbol,
+      dto: Class,
+      always_optional: Bool
+    ] => ReeMapper::MapperStrategy
+  )
   def call(method:, dto: Hash, always_optional: false)
     ReeMapper::MapperStrategy.new(
-      method:          method,
-      dto:             dto,
+      method: method,
+      dto: dto,
       always_optional: always_optional
     )
   end

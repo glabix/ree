@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 require 'benchmark'
 
+package_require "ree_mapper"
+
 no_contracts = Ree::Contracts.no_contracts?
 Ree.disable_contracts
-
-package_require "ree_mapper"
 
 RSpec.xdescribe 'Mapper Benchmark' do
   link :build_mapper_factory, from: :ree_mapper

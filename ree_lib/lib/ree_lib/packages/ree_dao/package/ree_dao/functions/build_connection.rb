@@ -9,8 +9,7 @@ class ReeDao::BuildConnection
 
   fn :build_connection do
     link :connections
-    link 'ree_dao/dataset_extensions', -> { DatasetExtensions }
-    link 'ree_dao/build_methods', -> { BuildMethods }
+    import -> { DatasetExtensions & BuildMethods }
   end
 
   TIMEZONES = [:utc, :local].freeze

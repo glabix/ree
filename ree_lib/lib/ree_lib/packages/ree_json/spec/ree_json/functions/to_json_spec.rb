@@ -6,10 +6,4 @@ RSpec.describe :to_json do
   it {
     expect(to_json({id: 1})).to eq("{\"id\":1}")
   }
-
-  it {
-    expect(
-      to_json({id: Object.new}, mode: :object)
-    ).to eq("{\":id\":{\"^o\":\"Object\"}}")
-  }
 end

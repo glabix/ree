@@ -1,4 +1,4 @@
-require 'oj'
+require "json"
 
 module ReeJson
   include Ree::PackageDSL
