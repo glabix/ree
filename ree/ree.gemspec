@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = "Ree makes your ruby life happier"
   spec.homepage = "https://github.com/glabix/ree/tree/main/ree"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.1"
+  spec.required_ruby_version = ">= 3.4"
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/glabix/ree/tree/main/ree"
   spec.metadata["changelog_uri"] = "https://github.com/glabix/ree/blob/main/ree/CHANGELOG.md"
@@ -27,8 +27,8 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "commander", "~> 5.0.0"
-  spec.add_dependency "logger", "~> 1.6.5"
+  spec.add_dependency "commander"
+  spec.add_dependency "logger"
   spec.add_dependency "base64"
   spec.add_development_dependency "debug"
 end

@@ -6,7 +6,7 @@ class Accounts::BuildUser
     link :raise_error, from: :errors
     link :time, from: :clock
     link :users_repo
-    link 'accounts/entities/user', -> { User }
+    import -> { User }
   end
 
   InvalidDomainErr = Class.new(ArgumentError)
