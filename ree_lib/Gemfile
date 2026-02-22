@@ -12,6 +12,7 @@ gem "rake", "~> 13.0"
 
 group :test do
   gem 'rspec'
+  gem 'benchmark'
   gem 'bootsnap'
   gem 'webmock'
   gem 'ruby-prof'
