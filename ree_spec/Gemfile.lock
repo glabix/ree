@@ -3,6 +3,7 @@ PATH
   specs:
     ree_spec (0.0.11)
       commander (~> 5.0.0)
+      logger
       ree
       ree_lib
 
@@ -11,6 +12,7 @@ GEM
   specs:
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
+    base64 (0.3.0)
     bigdecimal (3.1.9)
     binding_of_caller (1.0.1)
       debug_inspector (>= 1.2.0)
@@ -29,6 +31,7 @@ GEM
     highline (3.0.1)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
+    logger (1.7.0)
     loofah (2.24.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
@@ -37,26 +40,23 @@ GEM
     nokogiri (1.16.7)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
-    oj (3.16.10)
-      bigdecimal (>= 3.0)
-      ostruct (>= 0.2)
-    ostruct (0.6.0)
     public_suffix (6.0.1)
     racc (1.8.1)
     rainbow (3.1.1)
     rake (13.2.1)
-    ree (1.1.0)
-      commander (~> 5.0.0)
-    ree_lib (1.2.0)
-      bigdecimal (~> 3.1.9)
-      binding_of_caller (~> 1.0.1)
-      i18n (~> 1.14.7)
-      loofah (~> 2.24.0)
-      oj (~> 3.16.9)
-      rainbow (~> 3.1.1)
-      ree (~> 1.1.0)
-      sequel (~> 5.88.0)
-      tzinfo (~> 2.0.6)
+    ree (1.3.0)
+      base64
+      commander
+      logger
+    ree_lib (1.3.6)
+      bigdecimal
+      binding_of_caller
+      i18n
+      loofah
+      rainbow
+      ree
+      sequel
+      tzinfo
     rexml (3.3.6)
       strscan
     rspec (3.13.0)
@@ -85,11 +85,6 @@ GEM
 
 PLATFORMS
   arm64-darwin-24
-  x86_64-darwin-19
-  x86_64-darwin-21
-  x86_64-darwin-22
-  x86_64-darwin-23
-  x86_64-linux
 
 DEPENDENCIES
   bootsnap
