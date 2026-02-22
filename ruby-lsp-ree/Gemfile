@@ -8,6 +8,7 @@ gemspec
 gem "rake", "~> 13.0"
 
 group :test do
+  gem 'ostruct'
   gem 'rspec'
   gem 'ruby-lsp', '~> 0.25.0'
   gem "sorbet-static-and-runtime"
