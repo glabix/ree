@@ -5,7 +5,7 @@ class Ree::Object
               :package_name, :factory, :after_init,
               :class_name, :links, :mount_as, :freeze,
               :errors, :linked_const_list, :compiled_frozen,
-              :singleton, :tags, :target, :with_caller,
+              :singleton, :tags, :target, :with_caller, :on_link,
               :benchmark_config
 
   # @param [Symbol] name Object name
@@ -27,6 +27,7 @@ class Ree::Object
     @linked_const_list = []
     @tags = []
     @benchmark_config = nil
+    @on_link = nil
   end
 
   def reset
@@ -42,6 +43,7 @@ class Ree::Object
     @errors = []
     @linked_const_list = []
     @benchmark_config = nil
+    @on_link = nil
   end
 
   # @param [ArrayOf[String]] list List of imported constants, modules and classes
@@ -167,5 +169,10 @@ class Ree::Object
   def add_tags(list)
     @tags += list
     @tags.uniq!
+  end
+
+  # @param [Proc, nil] block
+  def set_on_link(block)
+    @on_link = block
   end
 end
