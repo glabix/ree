@@ -84,6 +84,7 @@ GEM
       hashdiff (>= 0.4.0, < 2.0.0)
 
 PLATFORMS
+  arm64-darwin-24
   x86_64-darwin-19
   x86_64-darwin-21
   x86_64-darwin-22
@@ -99,4 +100,4 @@ DEPENDENCIES
   webmock
 
 BUNDLED WITH
-   2.5.4
+  4.0.6

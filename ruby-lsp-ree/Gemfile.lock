@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ruby-lsp-ree (0.1.25)
+    ruby-lsp-ree (0.1.26)
 
 GEM
   remote: https://rubygems.org/
@@ -40,6 +40,7 @@ GEM
       sorbet-runtime (= 0.5.11835)
 
 PLATFORMS
+  arm64-darwin-24
   x86_64-darwin-22
   x86_64-darwin-23
   x86_64-linux
@@ -52,4 +53,4 @@ DEPENDENCIES
   sorbet-static-and-runtime
 
 BUNDLED WITH
-   2.6.3
+   4.0.6
