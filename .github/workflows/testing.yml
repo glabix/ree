@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', '3.4']
+        ruby: ['3.4', '4.0']
         gemfile_folders: ['ree', 'ree_lib', 'ree_spec', 'ruby-lsp-ree']
         include:
           - gemfile_folders: 'ree'
