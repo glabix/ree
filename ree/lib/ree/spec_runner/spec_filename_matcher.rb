@@ -19,6 +19,9 @@ class Ree::SpecRunner::SpecFilenameMatcher
       return Pathname.new(expected_filename).relative_path_from(Pathname.new(@package_path)).to_s.split
     end
 
+    # If pattern contains "/", treat it as an exact path — no fuzzy matching
+    return [] if @spec_matcher.include?('/')
+
     Dir.glob(File.join(@package_path, '**/*_spec.rb'))
       .select { |fn| File.file?(fn) }
       .map {|file| Pathname.new(file).relative_path_from(Pathname.new(@package_path)).to_s }
