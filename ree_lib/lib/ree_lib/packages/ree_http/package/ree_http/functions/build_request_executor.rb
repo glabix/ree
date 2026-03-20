@@ -39,8 +39,13 @@ class ReeHttp::BuildRequestExecutor
     opts = DEFAULTS.merge(opts)
     proxy = opts[:proxy] || {}
 
+    if proxy.empty? && (env_proxy = ENV['https_proxy'] || ENV['http_proxy'])
+      proxy_uri = URI(env_proxy)
+      proxy = { address: proxy_uri.host, port: proxy_uri.port }
+    end
+
     request_executor = Net::HTTP.new(
-      uri.hostname, uri.port ,
+      uri.hostname, uri.port,
       proxy[:address], proxy[:port], proxy[:username], proxy[:password]
     )
 
