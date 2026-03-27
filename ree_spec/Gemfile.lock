@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ree_spec (0.0.11)
+    ree_spec (0.0.12)
       commander (~> 5.0.0)
       logger
       ree
@@ -147,7 +147,7 @@ CHECKSUMS
   rake (13.3.1) sha256=8c9e89d09f66a26a01264e7e3480ec0607f0c497a861ef16063604b1b08eb19c
   ree (1.3.0) sha256=31f2d05b5cbed0bc0f1c0143ad080a089c2d691694be09713044f769e576ba90
   ree_lib (1.3.6) sha256=2b56107a04641f151b5c614fd71995cbe47b79e835373bd1bbe7c379f2a1135d
-  ree_spec (0.0.11)
+  ree_spec (0.0.12)
   rexml (3.4.4) sha256=19e0a2c3425dfbf2d4fc1189747bdb2f849b6c5e74180401b15734bc97b5d142
   rspec (3.13.2) sha256=206284a08ad798e61f86d7ca3e376718d52c0bc944626b2349266f239f820587
   rspec-core (3.13.6) sha256=a8823c6411667b60a8bca135364351dda34cd55e44ff94c4be4633b37d828b2d
