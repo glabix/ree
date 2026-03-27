@@ -199,6 +199,20 @@ class ReeSpecCli::RunSpecs
 
   def get_spec_files(package, spec_matcher, files)
     package_dir = Ree::PathHelper.abs_package_dir(package)
+
+    if !files.empty?
+      return files.select do |f|
+        abs = File.expand_path(f)
+
+        if !File.exist?(abs)
+          puts "File not found: #{f}"
+          false
+        else
+          abs.start_with?(package_dir)
+        end
+      end.map { File.expand_path(_1) }
+    end
+
     all_specs = Dir["#{package_dir}/spec/**/*_spec.rb"]
 
     if spec_matcher

@@ -26,7 +26,7 @@ class ReeSpecCli::CommandBuilder
       c.option "--parallel PROCESS_COUNT", String, "Run specs in parallel processes (e.g. --parallel 15, 15 processes)"
       c.option "--only-failed", "Run only failed specs from previous run"
 
-      c.option "-f SPEC_FILE", "--fule SPEC_FILE", String, "List of spec files" do |f|
+      c.option "-f SPEC_FILE", "--file SPEC_FILE", String, "List of spec files" do |f|
         files ||= []
         files << f
       end
