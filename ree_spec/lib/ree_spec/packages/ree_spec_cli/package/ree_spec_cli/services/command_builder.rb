@@ -58,8 +58,9 @@ class ReeSpecCli::CommandBuilder
           process_count = Integer(options.parallel)
         end
 
-        if package_names.size > 1
-          files = []
+        if package_names.any? && files.any?
+          puts "Error: -p/--package and -f/--file cannot be used together"
+          exit 1
         end
 
         project_path = options.project_path || File.expand_path(Dir.pwd)

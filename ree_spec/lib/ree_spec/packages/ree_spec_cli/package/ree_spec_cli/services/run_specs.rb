@@ -17,9 +17,13 @@ class ReeSpecCli::RunSpecs
   def call(package_names, spec_matcher, tag, files, only_failed, project_path, process_count)
     init_ree_project(project_path)
 
-    run_all = package_names.empty?
-    packages = filter_packages_to_run(package_names, tag, run_all)
-    jobs, meta_index = get_jobs(packages, spec_matcher, files, only_failed)
+    if files.any?
+      jobs, meta_index = get_jobs_from_files(files, only_failed)
+    else
+      run_all = package_names.empty?
+      packages = filter_packages_to_run(package_names, tag, run_all)
+      jobs, meta_index = get_jobs(packages, spec_matcher, only_failed)
+    end
     processes = build_processes(process_count)
     error_files = []
     success_files = []
@@ -157,20 +161,70 @@ class ReeSpecCli::RunSpecs
     end
   end
 
-  def get_jobs(package_names, spec_matcher, files, only_failed)
+  def get_jobs_from_files(files, only_failed)
+    prev_scan_meta = read_prev_scan_metadata
+    scan_index = index_by(prev_scan_meta) { _1.abs_path }
+    packages_index = index_by(all_packages) { Ree::PathHelper.abs_package_dir(_1) }
+    result = []
+
+    files.each do |file|
+      abs_path, line_number = parse_file_with_line_number(file)
+
+      if !File.exist?(abs_path)
+        puts "File not found: #{file}"
+        next
+      end
+
+      package = find_package_for_file(abs_path, packages_index)
+
+      if package.nil?
+        puts "Could not determine package for: #{file}"
+        next
+      end
+
+      job_path = line_number ? "#{abs_path}:#{line_number}" : abs_path
+      result << Job.new(package: package, abs_path: job_path)
+    end
+
+    apply_sorting_and_filtering(result, scan_index, only_failed, prev_scan_meta)
+  end
+
+  def parse_file_with_line_number(file)
+    expanded = File.expand_path(file)
+
+    if expanded =~ /^(.+\.rb):(\d+)$/
+      [$1, $2]
+    else
+      [expanded, nil]
+    end
+  end
+
+  def find_package_for_file(abs_path, packages_index)
+    packages_index.each do |package_dir, package|
+      return package if abs_path.start_with?(package_dir)
+    end
+
+    nil
+  end
+
+  def get_jobs(package_names, spec_matcher, only_failed)
     prev_scan_meta = read_prev_scan_metadata
     result = []
     packages = package_names.map { packages_facade.get_package(_1) }
     scan_index = index_by(prev_scan_meta) { _1.abs_path }
 
     packages.each do |package|
-      spec_files = get_spec_files(package, spec_matcher, files)
+      spec_files = get_spec_files(package, spec_matcher)
 
       spec_files.each do |abs_path|
         result << Job.new(package:, abs_path:)
       end
     end
 
+    apply_sorting_and_filtering(result, scan_index, only_failed, prev_scan_meta)
+  end
+
+  def apply_sorting_and_filtering(result, scan_index, only_failed, prev_scan_meta)
     if only_failed
       result = result.select do |item|
         if scan_index[item.abs_path]
@@ -197,22 +251,8 @@ class ReeSpecCli::RunSpecs
     [result, scan_index]
   end
 
-  def get_spec_files(package, spec_matcher, files)
+  def get_spec_files(package, spec_matcher)
     package_dir = Ree::PathHelper.abs_package_dir(package)
-
-    if !files.empty?
-      return files.select do |f|
-        abs = File.expand_path(f)
-
-        if !File.exist?(abs)
-          puts "File not found: #{f}"
-          false
-        else
-          abs.start_with?(package_dir)
-        end
-      end.map { File.expand_path(_1) }
-    end
-
     all_specs = Dir["#{package_dir}/spec/**/*_spec.rb"]
 
     if spec_matcher
