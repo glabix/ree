@@ -18,7 +18,7 @@ class Roda
 
       def self.configure(app, **opts)
         opts = REE_LOGGER_DEFAULTS.merge(opts)
-        app.opts[:ree_logger] = ::ReeLogger::Logger.new
+        app.opts[:ree_logger] = opts[:ree_logger] || ::ReeLogger::Logger.new
         app.opts[:ree_logger_filter] = opts[:filter] if opts[:filter]
         app.opts[:ree_logger_log_params] = !!opts[:log_params]
         app.opts[:ree_logger_filter_params] = opts[:filter_params].map(&:to_s)
