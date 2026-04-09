@@ -29,6 +29,7 @@ module RubyLsp
         objects_to_add.uniq!{ |obj| obj.name }
         objects_to_add.reject!{ |obj| IGNORE_METHOD_CALL_NAMES.include?(obj.name) }
         objects_to_add.reject!{ |obj| parsed_doc.includes_linked_object?(obj.name) }
+        objects_to_add.reject!{ |obj| parsed_doc.includes_special_object?(obj.name) }
         return editor.source if objects_to_add.size == 0
         
         editor.add_links(parsed_doc, objects_to_add, current_package)
