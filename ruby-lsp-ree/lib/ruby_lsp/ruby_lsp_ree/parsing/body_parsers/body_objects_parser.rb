@@ -120,6 +120,10 @@ class RubyLsp::Ree::BodyObjectsParser < RubyLsp::Ree::BasicParser
             target_objects += parse([node.body])
           end
         end
+
+        if node.respond_to?(:arguments) && node.arguments
+          target_objects += parse_target_objects_from_args(node.arguments)
+        end
       end
 
       if node.respond_to?(:block) && node.block && node.block.is_a?(Prism::BlockNode)

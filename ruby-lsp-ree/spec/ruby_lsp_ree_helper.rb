@@ -20,7 +20,6 @@ module RubyLspReeHelper
     location = RubyIndexer::Location.new(0, 0, 0, 0)
 
     server.global_state.index.add(RubyIndexer::Entry::Method.new(
-      server.global_state.index.configuration,
       name,
       file_uri,
       location,
@@ -43,7 +42,6 @@ module RubyLspReeHelper
     end
     
     server.global_state.index.add(RubyIndexer::Entry::Method.new(
-      server.global_state.index.configuration,
       name,
       file_uri,
       location,
@@ -59,7 +57,6 @@ module RubyLspReeHelper
     location = RubyIndexer::Location.new(0, 0, 0, 0)
     
     server.global_state.index.add(RubyIndexer::Entry::Class.new(
-      server.global_state.index.configuration,
       [name],
       uri,
       location,
