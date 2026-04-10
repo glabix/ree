@@ -101,6 +101,10 @@ class RubyLsp::Ree::BodyObjectsParser < RubyLsp::Ree::BasicParser
           target_objects += parse(node.parts)
         end
 
+        if node.respond_to?(:exceptions) && node.exceptions
+          target_objects += parse(node.exceptions)
+        end
+
         if node.respond_to?(:rescue_clause) && node.rescue_clause
           target_objects += parse([node.rescue_clause])
         end

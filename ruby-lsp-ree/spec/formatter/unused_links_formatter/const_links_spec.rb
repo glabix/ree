@@ -103,6 +103,26 @@ it "doesn't remove link if imported constant is used" do
     expect(result).to eq(source)
   end
 
+  it "doesn't remove import link if usage is rescue block" do
+    source =  <<~RUBY
+      class SamplePackage::SomeClass
+        fn :some_class do
+          link :some_import2
+          link :some_import1, import: -> { SomeErr1 & SomeErr2 }
+        end
+
+        def call(arg1)
+          some_import2
+        rescue SomeErr1, SomeErr2
+          nil
+        end
+      end
+    RUBY
+
+    result = subject.run_formatting(sample_file_uri, ruby_document(source))
+    expect(result).to eq(source)
+  end
+
   context "multi-constant imports" do
     it "removes unused constant from the first place" do
       source =  <<~RUBY
