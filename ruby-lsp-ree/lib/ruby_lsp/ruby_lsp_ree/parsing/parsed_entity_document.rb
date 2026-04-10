@@ -52,14 +52,13 @@ class RubyLsp::Ree::ParsedEntityDocument < RubyLsp::Ree::ParsedClassDocument
       end
 
     @collections = @build_dto_node.block.body.body
-      .select{ _1.name == :column }
-      .map do 
+      .select{ _1.name == :collection }
+      .map do
         EntityCollection.new(
           name: _1.arguments.arguments.first.unescaped,
           location: _1.location
         )
       end
 
-    pp @collections
   end
 end

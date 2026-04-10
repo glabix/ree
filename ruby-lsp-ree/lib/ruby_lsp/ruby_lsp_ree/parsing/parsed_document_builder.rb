@@ -75,13 +75,23 @@ class RubyLsp::Ree::ParsedDocumentBuilder
   end
 
   def self.build_class_document(ast, package_name)
-    document = RubyLsp::Ree::ParsedClassDocument.new(ast, package_name)
-    
+    if has_build_dto?(ast)
+      document = RubyLsp::Ree::ParsedEntityDocument.new(ast, package_name)
+    else
+      document = RubyLsp::Ree::ParsedClassDocument.new(ast, package_name)
+    end
+
     document.parse_links_container_node
     document.parse_class_includes
     document.parse_links
 
     document
+  end
+
+  def self.has_build_dto?(ast)
+    class_node = ast.statements.body.detect{ |node| node.is_a?(Prism::ClassNode) }
+    return false unless class_node&.body&.body
+    class_node.body.body.any? { |node| node.is_a?(Prism::CallNode) && node.name == :build_dto }
   end   
 
   def self.build_enum_document(ast)

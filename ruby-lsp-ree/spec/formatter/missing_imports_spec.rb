@@ -345,7 +345,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
   
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
       expect(result.lines[3].strip).to eq('')
-      expect(result.lines[4].strip).to eq('build_dto')
+      expect(result.lines[4].strip).to eq('build_dto do')
     end
   end
 
