@@ -81,7 +81,7 @@ module RubyLsp
         when Prism::StringNode
           str_node.unescaped
         when Prism::InterpolatedStringNode
-          str_node.parts.map(&:unescaped).join
+          str_node.parts.select{ it.is_a?(Prism::StringNode) }.map(&:unescaped).join
         else
           ''
         end

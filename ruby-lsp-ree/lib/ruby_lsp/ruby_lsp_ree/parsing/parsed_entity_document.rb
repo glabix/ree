@@ -1,9 +1,18 @@
 class RubyLsp::Ree::ParsedEntityDocument < RubyLsp::Ree::ParsedClassDocument
   include RubyLsp::Ree::ReeLspUtils
 
-  attr_reader :columns, :build_dto_node
+  attr_reader :columns, :build_dto_node, :collections
 
   class EntityField
+    attr_reader :name, :location
+
+    def initialize(name:, location:)
+      @name = name
+      @location = location
+    end
+  end
+
+  class EntityCollection
     attr_reader :name, :location
 
     def initialize(name:, location:)
@@ -16,6 +25,10 @@ class RubyLsp::Ree::ParsedEntityDocument < RubyLsp::Ree::ParsedClassDocument
     super
     parse_class_includes
     parse_build_dto_structure
+  end
+
+  def includes_special_object?(obj_name)
+    super || @collections.map(&:name).include?(obj_name)
   end
 
   private 
@@ -37,5 +50,15 @@ class RubyLsp::Ree::ParsedEntityDocument < RubyLsp::Ree::ParsedClassDocument
           location: _1.location
         )
       end
+
+    @collections = @build_dto_node.block.body.body
+      .select{ _1.name == :collection }
+      .map do
+        EntityCollection.new(
+          name: _1.arguments.arguments.first.unescaped,
+          location: _1.location
+        )
+      end
+
   end
 end

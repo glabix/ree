@@ -10,6 +10,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       index_fn(server, 'create_item_cmd', 'create_package')
       index_fn(server, 'create_item2', 'create_package')
       index_fn(server, 'build_dto', 'ree_dto')
+      index_fn(server, 'some_collection', 'create_package')
       @index = server.global_state.index 
     end
   end
@@ -267,6 +268,26 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result.lines[3].strip).to eq('end')
     end
 
+    it "adds import from return statement" do
+      source =  <<~'RUBY'
+        class SamplePackage::SomeClass
+          fn :some_class
+  
+          def call(arg1)
+            return MyDTO.new(
+              updated_at: seconds_ago
+            )
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+  
+      expect(result.lines[1].strip).to eq('fn :some_class do')
+      expect(result.lines[2].strip).to eq('link :seconds_ago')
+      expect(result.lines[3].strip).to eq('end')
+    end
+
     it "adds import into dto" do
       source =  <<~'RUBY'
         class SamplePackage::SomeClass
@@ -297,7 +318,7 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       RUBY
   
       result = subject.run_formatting(sample_file_uri, ruby_document(source))
-        expect(result.lines[3].strip).to eq('link :seconds_ago')
+      expect(result.lines[3].strip).to eq('link :seconds_ago')
     end
 
     it "doesn't add build_dto import into dto" do
@@ -322,6 +343,29 @@ RSpec.describe "RubyLsp::Ree::ReeFormatter" do
       expect(result.lines[3].strip).to eq('')
       expect(result.lines[4].strip).to eq('link :seconds_ago')
       expect(result.lines[5].strip).to eq('')
+    end
+
+    it "doesn't add entity collection import" do
+      source =  <<~'RUBY'
+        class SamplePackage::SomeClass
+          include Ree::LinkDSL
+          include ReeDto::DSL
+
+          build_dto do
+            column :id, Nilor[Integer], default: nil
+
+            collection :some_collection
+          end
+
+          def some_method
+            some_collection
+          end
+        end
+      RUBY
+  
+      result = subject.run_formatting(sample_file_uri, ruby_document(source))
+      expect(result.lines[3].strip).to eq('')
+      expect(result.lines[4].strip).to eq('build_dto do')
     end
   end
 

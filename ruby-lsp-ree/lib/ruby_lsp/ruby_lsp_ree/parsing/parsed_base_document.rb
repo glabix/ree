@@ -40,6 +40,10 @@ class RubyLsp::Ree::ParsedBaseDocument
     @link_nodes.map(&:linked_objects).flatten.map(&:name).include?(obj_name)
   end
 
+  def includes_special_object?(obj_name)
+    false
+  end
+
   def find_link_node(name)
     @link_nodes.detect{ node_name(_1) == name }
   end
