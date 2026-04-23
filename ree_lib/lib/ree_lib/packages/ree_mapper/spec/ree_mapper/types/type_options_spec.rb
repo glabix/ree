@@ -328,6 +328,23 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
       }
     end
 
+    context 'with inline hash block' do
+      let(:mapper) {
+        mapper_factory.call.use(:cast) {
+          integer :id
+          hash :profile do
+            string :email, restrict: [:visitor]
+            string :name
+          end
+        }
+      }
+
+      it {
+        expect(mapper.cast({ id: 1, profile: { email: 'a@b.c', name: 'John' } }, access_type: :visitor))
+          .to eq({ id: 1, profile: { email: '[FILTERED]', name: 'John' } })
+      }
+    end
+
     context 'with array wrapper' do
       let(:mapper) {
         mapper_factory.call(register_as: :restricted_user).use(:cast) {
