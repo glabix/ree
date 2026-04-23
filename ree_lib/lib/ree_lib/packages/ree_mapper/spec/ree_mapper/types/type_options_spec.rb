@@ -275,6 +275,78 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
     end
   end
 
+  describe 'restrict:' do
+    let(:mapper) {
+      mapper_factory.call.use(:cast) {
+        integer :id
+        string :email, restrict: [:visitor]
+        string :phone, restrict: [:visitor, :guest]
+      }
+    }
+
+    it {
+      expect(mapper.cast({ id: 1, email: 'a@b.c', phone: '123' })).to eq({ id: 1, email: 'a@b.c', phone: '123' })
+    }
+
+    it {
+      expect(mapper.cast({ id: 1, email: 'a@b.c', phone: '123' }, access_type: :admin)).to eq({ id: 1, email: 'a@b.c', phone: '123' })
+    }
+
+    it {
+      expect(mapper.cast({ id: 1, email: 'a@b.c', phone: '123' }, access_type: :visitor))
+        .to eq({ id: 1, email: '[FILTERED]', phone: '[FILTERED]' })
+    }
+
+    it {
+      expect(mapper.cast({ id: 1, email: 'a@b.c', phone: '123' }, access_type: :guest))
+        .to eq({ id: 1, email: 'a@b.c', phone: '[FILTERED]' })
+    }
+
+    it 'does not require value for restricted fields' do
+      expect(mapper.cast({ id: 1 }, access_type: :visitor)).to eq({ id: 1, email: '[FILTERED]', phone: '[FILTERED]' })
+    end
+
+    context 'with nested mapper' do
+      let(:mapper) {
+        mapper_factory.call(register_as: :nested_user).use(:cast) {
+          integer :id
+          string :email, restrict: [:visitor]
+        }
+
+        mapper_factory.call.use(:cast) {
+          nested_user :user
+        }
+      }
+
+      it {
+        expect(mapper.cast({ user: { id: 1, email: 'a@b.c' } })).to eq({ user: { id: 1, email: 'a@b.c' } })
+      }
+
+      it {
+        expect(mapper.cast({ user: { id: 1, email: 'a@b.c' } }, access_type: :visitor))
+          .to eq({ user: { id: 1, email: '[FILTERED]' } })
+      }
+    end
+
+    context 'with array wrapper' do
+      let(:mapper) {
+        mapper_factory.call(register_as: :restricted_user).use(:cast) {
+          integer :id
+          string :email, restrict: [:visitor]
+        }
+
+        mapper_factory.call.use(:cast) {
+          array :users, restricted_user
+        }
+      }
+
+      it {
+        expect(mapper.cast({ users: [{ id: 1, email: 'a@b.c' }] }, access_type: :visitor))
+          .to eq({ users: [{ id: 1, email: '[FILTERED]' }] })
+      }
+    end
+  end
+
   describe 'default:' do
     let(:mapper) { mapper_factory.call.use(:cast) { integer? :number, default: 0 } }
 

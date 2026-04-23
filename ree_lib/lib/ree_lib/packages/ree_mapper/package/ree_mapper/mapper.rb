@@ -23,10 +23,10 @@ class ReeMapper::Mapper
 
         if type
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, role: nil, only: nil, except: nil, fields_filters: nil)
+            def #{method}(obj, role: nil, only: nil, except: nil, fields_filters: nil, access_type: nil)
               #{
                 if type.is_a?(ReeMapper::AbstractWrapper)
-                  "@type.#{method}(obj, role:, fields_filters:)"
+                  "@type.#{method}(obj, role:, fields_filters:, access_type:)"
                 else
                   "@type.#{method}(obj)"
                 end
@@ -35,7 +35,7 @@ class ReeMapper::Mapper
           RUBY
         else
           class_eval(<<~RUBY, __FILE__, __LINE__ + 1)
-            def #{method}(obj, role: nil, only: nil, except: nil, fields_filters: nil)
+            def #{method}(obj, role: nil, only: nil, except: nil, fields_filters: nil, access_type: nil)
               user_fields_filter = ReeMapper::FieldsFilter.build(only, except)
 
               if !user_fields_filter.nil?
@@ -49,6 +49,11 @@ class ReeMapper::Mapper
               @fields.each_with_object(@#{method}_strategy.build_object) do |(_, field), acc|
                 next unless fields_filters.nil? || fields_filters.all? { _1.allow? field.name }
                 next unless field.has_role?(role)
+
+                if field.restricted_for?(access_type)
+                  @#{method}_strategy.assign_value(acc, field, ReeMapper::Field::FILTERED_PLACEHOLDER)
+                  next
+                end
 
                 value = if @#{method}_strategy.has_value?(obj, field)
                   @#{method}_strategy.get_value(obj, field)
@@ -78,7 +83,7 @@ class ReeMapper::Mapper
                   end
 
                   value = begin
-                    field.type.#{method}(value, role:, fields_filters: nested_fields_filters)
+                    field.type.#{method}(value, role:, fields_filters: nested_fields_filters, access_type:)
                   rescue ReeMapper::ErrorWithLocation => e
                     e.prepend_field_name field.name_as_str
                     e.location ||= field.location
