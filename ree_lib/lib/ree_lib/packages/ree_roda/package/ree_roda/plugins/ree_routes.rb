@@ -123,7 +123,7 @@ class Roda
                   action_result = get_cached_action(route).call(accessor, filtered_params)
 
                   if route.serializer
-                    serialized_result = get_cached_serializer(route).serialize(action_result)
+                    serialized_result = get_cached_serializer(route).serialize(action_result, access_type: authenticated_scope)
                   else
                     serialized_result = {}
                   end
