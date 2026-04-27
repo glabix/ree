@@ -8,9 +8,10 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
     Kwargs[
       role: Nilor[Symbol, ArrayOf[Symbol]],
       fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
+      access_type: Nilor[Symbol],
     ] => Or[Sequel::Postgres::PGArray, String]
   )
-  def db_dump(value, role: nil, fields_filters: nil)
+  def db_dump(value, role: nil, fields_filters: nil, access_type: nil)
     if !value.is_a?(Array)
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
@@ -24,7 +25,7 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
     end
 
     value = value.map.with_index do |item, idx|
-      subject.type.db_dump(item, role:, fields_filters:)
+      subject.type.db_dump(item, role:, fields_filters:, access_type:)
     rescue ReeMapper::ErrorWithLocation => e
       e.location ||= subject.location
       e.prepend_field_name(idx.to_s)
@@ -43,9 +44,10 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
     Kwargs[
       role: Nilor[Symbol, ArrayOf[Symbol]],
       fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
+      access_type: Nilor[Symbol],
     ] => Array
   ).throws(ReeMapper::TypeError)
-  def db_load(value, role: nil, fields_filters: nil)
+  def db_load(value, role: nil, fields_filters: nil, access_type: nil)
     if !value.is_a?(Sequel::Postgres::PGArray)
       raise ReeMapper::TypeError.new("should be a Sequel::Postgres::PGArray, got `#{truncate(value.inspect)}`")
     end
@@ -59,7 +61,7 @@ class ReeDao::PgArray < ReeMapper::AbstractWrapper
     end
 
     value.map.with_index do |item, idx|
-      subject.type.db_load(item, role:, fields_filters:)
+      subject.type.db_load(item, role:, fields_filters:, access_type:)
     rescue ReeMapper::ErrorWithLocation => e
       e.location ||= subject.location
       e.prepend_field_name(idx.to_s)

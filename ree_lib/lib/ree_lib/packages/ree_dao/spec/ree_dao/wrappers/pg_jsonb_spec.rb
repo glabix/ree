@@ -98,4 +98,72 @@ RSpec.describe 'ReeDao::PgJsonb' do
       }.to raise_error(ReeMapper::TypeError, /`numbers` should be a Sequel::Postgres::JSONB, got `#{object.inspect}`/)
     }
   end
+
+  describe 'restrict: with access_type' do
+    let(:mapper) {
+      mapper_factory.call.use(:db_dump).use(:db_load) do
+        pg_jsonb :payload do
+          integer :id
+          string :email, restrict: [:visitor]
+          string :phone, restrict: [:visitor, :guest]
+        end
+      end
+    }
+
+    let(:payload) {
+      { payload: { id: 1, email: 'a@b.c', phone: '123' } }
+    }
+
+    describe '#db_dump' do
+      it 'passes values through when no access_type given' do
+        expect(mapper.db_dump(payload)).to eq({
+          payload: Sequel.pg_jsonb_wrap({ id: 1, email: 'a@b.c', phone: '123' })
+        })
+      end
+
+      it 'passes values through when access_type does not match any restrict' do
+        expect(mapper.db_dump(payload, access_type: :admin)).to eq({
+          payload: Sequel.pg_jsonb_wrap({ id: 1, email: 'a@b.c', phone: '123' })
+        })
+      end
+
+      it 'filters fields whose restrict list includes the access_type' do
+        expect(mapper.db_dump(payload, access_type: :guest)).to eq({
+          payload: Sequel.pg_jsonb_wrap({ id: 1, email: 'a@b.c', phone: '[FILTERED]' })
+        })
+      end
+
+      it 'filters all matching restricted fields when access_type matches' do
+        expect(mapper.db_dump(payload, access_type: :visitor)).to eq({
+          payload: Sequel.pg_jsonb_wrap({ id: 1, email: '[FILTERED]', phone: '[FILTERED]' })
+        })
+      end
+    end
+
+    describe '#db_load' do
+      let(:loaded_payload) {
+        { payload: Sequel::Postgres::JSONBHash.new({ id: 1, email: 'a@b.c', phone: '123' }) }
+      }
+
+      it 'passes values through when no access_type given' do
+        expect(mapper.db_load(loaded_payload)).to eq(payload)
+      end
+
+      it 'passes values through when access_type does not match any restrict' do
+        expect(mapper.db_load(loaded_payload, access_type: :admin)).to eq(payload)
+      end
+
+      it 'filters fields whose restrict list includes the access_type' do
+        expect(mapper.db_load(loaded_payload, access_type: :guest)).to eq({
+          payload: { id: 1, email: 'a@b.c', phone: '[FILTERED]' }
+        })
+      end
+
+      it 'filters all matching restricted fields when access_type matches' do
+        expect(mapper.db_load(loaded_payload, access_type: :visitor)).to eq({
+          payload: { id: 1, email: '[FILTERED]', phone: '[FILTERED]' }
+        })
+      end
+    end
+  end
 end
