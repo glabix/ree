@@ -133,6 +133,21 @@ module Ree
       !!@benchmark_mode
     end
 
+    # Routes declared as `visibility :internal` are excluded from generated
+    # swagger documents. Enable this for public-facing deployments and leave it
+    # off internally, so the same codebase yields a public and a full document.
+    def hide_internal_swagger_endpoints
+      @hide_internal_swagger_endpoints = true
+    end
+
+    def show_internal_swagger_endpoints
+      @hide_internal_swagger_endpoints = false
+    end
+
+    def hide_internal_swagger_endpoints?
+      !!@hide_internal_swagger_endpoints
+    end
+
     def obfuscated?
       ENV.has_key?('REE_LICENSE_KEY')
     end
