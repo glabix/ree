@@ -17,7 +17,8 @@ class Roda
 
       module ClassMethods
         def ree_routes(routes, swagger_title: "", swagger_description: "",
-                        swagger_version: "", swagger_url: "", api_url: "")
+                        swagger_version: "", swagger_url: "", api_url: "",
+                        swagger_include_internal: nil)
           @ree_routes ||= []
           @ree_routes += routes
 
@@ -27,12 +28,17 @@ class Roda
           opts[:ree_routes_swagger_url] = swagger_url
           opts[:ree_routes_api_url] = api_url
 
+          # nil keeps the global default (Ree.hide_internal_swagger_endpoints);
+          # pass true/false to force one app to differ from it.
+          swagger_opts = swagger_include_internal.nil? ? {} : { include_internal: swagger_include_internal }
+
           opts[:ree_routes_swagger] = ReeRoda::BuildSwaggerFromRoutes.new.call(
             @ree_routes,
             opts[:ree_routes_swagger_title],
             opts[:ree_routes_swagger_description],
             opts[:ree_routes_swagger_version],
-            opts[:ree_routes_api_url]
+            opts[:ree_routes_api_url],
+            **swagger_opts
           )
 
           build_routes_proc

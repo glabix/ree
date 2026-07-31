@@ -24,6 +24,8 @@ module ReeRoutes
       include Ree::Contracts::Core
       include Ree::Contracts::ArgContracts
 
+      ADMIN_PATH_SEGMENT = "admin"
+
       def routes(name, &proc)
         raise ArgumentError.new("block is required") if !block_given?
 
@@ -87,6 +89,14 @@ module ReeRoutes
           raise ArgumentError.new("action, summary and auth scope should be provided for #{builder.get_route.inspect}")
         end
 
+        if builder.get_route.visibility.nil? && admin_path?(path)
+          raise ArgumentError.new(
+            "admin route #{path} must declare visibility explicitly: " \
+            "`visibility :internal` to keep it out of generated swagger, " \
+            "or `visibility :public` if it is intentionally documented"
+          )
+        end
+
         route = builder.get_route
 
         @dsl.link(route.action.name, from: route.action.package_name)
@@ -97,6 +107,13 @@ module ReeRoutes
 
         @routes << route
         route
+      end
+
+      # Forgetting `visibility` on an admin route is invisible in review and
+      # silently publishes it, so make it a boot-time failure instead.
+      contract String => Bool
+      def admin_path?(path)
+        path.split("/").include?(ADMIN_PATH_SEGMENT)
       end
     end
   end

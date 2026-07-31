@@ -7,8 +7,19 @@ class ReeRoda::BuildSwaggerFromRoutes
     link "ree_swagger/dto/endpoint_dto", -> { EndpointDto }
   end
 
-  contract(ArrayOf[ReeRoutes::Route], String, String, String, String => Hash)
-  def call(routes, title, description, version, api_url)
+  contract(
+    ArrayOf[ReeRoutes::Route], String, String, String, String,
+    Ksplat[include_internal?: Bool] => Hash
+  )
+  def call(routes, title, description, version, api_url, **opts)
+    # Defaults to the global switch (see Ree.hide_internal_swagger_endpoints),
+    # so one codebase can serve a public and an internal document.
+    include_internal = opts.fetch(:include_internal) {
+      !Ree.hide_internal_swagger_endpoints?
+    }
+
+    routes = routes.select(&:public?) if !include_internal
+
     endpoints = routes.map do |route|
       method_decorator = Ree::Contracts.get_method_decorator(
         route.action.klass, :call, scope: :instance

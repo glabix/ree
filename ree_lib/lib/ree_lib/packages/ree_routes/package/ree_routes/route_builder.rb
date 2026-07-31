@@ -5,6 +5,8 @@ require_relative "route"
 class ReeRoutes::RouteBuilder
   Redirect = Struct.new(:path, :code)
 
+  VISIBILITIES = [:public, :internal].freeze
+
   def initialize
     @route = ReeRoutes::Route.new
     @route.respond_to = :json
@@ -40,6 +42,17 @@ class ReeRoutes::RouteBuilder
   contract String => String
   def summary(str)
     @route.summary = str
+  end
+
+  contract Symbol => Symbol
+  def visibility(value)
+    if !VISIBILITIES.include?(value)
+      raise ArgumentError.new(
+        "visibility should be one of #{VISIBILITIES.inspect}, got #{value.inspect}"
+      )
+    end
+
+    @route.visibility = value
   end
 
   contract Symbol, Symbol => nil
