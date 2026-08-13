@@ -21,4 +21,18 @@ RSpec.describe 'Ree::Contracts no_contract ENV' do
       end.new.call(:no_string)
     ).to be_nil
   }
+
+  it "allows multiple contracts in classes with Ree::MethodAddedHook" do
+    expect(
+      Class.new do
+        extend Ree::MethodAddedHook
+
+        contract(String => nil).throws(ArgumentError)
+        def call(name); end
+
+        contract Symbol => nil
+        def another(name); end
+      end.new.call(:no_string)
+    ).to be_nil
+  end
 end

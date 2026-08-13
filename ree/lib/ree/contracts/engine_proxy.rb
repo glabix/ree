@@ -7,6 +7,8 @@ module Ree::Contracts
     end
 
     def throws(*errors)
+      return self if @engine.nil?
+
       @engine.add_errors(*errors)
     end
   end

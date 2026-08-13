@@ -26,6 +26,8 @@ module Ree::Contracts
     end
 
     def contract(*args, &block)
+      return EngineProxy.new(nil) if Ree::Contracts.no_contracts?
+
       engine = Engine.fetch_for(self)
       engine.add_contract(*args, &block)
       EngineProxy.new(engine)
