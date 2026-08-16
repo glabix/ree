@@ -6,6 +6,11 @@ class ReeMapper::AbstractWrapper
     @subject = field
   end
 
+  # See ReeMapper::AbstractType#db_load_trusted_check. Wrappers always cast.
+  def db_load_trusted_check(var)
+    nil
+  end
+
   private
 
   def truncate(str, limit = 180)

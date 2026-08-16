@@ -183,21 +183,23 @@ module ReeDao
       end
 
       def with_mapper(mapper)
-        clone(
-          schema_mapper: mapper || opts[:schema_mapper],
-        ).with_row_proc(
-          Proc.new { |hash|
-            m = mapper || opts[:schema_mapper]
+        m = mapper || opts[:schema_mapper]
 
-            if m
-              entity = m.db_load(hash)
-              self.set_persistence_state(entity, hash)
-              entity
-            else
-              hash
-            end
+        row_proc = if m.nil?
+          Proc.new { |hash| hash }
+        elsif (dto = m.find_strategy(:db_load)&.dto) && dto.include?(ReeDto::DSL)
+          # ree_dto entities skip set_persistence_state anyway; avoid the
+          # per-row ancestor walk entirely
+          Proc.new { |hash| m.db_load(hash) }
+        else
+          Proc.new { |hash|
+            entity = m.db_load(hash)
+            self.set_persistence_state(entity, hash)
+            entity
           }
-        )
+        end
+
+        clone(schema_mapper: m).with_row_proc(row_proc)
       end
 
       private

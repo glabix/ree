@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class ReeMapper::Rational < ReeMapper::AbstractType
+  def db_load_trusted_check(var)
+    "#{var}.is_a?(::Rational)"
+  end
+
   contract(Any => Rational).throws(ReeMapper::TypeError)
   def serialize(value)
     if value.is_a?(Rational)

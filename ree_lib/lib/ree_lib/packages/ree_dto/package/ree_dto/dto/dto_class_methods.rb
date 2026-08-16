@@ -32,6 +32,20 @@ module ReeDto::DtoClassMethods
     dto_obj
   end
 
+  # Fast-path constructor used by compiled db_load: takes ownership of attrs
+  # (it becomes @_attrs without copying), so callers must not reuse the hash.
+  # Reads @fields_with_default directly: the contract-wrapped reader would
+  # revalidate the array on every row.
+  def build_from_attrs(attrs)
+    (@fields_with_default || []).each do |field|
+      attrs[field.name] = field.default unless attrs.key?(field.name)
+    end
+
+    dto_obj = allocate
+    dto_obj.instance_variable_set(:@_attrs, attrs)
+    dto_obj
+  end
+
   private
 
   def set_fields(v)

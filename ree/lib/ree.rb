@@ -148,6 +148,23 @@ module Ree
       !!@hide_internal_swagger_endpoints
     end
 
+    # Mappers built while this mode is on compile a specialized :db_load
+    # method that trusts DB values already typecast by the driver: primitive
+    # fields skip casting behind a cheap type guard, and dto construction
+    # avoids intermediate allocations. Read at mapper build time, so enable
+    # it in ree.setup.rb before any DAO/mapper is loaded.
+    def enable_db_load_performance_mode
+      @db_load_performance_mode = true
+    end
+
+    def disable_db_load_performance_mode
+      @db_load_performance_mode = false
+    end
+
+    def db_load_performance_mode?
+      !!@db_load_performance_mode
+    end
+
     def obfuscated?
       ENV.has_key?('REE_LICENSE_KEY')
     end

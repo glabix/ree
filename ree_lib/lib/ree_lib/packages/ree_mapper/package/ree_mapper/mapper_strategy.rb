@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ReeMapper::MapperStrategy
-  attr_reader :method, :always_optional
+  attr_reader :method, :always_optional, :output
 
   contract(Symbol, Class, Bool => Any)
   def initialize(method:, dto:, always_optional:)
@@ -60,8 +60,6 @@ class ReeMapper::MapperStrategy
   end
 
   private
-
-  attr_reader :output
 
   def build_output(dto)
     if dto == Hash || (defined?(OpenStruct) && dto == OpenStruct)

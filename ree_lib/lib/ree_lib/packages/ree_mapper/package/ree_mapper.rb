@@ -47,11 +47,17 @@ module ReeMapper
 
   require_relative 'ree_mapper/mapper_strategy'
   require_relative 'ree_mapper/mapper'
+  require_relative 'ree_mapper/db_load_compiler'
   require_relative 'ree_mapper/mapper_factory_proxy'
   require_relative 'ree_mapper/mapper_factory'
 
   require_relative 'ree_mapper/default_factory'
   require_relative 'ree_mapper/dsl'
+
+  # Defensive read: an older ree gem without the flag means the mode is off
+  def self.db_load_performance_mode?
+    Ree.respond_to?(:db_load_performance_mode?) && Ree.db_load_performance_mode?
+  end
 
   def self.get_mapper_factory(mod)
     if !mod.is_a?(Module)

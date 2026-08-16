@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class ReeMapper::Integer < ReeMapper::AbstractType
+  def db_load_trusted_check(var)
+    "#{var}.is_a?(::Integer)"
+  end
+
   contract(Any => Integer).throws(ReeMapper::TypeError)
   def serialize(value)
     if value.is_a? Integer
