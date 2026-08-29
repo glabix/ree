@@ -6,9 +6,10 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     Kwargs[
       role: Nilor[Symbol, ArrayOf[Symbol]],
       fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
+      access_type: Nilor[Symbol],
     ] => Array
   ).throws(ReeMapper::TypeError)
-  def serialize(value, role: nil, fields_filters: nil)
+  def serialize(value, role: nil, fields_filters: nil, access_type: nil)
     if !check_value(value)
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
@@ -24,7 +25,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     value.map.with_index do |item, idx|
       next nil if item.nil? && subject.null
 
-      subject.type.serialize(item, role:, fields_filters:)
+      subject.type.serialize(item, role:, fields_filters:, access_type:)
     rescue ReeMapper::ErrorWithLocation => e
       e.prepend_field_name(idx.to_s)
       e.location ||= subject.location
@@ -37,9 +38,10 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     Kwargs[
       role: Nilor[Symbol, ArrayOf[Symbol]],
       fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
+      access_type: Nilor[Symbol],
     ] => Array
   ).throws(ReeMapper::TypeError)
-  def cast(value, role: nil, fields_filters: nil)
+  def cast(value, role: nil, fields_filters: nil, access_type: nil)
     if !check_value(value)
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
@@ -55,7 +57,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     value.map.with_index do |item, idx|
       next nil if item.nil? && subject.null
 
-      subject.type.cast(item, role:, fields_filters:)
+      subject.type.cast(item, role:, fields_filters:, access_type:)
     rescue ReeMapper::ErrorWithLocation => e
       e.prepend_field_name(idx.to_s)
       e.location ||= subject.location
@@ -68,9 +70,10 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     Kwargs[
       role: Nilor[Symbol, ArrayOf[Symbol]],
       fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
+      access_type: Nilor[Symbol],
     ] => Array
   ).throws(ReeMapper::TypeError)
-  def db_dump(value, role: nil, fields_filters: nil)
+  def db_dump(value, role: nil, fields_filters: nil, access_type: nil)
     if !check_value(value)
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
@@ -86,7 +89,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     value.map.with_index do |item, idx|
       next nil if item.nil? && subject.null
 
-      subject.type.db_dump(item, role:, fields_filters:)
+      subject.type.db_dump(item, role:, fields_filters:, access_type:)
     rescue ReeMapper::ErrorWithLocation => e
       e.prepend_field_name(idx.to_s)
       e.location ||= subject.location
@@ -99,9 +102,10 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     Kwargs[
       role: Nilor[Symbol, ArrayOf[Symbol]],
       fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
+      access_type: Nilor[Symbol],
     ] => Array
   ).throws(ReeMapper::TypeError)
-  def db_load(value, role: nil, fields_filters: nil)
+  def db_load(value, role: nil, fields_filters: nil, access_type: nil)
     if !check_value(value)
       raise ReeMapper::TypeError.new("should be an array, got `#{truncate(value.inspect)}`")
     end
@@ -117,7 +121,7 @@ class ReeMapper::Array < ReeMapper::AbstractWrapper
     value.map.with_index do |item, idx|
       next nil if item.nil? && subject.null
 
-      subject.type.db_load(item, role:, fields_filters:)
+      subject.type.db_load(item, role:, fields_filters:, access_type:)
     rescue ReeMapper::ErrorWithLocation => e
       e.prepend_field_name(idx.to_s)
       e.location ||= subject.location

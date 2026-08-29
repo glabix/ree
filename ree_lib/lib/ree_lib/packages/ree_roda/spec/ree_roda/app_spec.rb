@@ -118,6 +118,27 @@ RSpec.describe ReeRoda::App do
       end
     end
 
+    class ReeRodaTest::RestrictedCmd
+      include ReeActions::DSL
+
+      action :restricted_cmd
+
+      def call(access, attrs)
+        {result: "ok", secret: "topsecret"}
+      end
+    end
+
+    class ReeRodaTest::RestrictedSerializer
+      include ReeMapper::DSL
+
+      mapper :restricted_serializer
+
+      build_mapper.use(:serialize) do
+        string :result
+        string :secret, restrict: [:visitor]
+      end
+    end
+
     class ReeRodaTest::TestRoutes
       include ReeRoutes::DSL
 
@@ -221,6 +242,22 @@ RSpec.describe ReeRoda::App do
           warden_scope :user, :another_user
           sections "some_action"
           action :warden_scope_cmd, **opts
+        end
+
+        get "api/restricted_for_visitor" do
+          summary "Restricted route served via visitor scope"
+          warden_scope :visitor
+          sections "some_action"
+          action :restricted_cmd, **opts
+          serializer :restricted_serializer, **opts
+        end
+
+        get "api/restricted_for_user" do
+          summary "Restricted route served via user scope"
+          warden_scope :user
+          sections "some_action"
+          action :restricted_cmd, **opts
+          serializer :restricted_serializer, **opts
         end
       end
     end
@@ -377,4 +414,16 @@ RSpec.describe ReeRoda::App do
     get "check_warden"
     expect(last_response.status).to eq(401)
   }
+
+  it 'filters restricted fields when authenticated as visitor' do
+    get "api/restricted_for_visitor"
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq("{\"result\":\"ok\",\"secret\":\"[FILTERED]\"}")
+  end
+
+  it 'keeps restricted fields when authenticated under a non-restricted scope' do
+    get "api/restricted_for_user?user=1"
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to eq("{\"result\":\"ok\",\"secret\":\"topsecret\"}")
+  end
 end

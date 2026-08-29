@@ -275,6 +275,148 @@ RSpec.describe 'ReeMapper::MapperFactory type options' do
     end
   end
 
+  describe 'restrict:' do
+    let(:mapper) {
+      mapper_factory.call.use(:cast) {
+        integer :id
+        string :email, restrict: [:visitor]
+        string :phone, restrict: [:visitor, :guest]
+      }
+    }
+
+    it {
+      expect(mapper.cast({ id: 1, email: 'a@b.c', phone: '123' })).to eq({ id: 1, email: 'a@b.c', phone: '123' })
+    }
+
+    it {
+      expect(mapper.cast({ id: 1, email: 'a@b.c', phone: '123' }, access_type: :admin)).to eq({ id: 1, email: 'a@b.c', phone: '123' })
+    }
+
+    it {
+      expect(mapper.cast({ id: 1, email: 'a@b.c', phone: '123' }, access_type: :visitor))
+        .to eq({ id: 1, email: '[FILTERED]', phone: '[FILTERED]' })
+    }
+
+    it {
+      expect(mapper.cast({ id: 1, email: 'a@b.c', phone: '123' }, access_type: :guest))
+        .to eq({ id: 1, email: 'a@b.c', phone: '[FILTERED]' })
+    }
+
+    it 'does not require value for restricted fields' do
+      expect(mapper.cast({ id: 1 }, access_type: :visitor)).to eq({ id: 1, email: '[FILTERED]', phone: '[FILTERED]' })
+    end
+
+    context 'with nested mapper' do
+      let(:mapper) {
+        mapper_factory.call(register_as: :nested_user).use(:cast) {
+          integer :id
+          string :email, restrict: [:visitor]
+        }
+
+        mapper_factory.call.use(:cast) {
+          nested_user :user
+        }
+      }
+
+      it {
+        expect(mapper.cast({ user: { id: 1, email: 'a@b.c' } })).to eq({ user: { id: 1, email: 'a@b.c' } })
+      }
+
+      it {
+        expect(mapper.cast({ user: { id: 1, email: 'a@b.c' } }, access_type: :visitor))
+          .to eq({ user: { id: 1, email: '[FILTERED]' } })
+      }
+    end
+
+    context 'with inline hash block' do
+      let(:mapper) {
+        mapper_factory.call.use(:cast) {
+          integer :id
+          hash :profile do
+            string :email, restrict: [:visitor]
+            string :name
+          end
+        }
+      }
+
+      it {
+        expect(mapper.cast({ id: 1, profile: { email: 'a@b.c', name: 'John' } }, access_type: :visitor))
+          .to eq({ id: 1, profile: { email: '[FILTERED]', name: 'John' } })
+      }
+    end
+
+    context 'with array wrapper of registered mapper' do
+      let(:mapper) {
+        mapper_factory.call(register_as: :restricted_user).use(:cast) {
+          integer :id
+          string :email, restrict: [:visitor]
+          string :phone, restrict: [:visitor, :guest]
+        }
+
+        mapper_factory.call.use(:cast) {
+          array :users, restricted_user
+        }
+      }
+
+      let(:payload) {
+        { users: [{ id: 1, email: 'a@b.c', phone: '111' }, { id: 2, email: 'c@d.e', phone: '222' }] }
+      }
+
+      it 'passes values through when no access_type given' do
+        expect(mapper.cast(payload)).to eq(payload)
+      end
+
+      it 'passes values through when access_type does not match any restrict' do
+        expect(mapper.cast(payload, access_type: :admin)).to eq(payload)
+      end
+
+      it 'filters restricted fields of every element when access_type matches' do
+        expect(mapper.cast(payload, access_type: :visitor)).to eq(
+          { users: [
+            { id: 1, email: '[FILTERED]', phone: '[FILTERED]' },
+            { id: 2, email: '[FILTERED]', phone: '[FILTERED]' }
+          ] }
+        )
+      end
+
+      it 'only filters fields whose restrict list includes the access_type' do
+        expect(mapper.cast(payload, access_type: :guest)).to eq(
+          { users: [
+            { id: 1, email: 'a@b.c', phone: '[FILTERED]' },
+            { id: 2, email: 'c@d.e', phone: '[FILTERED]' }
+          ] }
+        )
+      end
+    end
+
+    context 'with registered mapper containing array of another registered mapper' do
+      let(:mapper) {
+        mapper_factory.call(register_as: :restricted_order).use(:cast) {
+          integer :number
+          string :card, restrict: [:visitor]
+        }
+
+        mapper_factory.call(register_as: :restricted_customer).use(:cast) {
+          integer :id
+          array :orders, restricted_order
+        }
+
+        mapper_factory.call.use(:cast) {
+          restricted_customer :customer
+        }
+      }
+
+      it 'threads access_type through registered mapper -> array -> registered mapper' do
+        expect(mapper.cast(
+          { customer: { id: 1, orders: [{ number: 10, card: '4242' }, { number: 11, card: '5353' }] } },
+          access_type: :visitor
+        )).to eq(
+          { customer: { id: 1, orders: [{ number: 10, card: '[FILTERED]' }, { number: 11, card: '[FILTERED]' }] } }
+        )
+      end
+    end
+  end
+
   describe 'default:' do
     let(:mapper) { mapper_factory.call.use(:cast) { integer? :number, default: 0 } }
 

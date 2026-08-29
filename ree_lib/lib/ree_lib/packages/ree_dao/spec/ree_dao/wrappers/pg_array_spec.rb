@@ -69,4 +69,63 @@ RSpec.describe 'ReeDao::PgArray' do
       }.to raise_error(ReeMapper::TypeError, /`tags` should be a Sequel::Postgres::PGArray, got `1`/)
     }
   end
+
+  describe 'restrict: with access_type' do
+    let(:mapper) {
+      mapper_factory.call(register_as: :pg_array_user).use(:db_dump).use(:db_load) {
+        integer :id
+        string :email, restrict: [:visitor]
+      }
+
+      mapper_factory.call.use(:db_dump).use(:db_load) do
+        pg_array :users, pg_array_user
+      end
+    }
+
+    let(:payload) {
+      { users: [{ id: 1, email: 'a@b.c' }, { id: 2, email: 'c@d.e' }] }
+    }
+
+    describe '#db_dump' do
+      it 'passes values through when no access_type given' do
+        expect(mapper.db_dump(payload)).to eq({ users: Sequel.pg_array(payload[:users]) })
+      end
+
+      it 'passes values through when access_type does not match any restrict' do
+        expect(mapper.db_dump(payload, access_type: :admin)).to eq({ users: Sequel.pg_array(payload[:users]) })
+      end
+
+      it 'filters restricted fields of every element when access_type matches' do
+        expect(mapper.db_dump(payload, access_type: :visitor)).to eq({
+          users: Sequel.pg_array([
+            { id: 1, email: '[FILTERED]' },
+            { id: 2, email: '[FILTERED]' }
+          ])
+        })
+      end
+    end
+
+    describe '#db_load' do
+      let(:loaded_payload) {
+        { users: Sequel::Postgres::PGArray.new([{ id: 1, email: 'a@b.c' }, { id: 2, email: 'c@d.e' }]) }
+      }
+
+      it 'passes values through when no access_type given' do
+        expect(mapper.db_load(loaded_payload)).to eq(payload)
+      end
+
+      it 'passes values through when access_type does not match any restrict' do
+        expect(mapper.db_load(loaded_payload, access_type: :admin)).to eq(payload)
+      end
+
+      it 'filters restricted fields of every element when access_type matches' do
+        expect(mapper.db_load(loaded_payload, access_type: :visitor)).to eq({
+          users: [
+            { id: 1, email: '[FILTERED]' },
+            { id: 2, email: '[FILTERED]' }
+          ]
+        })
+      end
+    end
+  end
 end

@@ -8,6 +8,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
     Kwargs[
       role: Nilor[Symbol, ArrayOf[Symbol]],
       fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
+      access_type: Nilor[Symbol],
     ] => Or[
       Sequel::Postgres::JSONBHash,
       Sequel::Postgres::JSONBArray,
@@ -19,7 +20,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
       Sequel::Postgres::JSONBNull
     ]
   ).throws(ReeMapper::TypeError)
-  def db_dump(value, role: nil, fields_filters: nil)
+  def db_dump(value, role: nil, fields_filters: nil, access_type: nil)
     if subject.fields_filter
       fields_filters = if fields_filters
         fields_filters + [subject.fields_filter]
@@ -29,7 +30,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
     end
 
     value = begin
-      subject.type.db_dump(value, role:, fields_filters:)
+      subject.type.db_dump(value, role:, fields_filters:, access_type:)
     rescue ReeMapper::ErrorWithLocation => e
       e.location ||= subject.location
       raise e
@@ -47,6 +48,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
     Kwargs[
       role: Nilor[Symbol, ArrayOf[Symbol]],
       fields_filters: Nilor[ArrayOf[ReeMapper::FieldsFilter]],
+      access_type: Nilor[Symbol],
     ] => Or[
       Hash,
       Array,
@@ -58,7 +60,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
       Rational,
     ]
   ).throws(ReeMapper::TypeError)
-  def db_load(value, role: nil, fields_filters: nil)
+  def db_load(value, role: nil, fields_filters: nil, access_type: nil)
     value = case value
     when Sequel::Postgres::JSONBHash
       ReeObject::ToHash.new.call(value.to_h)
@@ -79,7 +81,7 @@ class ReeDao::PgJsonb < ReeMapper::AbstractWrapper
     end
 
     begin
-      subject.type.db_load(value, role:, fields_filters:)
+      subject.type.db_load(value, role:, fields_filters:, access_type:)
     rescue ReeMapper::ErrorWithLocation => e
       e.location ||= subject.location
       raise e

@@ -3,9 +3,10 @@
 class ReeMapper::Field
   attr_reader :type, :name, :from, :doc, :optional, :null, :roles, :default,
               :name_as_str, :name_as_instance_var_name, :from_as_str,
-              :fields_filter, :location
+              :fields_filter, :restrict, :location
 
   NO_DEFAULT = Object.new.freeze
+  FILTERED_PLACEHOLDER = '[FILTERED]'
 
   contract(
     Any,
@@ -19,11 +20,12 @@ class ReeMapper::Field
       default:  Any,
       only:     Nilor[ReeMapper::FilterFieldsContract],
       except:   Nilor[ReeMapper::FilterFieldsContract],
+      restrict: Nilor[ArrayOf[Symbol]],
       location: Nilor[String],
     ] => Any
   ).throws(ArgumentError)
   def initialize(type, name = nil, from: nil, doc: nil, optional: false, null: false, role: nil, default: NO_DEFAULT,
-                 only: nil, except: nil, location: nil)
+                 only: nil, except: nil, restrict: nil, location: nil)
     @type     = type
     @name     = name
     @from     = from || name
@@ -32,6 +34,7 @@ class ReeMapper::Field
     @null     = null
     @roles    = Array(role)
     @default  = default
+    @restrict = restrict
 
     @fields_filter = ReeMapper::FieldsFilter.build(only, except)
 
@@ -52,6 +55,12 @@ class ReeMapper::Field
   contract None => Bool
   def has_default?
     default != NO_DEFAULT
+  end
+
+  contract Nilor[Symbol] => Bool
+  def restricted_for?(access_type)
+    return false if @restrict.nil? || access_type.nil?
+    @restrict.include?(access_type)
   end
 
   contract Nilor[Symbol, ArrayOf[Symbol]] => Bool
