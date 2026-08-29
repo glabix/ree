@@ -5,12 +5,12 @@ class ReeDate::PrevYear
 
   fn :prev_year do
     link :today
-    link :advance
+    link :advance_date
   end
 
   doc("Short-hand for <tt>years_ago(1)</tt>.")
   contract(Nilor[Date] => Date)
   def call(date = nil)
-    advance(date || today, years: -1)
+    advance_date(date || today, years: -1)
   end
 end

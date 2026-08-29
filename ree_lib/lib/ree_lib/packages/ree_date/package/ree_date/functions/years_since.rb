@@ -5,12 +5,12 @@ class ReeDate::YearsSince
 
   fn :years_since do
     link :today
-    link :advance
+    link :advance_date
   end
 
   doc("Returns a new date the specified number of years in the future.")
   contract(Nilor[Date], Integer => Date)
   def call(date = nil, year_count)
-    advance(date || today, years: +year_count)
+    advance_date(date || today, years: +year_count)
   end
 end

@@ -5,7 +5,7 @@ class ReeDate::NextOccurring
 
   fn :next_occurring do
     link :today
-    link :advance
+    link :advance_date
     link :monday
     link :days_since
     link 'ree_date/functions/constants', -> { DAYS_INTO_WEEK }
@@ -32,7 +32,7 @@ class ReeDate::NextOccurring
       days = DAYS_INTO_WEEK.fetch(week_day) - 1
     end
 
-    advance(date, days: 7)
+    advance_date(date, days: 7)
       .then { monday(_1) }
       .then { days_since(_1, days) }
   end

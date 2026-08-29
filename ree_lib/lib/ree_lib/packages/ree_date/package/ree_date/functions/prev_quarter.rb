@@ -5,12 +5,12 @@ class ReeDate::PrevQuarter
 
   fn :prev_quarter do
     link :today
-    link :advance
+    link :advance_date
   end
 
   doc("Short-hand for <tt>quarters_ago(1)</tt>.")
   contract(Nilor[Date] => Date)
   def call(date = nil)
-    advance(date || today, quarters: -1)
+    advance_date(date || today, quarters: -1)
   end
 end
