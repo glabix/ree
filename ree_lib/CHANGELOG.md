@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [1.3.12] - 2026-09-02
+
+- `ree_audit`: `annotate_audit` fn — the entry point product code uses to attach
+  facts to the current audited call. Declared `freeze false` so a host
+  application can stub it in its own specs.
+
 ## [1.3.11] - 2026-09-02
 
 - New `ree_audit` package: an opt-in trail of audited action calls (event,
