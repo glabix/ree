@@ -44,6 +44,13 @@ class ReeRoutes::RouteBuilder
     @route.summary = str
   end
 
+  # Needed in exactly two cases: silencing a noisy internal route, and turning
+  # the trail on for a public route that reaches into someone else's data.
+  contract Bool => Bool
+  def audit(value)
+    @route.audit = value
+  end
+
   contract Symbol => Symbol
   def visibility(value)
     if !VISIBILITIES.include?(value)

@@ -68,6 +68,38 @@ RSpec.describe ReeRoutes::DSL, type: [:autoclean] do
         end
       end
     end
+
+    class ReeRoutesTest::AuditRoutes
+      include ReeRoutes::DSL
+
+      routes :audit_routes do
+        default_warden_scope :user
+
+        get "internal_default" do
+          summary "Internal route, audited by default"
+          action :cmd, from: :ree_routes_test
+          visibility :internal
+        end
+
+        get "internal_silenced" do
+          summary "Internal route, deliberately not audited"
+          action :cmd, from: :ree_routes_test
+          visibility :internal
+          audit false
+        end
+
+        get "public_default" do
+          summary "Public route, not audited"
+          action :cmd, from: :ree_routes_test
+        end
+
+        get "public_audited" do
+          summary "Public route reaching into someone else's data"
+          action :cmd, from: :ree_routes_test
+          audit true
+        end
+      end
+    end
   end
 
   after :all do
@@ -91,5 +123,16 @@ RSpec.describe ReeRoutes::DSL, type: [:autoclean] do
     expect(post_route.respond_to).to eq(:json)
 
     expect(csv_route.respond_to).to eq(:csv)
+  }
+
+  it {
+    routes = ReeRoutesTest::AuditRoutes.new.each_with_object({}) { |r, acc|
+      acc[r.path] = r
+    }
+
+    expect(routes["internal_default"].audited?).to eq(true)
+    expect(routes["internal_silenced"].audited?).to eq(false)
+    expect(routes["public_default"].audited?).to eq(false)
+    expect(routes["public_audited"].audited?).to eq(true)
   }
 end

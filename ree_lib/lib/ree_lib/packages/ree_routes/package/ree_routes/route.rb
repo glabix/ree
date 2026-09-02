@@ -3,7 +3,9 @@
 class ReeRoutes::Route
   attr_accessor :summary, :request_method, :serializer, :respond_to,
                 :sections, :action, :route, :warden_scopes, :path, :override,
-                :visibility
+                :visibility, :before, :redirect
+
+  attr_writer :audit
 
   # Routing always includes every route; visibility only affects generated docs.
   def public?
@@ -12,6 +14,14 @@ class ReeRoutes::Route
 
   def internal?
     !public?
+  end
+
+  # Internal routes are audited unless told otherwise. `visibility` is
+  # mandatory for admin paths (see DSL#define_route), so this list can never
+  # drift away from the set of routes that actually touch client data — which a
+  # hand-maintained list of audited routes inevitably would.
+  def audited?
+    @audit.nil? ? internal? : @audit
   end
 
   def valid?

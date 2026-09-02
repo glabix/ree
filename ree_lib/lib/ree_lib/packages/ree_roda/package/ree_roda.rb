@@ -11,6 +11,7 @@ module ReeRoda
     depends_on :ree_object
     depends_on :ree_swagger
     depends_on :ree_errors
+    depends_on :ree_audit
   end
 end
 

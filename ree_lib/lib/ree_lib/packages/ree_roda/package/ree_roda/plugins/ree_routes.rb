@@ -7,12 +7,16 @@ class Roda
         package_require("ree_json/functions/to_json")
         package_require("ree_hash/functions/transform_values")
         package_require("ree_object/functions/not_blank")
+        package_require("ree_audit/beans/audit")
+        package_require("ree_audit/event")
 
         app.plugin :all_verbs
       end
 
       def self.configure(app, opts = {})
         app.opts[:ree_routes_before] = opts[:before] if opts[:before]
+        # An application that passes no `audit:` behaves exactly as before.
+        app.opts[:ree_routes_audit] = opts[:audit] if opts[:audit]
       end
 
       module ClassMethods
@@ -126,7 +130,31 @@ class Roda
                   end
 
                   accessor = authenticated_user
-                  action_result = get_cached_action(route).call(accessor, filtered_params)
+                  audit = context.opts[:ree_routes_audit]
+
+                  action_result = if audit && route.audited?
+                    # The event carries the params exactly as the action
+                    # received them. IP, user agent and session come from the
+                    # accessor rather than from the request, so that the audit
+                    # package stays free of any Roda dependency.
+                    audit_event = ReeAudit::Event.build(
+                      action_name: route.action.name,
+                      package_name: route.action.package_name,
+                      summary: route.summary,
+                      sections: route.sections,
+                      request_method: route.request_method,
+                      path: route.path,
+                      request_path: r.path,
+                      params: filtered_params,
+                      accessor: accessor
+                    )
+
+                    audit.around(audit_event) do
+                      get_cached_action(route).call(accessor, filtered_params)
+                    end
+                  else
+                    get_cached_action(route).call(accessor, filtered_params)
+                  end
 
                   if route.serializer
                     serialized_result = get_cached_serializer(route).serialize(action_result)
