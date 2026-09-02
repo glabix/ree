@@ -11,6 +11,10 @@
       "entry_path": "packages/ree_array/package/ree_array.rb"
     },
     {
+      "name": "ree_audit",
+      "entry_path": "packages/ree_audit/package/ree_audit.rb"
+    },
+    {
       "name": "ree_dao",
       "entry_path": "packages/ree_dao/package/ree_dao.rb"
     },
