@@ -9,7 +9,7 @@ PATH
 PATH
   remote: .
   specs:
-    ree_lib (1.3.11)
+    ree_lib (1.3.12)
       bigdecimal
       binding_of_caller
       i18n
