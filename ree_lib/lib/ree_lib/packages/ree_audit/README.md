@@ -54,11 +54,12 @@ through `ree_logger`.
 
 ## What gets audited
 
-`Route#audited?` returns `internal?` unless the route says otherwise:
+Nothing is audited until the route says so:
 
 ```ruby
 get "api/v1/admin/users" do
-  visibility :internal    # audited by default
+  visibility :internal
+  audit true              # recorded
 end
 
 get "api/v1/admin/health" do
@@ -66,19 +67,20 @@ get "api/v1/admin/health" do
   audit false             # deliberately silent
 end
 
-get "api/v1/exports" do
-  audit true              # public route reaching into someone else's data
-end
-
 get "api/v1/organizations/:id/balance" do
   audit :on_annotation    # the owner calls it too — see below
 end
 ```
 
-Tying the default to `visibility` rather than to a hand-kept list is deliberate:
-`visibility` is mandatory on admin paths (the routes DSL fails at boot without
-it), so the audited set cannot drift away from the set of routes that actually
-touch client data.
+The flag is declared at the route and nowhere else. Deriving it from
+`visibility` would work just as well and read far worse: whether a call lands in
+the access trail is exactly the kind of fact a reader must see where the route
+is written, not infer from a flag that means something else.
+
+Forgetting it is not possible where it matters: like `visibility`, `audit` is
+mandatory on admin paths — a route whose path carries an `admin` segment fails
+at boot until it declares one. So the audited set cannot drift away from the set
+of routes that reach client data.
 
 ### `audit :on_annotation`
 

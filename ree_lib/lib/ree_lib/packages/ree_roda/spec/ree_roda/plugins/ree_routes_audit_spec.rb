@@ -99,6 +99,14 @@ RSpec.describe "ree_routes audit" do
           summary "Internal route"
           sections "Admin"
           visibility :internal
+          audit true
+          action :ok_cmd, **opts
+        end
+
+        get "api/internal_undeclared" do
+          summary "Internal route that never mentions audit"
+          sections "Admin"
+          visibility :internal
           action :ok_cmd, **opts
         end
 
@@ -148,6 +156,7 @@ RSpec.describe "ree_routes audit" do
           summary "Internal route refusing access"
           sections "Admin"
           visibility :internal
+          audit true
           action :denied_cmd, **opts
         end
 
@@ -155,6 +164,7 @@ RSpec.describe "ree_routes audit" do
           summary "Internal route blowing up"
           sections "Admin"
           visibility :internal
+          audit true
           action :boom_cmd, **opts
         end
       end
@@ -272,6 +282,13 @@ RSpec.describe "ree_routes audit" do
     expect(event.path).to eq("api/internal_default")
     expect(event.request_path).to eq("/api/internal_default")
     expect(event.accessor).to eq({user: "visitor"})
+  end
+
+  it "leaves an internal route that never declared audit out of the trail" do
+    get "api/internal_undeclared"
+
+    expect(last_response.status).to eq(200)
+    expect(test_sink.events).to be_empty
   end
 
   it "leaves a silenced internal route out of the trail" do

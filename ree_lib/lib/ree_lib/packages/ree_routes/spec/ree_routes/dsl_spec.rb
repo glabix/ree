@@ -76,7 +76,14 @@ RSpec.describe ReeRoutes::DSL, type: [:autoclean] do
         default_warden_scope :user
 
         get "internal_default" do
-          summary "Internal route, audited by default"
+          summary "Internal route that says it is audited"
+          action :cmd, from: :ree_routes_test
+          visibility :internal
+          audit true
+        end
+
+        get "internal_undeclared" do
+          summary "Internal route that never mentions audit"
           action :cmd, from: :ree_routes_test
           visibility :internal
         end
@@ -137,7 +144,10 @@ RSpec.describe ReeRoutes::DSL, type: [:autoclean] do
     }
 
     expect(routes["internal_default"].audited?).to eq(true)
+    expect(routes["internal_undeclared"].audited?).to eq(false)
+    expect(routes["internal_undeclared"].audit_declared?).to eq(false)
     expect(routes["internal_silenced"].audited?).to eq(false)
+    expect(routes["internal_silenced"].audit_declared?).to eq(true)
     expect(routes["public_default"].audited?).to eq(false)
     expect(routes["public_audited"].audited?).to eq(true)
     expect(routes["public_on_annotation"].audited?).to eq(true)

@@ -16,12 +16,18 @@ class ReeRoutes::Route
     !public?
   end
 
-  # Internal routes are audited unless told otherwise. `visibility` is
-  # mandatory for admin paths (see DSL#define_route), so this list can never
-  # drift away from the set of routes that actually touch client data — which a
-  # hand-maintained list of audited routes inevitably would.
+  # Auditing is declared at the route and nowhere else. Deriving it from
+  # `visibility` would work just as well and read far worse: whether a call
+  # lands in the access trail is exactly the kind of fact that must be visible
+  # where the route is written, not inferred from a flag that means something
+  # else. `audit` is mandatory on admin paths (see DSL#define_route), so the
+  # audited set still cannot drift away from the routes that touch client data.
   def audited?
-    @audit.nil? ? internal? : @audit != false
+    @audit == true || @audit == :on_annotation
+  end
+
+  def audit_declared?
+    !@audit.nil?
   end
 
   # `audit :on_annotation` — a public route that the client calls for its own
