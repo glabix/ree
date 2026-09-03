@@ -3,11 +3,13 @@
 package_require('ree_audit/beans/audit')
 package_require('ree_audit/event')
 package_require('ree_errors/permission_error')
+package_require('ree_errors/not_found_error')
 
 RSpec.describe :audit do
   link :audit, from: :ree_audit
   link :config, from: :ree_audit
   link :permission_error, from: :ree_errors
+  link :not_found_error, from: :ree_errors
   link :logger, from: :ree_logger
 
   # Captures what the application would have persisted.
@@ -87,6 +89,18 @@ RSpec.describe :audit do
     written = test_sink.events.first
     expect(written.status).to eq(:denied)
     expect(written.error_message).to eq("not allowed")
+  end
+
+  # 404 предметной области — обычный исход, а не поломка: строка «нечего
+  # показать» в отчёте соответствия не должна читаться как сбой.
+  it "records a domain not-found as its own outcome, not as a failure" do
+    klass = not_found_error(:missing)
+
+    expect {
+      audit.around(event) { raise klass.new("nothing here") }
+    }.to raise_error(klass)
+
+    expect(test_sink.events.first.status).to eq(:not_found)
   end
 
   it "records an arbitrary failure as an error and lets it through" do

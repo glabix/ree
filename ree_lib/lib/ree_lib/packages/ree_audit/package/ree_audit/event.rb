@@ -4,7 +4,7 @@
 # enriched by the application through ReeAudit.annotate, and handed to a sink
 # once the call is over.
 class ReeAudit::Event
-  STATUSES = [:ok, :denied, :error].freeze
+  STATUSES = [:ok, :denied, :not_found, :error].freeze
 
   attr_accessor :action_name, :package_name, :summary, :sections,
                 :request_method, :path, :request_path, :params, :accessor,

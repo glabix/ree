@@ -47,7 +47,7 @@ class ReeAudit::Audit
       event.status = :ok
       result
     rescue StandardError => e
-      event.status = denied?(e) ? :denied : :error
+      event.status = status_for(e)
       event.error_type = e.class.name
       event.error_message = e.message.to_s[0, MAX_ERROR_MESSAGE_LENGTH]
       raise
@@ -62,11 +62,20 @@ class ReeAudit::Audit
 
   private
 
-  # A refusal to show client data is as much an audit fact as showing it.
-  def denied?(e)
-    e.is_a?(ReeErrors::Error) && e.type == :permission
+  # A refusal to show client data is as much an audit fact as showing it — and
+  # it must not be filed next to a crash. Neither must "there was nothing to
+  # show": a domain 404 is an ordinary outcome, and reading it as a failure in a
+  # compliance report tells the reader something broke when nothing did.
+  def status_for(e)
+    return :error if !e.is_a?(ReeErrors::Error)
+
+    case e.type
+    when :permission then :denied
+    when :not_found then :not_found
+    else :error
+    end
   rescue StandardError
-    false
+    :error
   end
 
   # The trail must never be the reason a request fails.

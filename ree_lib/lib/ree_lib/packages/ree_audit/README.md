@@ -115,7 +115,7 @@ Annotating before the check, not after, keeps a refusal in the trail as well:
 | `request_method`, `path`, `request_path` | `path` is the DSL template (stable), `request_path` is the actual path (shows the object) |
 | `params` | what the action received, after filtering |
 | `accessor` | the authenticated object — the application decides how to read it |
-| `status` | `:ok`, `:denied`, `:error` |
+| `status` | `:ok`, `:denied`, `:not_found`, `:error` |
 | `error_type`, `error_message` | present when the call failed; message truncated to 512 chars |
 | `started_at`, `duration_ms` | timing (monotonic clock) |
 | `annotations` | whatever the application attached during the call |
@@ -123,6 +123,12 @@ Annotating before the check, not after, keeps a refusal in the trail as well:
 `:denied` means the action raised a `ReeErrors::Error` whose type is
 `:permission`. A refusal to show client data is as much an audit fact as
 showing it.
+
+`:denied` and `:not_found` are split out of `:error` on purpose. A refusal by
+permission and an ordinary "there was nothing to show" are both normal outcomes;
+filing them next to a crash makes a compliance report say something broke when
+nothing did. The split follows the domain error type, so an application gets it
+without classifying anything itself.
 
 There is **no HTTP status** on the event, and that is not an oversight: the
 wrapper sits around the action call, while Roda sets the status afterwards (and,
