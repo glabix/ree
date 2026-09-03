@@ -9,7 +9,7 @@ class ReeAudit::Event
   attr_accessor :action_name, :package_name, :summary, :sections,
                 :request_method, :path, :request_path, :params, :accessor,
                 :status, :error_type, :error_message, :started_at,
-                :duration_ms, :annotations
+                :duration_ms, :annotations, :on_annotation
 
   class << self
     # Keyword-only on purpose: callers live in another package and must not
@@ -23,7 +23,8 @@ class ReeAudit::Event
       path: nil,
       request_path: nil,
       params: {},
-      accessor: nil
+      accessor: nil,
+      on_annotation: false
     )
       event = new
 
@@ -37,6 +38,7 @@ class ReeAudit::Event
       event.params = params || {}
       event.accessor = accessor
       event.annotations = {}
+      event.on_annotation = on_annotation
 
       event
     end
@@ -47,6 +49,7 @@ class ReeAudit::Event
     @params = {}
     @annotations = {}
     @status = :ok
+    @on_annotation = false
   end
 
   def ok?
@@ -55,6 +58,14 @@ class ReeAudit::Event
 
   def denied?
     status == :denied
+  end
+
+  # An `on_annotation` event is the same call seen from two sides: the client
+  # asking for its own data, and a staff member asking for the client's. Only
+  # the code that resolved the caller can tell them apart, and it says so by
+  # annotating — so an untouched event of that kind is not worth recording.
+  def recordable?
+    !on_annotation || !annotations.empty?
   end
 
   def to_h

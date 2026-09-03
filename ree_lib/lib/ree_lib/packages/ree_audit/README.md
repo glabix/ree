@@ -69,12 +69,40 @@ end
 get "api/v1/exports" do
   audit true              # public route reaching into someone else's data
 end
+
+get "api/v1/organizations/:id/balance" do
+  audit :on_annotation    # the owner calls it too — see below
+end
 ```
 
 Tying the default to `visibility` rather than to a hand-kept list is deliberate:
 `visibility` is mandatory on admin paths (the routes DSL fails at boot without
 it), so the audited set cannot drift away from the set of routes that actually
 touch client data.
+
+### `audit :on_annotation`
+
+Some routes are called by two different people: the owner of the data, reading
+its own, and a staff member reading someone else's. Which one it was is known
+only after the permission check has run, inside the action — so the event is
+always assembled, and it reaches the sink only if the code annotated it:
+
+```ruby
+def call(organization_id, user_id)
+  admin = platform_admins.active.by_user(user_id).first
+
+  if admin
+    # this call was made by staff, and that is what makes it worth recording
+    annotate_audit(organization_id: organization_id, staff_id: admin.id)
+  end
+  ...
+end
+```
+
+`audit true` on such a route would bury the handful of staff calls under every
+ordinary request the owners make; leaving it unaudited would lose them.
+Annotating before the check, not after, keeps a refusal in the trail as well:
+`Event#recordable?` is decided in `ensure`, when the annotation is already there.
 
 ## The event
 

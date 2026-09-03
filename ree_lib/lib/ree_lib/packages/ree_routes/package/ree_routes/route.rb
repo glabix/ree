@@ -21,7 +21,16 @@ class ReeRoutes::Route
   # drift away from the set of routes that actually touch client data — which a
   # hand-maintained list of audited routes inevitably would.
   def audited?
-    @audit.nil? ? internal? : @audit
+    @audit.nil? ? internal? : @audit != false
+  end
+
+  # `audit :on_annotation` — a public route that the client calls for its own
+  # data and a staff member calls for someone else's. The event is always
+  # assembled, but it only reaches the sink if the code annotated the call;
+  # auditing such a route unconditionally would bury the staff access under
+  # every ordinary client request.
+  def audit_on_annotation?
+    @audit == :on_annotation
   end
 
   def valid?

@@ -158,4 +158,41 @@ RSpec.describe :audit do
   it "ignores an annotation made outside an audited call" do
     expect(ReeAudit.annotate(permission: :access_uploads)).to be_nil
   end
+
+  context "an :on_annotation event" do
+    let(:event) {
+      ReeAudit::Event.build(action_name: :balance_query, on_annotation: true)
+    }
+
+    it "drops the call nobody annotated" do
+      result = audit.around(event) { :action_result }
+
+      expect(result).to eq(:action_result)
+      expect(test_sink.events).to be_empty
+    end
+
+    it "writes the call the action annotated" do
+      audit.around(event) do
+        ReeAudit.annotate(platform_admin_id: 7)
+        :action_result
+      end
+
+      expect(test_sink.events.size).to eq(1)
+      expect(test_sink.events.first.annotations).to eq({platform_admin_id: 7})
+    end
+
+    it "writes a refusal that was annotated before the raise" do
+      klass = permission_error(:no_access)
+
+      expect {
+        audit.around(event) do
+          ReeAudit.annotate(platform_admin_id: 7)
+          raise klass.new("not allowed")
+        end
+      }.to raise_error(klass)
+
+      expect(test_sink.events.size).to eq(1)
+      expect(test_sink.events.first.status).to eq(:denied)
+    end
+  end
 end

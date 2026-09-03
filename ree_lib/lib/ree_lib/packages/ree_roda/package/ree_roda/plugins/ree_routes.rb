@@ -146,7 +146,8 @@ class Roda
                       path: route.path,
                       request_path: r.path,
                       params: filtered_params,
-                      accessor: accessor
+                      accessor: accessor,
+                      on_annotation: route.audit_on_annotation?
                     )
 
                     audit.around(audit_event) do

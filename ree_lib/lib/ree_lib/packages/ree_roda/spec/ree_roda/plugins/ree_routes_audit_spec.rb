@@ -49,6 +49,34 @@ RSpec.describe "ree_routes audit" do
       end
     end
 
+    # Клиентская ручка глазами сотрудника: код опознаёт служебное обращение и
+    # помечает его аннотацией.
+    class ReeRodaAuditTest::StaffCmd
+      include ReeActions::DSL
+
+      action :staff_cmd
+
+      def call(access, attrs)
+        ReeAudit.annotate(staff_id: 42)
+        {result: "ok"}
+      end
+    end
+
+    class ReeRodaAuditTest::DeniedStaffCmd
+      include ReeActions::DSL
+
+      action :denied_staff_cmd do
+        link :permission_error, from: :ree_errors
+      end
+
+      PermissionErr = permission_error(:no_access, msg: "not allowed")
+
+      def call(access, attrs)
+        ReeAudit.annotate(staff_id: 42)
+        raise PermissionErr
+      end
+    end
+
     class ReeRodaAuditTest::BoomCmd
       include ReeActions::DSL
 
@@ -93,6 +121,27 @@ RSpec.describe "ree_routes audit" do
           sections "Public"
           audit true
           action :ok_cmd, **opts
+        end
+
+        get "api/on_annotation_client" do
+          summary "Client reading its own data"
+          sections "Public"
+          audit :on_annotation
+          action :ok_cmd, **opts
+        end
+
+        get "api/on_annotation_staff" do
+          summary "Staff reading someone else's data"
+          sections "Public"
+          audit :on_annotation
+          action :staff_cmd, **opts
+        end
+
+        get "api/on_annotation_staff_denied" do
+          summary "Staff refused someone else's data"
+          sections "Public"
+          audit :on_annotation
+          action :denied_staff_cmd, **opts
         end
 
         get "api/internal_denied" do
@@ -245,6 +294,31 @@ RSpec.describe "ree_routes audit" do
     expect(last_response.status).to eq(200)
     expect(test_sink.events.size).to eq(1)
     expect(test_sink.events.first.status).to eq(:ok)
+  end
+
+  it "leaves an unannotated :on_annotation route out of the trail" do
+    get "api/on_annotation_client"
+
+    expect(last_response.status).to eq(200)
+    expect(test_sink.events).to be_empty
+  end
+
+  it "writes an :on_annotation route once the action annotated it" do
+    get "api/on_annotation_staff"
+
+    expect(last_response.status).to eq(200)
+    expect(test_sink.events.size).to eq(1)
+    expect(test_sink.events.first.annotations).to eq({staff_id: 42})
+  end
+
+  # Отказ сотруднику — такой же факт журнала, как и показ данных: аннотация
+  # успевает лечь до того, как действие бросит исключение.
+  it "writes an annotated :on_annotation route that ended in a refusal" do
+    get "api/on_annotation_staff_denied"
+
+    expect(last_response.status).to eq(403)
+    expect(test_sink.events.size).to eq(1)
+    expect(test_sink.events.first.status).to eq(:denied)
   end
 
   it "records a refusal and still answers 403" do

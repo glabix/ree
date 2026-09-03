@@ -98,6 +98,12 @@ RSpec.describe ReeRoutes::DSL, type: [:autoclean] do
           action :cmd, from: :ree_routes_test
           audit true
         end
+
+        get "public_on_annotation" do
+          summary "Public route the owner and a staff member both call"
+          action :cmd, from: :ree_routes_test
+          audit :on_annotation
+        end
       end
     end
   end
@@ -134,5 +140,16 @@ RSpec.describe ReeRoutes::DSL, type: [:autoclean] do
     expect(routes["internal_silenced"].audited?).to eq(false)
     expect(routes["public_default"].audited?).to eq(false)
     expect(routes["public_audited"].audited?).to eq(true)
+    expect(routes["public_on_annotation"].audited?).to eq(true)
+
+    expect(routes["internal_default"].audit_on_annotation?).to eq(false)
+    expect(routes["public_audited"].audit_on_annotation?).to eq(false)
+    expect(routes["public_on_annotation"].audit_on_annotation?).to eq(true)
   }
+
+  it "refuses an audit mode it does not know" do
+    expect {
+      ReeRoutes::RouteBuilder.new.audit(:on_annotations)
+    }.to raise_error(ArgumentError, /audit should be one of/)
+  end
 end

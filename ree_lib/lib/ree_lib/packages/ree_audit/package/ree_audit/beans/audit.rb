@@ -56,7 +56,7 @@ class ReeAudit::Audit
         (Process.clock_gettime(Process::CLOCK_MONOTONIC) - started_monotonic) * 1000
       ).round
       ReeAudit::Context.pop
-      write_safely(event)
+      write_safely(event) if event.recordable?
     end
   end
 
