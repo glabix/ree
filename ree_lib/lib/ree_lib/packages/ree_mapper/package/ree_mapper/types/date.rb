@@ -3,6 +3,11 @@
 require 'date'
 
 class ReeMapper::Date < ReeMapper::AbstractType
+  # instance_of?, not is_a?: DateTime < Date, and cast converts DateTime
+  def db_load_trusted_check(var)
+    "#{var}.instance_of?(::Date)"
+  end
+
   contract(Any => Date).throws(ReeMapper::TypeError)
   def serialize(value)
     if value.class == Date

@@ -3,6 +3,11 @@
 require 'time'
 
 class ReeMapper::Time < ReeMapper::AbstractType
+  # instance_of?: cast accepts subclasses (e.g. Sequel::SQLTime) only via parse paths
+  def db_load_trusted_check(var)
+    "#{var}.instance_of?(::Time)"
+  end
+
   contract(Any => Time).throws(ReeMapper::TypeError)
   def serialize(value)
     if value.class == Time

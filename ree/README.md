@@ -449,6 +449,28 @@ end
 ### Disabling contracts
 If you want to disable contracts, set the `NO_CONTRACTS` environment variable. This will disable contracts and you won't have a performance hit.
 
+### DB load performance mode
+Read models that load many rows pay for casting every column through the
+mapper even though the DB driver already returns correctly typed values.
+Enable the mode in `ree.setup.rb` (before any DAO or mapper is loaded):
+
+```ruby
+if ENV['RUBY_ENV'] == 'production'
+  Ree.enable_db_load_performance_mode
+end
+```
+
+Mappers built while the mode is on compile a specialized `db_load` method:
+primitive fields (`integer`, `string`, `bool`, `float`, `date`, `time`,
+`date_time`, `rational`, `any`) skip casting behind a single type-guard
+check, and dto construction avoids intermediate allocations. Values that
+fail the guard (e.g. a date stored as a string inside `pg_jsonb`, or a
+`BigDecimal` from a `numeric` column mapped to `float`) are cast exactly as
+before, so results and errors are identical to the normal mode. Custom
+types, enums, `pg_array`/`pg_jsonb` and nested mappers are always cast.
+Calls with `role:`/`only:`/`except:` fall back to the generic
+implementation. Running production under YJIT compounds the gain.
+
 ## Ree Schemas
 Coming soon...
 

@@ -4,6 +4,10 @@ class ReeMapper::Bool < ReeMapper::AbstractType
   TRUE_CAST_VALUES = ['1', 'true', 'on', 1, true].freeze
   FALSE_CAST_VALUES = ['0', 'false', 'off', 0, false].freeze
 
+  def db_load_trusted_check(var)
+    "(true.equal?(#{var}) || false.equal?(#{var}))"
+  end
+
   contract(Any => Bool).throws(ReeMapper::TypeError)
   def serialize(value)
     if value.is_a?(TrueClass) || value.is_a?(FalseClass)

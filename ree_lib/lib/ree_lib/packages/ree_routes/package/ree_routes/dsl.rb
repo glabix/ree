@@ -97,6 +97,14 @@ module ReeRoutes
           )
         end
 
+        if !builder.get_route.audit_declared? && admin_path?(path)
+          raise ArgumentError.new(
+            "admin route #{path} must declare audit explicitly: " \
+            "`audit true` to record the call in the access trail, " \
+            "or `audit false` if the route touches nothing worth recording"
+          )
+        end
+
         route = builder.get_route
 
         @dsl.link(route.action.name, from: route.action.package_name)

@@ -139,7 +139,32 @@ class ReeMapper::Mapper
   def prepare_dto
     raise ReeMapper::ArgumentError, "mapper should contain at least one field" if fields.empty?
     strategies.each { _1.prepare_dto(fields.keys) }
+
+    if ReeMapper.db_load_performance_mode? && find_strategy(:db_load)
+      ReeMapper::DbLoadCompiler.compile(self)
+    end
+
     nil
+  end
+
+  # DbLoadCompiler helpers below are deliberately contract-free: they run
+  # per field per row on the hot path.
+
+  # Guard expression for the wrapped type, or nil when this mapper's db_load
+  # must always be called (composite mappers, wrappers, custom types)
+  def db_load_trusted_check(var)
+    return nil if @type.nil?
+    @type.respond_to?(:db_load_trusted_check) ? @type.db_load_trusted_check(var) : nil
+  end
+
+  # Slow path of compiled db_load: full cast with the same error decoration
+  # as the generic per-field loop
+  def __dbl_cast(field, value, nested_filters)
+    field.type.db_load(value, role: nil, fields_filters: nested_filters)
+  rescue ReeMapper::ErrorWithLocation => e
+    e.prepend_field_name(field.name_as_str)
+    e.location ||= field.location
+    raise e
   end
 
   contract(Symbol => Nilor[ReeMapper::MapperStrategy])

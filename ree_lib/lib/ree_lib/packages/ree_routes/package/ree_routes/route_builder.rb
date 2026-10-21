@@ -6,6 +6,7 @@ class ReeRoutes::RouteBuilder
   Redirect = Struct.new(:path, :code)
 
   VISIBILITIES = [:public, :internal].freeze
+  AUDIT_MODES = [true, false, :on_annotation].freeze
 
   def initialize
     @route = ReeRoutes::Route.new
@@ -42,6 +43,21 @@ class ReeRoutes::RouteBuilder
   contract String => String
   def summary(str)
     @route.summary = str
+  end
+
+  # Needed in exactly three cases: silencing a noisy internal route, turning
+  # the trail on for a public route that reaches into someone else's data, and
+  # `:on_annotation` for a route both the owner of the data and a staff member
+  # can call — see Route#audit_on_annotation?.
+  contract Or[Bool, Symbol] => Or[Bool, Symbol]
+  def audit(value)
+    if !AUDIT_MODES.include?(value)
+      raise ArgumentError.new(
+        "audit should be one of #{AUDIT_MODES.inspect}, got #{value.inspect}"
+      )
+    end
+
+    @route.audit = value
   end
 
   contract Symbol => Symbol
