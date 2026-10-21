@@ -1,5 +1,16 @@
 ## [Unreleased]
 
+## [1.3.16] - 2026-10-21
+
+- `ree_roda`: the `ree_logger` plugin applies `filter_params` to the query
+  string of the `Request:` line. It used to be logged verbatim, so a secret
+  sent in the URL reached the log even though `Params` showed it filtered.
+  A bracketed name (`user[password]`, also percent-encoded) is matched by
+  each of its segments.
+- `ree_roda`: `filter_params` in the `ree_logger` plugin now walks nested
+  hashes and arrays; it used to check top level keys only. Names are still
+  matched exactly.
+
 ## [1.3.12] - 2026-09-02
 
 - `ree_audit`: `annotate_audit` fn — the entry point product code uses to attach
